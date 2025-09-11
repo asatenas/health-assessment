@@ -138,7 +138,7 @@ Se não souber o nome exato, pode descrever o local e o motivo da cirurgia.`
   }, [messages.length, hasInitialMessage, setMessages, isReadonly]);
 
   const { data: votes } = useSWR<Array<Vote>>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
+    false ? `/api/vote?chatId=${id}` : null,
     fetcher,
   );
 
