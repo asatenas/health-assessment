@@ -68,10 +68,14 @@ export function Chat({
       api: '/api/chat',
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest({ messages, id, body }) {
+        const userMessages = messages.filter(m => m.role === 'user');
+        const isFirstUserMessage = userMessages.length === 1;
+        
         return {
           body: {
             id,
             message: messages.at(-1),
+            messages: isFirstUserMessage ? messages : undefined,
             selectedChatModel: initialChatModel,
             selectedVisibilityType: visibilityType,
             ...body,

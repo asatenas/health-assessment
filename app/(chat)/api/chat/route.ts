@@ -76,11 +76,13 @@ export async function POST(request: Request) {
     const {
       id,
       message,
+      messages,
       selectedChatModel,
       selectedVisibilityType,
     }: {
       id: string;
       message: ChatMessage;
+      messages?: ChatMessage[];
       selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
     } = requestBody;
@@ -122,7 +124,9 @@ export async function POST(request: Request) {
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });
-    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    const uiMessages = messages 
+      ? messages // Use provided messages for first user message (includes initial assistant message)
+      : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
 
     const { longitude, latitude, city, country } = geolocation(request);
 
