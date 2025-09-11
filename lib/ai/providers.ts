@@ -25,7 +25,7 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': gateway.languageModel('anthropic/claude-sonnet-4'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: gateway.languageModel('openai/gpt-5-mini'),
+          model: gateway.languageModel('anthropic/claude-sonnet-4'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
         'title-model': gateway.languageModel('anthropic/claude-sonnet-4'),

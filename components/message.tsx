@@ -281,7 +281,7 @@ const PurePreviewMessage = ({
                 );
               }
             })}
-
+{/*
             {!isReadonly && (
               <MessageActions
                 key={`action-${message.id}`}
@@ -291,6 +291,7 @@ const PurePreviewMessage = ({
                 isLoading={isLoading}
               />
             )}
+*/}
           </div>
         </div>
       </motion.div>
@@ -330,7 +331,7 @@ export const ThinkingMessage = () => {
 
         <div className="flex flex-col gap-4 w-full">
           <MessageContent className="bg-transparent -ml-4">
-            <div className="text-muted-foreground">Hmm...</div>
+            <div className="text-muted-foreground">Pensando...</div>
           </MessageContent>
         </div>
       </div>

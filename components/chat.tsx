@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
-import { fetcher, fetchWithErrorHandlers, generateUUID, cn } from '@/lib/utils';
+import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -22,6 +22,7 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
+import { useMessages } from '@/hooks/use-messages';
 
 export function Chat({
   id,
@@ -67,10 +68,14 @@ export function Chat({
       api: '/api/chat',
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest({ messages, id, body }) {
+        const userMessages = messages.filter(m => m.role === 'user');
+        const isFirstUserMessage = userMessages.length === 1;
+        
         return {
           body: {
             id,
             message: messages.at(-1),
+            messages: isFirstUserMessage ? messages : undefined,
             selectedChatModel: initialChatModel,
             selectedVisibilityType: visibilityType,
             ...body,
@@ -94,10 +99,16 @@ export function Chat({
     },
   });
 
+  const { setHasSentMessage } = useMessages({
+    chatId: id,
+    status,
+  });
+
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
+  const [hasInitialMessage, setHasInitialMessage] = useState(false);
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
@@ -111,8 +122,34 @@ export function Chat({
     }
   }, [query, sendMessage, hasAppendedQuery, id]);
 
+  useEffect(() => {
+    if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
+      setMessages([{
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [{
+          type: 'text',
+          text: `Olá! Eu serei seu assistente hoje para te ajudar a identificar e reduzir os riscos cardíacos do seu procedimento cirúrgico.
+
+A nossa entrevista é rápida e simples. É importante responder com sinceridade e do jeito que você entender — se algo não fizer sentido, pode me avisar que eu explico. Tudo bem?
+
+Para começar: **que cirurgia você vai fazer e ela é marcada (eletiva) ou é de urgência?**
+
+Exemplos de tipo: cirurgia do coração, do peito (pulmões), do abdome (vesícula, intestino), de vasos (como aneurisma da aorta), ortopédica, urológica, ginecológica, etc.
+
+Se não souber o nome exato, pode descrever o local e o motivo da cirurgia.`
+        }],
+        metadata: {
+          createdAt: new Date().toISOString()
+        }
+      }]);
+      setHasInitialMessage(true);
+      setHasSentMessage(true);
+    }
+  }, [messages.length, hasInitialMessage, setMessages, isReadonly, setHasSentMessage]);
+
   const { data: votes } = useSWR<Array<Vote>>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
+    false ? `/api/vote?chatId=${id}` : null,
     fetcher,
   );
 
