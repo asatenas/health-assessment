@@ -42,5 +42,6 @@ export function useMessages({
     onViewportEnter,
     onViewportLeave,
     hasSentMessage,
+    setHasSentMessage,
   };
 }

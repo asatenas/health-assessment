@@ -22,6 +22,7 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
+import { useMessages } from '@/hooks/use-messages';
 
 export function Chat({
   id,
@@ -94,6 +95,11 @@ export function Chat({
     },
   });
 
+  const { setHasSentMessage } = useMessages({
+    chatId: id,
+    status,
+  });
+
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
@@ -134,8 +140,9 @@ Se não souber o nome exato, pode descrever o local e o motivo da cirurgia.`
         }
       }]);
       setHasInitialMessage(true);
+      setHasSentMessage(true);
     }
-  }, [messages.length, hasInitialMessage, setMessages, isReadonly]);
+  }, [messages.length, hasInitialMessage, setMessages, isReadonly, setHasSentMessage]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     false ? `/api/vote?chatId=${id}` : null,
