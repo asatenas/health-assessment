@@ -281,7 +281,7 @@ const PurePreviewMessage = ({
                 );
               }
             })}
-
+{/*
             {!isReadonly && (
               <MessageActions
                 key={`action-${message.id}`}
@@ -291,6 +291,7 @@ const PurePreviewMessage = ({
                 isLoading={isLoading}
               />
             )}
+*/}
           </div>
         </div>
       </motion.div>
