@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export const Greeting = () => {
+export const Greeting = ({ onInitialMessage }: { onInitialMessage?: () => void }) => {
   return (
     <div
       key="overview"
@@ -12,8 +12,13 @@ export const Greeting = () => {
         exit={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
         className="text-2xl font-semibold"
+        onAnimationComplete={() => {
+          if (onInitialMessage) {
+            setTimeout(onInitialMessage, 1000);
+          }
+        }}
       >
-        Hello there!
+        Olá!
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -22,7 +27,7 @@ export const Greeting = () => {
         transition={{ delay: 0.6 }}
         className="text-2xl text-zinc-500"
       >
-        How can I help you today?
+        Eu sou seu assistente virtual para avaliação de risco cirúrgico.
       </motion.div>
     </div>
   );

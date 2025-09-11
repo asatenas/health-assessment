@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
-import { fetcher, fetchWithErrorHandlers, generateUUID, cn } from '@/lib/utils';
+import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -98,6 +98,7 @@ export function Chat({
   const query = searchParams.get('query');
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
+  const [hasInitialMessage, setHasInitialMessage] = useState(false);
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
@@ -110,6 +111,31 @@ export function Chat({
       window.history.replaceState({}, '', `/chat/${id}`);
     }
   }, [query, sendMessage, hasAppendedQuery, id]);
+
+  useEffect(() => {
+    if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
+      setMessages([{
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [{
+          type: 'text',
+          text: `Olá! Eu serei seu assistente hoje para te ajudar a identificar e reduzir os riscos cardíacos do seu procedimento cirúrgico.
+
+A nossa entrevista é rápida e simples. É importante responder com sinceridade e do jeito que você entender — se algo não fizer sentido, pode me avisar que eu explico. Tudo bem?
+
+Para começar: **que cirurgia você vai fazer e ela é marcada (eletiva) ou é de urgência?**
+
+Exemplos de tipo: cirurgia do coração, do peito (pulmões), do abdome (vesícula, intestino), de vasos (como aneurisma da aorta), ortopédica, urológica, ginecológica, etc.
+
+Se não souber o nome exato, pode descrever o local e o motivo da cirurgia.`
+        }],
+        metadata: {
+          createdAt: new Date().toISOString()
+        }
+      }]);
+      setHasInitialMessage(true);
+    }
+  }, [messages.length, hasInitialMessage, setMessages, isReadonly]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
