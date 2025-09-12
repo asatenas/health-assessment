@@ -25,10 +25,10 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': gateway.languageModel('anthropic/claude-sonnet-4'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: gateway.languageModel('anthropic/claude-sonnet-4'),
+          model: gateway.languageModel('openai/gpt-5'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': gateway.languageModel('anthropic/claude-sonnet-4'),
-        'artifact-model': gateway.languageModel('anthropic/claude-sonnet-4'),
+        'title-model': gateway.languageModel('openai/gpt-4.1-mini'),
+        'artifact-model': gateway.languageModel('openai/gpt-4.1-mini'),
       },
     });

@@ -108,6 +108,16 @@ const PurePreviewMessage = ({
               </div>
             )}
 
+            {/* Show loading indicator if streaming with no visible content */}
+            {isLoading && !message.parts.some(part =>
+              (part.type === 'text' && part.text?.trim().length > 0) ||
+              (part.type === 'reasoning' && part.text?.trim().length > 0)
+            ) && (
+              <MessageContent className="bg-transparent -ml-4">
+                <div className="text-muted-foreground">Formulando resposta...</div>
+              </MessageContent>
+            )}
+
             {message.parts?.map((part, index) => {
               const { type } = part;
               const key = `message-${message.id}-part-${index}`;
@@ -331,7 +341,7 @@ export const ThinkingMessage = () => {
 
         <div className="flex flex-col gap-4 w-full">
           <MessageContent className="bg-transparent -ml-4">
-            <div className="text-muted-foreground">Pensando...</div>
+            <div className="text-muted-foreground">Analisando...</div>
           </MessageContent>
         </div>
       </div>
