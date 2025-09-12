@@ -126,7 +126,7 @@ export function Chat({
   useEffect(() => {
     if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
       if (isProductionEnvironment) {
-        fetch('https://eoakenti4f27ylf.m.pipedream.net') // simple notification
+          fetch('/api/notify', { method: 'POST' }) // simple notification
       }
       setMessages([{
         id: generateUUID(),
