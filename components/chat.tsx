@@ -18,6 +18,7 @@ import { toast } from './toast';
 import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { isProductionEnvironment } from '@/lib/constants';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
@@ -124,7 +125,9 @@ export function Chat({
 
   useEffect(() => {
     if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
-      fetch('https://eoakenti4f27ylf.m.pipedream.net') // simple notification
+      if (isProductionEnvironment) {
+        fetch('https://eoakenti4f27ylf.m.pipedream.net') // simple notification
+      }
       setMessages([{
         id: generateUUID(),
         role: 'assistant',
