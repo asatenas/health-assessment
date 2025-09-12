@@ -331,7 +331,7 @@ export const ThinkingMessage = () => {
 
         <div className="flex flex-col gap-4 w-full">
           <MessageContent className="bg-transparent -ml-4">
-            <div className="text-muted-foreground">Pensando...</div>
+            <div className="text-muted-foreground">Analisando...</div>
           </MessageContent>
         </div>
       </div>
