@@ -133,15 +133,12 @@ export function Chat({
         role: 'assistant',
         parts: [{
           type: 'text',
-          text: `Olá! Eu serei seu assistente hoje para te ajudar a identificar e reduzir os riscos cardíacos do seu procedimento cirúrgico.
+          text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
 
-A nossa entrevista é rápida e simples. É importante responder com sinceridade e do jeito que você entender — se algo não fizer sentido, pode me avisar que eu explico. Tudo bem?
+Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
 
-Para começar: **que cirurgia você vai fazer e ela é marcada (eletiva) ou é de urgência?**
-
-Exemplos de tipo: cirurgia do coração, do peito (pulmões), do abdome (vesícula, intestino), de vasos (como aneurisma da aorta), ortopédica, urológica, ginecológica, etc.
-
-Se não souber o nome exato, pode descrever o local e o motivo da cirurgia.`
+👉 Vamos começar?
+`
         }],
         metadata: {
           createdAt: new Date().toISOString()
