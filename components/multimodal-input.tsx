@@ -268,7 +268,7 @@ function PureMultimodalInput({
         onSubmit={(event) => {
           event.preventDefault();
           if (status !== 'ready') {
-            toast.error('Please wait for the model to finish its response!');
+            toast.error('Por favor espere receber a resposta por completo.');
           } else {
             submitForm();
           }
@@ -311,7 +311,7 @@ function PureMultimodalInput({
         <PromptInputTextarea
           data-testid="multimodal-input"
           ref={textareaRef}
-          placeholder="Digite sua resposta..."
+          placeholder="Digite sua mensagem..."
           value={input}
           onChange={handleInput}
           minHeight={72}
