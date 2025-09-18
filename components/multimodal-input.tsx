@@ -461,7 +461,7 @@ function PureMultimodalInput({
           ) : input.trim() || uploadQueue.length > 0 ? (
             <PromptInputSubmit
               status={status}
-              disabled={!input.trim() || uploadQueue.length > 0}
+              disabled={(!input.trim() || uploadQueue.length > 0) && attachments.length === 0}
               className="p-3 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
             >
               <ArrowUpIcon size={20} />
