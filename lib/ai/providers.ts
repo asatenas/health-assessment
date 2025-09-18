@@ -1,5 +1,6 @@
 import {
   customProvider,
+  defaultSettingsMiddleware,
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
@@ -23,10 +24,35 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': gateway.languageModel('anthropic/claude-sonnet-4'),
+        'chat-model': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'low',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                }
+              }
+            }
+          })
+        }),
         'chat-model-reasoning': wrapLanguageModel({
           model: gateway.languageModel('openai/gpt-5'),
-          middleware: extractReasoningMiddleware({ tagName: 'think' }),
+            middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'medium',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                }
+              }
+            }
+          })
         }),
         'title-model': gateway.languageModel('openai/gpt-4.1-mini'),
         'artifact-model': gateway.languageModel('openai/gpt-4.1-mini'),
