@@ -114,7 +114,7 @@ const PurePreviewMessage = ({
               (part.type === 'reasoning' && part.text?.trim().length > 0)
             ) && (
               <MessageContent className="bg-transparent -ml-4">
-                <div className="text-muted-foreground">Formulando resposta...</div>
+                <div className="text-muted-foreground">Continuando entrevista...</div>
               </MessageContent>
             )}
 
