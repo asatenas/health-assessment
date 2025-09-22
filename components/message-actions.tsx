@@ -4,6 +4,7 @@
 // import type { Vote } from '@/lib/db/schema';
 
 // import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
+import { SpeakerIcon } from './icons';
 import { Actions, Action } from './elements/actions';
 import { memo } from 'react';
 // import equal from 'fast-deep-equal';
@@ -29,6 +30,25 @@ export function PureMessageActions({
 
   return (
     <Actions>
+        <Action
+          tooltip="Ouvir"
+          onClick={async () => {
+            const textFromParts = message.parts
+              ?.filter((part) => part.type === 'text')
+              .map((part) => part.text)
+              .join('\n')
+              .trim();
+
+            if (!textFromParts) {
+              return;
+            }
+
+            console.log(textFromParts);
+          }}
+        >
+          <SpeakerIcon />
+        </Action>
+
         {/* <Action
           tooltip="Copy"
           onClick={async () => {
