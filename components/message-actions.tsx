@@ -6,10 +6,11 @@
 // import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
 import { SpeakerIcon } from './icons';
 import { Actions, Action } from './elements/actions';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 // import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/lib/types';
+import { speakText } from '@/lib/tts';
 
 export function PureMessageActions({
   chatId,
@@ -24,6 +25,7 @@ export function PureMessageActions({
 }) {
   // const { mutate } = useSWRConfig();
   // const [_, copyToClipboard] = useCopyToClipboard();
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   if (isLoading) return null;
   if (message.role === 'user') return null;
@@ -32,6 +34,7 @@ export function PureMessageActions({
     <Actions>
         <Action
           tooltip="Ouvir"
+          disabled={isSpeaking}
           onClick={async () => {
             const textFromParts = message.parts
               ?.filter((part) => part.type === 'text')
@@ -40,10 +43,20 @@ export function PureMessageActions({
               .trim();
 
             if (!textFromParts) {
+              toast.error("Não há texto para ler!");
               return;
             }
 
-            console.log(textFromParts);
+            setIsSpeaking(true);
+
+            try {
+              await speakText(textFromParts);
+            } catch (error) {
+              console.error('TTS error:', error);
+              toast.error("Erro ao reproduzir o áudio. Tente novamente.");
+            } finally {
+              setIsSpeaking(false);
+            }
           }}
         >
           <SpeakerIcon />
