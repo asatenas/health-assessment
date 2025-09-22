@@ -282,7 +282,6 @@ function PureMultimodalInput({
           // Show transcription in modal instead of directly setting input
           setPendingTranscription(transcription);
           setShowTranscriptionModal(true);
-          toast.success('Áudio transcrito com sucesso!');
         } catch (error) {
           console.error('Voice transcription error:', error);
           toast.error('Erro ao transcrever o áudio. Tente novamente.');
@@ -341,14 +340,11 @@ function PureMultimodalInput({
       if (width && width > 768) {
         textareaRef.current?.focus();
       }
-
-      toast.success('Mensagem enviada!');
     }, 100); // Small delay to ensure state updates
   }, [setInput, chatId, sendMessage, attachments, setAttachments, setLocalStorageInput, resetHeight, width, textareaRef]);
 
   const handleDiscardTranscription = useCallback(() => {
     setPendingTranscription('');
-    toast.info('Transcrição descartada.');
   }, []);
 
   const handleCloseTranscriptionModal = useCallback(() => {
@@ -643,4 +639,3 @@ function PureVoiceRecordButton({
 }
 
 const VoiceRecordButton = memo(PureVoiceRecordButton);
-
