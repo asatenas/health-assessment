@@ -137,7 +137,7 @@ export function Chat({
 
 Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
 
-👉 Vamos começar?
+Para começar, quantos anos você tem?
 `
         }],
         metadata: {
