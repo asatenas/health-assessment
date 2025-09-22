@@ -1,13 +1,12 @@
 let audioContext: AudioContext | null = null;
 let currentAudio: HTMLAudioElement | null = null;
+let currentResolve: (() => void) | null = null;
+let currentReject: ((reason?: any) => void) | null = null;
 
 export async function speakText(text: string): Promise<void> {
   try {
     // Stop any currently playing audio
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
+    stopSpeaking();
 
     // Create audio context if it doesn't exist
     if (!audioContext) {
@@ -37,15 +36,24 @@ export async function speakText(text: string): Promise<void> {
     currentAudio = new Audio(audioUrl);
 
     return new Promise((resolve, reject) => {
+      currentResolve = resolve;
+      currentReject = reject;
+
       if (!currentAudio) return reject(new Error('Audio creation failed'));
 
       currentAudio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
+        currentResolve = null;
+        currentReject = null;
         resolve();
       };
 
       currentAudio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
+        currentResolve = null;
+        currentReject = null;
         reject(new Error('Audio playback failed'));
       };
 
@@ -61,5 +69,12 @@ export function stopSpeaking(): void {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
+  }
+
+  // Resolve the promise gracefully instead of rejecting
+  if (currentResolve) {
+    currentResolve();
+    currentResolve = null;
+    currentReject = null;
   }
 }

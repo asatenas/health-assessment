@@ -14,7 +14,7 @@ import {
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
+import { ArrowUpIcon, PaperclipIcon, StopIcon, MicrophoneIcon, LoaderIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { SuggestedActions } from './suggested-actions';
@@ -39,6 +39,9 @@ import type { Attachment, ChatMessage } from '@/lib/types';
 import { chatModels } from '@/lib/ai/models';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { startTransition } from 'react';
+import { VoiceRecorder, requestMicrophonePermission } from '@/lib/voice-recording';
+import { VoiceTranscriptionModal } from './voice-transcription-modal';
+import { stopSpeaking } from '@/lib/tts';
 
 function PureMultimodalInput({
   chatId,
@@ -84,11 +87,11 @@ function PureMultimodalInput({
     }
   };
 
-  const resetHeight = () => {
+  const resetHeight = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = '72px';
     }
-  };
+  }, []);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
     'input',
@@ -117,6 +120,15 @@ function PureMultimodalInput({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
+
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [voiceRecorder] = useState(() => new VoiceRecorder());
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
+  // Transcription modal state
+  const [showTranscriptionModal, setShowTranscriptionModal] = useState(false);
+  const [pendingTranscription, setPendingTranscription] = useState('');
 
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
@@ -152,6 +164,7 @@ function PureMultimodalInput({
     sendMessage,
     setAttachments,
     setLocalStorageInput,
+    resetHeight,
     width,
     chatId,
   ]);
@@ -216,6 +229,131 @@ function PureMultimodalInput({
       scrollToBottom();
     }
   }, [status, scrollToBottom]);
+
+  // Voice recording handlers
+  const handleVoiceRecording = useCallback(async () => {
+    if (isRecording) {
+      // Stop recording
+      voiceRecorder.stopRecording();
+      return;
+    }
+
+    // Stop any ongoing text-to-speech before recording
+    stopSpeaking();
+
+    // Request microphone permission (this will show the browser permission dialog)
+    const hasPermission = await requestMicrophonePermission();
+    if (!hasPermission) {
+      toast.error('Acesso ao microfone negado. Por favor, permita o acesso ao microfone nas configurações do navegador.');
+      return;
+    }
+
+    // Start recording
+    voiceRecorder.startRecording();
+  }, [isRecording, voiceRecorder]);
+
+  // Set up voice recorder callbacks
+  useEffect(() => {
+    voiceRecorder.options = {
+      onRecordingStart: () => {
+        setIsRecording(true);
+        toast.success('Gravação iniciada!');
+      },
+      onRecordingStop: () => {
+        setIsRecording(false);
+      },
+      onDataAvailable: async (audioBlob) => {
+        setIsTranscribing(true);
+        try {
+          const formData = new FormData();
+          formData.append('audio', audioBlob, 'voice-message.webm');
+
+          const response = await fetch('/api/voice-message', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error('Falha na transcrição');
+          }
+
+          const { transcription } = await response.json();
+
+          // Show transcription in modal instead of directly setting input
+          setPendingTranscription(transcription);
+          setShowTranscriptionModal(true);
+          toast.success('Áudio transcrito com sucesso!');
+        } catch (error) {
+          console.error('Voice transcription error:', error);
+          toast.error('Erro ao transcrever o áudio. Tente novamente.');
+        } finally {
+          setIsTranscribing(false);
+        }
+      },
+      onError: (error) => {
+        console.error('Voice recording error:', error);
+        toast.error('Erro na gravação. Tente novamente.');
+        setIsRecording(false);
+        setIsTranscribing(false);
+      },
+    };
+  }, [voiceRecorder, setInput]);
+
+  // Cleanup voice recorder on unmount
+  useEffect(() => {
+    return () => {
+      if (isRecording) {
+        voiceRecorder.cancelRecording();
+      }
+    };
+  }, [voiceRecorder, isRecording]);
+
+  // Transcription modal handlers
+  const handleConfirmTranscription = useCallback((confirmedText: string) => {
+    setInput(confirmedText);
+    setPendingTranscription('');
+
+    // Auto-send the confirmed transcription
+    setTimeout(() => {
+      window.history.replaceState({}, '', `/chat/${chatId}`);
+
+      sendMessage({
+        role: 'user',
+        parts: [
+          ...attachments.map((attachment) => ({
+            type: 'file' as const,
+            url: attachment.url,
+            name: attachment.name,
+            mediaType: attachment.contentType,
+          })),
+          {
+            type: 'text',
+            text: confirmedText,
+          },
+        ],
+      });
+
+      setAttachments([]);
+      setLocalStorageInput('');
+      resetHeight();
+      setInput('');
+
+      if (width && width > 768) {
+        textareaRef.current?.focus();
+      }
+
+      toast.success('Mensagem enviada!');
+    }, 100); // Small delay to ensure state updates
+  }, [setInput, chatId, sendMessage, attachments, setAttachments, setLocalStorageInput, resetHeight, width, textareaRef]);
+
+  const handleDiscardTranscription = useCallback(() => {
+    setPendingTranscription('');
+    toast.info('Transcrição descartada.');
+  }, []);
+
+  const handleCloseTranscriptionModal = useCallback(() => {
+    setShowTranscriptionModal(false);
+  }, []);
 
   return (
     <div className="flex relative flex-col gap-4 w-full">
@@ -324,7 +462,7 @@ function PureMultimodalInput({
           </PromptInputTools>
           {status === 'submitted' ? (
             <StopButton stop={stop} setMessages={setMessages} />
-          ) : (
+          ) : input.trim() || uploadQueue.length > 0 ? (
             <PromptInputSubmit
               status={status}
               disabled={!input.trim() || uploadQueue.length > 0}
@@ -332,9 +470,24 @@ function PureMultimodalInput({
             >
               <ArrowUpIcon size={20} />
             </PromptInputSubmit>
+          ) : (
+            <VoiceRecordButton
+              isRecording={isRecording}
+              isTranscribing={isTranscribing}
+              onToggleRecording={handleVoiceRecording}
+              status={status}
+            />
           )}
         </PromptInputToolbar>
       </PromptInput>
+
+      <VoiceTranscriptionModal
+        isOpen={showTranscriptionModal}
+        onClose={handleCloseTranscriptionModal}
+        onConfirm={handleConfirmTranscription}
+        onDiscard={handleDiscardTranscription}
+        transcription={pendingTranscription}
+      />
     </div>
   );
 }
@@ -450,33 +603,44 @@ function PureStopButton({
 
 const StopButton = memo(PureStopButton);
 
-function PureSendButton({
-  submitForm,
-  input,
-  uploadQueue,
+function PureVoiceRecordButton({
+  isRecording,
+  isTranscribing,
+  onToggleRecording,
+  status,
 }: {
-  submitForm: () => void;
-  input: string;
-  uploadQueue: Array<string>;
+  isRecording: boolean;
+  isTranscribing: boolean;
+  onToggleRecording: () => void;
+  status: UseChatHelpers<ChatMessage>['status'];
 }) {
+  const getButtonState = () => {
+    if (isTranscribing) return { icon: <LoaderIcon size={16} />, tooltip: 'Transcrevendo...' };
+    if (isRecording) return { icon: <MicrophoneIcon size={16} />, tooltip: 'Parar gravação' };
+    return { icon: <MicrophoneIcon size={20} />, tooltip: 'Gravar mensagem de voz' };
+  };
+
+  const buttonState = getButtonState();
+
   return (
     <Button
-      data-testid="send-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      data-testid="voice-record-button"
+      className={`p-3 rounded-full transition-colors ${
+        isRecording
+          ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700'
+          : 'text-gray-700 bg-gray-200 hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300'
+      }`}
       onClick={(event) => {
         event.preventDefault();
-        submitForm();
+        onToggleRecording();
       }}
-      disabled={input.length === 0 || uploadQueue.length > 0}
+      disabled={status !== 'ready' || isTranscribing}
+      title={buttonState.tooltip}
     >
-      <ArrowUpIcon size={14} />
+      {buttonState.icon}
     </Button>
   );
 }
 
-const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.uploadQueue.length !== nextProps.uploadQueue.length)
-    return false;
-  if (prevProps.input !== nextProps.input) return false;
-  return true;
-});
+const VoiceRecordButton = memo(PureVoiceRecordButton);
+
