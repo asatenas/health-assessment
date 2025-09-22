@@ -1,28 +1,31 @@
-import { useSWRConfig } from 'swr';
-import { useCopyToClipboard } from 'usehooks-ts';
+// import { useSWRConfig } from 'swr';
+// import { useCopyToClipboard } from 'usehooks-ts';
 
-import type { Vote } from '@/lib/db/schema';
+// import type { Vote } from '@/lib/db/schema';
 
-import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
+// import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
+import { SpeakerIcon } from './icons';
 import { Actions, Action } from './elements/actions';
-import { memo } from 'react';
-import equal from 'fast-deep-equal';
+import { memo, useState } from 'react';
+// import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/lib/types';
+import { speakText } from '@/lib/tts';
 
 export function PureMessageActions({
   chatId,
   message,
-  vote,
+  // vote,
   isLoading,
 }: {
   chatId: string;
   message: ChatMessage;
-  vote: Vote | undefined;
+  // vote: Vote | undefined;
   isLoading: boolean;
 }) {
-  const { mutate } = useSWRConfig();
-  const [_, copyToClipboard] = useCopyToClipboard();
+  // const { mutate } = useSWRConfig();
+  // const [_, copyToClipboard] = useCopyToClipboard();
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   if (isLoading) return null;
   if (message.role === 'user') return null;
@@ -30,6 +33,36 @@ export function PureMessageActions({
   return (
     <Actions>
         <Action
+          tooltip="Ouvir"
+          disabled={isSpeaking}
+          onClick={async () => {
+            const textFromParts = message.parts
+              ?.filter((part) => part.type === 'text')
+              .map((part) => part.text)
+              .join('\n')
+              .trim();
+
+            if (!textFromParts) {
+              toast.error("Não há texto para ler!");
+              return;
+            }
+
+            setIsSpeaking(true);
+
+            try {
+              await speakText(textFromParts);
+            } catch (error) {
+              console.error('TTS error:', error);
+              toast.error("Erro ao reproduzir o áudio. Tente novamente.");
+            } finally {
+              setIsSpeaking(false);
+            }
+          }}
+        >
+          <SpeakerIcon />
+        </Action>
+
+        {/* <Action
           tooltip="Copy"
           onClick={async () => {
             const textFromParts = message.parts
@@ -142,7 +175,7 @@ export function PureMessageActions({
               }}
         >
           <ThumbDownIcon />
-        </Action>
+        </Action> */}
     </Actions>
   );
 }
@@ -150,7 +183,7 @@ export function PureMessageActions({
 export const MessageActions = memo(
   PureMessageActions,
   (prevProps, nextProps) => {
-    if (!equal(prevProps.vote, nextProps.vote)) return false;
+    // if (!equal(prevProps.vote, nextProps.vote)) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
 
     return true;
