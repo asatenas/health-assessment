@@ -66,6 +66,24 @@ export function VoiceTranscriptionModal({
     setEditedText(transcription);
   }, [transcription]);
 
+  // Prevent viewport jumping on mobile
+  useEffect(() => {
+    if (isOpen) {
+      // Lock body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      // Add a class to help with mobile viewport handling
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+    };
+  }, [isOpen]);
+
   const handleConfirm = () => {
     onConfirm(editedText.trim());
     onClose();
@@ -83,7 +101,7 @@ export function VoiceTranscriptionModal({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={handleClose}>
-      <AlertDialogContent className="sm:max-w-md">
+      <AlertDialogContent className="sm:max-w-md max-w-[95vw] max-h-[90vh] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <MicrophoneIcon size={20} />
@@ -94,17 +112,17 @@ export function VoiceTranscriptionModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 flex-1 overflow-hidden">
           <Textarea
             value={editedText}
             onChange={(e) => setEditedText(e.target.value)}
             placeholder="Texto transcrito aparecerá aqui..."
-            className="min-h-[120px] resize-none"
-            autoFocus
+            className="min-h-[120px] max-h-[200px] resize-none w-full"
+            autoFocus={false}
           />
         </div>
 
-        <AlertDialogFooter className="gap-2 sm:gap-2">
+        <AlertDialogFooter className="gap-2 sm:gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={handleDiscard}
