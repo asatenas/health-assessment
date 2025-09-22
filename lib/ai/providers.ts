@@ -31,7 +31,7 @@ export const myProvider = isTestEnvironment
               providerOptions: {
                 openai: {
                   reasoningEffort: 'low',
-                  reasoningSummary: 'auto',
+                  // reasoningSummary: 'auto',
                   serviceTier: 'priority',
                   textVerbosity: 'medium',
                 }
@@ -46,7 +46,7 @@ export const myProvider = isTestEnvironment
               providerOptions: {
                 openai: {
                   reasoningEffort: 'medium',
-                  reasoningSummary: 'auto',
+                  // reasoningSummary: 'auto',
                   serviceTier: 'priority',
                   textVerbosity: 'medium',
                 }
