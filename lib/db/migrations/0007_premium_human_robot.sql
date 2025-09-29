@@ -1,0 +1,1 @@
+ALTER TABLE "Chat" ADD COLUMN "readOnly" boolean DEFAULT false NOT NULL;
