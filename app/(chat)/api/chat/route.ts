@@ -113,6 +113,21 @@ export async function POST(request: Request) {
         title: '',
         visibility: selectedVisibilityType,
       });
+
+      // save first asssistant message
+      messages?.[0] &&
+        (await saveMessages({
+          messages: [
+            {
+              chatId: id,
+              id: messages[0].id,
+              role: 'assistant',
+              parts: messages[0].parts,
+              attachments: [],
+              createdAt: new Date(),
+            },
+          ],
+        }));
     } else {
       if (chat.userId !== session.user.id) {
         return new ChatSDKError('forbidden:chat').toResponse();
