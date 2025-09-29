@@ -69,7 +69,7 @@ export function Chat({
       api: '/api/chat',
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest({ messages, id, body }) {
-        const userMessages = messages.filter(m => m.role === 'user');
+        const userMessages = messages.filter((m) => m.role === 'user');
         const isFirstUserMessage = userMessages.length === 1;
 
         return {
@@ -126,31 +126,42 @@ export function Chat({
   useEffect(() => {
     if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
       if (isProductionEnvironment) {
-          fetch('/api/notify', { method: 'POST' }) // simple notification
+        fetch('/api/notify', { method: 'POST' }); // simple notification
       }
-      setMessages([{
-        id: generateUUID(),
-        role: 'assistant',
-        parts: [{
-          type: 'text',
-          text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
+      setMessages([
+        {
+          id: generateUUID(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'text',
+              text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
 
 Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
 
 Para começar, quantos anos você tem?
-`
-        }],
-        metadata: {
-          createdAt: new Date().toISOString()
-        }
-      }]);
+`,
+            },
+          ],
+          metadata: {
+            createdAt: new Date().toISOString(),
+          },
+        },
+      ]);
       setHasInitialMessage(true);
       setHasSentMessage(true);
     }
-  }, [messages.length, hasInitialMessage, setMessages, isReadonly, setHasSentMessage]);
+  }, [
+    messages.length,
+    hasInitialMessage,
+    setMessages,
+    isReadonly,
+    setHasSentMessage,
+  ]);
 
   const { data: votes } = useSWR<Array<Vote>>(
-    false ? `/api/vote?chatId=${id}` : null,
+    // `/api/vote?chatId=${id}`,
+    null,
     fetcher,
   );
 
