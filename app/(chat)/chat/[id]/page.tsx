@@ -42,6 +42,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
 
+  const isReadOnly = chat.readOnly || session?.user?.id !== chat.userId;
+
   if (!chatModelFromCookie) {
     return (
       <>
@@ -50,7 +52,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           initialMessages={uiMessages}
           initialChatModel={DEFAULT_CHAT_MODEL}
           initialVisibilityType={chat.visibility}
-          isReadonly={session?.user?.id !== chat.userId}
+          isReadonly={isReadOnly}
           session={session}
           autoResume={true}
         />
@@ -66,7 +68,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialMessages={uiMessages}
         initialChatModel={chatModelFromCookie.value}
         initialVisibilityType={chat.visibility}
-        isReadonly={session?.user?.id !== chat.userId}
+        isReadonly={isReadOnly}
         session={session}
         autoResume={true}
       />

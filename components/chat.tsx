@@ -18,6 +18,7 @@ import { toast } from './toast';
 import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { isProductionEnvironment } from '@/lib/constants';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
@@ -47,6 +48,11 @@ export function Chat({
     initialVisibilityType,
   });
 
+  const { isReadonly: currentIsReadonly, setReadonly } = useChatReadonly({
+    chatId: id,
+    initialReadonly: isReadonly,
+  });
+
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
 
@@ -69,7 +75,7 @@ export function Chat({
       api: '/api/chat',
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest({ messages, id, body }) {
-        const userMessages = messages.filter(m => m.role === 'user');
+        const userMessages = messages.filter((m) => m.role === 'user');
         const isFirstUserMessage = userMessages.length === 1;
 
         return {
@@ -124,33 +130,64 @@ export function Chat({
   }, [query, sendMessage, hasAppendedQuery, id]);
 
   useEffect(() => {
-    if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
+    if (messages.length === 0 && !hasInitialMessage && !currentIsReadonly) {
       if (isProductionEnvironment) {
-          fetch('/api/notify', { method: 'POST' }) // simple notification
+        fetch('/api/notify', { method: 'POST' }); // simple notification
       }
-      setMessages([{
-        id: generateUUID(),
-        role: 'assistant',
-        parts: [{
-          type: 'text',
-          text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
+      setMessages([
+        {
+          id: generateUUID(),
+          role: 'assistant',
+          parts: [
+            {
+              type: 'text',
+              text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
 
 Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
 
 Para começar, quantos anos você tem?
-`
-        }],
-        metadata: {
-          createdAt: new Date().toISOString()
-        }
-      }]);
+`,
+            },
+          ],
+          metadata: {
+            createdAt: new Date().toISOString(),
+          },
+        },
+      ]);
       setHasInitialMessage(true);
       setHasSentMessage(true);
     }
-  }, [messages.length, hasInitialMessage, setMessages, isReadonly, setHasSentMessage]);
+  }, [
+    messages.length,
+    hasInitialMessage,
+    setMessages,
+    currentIsReadonly,
+    setHasSentMessage,
+  ]);
+
+  // Listen for suspendMedications tool call in messages
+  useEffect(() => {
+    if (messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    let hasSuspendMedications = false;
+
+    if (lastMessage.role === 'assistant' && lastMessage.parts) {
+      hasSuspendMedications = lastMessage.parts.some(
+        (part: any) => part.type === 'tool-suspendMedications',
+      );
+    }
+
+    if (hasSuspendMedications && !currentIsReadonly) {
+      setReadonly(true);
+    }
+  }, [messages, currentIsReadonly, setReadonly]);
 
   const { data: votes } = useSWR<Array<Vote>>(
-    false ? `/api/vote?chatId=${id}` : null,
+    // `/api/vote?chatId=${id}`,
+    null,
     fetcher,
   );
 
@@ -170,7 +207,7 @@ Para começar, quantos anos você tem?
         <ChatHeader
           chatId={id}
           selectedVisibilityType={initialVisibilityType}
-          isReadonly={isReadonly}
+          isReadonly={currentIsReadonly}
           session={session}
         />
 
@@ -181,12 +218,12 @@ Para começar, quantos anos você tem?
           messages={messages}
           setMessages={setMessages}
           regenerate={regenerate}
-          isReadonly={isReadonly}
+          isReadonly={currentIsReadonly}
           isArtifactVisible={isArtifactVisible}
         />
 
         <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
-          {!isReadonly && (
+          {!currentIsReadonly && (
             <MultimodalInput
               chatId={id}
               input={input}
@@ -218,7 +255,7 @@ Para começar, quantos anos você tem?
         setMessages={setMessages}
         regenerate={regenerate}
         votes={votes}
-        isReadonly={isReadonly}
+        isReadonly={currentIsReadonly}
         selectedVisibilityType={visibilityType}
         selectedModelId={initialChatModel}
       />
