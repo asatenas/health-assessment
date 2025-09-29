@@ -107,14 +107,10 @@ export async function POST(request: Request) {
     const chat = await getChatById({ id });
 
     if (!chat) {
-      const title = await generateTitleFromUserMessage({
-        message,
-      });
-
       await saveChat({
         id,
         userId: session.user.id,
-        title,
+        title: '',
         visibility: selectedVisibilityType,
       });
     } else {
@@ -124,7 +120,7 @@ export async function POST(request: Request) {
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });
-    const uiMessages = messages 
+    const uiMessages = messages
       ? messages // Use provided messages for first user message (includes initial assistant message)
       : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
 
