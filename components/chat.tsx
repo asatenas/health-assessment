@@ -18,6 +18,7 @@ import { toast } from './toast';
 import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
+import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { isProductionEnvironment } from '@/lib/constants';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
@@ -45,6 +46,11 @@ export function Chat({
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
+  });
+
+  const { isReadonly: currentIsReadonly, setReadonly } = useChatReadonly({
+    chatId: id,
+    initialReadonly: isReadonly,
   });
 
   const { mutate } = useSWRConfig();
@@ -124,7 +130,7 @@ export function Chat({
   }, [query, sendMessage, hasAppendedQuery, id]);
 
   useEffect(() => {
-    if (messages.length === 0 && !hasInitialMessage && !isReadonly) {
+    if (messages.length === 0 && !hasInitialMessage && !currentIsReadonly) {
       if (isProductionEnvironment) {
         fetch('/api/notify', { method: 'POST' }); // simple notification
       }
@@ -155,9 +161,29 @@ Para começar, quantos anos você tem?
     messages.length,
     hasInitialMessage,
     setMessages,
-    isReadonly,
+    currentIsReadonly,
     setHasSentMessage,
   ]);
+
+  // Listen for suspendMedications tool call in messages
+  useEffect(() => {
+    if (messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    let hasSuspendMedications = false;
+
+    if (lastMessage.role === 'assistant' && lastMessage.parts) {
+      hasSuspendMedications = lastMessage.parts.some(
+        (part: any) => part.type === 'tool-suspendMedications',
+      );
+    }
+
+    if (hasSuspendMedications && !currentIsReadonly) {
+      setReadonly(true);
+    }
+  }, [messages, currentIsReadonly, setReadonly]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     // `/api/vote?chatId=${id}`,
@@ -181,7 +207,7 @@ Para começar, quantos anos você tem?
         <ChatHeader
           chatId={id}
           selectedVisibilityType={initialVisibilityType}
-          isReadonly={isReadonly}
+          isReadonly={currentIsReadonly}
           session={session}
         />
 
@@ -192,12 +218,12 @@ Para começar, quantos anos você tem?
           messages={messages}
           setMessages={setMessages}
           regenerate={regenerate}
-          isReadonly={isReadonly}
+          isReadonly={currentIsReadonly}
           isArtifactVisible={isArtifactVisible}
         />
 
         <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
-          {!isReadonly && (
+          {!currentIsReadonly && (
             <MultimodalInput
               chatId={id}
               input={input}
@@ -229,7 +255,7 @@ Para começar, quantos anos você tem?
         setMessages={setMessages}
         regenerate={regenerate}
         votes={votes}
-        isReadonly={isReadonly}
+        isReadonly={currentIsReadonly}
         selectedVisibilityType={visibilityType}
         selectedModelId={initialChatModel}
       />
