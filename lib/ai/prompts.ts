@@ -99,7 +99,6 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     0 points if elective
     1 point if emergency
 
-
 Finally, ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
 
 At the end:

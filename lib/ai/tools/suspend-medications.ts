@@ -67,7 +67,6 @@ Expected output:
     }),
     execute: async ({ medications }) => {
       await makeChatReadOnlyById({ chatId });
-      console.log(chatId, ': suspend medications', medications);
       return medications;
     },
   });
