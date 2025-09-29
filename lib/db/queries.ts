@@ -469,6 +469,20 @@ export async function updateChatVisiblityById({
   }
 }
 
+export async function makeChatReadOnlyById({ chatId }: { chatId: string }) {
+  try {
+    return await db
+      .update(chat)
+      .set({ readOnly: true })
+      .where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to make chat read only',
+    );
+  }
+}
+
 export async function getMessageCountByUserId({
   id,
   differenceInHours,
