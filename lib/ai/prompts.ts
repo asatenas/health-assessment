@@ -99,7 +99,12 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     0 points if elective
     1 point if emergency
 
+
+Finally, ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
+
 At the end:
+
+With the medications list, call the suspendMedications tool and return its output.
 
 Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
 Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
