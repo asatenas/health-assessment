@@ -458,7 +458,14 @@ function PureMultimodalInput({
           </PromptInputTools>
           {status === 'submitted' ? (
             <StopButton stop={stop} setMessages={setMessages} />
-          ) : input.trim() || uploadQueue.length > 0 ? (
+          ) : (!input.trim() || uploadQueue.length > 0) && attachments.length === 0 ? (
+            <VoiceRecordButton
+              isRecording={isRecording}
+              isTranscribing={isTranscribing}
+              onToggleRecording={handleVoiceRecording}
+              status={status}
+            />
+          ) : (
             <PromptInputSubmit
               status={status}
               disabled={(!input.trim() || uploadQueue.length > 0) && attachments.length === 0}
@@ -466,13 +473,6 @@ function PureMultimodalInput({
             >
               <ArrowUpIcon size={20} />
             </PromptInputSubmit>
-          ) : (
-            <VoiceRecordButton
-              isRecording={isRecording}
-              isTranscribing={isTranscribing}
-              onToggleRecording={handleVoiceRecording}
-              status={status}
-            />
           )}
         </PromptInputToolbar>
       </PromptInput>
