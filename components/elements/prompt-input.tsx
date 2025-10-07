@@ -36,6 +36,7 @@ export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
   maxHeight?: number;
   disableAutoResize?: boolean;
   resizeOnNewLinesOnly?: boolean;
+  allowEmptySubmit?: boolean;
 };
 
 export const PromptInputTextarea = ({
@@ -46,6 +47,7 @@ export const PromptInputTextarea = ({
   maxHeight = 164,
   disableAutoResize = false,
   resizeOnNewLinesOnly = false,
+  allowEmptySubmit = false,
   ...props
 }: PromptInputTextareaProps) => {
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
@@ -57,6 +59,13 @@ export const PromptInputTextarea = ({
 
       if (e.shiftKey) {
         // Allow newline
+        return;
+      }
+
+      // Don't submit if input is empty or only whitespace (unless allowEmptySubmit is true)
+      // allowEmptySubmit is true when there are attachments
+      if (!allowEmptySubmit && !e.currentTarget.value.trim()) {
+        e.preventDefault();
         return;
       }
 
