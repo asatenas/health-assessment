@@ -144,7 +144,7 @@ function PureMultimodalInput({
         })),
         {
           type: 'text',
-          text: input,
+          text: input ? input : attachments.map((attachment) => attachment.name).join(' '),
         },
       ],
     });
