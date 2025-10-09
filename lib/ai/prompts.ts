@@ -3,9 +3,9 @@ import type { Geo } from '@vercel/functions';
 
 export const initialMessage = `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
 
-Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
+O meu objetivo é realizar uma avaliação pré-anestésica. Para isso, preciso que primeiro preencha o formulário abaixo. Depois, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
 
-Para começar, quantos anos você tem?
+Por favor leia as perguntas com atenção e responda de forma mais completa possível.
 `;
 
 export const artifactsPrompt = `
