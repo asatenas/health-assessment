@@ -25,6 +25,7 @@ import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
+import { initialMessage } from '@/lib/ai/prompts';
 
 export function Chat({
   id,
@@ -141,12 +142,7 @@ export function Chat({
           parts: [
             {
               type: 'text',
-              text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
-
-Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
-
-Para começar, quantos anos você tem?
-`,
+              text: initialMessage,
             },
           ],
           metadata: {
