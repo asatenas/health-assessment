@@ -8,6 +8,11 @@ O meu objetivo é realizar uma avaliação pré-anestésica. Para isso, preciso 
 Por favor leia as perguntas com atenção e responda de forma mais completa possível.
 `;
 
+export const postFormMessage = `Obrigado por preencher o formulário. Vamos continuar com a entrevista.
+
+Qual é a cirurgia que você vai fazer e em qual parte do corpo? Se souber, diga também o nome do procedimento.
+`;
+
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
 
