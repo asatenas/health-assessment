@@ -25,7 +25,8 @@ import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
-import { initialMessage } from '@/lib/ai/prompts';
+import { initialMessage, postFormMessage } from '@/lib/ai/prompts';
+import { PreChatForm } from './pre-chat-form';
 
 export function Chat({
   id,
@@ -117,6 +118,8 @@ export function Chat({
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
+  const [hasCompletedForm, setHasCompletedForm] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
@@ -159,6 +162,7 @@ export function Chat({
     setMessages,
     currentIsReadonly,
     setHasSentMessage,
+    hasCompletedForm,
   ]);
 
   // Listen for suspendMedications tool call in messages
@@ -207,35 +211,68 @@ export function Chat({
           session={session}
         />
 
-        <Messages
-          chatId={id}
-          status={status}
-          votes={votes}
-          messages={messages}
-          setMessages={setMessages}
-          regenerate={regenerate}
-          isReadonly={currentIsReadonly}
-          isArtifactVisible={isArtifactVisible}
-        />
+        {!isFormVisible && (
+          <Messages
+            chatId={id}
+            status={status}
+            votes={votes}
+            messages={messages}
+            setMessages={setMessages}
+            regenerate={regenerate}
+            isReadonly={currentIsReadonly}
+            isArtifactVisible={isArtifactVisible}
+          />
+        )}
 
-        <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
-          {!currentIsReadonly && (
-            <MultimodalInput
-              chatId={id}
-              input={input}
-              setInput={setInput}
-              status={status}
-              stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
-              sendMessage={sendMessage}
-              selectedVisibilityType={visibilityType}
-              selectedModelId={initialChatModel}
-            />
-          )}
-        </div>
+        {!hasCompletedForm && (
+          <PreChatForm
+            onComplete={(formData) => {
+              console.log(formData);
+              setHasCompletedForm(true);
+              setIsFormVisible(false);
+
+              // Add assistant message after form submission
+              setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  id: generateUUID(),
+                  role: 'assistant',
+                  parts: [
+                    {
+                      type: 'text',
+                      text: postFormMessage,
+                    },
+                  ],
+                  metadata: {
+                    createdAt: new Date().toISOString(),
+                  },
+                },
+              ]);
+            }}
+            onShowForm={() => setIsFormVisible(true)}
+          />
+        )}
+
+        {hasCompletedForm && (
+          <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
+            {!currentIsReadonly && (
+              <MultimodalInput
+                chatId={id}
+                input={input}
+                setInput={setInput}
+                status={status}
+                stop={stop}
+                attachments={attachments}
+                setAttachments={setAttachments}
+                messages={messages}
+                setMessages={setMessages}
+                sendMessage={sendMessage}
+                selectedVisibilityType={visibilityType}
+                selectedModelId={initialChatModel}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <Artifact

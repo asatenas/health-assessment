@@ -1,0 +1,420 @@
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PlusIcon } from './icons';
+
+interface PreChatFormData {
+  idade: string;
+  peso: string;
+  altura: string;
+  alergias: {
+    latex: boolean;
+  };
+  marcaPasso: boolean;
+  bombaMedicamentos: boolean;
+  itensUso: {
+    megaHair: boolean;
+    apliques: boolean;
+    unhaGel: boolean;
+    ciliosPosticos: boolean;
+    piercings: boolean;
+  };
+  medicamentos: string[];
+  exames: {
+    hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
+    creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
+    ecocardiograma: {
+      tipo: 'texto' | 'arquivo';
+      valor: string;
+      arquivo?: File;
+    };
+  };
+}
+
+interface PreChatFormProps {
+  onComplete: (data: PreChatFormData) => void;
+  onShowForm: () => void;
+}
+
+export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<PreChatFormData>({
+    idade: '',
+    peso: '',
+    altura: '',
+    alergias: {
+      latex: false,
+    },
+    marcaPasso: false,
+    bombaMedicamentos: false,
+    itensUso: {
+      megaHair: false,
+      apliques: false,
+      unhaGel: false,
+      ciliosPosticos: false,
+      piercings: false,
+    },
+    medicamentos: [],
+    exames: {
+      hemoglobina: { tipo: 'texto', valor: '' },
+      creatinina: { tipo: 'texto', valor: '' },
+      ecocardiograma: { tipo: 'texto', valor: '' },
+    },
+  });
+
+  const [novaAlergia, setNovaAlergia] = useState('');
+  const [novoMedicamento, setNovoMedicamento] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onComplete(formData);
+  };
+
+  const adicionarMedicamento = () => {
+    if (novoMedicamento.trim()) {
+      setFormData({
+        ...formData,
+        medicamentos: [...formData.medicamentos, novoMedicamento.trim()],
+      });
+      setNovoMedicamento('');
+    }
+  };
+
+  const removerMedicamento = (index: number) => {
+    setFormData({
+      ...formData,
+      medicamentos: formData.medicamentos.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleExameChange = (
+    exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    field: 'tipo' | 'valor',
+    value: string,
+  ) => {
+    setFormData({
+      ...formData,
+      exames: {
+        ...formData.exames,
+        [exame]: {
+          ...formData.exames[exame],
+          [field]: value,
+        },
+      },
+    });
+  };
+
+  const handleExameFileChange = (
+    exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    file: File | undefined,
+  ) => {
+    setFormData({
+      ...formData,
+      exames: {
+        ...formData.exames,
+        [exame]: {
+          ...formData.exames[exame],
+          arquivo: file,
+        },
+      },
+    });
+  };
+
+  if (!showForm) {
+    return (
+      <div className="justify-end py-4">
+        <div className="max-w-4xl mx-auto flex justify-end pr-6">
+          <Button
+            onClick={() => {
+              setShowForm(true);
+              onShowForm();
+            }}
+            size="lg"
+            className="min-w-[200px]"
+          >
+            Continuar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4">
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-2xl font-bold mb-6">Informações do Paciente</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Dados Básicos */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="idade">Idade</Label>
+              <Input
+                id="idade"
+                type="number"
+                // required
+                value={formData.idade}
+                onChange={(e) =>
+                  setFormData({ ...formData, idade: e.target.value })
+                }
+                placeholder="Ex: 45"
+                onWheel={(e) => e.currentTarget.blur()}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="peso">Peso (kg)</Label>
+              <Input
+                id="peso"
+                type="number"
+                // required
+                value={formData.peso}
+                onChange={(e) =>
+                  setFormData({ ...formData, peso: e.target.value })
+                }
+                placeholder="Ex: 70.5"
+                onWheel={(e) => e.currentTarget.blur()}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="altura">Altura (cm)</Label>
+              <Input
+                id="altura"
+                type="number"
+                // required
+                value={formData.altura}
+                onChange={(e) =>
+                  setFormData({ ...formData, altura: e.target.value })
+                }
+                placeholder="Ex: 175"
+                onWheel={(e) => e.currentTarget.blur()}
+              />
+            </div>
+          </div>
+
+          {/* Alergias */}
+          <div className="space-y-3">
+            <Label>Alergias</Label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="alergia-latex"
+                checked={formData.alergias.latex}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    alergias: {
+                      ...formData.alergias,
+                      latex: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="alergia-latex" className="font-normal">
+                Látex
+              </Label>
+            </div>
+          </div>
+
+          {/* Dispositivos Médicos */}
+          <div className="space-y-3">
+            <Label>Dispositivos Médicos</Label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="marca-passo"
+                checked={formData.marcaPasso}
+                onChange={(e) =>
+                  setFormData({ ...formData, marcaPasso: e.target.checked })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="marca-passo" className="font-normal">
+                Marca-passos ou dispositivo para arritmia
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="bomba-medicamentos"
+                checked={formData.bombaMedicamentos}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    bombaMedicamentos: e.target.checked,
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="bomba-medicamentos" className="font-normal">
+                Bomba de medicamentos implantada
+              </Label>
+            </div>
+          </div>
+
+          {/* Itens de Uso */}
+          <div className="space-y-3">
+            <Label>Usa algum dos itens abaixo?</Label>
+            {[
+              { key: 'megaHair', label: 'Mega-Hair' },
+              { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
+              { key: 'unhaGel', label: 'Unha de gel' },
+              { key: 'ciliosPosticos', label: 'Cílios postiços' },
+              { key: 'piercings', label: 'Piercings' },
+            ].map(({ key, label }) => (
+              <div key={key} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={`item-${key}`}
+                  checked={
+                    formData.itensUso[key as keyof typeof formData.itensUso]
+                  }
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      itensUso: {
+                        ...formData.itensUso,
+                        [key]: e.target.checked,
+                      },
+                    })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor={`item-${key}`} className="font-normal">
+                  {label}
+                </Label>
+              </div>
+            ))}
+          </div>
+
+          {/* Medicamentos */}
+          <div className="space-y-3">
+            <Label>Medicamentos e dosagem</Label>
+            <div className="flex gap-2">
+              <Input
+                value={novoMedicamento}
+                onChange={(e) => setNovoMedicamento(e.target.value)}
+                placeholder="Adicionar medicamento"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    adicionarMedicamento();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                onClick={adicionarMedicamento}
+                variant="outline"
+                size="icon"
+              >
+                <PlusIcon />
+              </Button>
+            </div>
+            {formData.medicamentos.map((medicamento, index) => (
+              <div
+                key={`medicamento-${medicamento}-${index}`}
+                className="flex items-center justify-between bg-muted px-3 py-2 rounded-md"
+              >
+                <span>{medicamento}</span>
+                <Button
+                  type="button"
+                  onClick={() => removerMedicamento(index)}
+                  variant="ghost"
+                  size="icon"
+                  className="size-6"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 4L4 12M4 4L12 12"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {/* Exames */}
+          <div className="space-y-4">
+            <Label>Exames (valor ou arquivo)</Label>
+            {[
+              { key: 'hemoglobina', label: 'Hemoglobina' },
+              { key: 'creatinina', label: 'Creatinina' },
+              { key: 'ecocardiograma', label: 'Ecocardiograma' },
+            ].map(({ key, label }) => (
+              <div key={key} className="space-y-2">
+                <Label className="text-sm font-normal">{label}</Label>
+                <div className="flex gap-2">
+                  <select
+                    value={
+                      formData.exames[key as keyof typeof formData.exames].tipo
+                    }
+                    onChange={(e) =>
+                      handleExameChange(
+                        key as keyof typeof formData.exames,
+                        'tipo',
+                        e.target.value,
+                      )
+                    }
+                    className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="texto">Valor</option>
+                    <option value="arquivo">Arquivo</option>
+                  </select>
+                  {formData.exames[key as keyof typeof formData.exames].tipo ===
+                  'texto' ? (
+                    <Input
+                      value={
+                        formData.exames[key as keyof typeof formData.exames]
+                          .valor
+                      }
+                      onChange={(e) =>
+                        handleExameChange(
+                          key as keyof typeof formData.exames,
+                          'valor',
+                          e.target.value,
+                        )
+                      }
+                      placeholder={`Ex: valor de ${label.toLowerCase()}`}
+                      className="flex-1"
+                    />
+                  ) : (
+                    <Input
+                      type="file"
+                      onChange={(e) =>
+                        handleExameFileChange(
+                          key as keyof typeof formData.exames,
+                          e.target.files?.[0],
+                        )
+                      }
+                      className="flex-1"
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="submit" className="min-w-[200px]" size="lg">
+              Continuar
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
