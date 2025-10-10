@@ -14,7 +14,13 @@ import {
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 
-import { ArrowUpIcon, PaperclipIcon, StopIcon, MicrophoneIcon, LoaderIcon } from './icons';
+import {
+  ArrowUpIcon,
+  PaperclipIcon,
+  StopIcon,
+  MicrophoneIcon,
+  LoaderIcon,
+} from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { SuggestedActions } from './suggested-actions';
@@ -39,7 +45,10 @@ import type { Attachment, ChatMessage } from '@/lib/types';
 import { chatModels } from '@/lib/ai/models';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { startTransition } from 'react';
-import { VoiceRecorder, requestMicrophonePermission } from '@/lib/voice-recording';
+import {
+  VoiceRecorder,
+  requestMicrophonePermission,
+} from '@/lib/voice-recording';
 import { VoiceTranscriptionModal } from './voice-transcription-modal';
 import { stopSpeaking } from '@/lib/tts';
 
@@ -144,7 +153,9 @@ function PureMultimodalInput({
         })),
         {
           type: 'text',
-          text: input ? input : attachments.map((attachment) => attachment.name).join(' '),
+          text: input
+            ? input
+            : attachments.map((attachment) => attachment.name).join(' '),
         },
       ],
     });
@@ -244,7 +255,9 @@ function PureMultimodalInput({
     // Request microphone permission (this will show the browser permission dialog)
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
-      toast.error('Acesso ao microfone negado. Por favor, permita o acesso ao microfone nas configurações do navegador.');
+      toast.error(
+        'Acesso ao microfone negado. Por favor, permita o acesso ao microfone nas configurações do navegador.',
+      );
       return;
     }
 
@@ -308,40 +321,53 @@ function PureMultimodalInput({
   }, [voiceRecorder, isRecording]);
 
   // Transcription modal handlers
-  const handleConfirmTranscription = useCallback((confirmedText: string) => {
-    setInput(confirmedText);
-    setPendingTranscription('');
+  const handleConfirmTranscription = useCallback(
+    (confirmedText: string) => {
+      setInput(confirmedText);
+      setPendingTranscription('');
 
-    // Auto-send the confirmed transcription
-    setTimeout(() => {
-      window.history.replaceState({}, '', `/chat/${chatId}`);
+      // Auto-send the confirmed transcription
+      setTimeout(() => {
+        window.history.replaceState({}, '', `/chat/${chatId}`);
 
-      sendMessage({
-        role: 'user',
-        parts: [
-          ...attachments.map((attachment) => ({
-            type: 'file' as const,
-            url: attachment.url,
-            name: attachment.name,
-            mediaType: attachment.contentType,
-          })),
-          {
-            type: 'text',
-            text: confirmedText,
-          },
-        ],
-      });
+        sendMessage({
+          role: 'user',
+          parts: [
+            ...attachments.map((attachment) => ({
+              type: 'file' as const,
+              url: attachment.url,
+              name: attachment.name,
+              mediaType: attachment.contentType,
+            })),
+            {
+              type: 'text',
+              text: confirmedText,
+            },
+          ],
+        });
 
-      setAttachments([]);
-      setLocalStorageInput('');
-      resetHeight();
-      setInput('');
+        setAttachments([]);
+        setLocalStorageInput('');
+        resetHeight();
+        setInput('');
 
-      if (width && width > 768) {
-        textareaRef.current?.focus();
-      }
-    }, 100); // Small delay to ensure state updates
-  }, [setInput, chatId, sendMessage, attachments, setAttachments, setLocalStorageInput, resetHeight, width, textareaRef]);
+        if (width && width > 768) {
+          textareaRef.current?.focus();
+        }
+      }, 100); // Small delay to ensure state updates
+    },
+    [
+      setInput,
+      chatId,
+      sendMessage,
+      attachments,
+      setAttachments,
+      setLocalStorageInput,
+      resetHeight,
+      width,
+      textareaRef,
+    ],
+  );
 
   const handleDiscardTranscription = useCallback(() => {
     setPendingTranscription('');
@@ -460,7 +486,8 @@ function PureMultimodalInput({
           </PromptInputTools>
           {status === 'submitted' ? (
             <StopButton stop={stop} setMessages={setMessages} />
-          ) : (!input.trim() || uploadQueue.length > 0) && attachments.length === 0 ? (
+          ) : (!input.trim() || uploadQueue.length > 0) &&
+            attachments.length === 0 ? (
             <VoiceRecordButton
               isRecording={isRecording}
               isTranscribing={isTranscribing}
@@ -470,7 +497,10 @@ function PureMultimodalInput({
           ) : (
             <PromptInputSubmit
               status={status}
-              disabled={(!input.trim() || uploadQueue.length > 0) && attachments.length === 0}
+              disabled={
+                (!input.trim() || uploadQueue.length > 0) &&
+                attachments.length === 0
+              }
               className="p-3 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
             >
               <ArrowUpIcon size={20} />
@@ -613,9 +643,14 @@ function PureVoiceRecordButton({
   status: UseChatHelpers<ChatMessage>['status'];
 }) {
   const getButtonState = () => {
-    if (isTranscribing) return { icon: <LoaderIcon size={16} />, tooltip: 'Transcrevendo...' };
-    if (isRecording) return { icon: <MicrophoneIcon size={16} />, tooltip: 'Parar gravação' };
-    return { icon: <MicrophoneIcon size={20} />, tooltip: 'Gravar mensagem de voz' };
+    if (isTranscribing)
+      return { icon: <LoaderIcon size={16} />, tooltip: 'Transcrevendo...' };
+    if (isRecording)
+      return { icon: <MicrophoneIcon size={16} />, tooltip: 'Parar gravação' };
+    return {
+      icon: <MicrophoneIcon size={20} />,
+      tooltip: 'Gravar mensagem de voz',
+    };
   };
 
   const buttonState = getButtonState();
