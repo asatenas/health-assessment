@@ -550,3 +550,20 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     );
   }
 }
+
+export async function updateChatFormById({
+  chatId,
+  form,
+}: {
+  chatId: string;
+  form: any;
+}) {
+  try {
+    return await db.update(chat).set({ form }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat form by id',
+    );
+  }
+}

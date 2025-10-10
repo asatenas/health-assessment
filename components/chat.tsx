@@ -227,9 +227,20 @@ export function Chat({
 
         {!hasCompletedForm && (
           <PreChatForm
-            onComplete={(formData) => {
-              // form was completed
-              console.log(formData);
+            onComplete={async (formData) => {
+              // form was completed - save to database
+              try {
+                await fetch(`/api/chat/${id}`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ form: formData }),
+                });
+              } catch (error) {
+                console.error('Failed to save form data:', error);
+              }
+
               setHasCompletedForm(true);
               setIsFormVisible(false);
 
