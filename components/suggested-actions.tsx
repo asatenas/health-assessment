@@ -11,12 +11,14 @@ interface SuggestedActionsProps {
   chatId: string;
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
   selectedVisibilityType: VisibilityType;
+  disabled: boolean;
 }
 
 function PureSuggestedActions({
   chatId,
   sendMessage,
   selectedVisibilityType,
+  disabled,
 }: SuggestedActionsProps) {
   const suggestedActions = [
     'Sim',
@@ -43,6 +45,7 @@ function PureSuggestedActions({
                 });
               }}
               className="text-left w-full h-auto whitespace-normal p-3"
+              disabled={disabled}
             >
               {suggestedAction}
             </Suggestion>
@@ -58,6 +61,7 @@ export const SuggestedActions = memo(
     if (prevProps.chatId !== nextProps.chatId) return false;
     if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
       return false;
+    if (prevProps.disabled !== nextProps.disabled) return false;
 
     return true;
   },
