@@ -1,12 +1,17 @@
 import { auth } from '@/app/(auth)/auth';
-import { getChatById, updateChatFormById } from '@/lib/db/queries';
+import {
+  getChatById,
+  updateChatFormById,
+  updateChatResultsById,
+} from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
 
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } },
 ) {
-  const { form }: { form: any } = await request.json();
+  const { form, results }: { form?: any; results?: string } =
+    await request.json();
   const chatId = params.id;
 
   if (!chatId) {
@@ -32,10 +37,19 @@ export async function PATCH(
     return new ChatSDKError('forbidden:chat').toResponse();
   }
 
-  await updateChatFormById({
-    chatId,
-    form,
-  });
+  if (form !== undefined) {
+    await updateChatFormById({
+      chatId,
+      form,
+    });
+  }
 
-  return new Response('Chat form updated', { status: 200 });
+  if (results !== undefined) {
+    await updateChatResultsById({
+      chatId,
+      results,
+    });
+  }
+
+  return new Response('Chat updated', { status: 200 });
 }

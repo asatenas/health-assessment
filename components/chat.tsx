@@ -120,6 +120,8 @@ export function Chat({
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
   const [hasCompletedForm, setHasCompletedForm] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [storedFormData, setStoredFormData] = useState<any>(null);
+  const [finalized, setFinalized] = useState(false);
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
@@ -165,13 +167,34 @@ export function Chat({
     hasCompletedForm,
   ]);
 
-  // Listen for suspendMedications tool call in messages
   useEffect(() => {
-    if (messages.length === 0) {
+    const lastMessage = messages.at(-1);
+    if (messages.length === 0 || !lastMessage) {
       return;
     }
 
-    const lastMessage = messages[messages.length - 1];
+    // end of interview
+    if (finalized && lastMessage.role === 'assistant') {
+      const lastPart = lastMessage.parts.at(-1);
+      if (lastPart?.type === 'text' && lastPart?.state === 'done') {
+        const textParts = lastMessage.parts
+          ?.filter((part: any) => part.type === 'text')
+          .map((part: any) => part.text)
+          .join('\n');
+
+        fetch(`/api/chat/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ results: textParts, form: storedFormData }),
+        }).catch((error) => {
+          console.error('Failed to save results:', error);
+        });
+      }
+    }
+
+    // Listen for suspendMedications tool call in messages
     let hasSuspendMedications = false;
 
     if (lastMessage.role === 'assistant' && lastMessage.parts) {
@@ -180,11 +203,11 @@ export function Chat({
       );
     }
 
-    // end of interview
     if (hasSuspendMedications && !currentIsReadonly) {
       setReadonly(true);
+      setFinalized(true);
     }
-  }, [messages, currentIsReadonly, setReadonly]);
+  }, [messages, currentIsReadonly, setReadonly, id, storedFormData]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     // `/api/vote?chatId=${id}`,
@@ -228,18 +251,8 @@ export function Chat({
         {!hasCompletedForm && (
           <PreChatForm
             onComplete={async (formData) => {
-              // form was completed - save to database
-              try {
-                await fetch(`/api/chat/${id}`, {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ form: formData }),
-                });
-              } catch (error) {
-                console.error('Failed to save form data:', error);
-              }
+              // Store form data for later saving
+              setStoredFormData(formData);
 
               setHasCompletedForm(true);
               setIsFormVisible(false);

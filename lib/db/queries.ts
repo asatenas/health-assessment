@@ -567,3 +567,20 @@ export async function updateChatFormById({
     );
   }
 }
+
+export async function updateChatResultsById({
+  chatId,
+  results,
+}: {
+  chatId: string;
+  results: string;
+}) {
+  try {
+    return await db.update(chat).set({ results }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat results by id',
+    );
+  }
+}
