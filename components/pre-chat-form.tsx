@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusIcon } from './icons';
 
 interface PreChatFormData {
   idade: string;
@@ -22,7 +21,6 @@ interface PreChatFormData {
     ciliosPosticos: boolean;
     piercings: boolean;
   };
-  medicamentos: string[];
   exames: {
     hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
     creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
@@ -57,7 +55,6 @@ export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
       ciliosPosticos: false,
       piercings: false,
     },
-    medicamentos: [],
     exames: {
       hemoglobina: { tipo: 'texto', valor: '' },
       creatinina: { tipo: 'texto', valor: '' },
@@ -65,29 +62,9 @@ export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
     },
   });
 
-  const [novaAlergia, setNovaAlergia] = useState('');
-  const [novoMedicamento, setNovoMedicamento] = useState('');
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onComplete(formData);
-  };
-
-  const adicionarMedicamento = () => {
-    if (novoMedicamento.trim()) {
-      setFormData({
-        ...formData,
-        medicamentos: [...formData.medicamentos, novoMedicamento.trim()],
-      });
-      setNovoMedicamento('');
-    }
-  };
-
-  const removerMedicamento = (index: number) => {
-    setFormData({
-      ...formData,
-      medicamentos: formData.medicamentos.filter((_, i) => i !== index),
-    });
   };
 
   const handleExameChange = (
@@ -287,62 +264,6 @@ export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
                 <Label htmlFor={`item-${key}`} className="font-normal">
                   {label}
                 </Label>
-              </div>
-            ))}
-          </div>
-
-          {/* Medicamentos */}
-          <div className="space-y-3">
-            <Label>Medicamentos e dosagem</Label>
-            <div className="flex gap-2">
-              <Input
-                value={novoMedicamento}
-                onChange={(e) => setNovoMedicamento(e.target.value)}
-                placeholder="Adicionar medicamento"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    adicionarMedicamento();
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                onClick={adicionarMedicamento}
-                variant="outline"
-                size="icon"
-              >
-                <PlusIcon />
-              </Button>
-            </div>
-            {formData.medicamentos.map((medicamento, index) => (
-              <div
-                key={`medicamento-${medicamento}-${index}`}
-                className="flex items-center justify-between bg-muted px-3 py-2 rounded-md"
-              >
-                <span>{medicamento}</span>
-                <Button
-                  type="button"
-                  onClick={() => removerMedicamento(index)}
-                  variant="ghost"
-                  size="icon"
-                  className="size-6"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 4L4 12M4 4L12 12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </Button>
               </div>
             ))}
           </div>
