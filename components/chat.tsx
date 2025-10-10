@@ -180,6 +180,7 @@ export function Chat({
       );
     }
 
+    // end of interview
     if (hasSuspendMedications && !currentIsReadonly) {
       setReadonly(true);
     }
@@ -227,6 +228,7 @@ export function Chat({
         {!hasCompletedForm && (
           <PreChatForm
             onComplete={(formData) => {
+              // form was completed
               console.log(formData);
               setHasCompletedForm(true);
               setIsFormVisible(false);
