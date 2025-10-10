@@ -30,6 +30,8 @@ export const chat = pgTable('Chat', {
     .notNull()
     .default('private'),
   readOnly: boolean('readOnly').notNull().default(false),
+  form: json('form'),
+  results: text('results'),
 });
 
 export type Chat = InferSelectModel<typeof chat>;
