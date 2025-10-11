@@ -35,9 +35,14 @@ interface PreChatFormData {
 interface PreChatFormProps {
   onComplete: (data: PreChatFormData) => void;
   onShowForm: () => void;
+  isReadonly: boolean;
 }
 
-export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
+export function PreChatForm({
+  onComplete,
+  onShowForm,
+  isReadonly,
+}: PreChatFormProps) {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<PreChatFormData>({
     idade: '',
@@ -99,6 +104,10 @@ export function PreChatForm({ onComplete, onShowForm }: PreChatFormProps) {
       },
     });
   };
+
+  if (isReadonly) {
+    return;
+  }
 
   if (!showForm) {
     return (

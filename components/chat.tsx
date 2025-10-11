@@ -248,7 +248,7 @@ export function Chat({
           />
         )}
 
-        {!hasCompletedForm && (
+        {!hasCompletedForm && hasInitialMessage && (
           <PreChatForm
             onComplete={async (formData) => {
               // Store form data for later saving
@@ -276,6 +276,7 @@ export function Chat({
               ]);
             }}
             onShowForm={() => setIsFormVisible(true)}
+            isReadonly={currentIsReadonly}
           />
         )}
 
