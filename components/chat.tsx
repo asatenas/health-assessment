@@ -136,28 +136,33 @@ export function Chat({
   }, [query, sendMessage, hasAppendedQuery, id]);
 
   useEffect(() => {
-    if (messages.length === 0 && !hasInitialMessage && !currentIsReadonly) {
-      if (isProductionEnvironment) {
-        fetch('/api/notify', { method: 'POST' }); // simple notification
-      }
-      setMessages([
-        {
-          id: generateUUID(),
-          role: 'assistant',
-          parts: [
-            {
-              type: 'text',
-              text: initialMessage,
-            },
-          ],
-          metadata: {
-            createdAt: new Date().toISOString(),
-          },
-        },
-      ]);
-      setHasInitialMessage(true);
-      setHasSentMessage(true);
+    // run only when initiating chat
+    if (messages.length > 0 || hasInitialMessage || currentIsReadonly) {
+      return;
     }
+
+    if (isProductionEnvironment) {
+      fetch('/api/notify', { method: 'POST' }); // simple notification for new chats
+    }
+
+    setMessages([
+      {
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'text',
+            text: initialMessage,
+          },
+        ],
+        metadata: {
+          createdAt: new Date().toISOString(),
+        },
+      },
+    ]);
+
+    setHasInitialMessage(true);
+    setHasSentMessage(true);
   }, [
     messages.length,
     hasInitialMessage,
@@ -169,12 +174,36 @@ export function Chat({
 
   useEffect(() => {
     const lastMessage = messages.at(-1);
-    if (messages.length === 0 || !lastMessage) {
+    if (!lastMessage) {
       return;
     }
 
-    // end of interview
-    if (finalized && lastMessage.role === 'assistant') {
+    // TODO: currently this checks if is the end of the interview when suspendMedications is called.
+    // should actually be a confirmation button from the user
+
+    // Listen for suspendMedications tool call in messages
+    let hasSuspendMedications = false;
+
+    if (lastMessage.role === 'assistant' && lastMessage.parts) {
+      hasSuspendMedications = lastMessage.parts.some(
+        (part: any) => part.type === 'tool-suspendMedications',
+      );
+    }
+
+    if (hasSuspendMedications && !currentIsReadonly) {
+      setReadonly(true);
+      setFinalized(true);
+    }
+  }, [messages, currentIsReadonly, setReadonly, id, storedFormData]);
+
+  // run at end of interview
+  useEffect(() => {
+    const lastMessage = messages.at(-1);
+    if (!lastMessage) {
+      return;
+    }
+
+    if (currentIsReadonly && finalized && lastMessage.role === 'assistant') {
       const lastPart = lastMessage.parts.at(-1);
       if (lastPart?.type === 'text' && lastPart?.state === 'done') {
         const textParts = lastMessage.parts
@@ -193,21 +222,7 @@ export function Chat({
         });
       }
     }
-
-    // Listen for suspendMedications tool call in messages
-    let hasSuspendMedications = false;
-
-    if (lastMessage.role === 'assistant' && lastMessage.parts) {
-      hasSuspendMedications = lastMessage.parts.some(
-        (part: any) => part.type === 'tool-suspendMedications',
-      );
-    }
-
-    if (hasSuspendMedications && !currentIsReadonly) {
-      setReadonly(true);
-      setFinalized(true);
-    }
-  }, [messages, currentIsReadonly, setReadonly, id, storedFormData]);
+  }, [currentIsReadonly, setReadonly]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     // `/api/vote?chatId=${id}`,
