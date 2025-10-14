@@ -272,23 +272,15 @@ export function Chat({
               setHasCompletedForm(true);
               setIsFormVisible(false);
 
-              // Add assistant message after form submission
-              setMessages((prevMessages) => [
-                ...prevMessages,
-                {
-                  id: generateUUID(),
-                  role: 'assistant',
-                  parts: [
-                    {
-                      type: 'text',
-                      text: postFormMessage,
-                    },
-                  ],
-                  metadata: {
-                    createdAt: new Date().toISOString(),
+              sendMessage({
+                role: 'user',
+                parts: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(formData), // TODO: not send as stringified JSON
                   },
-                },
-              ]);
+                ],
+              });
             }}
             onShowForm={() => setIsFormVisible(true)}
             isReadonly={currentIsReadonly}
