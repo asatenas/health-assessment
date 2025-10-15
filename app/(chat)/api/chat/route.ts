@@ -24,6 +24,7 @@ import { convertToUIMessages, generateUUID } from '@/lib/utils';
 // import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 // import { getWeather } from '@/lib/ai/tools/get-weather';
 import { suspendMedications } from '@/lib/ai/tools/suspend-medications';
+import { finalizeInterview } from '@/lib/ai/tools/finalize-interview';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
@@ -175,6 +176,7 @@ export async function POST(request: Request) {
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
             suspendMedications: suspendMedications({ chatId: id }),
+            finalizeInterview: finalizeInterview({ chatId: id }),
             // getWeather,
             // createDocument: createDocument({ session, dataStream }),
             // updateDocument: updateDocument({ session, dataStream }),

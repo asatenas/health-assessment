@@ -25,7 +25,7 @@ import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
-import { initialMessage, postFormMessage } from '@/lib/ai/prompts';
+import { initialMessage } from '@/lib/ai/prompts';
 import { PreChatForm } from './pre-chat-form';
 
 export function Chat({
@@ -121,7 +121,12 @@ export function Chat({
   const [hasCompletedForm, setHasCompletedForm] = useState(false);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [storedFormData, setStoredFormData] = useState<any>(null);
-  const [finalized, setFinalized] = useState(false);
+
+  // tool calls for flow control
+  const [hasSuspendMedicationsCalled, setHasSuspendMedicationsCalled] =
+    useState(false);
+  const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] =
+    useState(false);
 
   useEffect(() => {
     if (query && !hasAppendedQuery) {
@@ -172,38 +177,32 @@ export function Chat({
     hasCompletedForm,
   ]);
 
+  function checkToolCall(lastMessage: ChatMessage, toolName: string) {
+    return (
+      lastMessage.role === 'assistant' &&
+      lastMessage.parts?.some((part: any) => part.type === toolName)
+    );
+  }
+
+  // check for tool calls
   useEffect(() => {
     const lastMessage = messages.at(-1);
     if (!lastMessage) {
       return;
     }
 
-    // TODO: currently this checks if is the end of the interview when suspendMedications is called.
-    // should actually be a confirmation button from the user
-
-    // Listen for suspendMedications tool call in messages
-    let hasSuspendMedications = false;
-
-    if (lastMessage.role === 'assistant' && lastMessage.parts) {
-      hasSuspendMedications = lastMessage.parts.some(
-        (part: any) => part.type === 'tool-suspendMedications',
-      );
+    if (!hasSuspendMedicationsCalled) {
+      if (checkToolCall(lastMessage, 'tool-suspendMedications')) {
+        setHasSuspendMedicationsCalled(true);
+        setReadonly(true);
+      }
     }
 
-    if (hasSuspendMedications && !currentIsReadonly) {
-      setReadonly(true);
-      setFinalized(true);
-    }
-  }, [messages, currentIsReadonly, setReadonly, id, storedFormData]);
-
-  // run at end of interview
-  useEffect(() => {
-    const lastMessage = messages.at(-1);
-    if (!lastMessage) {
-      return;
-    }
-
-    if (currentIsReadonly && finalized && lastMessage.role === 'assistant') {
+    if (!hasFinalizeInterviewCalled) {
+      if (checkToolCall(lastMessage, 'tool-finalizeInterview')) {
+        setHasFinalizeInterviewCalled(true);
+      }
+    } else {
       const lastPart = lastMessage.parts.at(-1);
       if (lastPart?.type === 'text' && lastPart?.state === 'done') {
         const textParts = lastMessage.parts
@@ -211,6 +210,7 @@ export function Chat({
           .map((part: any) => part.text)
           .join('\n');
 
+        // save to database
         fetch(`/api/chat/${id}`, {
           method: 'PATCH',
           headers: {
@@ -222,7 +222,17 @@ export function Chat({
         });
       }
     }
-  }, [currentIsReadonly, setReadonly]);
+  }, [
+    id,
+    messages,
+    hasSuspendMedicationsCalled,
+    setHasSuspendMedicationsCalled,
+    hasFinalizeInterviewCalled,
+    setHasFinalizeInterviewCalled,
+    currentIsReadonly,
+    setReadonly,
+    storedFormData,
+  ]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     // `/api/vote?chatId=${id}`,
