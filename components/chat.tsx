@@ -36,6 +36,8 @@ export function Chat({
   isReadonly,
   session,
   autoResume,
+  initialFormData,
+  hasInitialMessages: hasInitialMessagesFromServer,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -44,6 +46,8 @@ export function Chat({
   isReadonly: boolean;
   session: Session;
   autoResume: boolean;
+  initialFormData?: any;
+  hasInitialMessages?: boolean;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -113,20 +117,38 @@ export function Chat({
     status,
   });
 
-  // const searchParams = useSearchParams();
-  // const query = searchParams.get('query');
+  // Helper function to check if any message contains a specific tool call
+  const checkAnyMessageForToolCall = (
+    messages: ChatMessage[],
+    toolName: string,
+  ) => {
+    return messages.some(
+      (msg) =>
+        msg.role === 'assistant' &&
+        msg.parts?.some((part: any) => part.type === toolName),
+    );
+  };
 
-  // const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
-  const [hasInitialMessage, setHasInitialMessage] = useState(false);
-  const [hasCompletedForm, setHasCompletedForm] = useState(false);
+  // Initialize state based on database data
+  const [hasInitialMessage, setHasInitialMessage] = useState(
+    hasInitialMessagesFromServer || false,
+  );
+  const [hasCompletedForm, setHasCompletedForm] = useState(
+    !!initialFormData || false,
+  );
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [storedFormData, setStoredFormData] = useState<any>(null);
+  const [storedFormData, setStoredFormData] = useState<any>(
+    initialFormData || null,
+  );
 
-  // tool calls for flow control
+  // tool calls for flow control - check initial messages for tool calls
   const [hasSuspendMedicationsCalled, setHasSuspendMedicationsCalled] =
-    useState(false);
-  const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] =
-    useState(false);
+    useState(
+      checkAnyMessageForToolCall(initialMessages, 'tool-suspendMedications'),
+    );
+  const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] = useState(
+    checkAnyMessageForToolCall(initialMessages, 'tool-finalizeInterview'),
+  );
 
   // useEffect(() => {
   //   if (query && !hasAppendedQuery) {
@@ -142,7 +164,7 @@ export function Chat({
 
   useEffect(() => {
     // run only when initiating chat
-    if (messages.length > 0 || hasInitialMessage || currentIsReadonly) {
+    if (hasInitialMessage || currentIsReadonly) {
       return;
     }
 

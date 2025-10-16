@@ -208,6 +208,21 @@ export async function getChatById({ id }: { id: string }) {
   }
 }
 
+export async function getChatFormById({ id }: { id: string }) {
+  try {
+    const [result] = await db
+      .select({ form: chat.form })
+      .from(chat)
+      .where(eq(chat.id, id));
+    return result?.form || null;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat form by id',
+    );
+  }
+}
+
 export async function saveMessages({
   messages,
 }: {
