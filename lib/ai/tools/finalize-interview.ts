@@ -1,6 +1,10 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { makeChatReadOnlyById } from '@/lib/db/queries';
+import {
+  makeChatReadOnlyById,
+  updateChatFormById,
+  updateChatResultsById,
+} from '@/lib/db/queries';
 
 interface finalizeInterviewProps {
   chatId: string;
@@ -8,18 +12,17 @@ interface finalizeInterviewProps {
 
 export const finalizeInterview = ({ chatId }: finalizeInterviewProps) =>
   tool({
-    description: `Disponha esta mensagem abaixo para terminar a entrevista. Instrua o usuário a clicar em um dos dois botões: Confirmo ou Não Confirmo.
-
-Eu declaro, para os devidos fins, que todas as informações de saúde por mim prestadas são verdadeiras e correspondem fielmente à minha condição atual.
-
-Estou ciente de que a veracidade dessas informações é fundamental para a qualidade e segurança do meu atendimento, bem como para o correto registro em meu prontuário.
-Reconheço, ainda, que a omissão ou a prestação de informações falsas poderá comprometer minha assistência e implicar em responsabilidades legais, conforme a legislação vigente.
-    `,
+    description: `Use this tool to finalize the interview.
+These are the inputs.
+Form - the form data the patient filled in previously.
+Results - the scores that were calculated according to the responses given by the patient.`,
     inputSchema: z.object({
+      form: z.string(),
       results: z.string(),
     }),
-    execute: async ({ results }) => {
+    execute: async ({ form, results }, messages) => {
       await makeChatReadOnlyById({ chatId });
-      return results;
+      await updateChatFormById({ chatId, form });
+      await updateChatResultsById({ chatId, results });
     },
   });

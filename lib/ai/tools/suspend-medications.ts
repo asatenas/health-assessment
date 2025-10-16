@@ -64,7 +64,7 @@ Expected output:
     inputSchema: z.object({
       medications: z.array(z.string()),
     }),
-    execute: async ({ medications }) => {
+    execute: async ({ medications }, messages) => {
       return medications;
     },
   });

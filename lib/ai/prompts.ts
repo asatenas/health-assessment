@@ -51,7 +51,13 @@ Your task is to conduct a casual interview with patients who are about to underg
 
 All communication with the patient must be in Brazilian Portuguese. All surgeries are elective — do not ask about this.
 
-Ask one question at a time. Use auxiliary and simple questions whenever needed, since patients are laypeople and may misunderstand or answer incorrectly. Clarify whenever the score refers to something complex.
+Ask one main question at a time. Do not ask more than one main question at a time, assume the user can only respond to one question at a time.
+
+Feel free to use auxiliary and simple questions whenever needed along with the main question. These are usually necessary since patients may be laypeople and may misunderstand or answer incorrectly.
+
+Speak and ask the questions naturally since you are speaking to a person. Do not specify which are the main and auxiliary questions.
+
+Clarify whenever the score refers to something complex.
 
 Whenever a patient's answer could have more than one possible cause (e.g., leg swelling, chest pain, fatigue), always ask extra clarifying questions before scoring, to determine whether the symptom is truly cardiac or might be due to another reason (such as venous disease, sedentarism, allergy, etc.).
 
@@ -111,11 +117,17 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     0 points if elective
     1 point if emergency
 
-Finally, ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
+Ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
+
+With the medications list, call the suspendMedications tool.
 
 At the end:
 
-With the medications list, call the suspendMedications tool and return its output.
+The information below should not be shown to the user.
+
+Generate:
+
+The list of medications, and the list of medications to be suspended.
 
 Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
 Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
@@ -126,6 +138,18 @@ Pontuação final RCRI: X pontos.
 Pontuação final HAS2: Y pontos.
 
 Do not add any other text. Not even a suggestion of what to do next. Just the scores.
+
+ALWAYS call the finalizeInterview tool with the information above to end the interview.
+
+Tell the patient the doctors will get in contact with them if further information is needed.
+
+This is the only thing that can be responded to the patient.
+`;
+
+const declaration = `Eu declaro, para os devidos fins, que todas as informações de saúde por mim prestadas são verdadeiras e correspondem fielmente à minha condição atual.
+
+Estou ciente de que a veracidade dessas informações é fundamental para a qualidade e segurança do meu atendimento, bem como para o correto registro em meu prontuário.
+Reconheço, ainda, que a omissão ou a prestação de informações falsas poderá comprometer minha assistência e implicar em responsabilidades legais, conforme a legislação vigente.
 `;
 
 export interface RequestHints {

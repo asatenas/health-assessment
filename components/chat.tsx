@@ -202,25 +202,6 @@ export function Chat({
       if (checkToolCall(lastMessage, 'tool-finalizeInterview')) {
         setHasFinalizeInterviewCalled(true);
       }
-    } else {
-      const lastPart = lastMessage.parts.at(-1);
-      if (lastPart?.type === 'text' && lastPart?.state === 'done') {
-        const textParts = lastMessage.parts
-          ?.filter((part: any) => part.type === 'text')
-          .map((part: any) => part.text)
-          .join('\n');
-
-        // save to database
-        fetch(`/api/chat/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ results: textParts, form: storedFormData }),
-        }).catch((error) => {
-          console.error('Failed to save results:', error);
-        });
-      }
     }
   }, [
     id,
