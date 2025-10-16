@@ -8,11 +8,12 @@ import { ChatSDKError } from '@/lib/errors';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  context: { params: { id: string } },
 ) {
+  const { id: chatId } = context.params;
+
   const { form, results }: { form?: any; results?: string } =
     await request.json();
-  const chatId = params.id;
 
   if (!chatId) {
     return new ChatSDKError(
