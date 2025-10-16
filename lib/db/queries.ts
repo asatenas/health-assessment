@@ -208,6 +208,21 @@ export async function getChatById({ id }: { id: string }) {
   }
 }
 
+export async function getChatFormById({ id }: { id: string }) {
+  try {
+    const [result] = await db
+      .select({ form: chat.form })
+      .from(chat)
+      .where(eq(chat.id, id));
+    return result?.form || null;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat form by id',
+    );
+  }
+}
+
 export async function saveMessages({
   messages,
 }: {
@@ -547,6 +562,60 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get stream ids by chat id',
+    );
+  }
+}
+
+export async function updateChatFormById({
+  chatId,
+  form,
+}: {
+  chatId: string;
+  form: any;
+}) {
+  try {
+    return await db.update(chat).set({ form }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat form by id',
+    );
+  }
+}
+
+export async function updateChatMedicationsById({
+  chatId,
+  medications,
+}: {
+  chatId: string;
+  medications: any;
+}) {
+  try {
+    return await db
+      .update(chat)
+      .set({ medications })
+      .where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat medications by id',
+    );
+  }
+}
+
+export async function updateChatResultsById({
+  chatId,
+  results,
+}: {
+  chatId: string;
+  results: string;
+}) {
+  try {
+    return await db.update(chat).set({ results }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat results by id',
     );
   }
 }

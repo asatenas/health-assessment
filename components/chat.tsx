@@ -16,7 +16,7 @@ import { unstable_serialize } from 'swr/infinite';
 import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
 import type { Session } from 'next-auth';
-import { useSearchParams } from 'next/navigation';
+// import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { isProductionEnvironment } from '@/lib/constants';
@@ -25,6 +25,8 @@ import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
+import { initialMessage } from '@/lib/ai/prompts';
+import { PreChatForm } from './pre-chat-form';
 
 export function Chat({
   id,
@@ -34,6 +36,8 @@ export function Chat({
   isReadonly,
   session,
   autoResume,
+  initialFormData,
+  hasInitialMessages: hasInitialMessagesFromServer,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -42,6 +46,8 @@ export function Chat({
   isReadonly: boolean;
   session: Session;
   autoResume: boolean;
+  initialFormData?: any;
+  hasInitialMessages?: boolean;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -111,79 +117,125 @@ export function Chat({
     status,
   });
 
-  const searchParams = useSearchParams();
-  const query = searchParams.get('query');
+  // Helper function to check if any message contains a specific tool call
+  const checkAnyMessageForToolCall = (
+    messages: ChatMessage[],
+    toolName: string,
+  ) => {
+    return messages.some(
+      (msg) =>
+        msg.role === 'assistant' &&
+        msg.parts?.some((part: any) => part.type === toolName),
+    );
+  };
 
-  const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
-  const [hasInitialMessage, setHasInitialMessage] = useState(false);
+  // Initialize state based on database data
+  const [hasInitialMessage, setHasInitialMessage] = useState(
+    hasInitialMessagesFromServer || false,
+  );
+  const [hasCompletedForm, setHasCompletedForm] = useState(
+    !!initialFormData || false,
+  );
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [storedFormData, setStoredFormData] = useState<any>(
+    initialFormData || null,
+  );
+
+  // tool calls for flow control - check initial messages for tool calls
+  const [hasSuspendMedicationsCalled, setHasSuspendMedicationsCalled] =
+    useState(
+      checkAnyMessageForToolCall(initialMessages, 'tool-suspendMedications'),
+    );
+  const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] = useState(
+    checkAnyMessageForToolCall(initialMessages, 'tool-finalizeInterview'),
+  );
+
+  // useEffect(() => {
+  //   if (query && !hasAppendedQuery) {
+  //     sendMessage({
+  //       role: 'user' as const,
+  //       parts: [{ type: 'text', text: query }],
+  //     });
+
+  //     setHasAppendedQuery(true);
+  //     window.history.replaceState({}, '', `/chat/${id}`);
+  //   }
+  // }, [query, sendMessage, hasAppendedQuery, id]);
 
   useEffect(() => {
-    if (query && !hasAppendedQuery) {
-      sendMessage({
-        role: 'user' as const,
-        parts: [{ type: 'text', text: query }],
-      });
-
-      setHasAppendedQuery(true);
-      window.history.replaceState({}, '', `/chat/${id}`);
+    // run only when initiating chat
+    if (hasInitialMessage || currentIsReadonly) {
+      return;
     }
-  }, [query, sendMessage, hasAppendedQuery, id]);
 
-  useEffect(() => {
-    if (messages.length === 0 && !hasInitialMessage && !currentIsReadonly) {
-      if (isProductionEnvironment) {
-        fetch('/api/notify', { method: 'POST' }); // simple notification
-      }
-      setMessages([
-        {
-          id: generateUUID(),
-          role: 'assistant',
-          parts: [
-            {
-              type: 'text',
-              text: `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
+    if (isProductionEnvironment) {
+      fetch('/api/notify', { method: 'POST' }); // simple notification for new chats
+    }
 
-Nosso objetivo é reduzir os riscos cardíacos que podem acontecer depois do procedimento. Para isso, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
-
-Para começar, quantos anos você tem?
-`,
-            },
-          ],
-          metadata: {
-            createdAt: new Date().toISOString(),
+    setMessages([
+      {
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'text',
+            text: initialMessage,
           },
+        ],
+        metadata: {
+          createdAt: new Date().toISOString(),
         },
-      ]);
-      setHasInitialMessage(true);
-      setHasSentMessage(true);
-    }
+      },
+    ]);
+
+    setHasInitialMessage(true);
+    setHasSentMessage(true);
   }, [
     messages.length,
     hasInitialMessage,
     setMessages,
     currentIsReadonly,
     setHasSentMessage,
+    hasCompletedForm,
   ]);
 
-  // Listen for suspendMedications tool call in messages
+  function checkToolCall(lastMessage: ChatMessage, toolName: string) {
+    return (
+      lastMessage.role === 'assistant' &&
+      lastMessage.parts?.some((part: any) => part.type === toolName)
+    );
+  }
+
+  // check for tool calls
   useEffect(() => {
-    if (messages.length === 0) {
+    const lastMessage = messages.at(-1);
+    if (!lastMessage) {
       return;
     }
 
-    const lastMessage = messages[messages.length - 1];
-    let hasSuspendMedications = false;
-
-    if (lastMessage.role === 'assistant' && lastMessage.parts) {
-      hasSuspendMedications = lastMessage.parts.some(
-        (part: any) => part.type === 'tool-suspendMedications',
-      );
+    if (!hasSuspendMedicationsCalled) {
+      if (checkToolCall(lastMessage, 'tool-suspendMedications')) {
+        setHasSuspendMedicationsCalled(true);
+      }
     }
 
-    if (hasSuspendMedications && !currentIsReadonly) {
-      setReadonly(true);
+    if (!hasFinalizeInterviewCalled) {
+      if (checkToolCall(lastMessage, 'tool-finalizeInterview')) {
+        setReadonly(true);
+        setHasFinalizeInterviewCalled(true);
+      }
     }
-  }, [messages, currentIsReadonly, setReadonly]);
+  }, [
+    id,
+    messages,
+    hasSuspendMedicationsCalled,
+    setHasSuspendMedicationsCalled,
+    hasFinalizeInterviewCalled,
+    setHasFinalizeInterviewCalled,
+    currentIsReadonly,
+    setReadonly,
+    storedFormData,
+  ]);
 
   const { data: votes } = useSWR<Array<Vote>>(
     // `/api/vote?chatId=${id}`,
@@ -211,35 +263,65 @@ Para começar, quantos anos você tem?
           session={session}
         />
 
-        <Messages
-          chatId={id}
-          status={status}
-          votes={votes}
-          messages={messages}
-          setMessages={setMessages}
-          regenerate={regenerate}
-          isReadonly={currentIsReadonly}
-          isArtifactVisible={isArtifactVisible}
-        />
+        {!isFormVisible && (
+          <Messages
+            chatId={id}
+            status={status}
+            votes={votes}
+            messages={messages}
+            setMessages={setMessages}
+            regenerate={regenerate}
+            isReadonly={currentIsReadonly}
+            isArtifactVisible={isArtifactVisible}
+          />
+        )}
 
-        <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
-          {!currentIsReadonly && (
-            <MultimodalInput
-              chatId={id}
-              input={input}
-              setInput={setInput}
-              status={status}
-              stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
-              sendMessage={sendMessage}
-              selectedVisibilityType={visibilityType}
-              selectedModelId={initialChatModel}
-            />
-          )}
-        </div>
+        {!hasCompletedForm && hasInitialMessage && (
+          <PreChatForm
+            onComplete={async (formData) => {
+              // Store form data for later saving
+              setStoredFormData(formData);
+
+              setHasCompletedForm(true);
+              setIsFormVisible(false);
+
+              window.history.replaceState({}, '', `/chat/${id}`);
+
+              sendMessage({
+                role: 'user',
+                parts: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(formData), // TODO: not send as stringified JSON
+                  },
+                ],
+              });
+            }}
+            onShowForm={() => setIsFormVisible(true)}
+            isReadonly={currentIsReadonly}
+          />
+        )}
+
+        {hasCompletedForm && (
+          <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
+            {!currentIsReadonly && (
+              <MultimodalInput
+                chatId={id}
+                input={input}
+                setInput={setInput}
+                status={status}
+                stop={stop}
+                attachments={attachments}
+                setAttachments={setAttachments}
+                messages={messages}
+                setMessages={setMessages}
+                sendMessage={sendMessage}
+                selectedVisibilityType={visibilityType}
+                selectedModelId={initialChatModel}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <Artifact

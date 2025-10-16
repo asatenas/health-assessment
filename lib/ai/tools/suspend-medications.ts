@@ -1,6 +1,5 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { makeChatReadOnlyById } from '@/lib/db/queries';
 
 interface SuspendMedicationsProps {
   chatId: string;
@@ -65,8 +64,7 @@ Expected output:
     inputSchema: z.object({
       medications: z.array(z.string()),
     }),
-    execute: async ({ medications }) => {
-      await makeChatReadOnlyById({ chatId });
+    execute: async ({ medications }, messages) => {
       return medications;
     },
   });

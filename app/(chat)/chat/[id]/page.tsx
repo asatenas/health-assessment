@@ -3,7 +3,11 @@ import { notFound, redirect } from 'next/navigation';
 
 import { auth } from '@/app/(auth)/auth';
 import { Chat } from '@/components/chat';
-import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
+import {
+  getChatById,
+  getChatFormById,
+  getMessagesByChatId,
+} from '@/lib/db/queries';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { convertToUIMessages } from '@/lib/utils';
@@ -44,6 +48,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const isReadOnly = chat.readOnly || session?.user?.id !== chat.userId;
 
+  const initialFormData = await getChatFormById({ id });
+  const hasInitialMessages = uiMessages.length > 1;
+
   if (!chatModelFromCookie) {
     return (
       <>
@@ -55,6 +62,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           isReadonly={isReadOnly}
           session={session}
           autoResume={true}
+          initialFormData={initialFormData}
+          hasInitialMessages={hasInitialMessages}
         />
         <DataStreamHandler />
       </>
@@ -71,6 +80,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         isReadonly={isReadOnly}
         session={session}
         autoResume={true}
+        initialFormData={initialFormData}
+        hasInitialMessages={hasInitialMessages}
       />
       <DataStreamHandler />
     </>
