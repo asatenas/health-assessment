@@ -25,6 +25,7 @@ import { convertToUIMessages, generateUUID } from '@/lib/utils';
 // import { getWeather } from '@/lib/ai/tools/get-weather';
 import { saveForm } from '@/lib/ai/tools/save-form';
 import { suspendMedications } from '@/lib/ai/tools/suspend-medications';
+import { saveMedications } from '@/lib/ai/tools/save-medications';
 import { finalizeInterview } from '@/lib/ai/tools/finalize-interview';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
@@ -176,6 +177,7 @@ export async function POST(request: Request) {
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
+            saveMedications: saveMedications({ chatId: id }),
             saveForm: saveForm({ chatId: id }),
             suspendMedications: suspendMedications({ chatId: id }),
             finalizeInterview: finalizeInterview({ chatId: id }),

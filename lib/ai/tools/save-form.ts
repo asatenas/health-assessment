@@ -8,7 +8,9 @@ interface SaveFormProps {
 
 export const saveForm = ({ chatId }: SaveFormProps) =>
   tool({
-    description: `Save the form data to the database`,
+    description: `Use this tool to save the patient information form data to the db.
+Only call this tool once.
+This tool should not be used to save the medications list to suspend.`,
     inputSchema: z.object({
       form: z.string(),
     }),

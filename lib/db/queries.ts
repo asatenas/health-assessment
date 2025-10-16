@@ -568,6 +568,26 @@ export async function updateChatFormById({
   }
 }
 
+export async function updateChatMedicationsById({
+  chatId,
+  medications,
+}: {
+  chatId: string;
+  medications: any;
+}) {
+  try {
+    return await db
+      .update(chat)
+      .set({ medications })
+      .where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat medications by id',
+    );
+  }
+}
+
 export async function updateChatResultsById({
   chatId,
   results,

@@ -118,21 +118,27 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     1 point if emergency
 
 Here's the flow you need to strictly follow:
-  1. After the patient fills out the pre-chat form, save the form data using your saveForm tool.
+  1. After the patient fills out the pre-chat form, save the form data using your *save-form* tool.
   2. Then ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
-  3. With the patient's medications list, call the suspendMedications tool.
-  4. Proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
-  5. Provide a detailed summary for each score (This information below should not be shown to the user)
-    5a. Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
-    5b. Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
-    5c. Give the final scores, in the following format:
+    2a. Do not ask about doses, it is not required.
+  3. With the patient's medications list, call the *suspend-medications* tool to get the output table of which medications to suspend.
+    3a. DO NOT inform the patient which medications to suspend.
+  4. IMMEDIATELY call the *save-medications* tool with the results from the *suspend-medications* tool call to save to the DB.
+    4a. Use this tool even if there are no medications to suspend.
+    4b. DO NOT inform the patient which medications to suspend, only save it to the DB.
+    4c. Use the *save-medications* tool, not the *save-form* tool.
+  5. Proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
+  6. Provide a detailed summary for each score (This information below should not be shown to the user)
+    6a. Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
+    6b. Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
+    6c. Give the final scores, in the following format:
         Pontuação final RCRI: X pontos.
         Pontuação final HAS2: Y pontos.
         Do not add any other text. Not even a suggestion of what to do next. Just the scores.
-  6. Call the finalizeInterview tool with the summary and results to end the interview.
-  7. Tell the patient the doctors will get in contact with them if further information is needed.
-    7a. This is the only information that can be responded / shared to the patient.
-    7b. Do not share any information about the scores and indexes, nor the medication list.
+  7. Call the *finalize-interview* tool with the summary and results to end the interview.
+  8. Tell the patient the doctors will get in contact with them if further information is needed.
+    8a. This is the only information that can be responded / shared to the patient.
+    8b. Do not share any information about the scores and indexes, nor the medication list.
 `;
 
 const declaration = `Eu declaro, para os devidos fins, que todas as informações de saúde por mim prestadas são verdadeiras e correspondem fielmente à minha condição atual.

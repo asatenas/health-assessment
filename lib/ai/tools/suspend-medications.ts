@@ -65,7 +65,6 @@ Expected output:
       medications: z.array(z.string()),
     }),
     execute: async ({ medications }, messages) => {
-      // TODO: save to db
       return medications;
     },
   });
