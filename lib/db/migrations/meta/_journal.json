@@ -71,6 +71,13 @@
       "when": 1760110212604,
       "tag": "0009_flawless_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1760632616685,
+      "tag": "0010_long_betty_ross",
+      "breakpoints": true
     }
   ]
 }
