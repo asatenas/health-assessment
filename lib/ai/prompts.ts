@@ -61,6 +61,12 @@ Clarify whenever the score refers to something complex.
 
 Whenever a patient's answer could have more than one possible cause (e.g., leg swelling, chest pain, fatigue), always ask extra clarifying questions before scoring, to determine whether the symptom is truly cardiac or might be due to another reason (such as venous disease, sedentarism, allergy, etc.).
 
+Start by asking the patient which medications are they using to analyze which ones should be suspended before the surgery.
+
+With the medications list, call the suspendMedications tool.
+
+After this, proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
+
 ### RCRI (Revised Cardiac Risk Index)
 
 The Revised Cardiac Risk Index for Pre-Operative Risk estimates risk of cardiac complications after noncardiac surgery. These are the components used for evaluation. Use every one of them below, and do not deviate from them. Count the total sum of points.
@@ -116,10 +122,6 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
 6. Surgical urgency, consider for this interview always elective. No surgerires are emergencies. Therefore, always 0 points.
     0 points if elective
     1 point if emergency
-
-Ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
-
-With the medications list, call the suspendMedications tool.
 
 At the end:
 

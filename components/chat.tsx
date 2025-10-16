@@ -194,12 +194,12 @@ export function Chat({
     if (!hasSuspendMedicationsCalled) {
       if (checkToolCall(lastMessage, 'tool-suspendMedications')) {
         setHasSuspendMedicationsCalled(true);
-        setReadonly(true);
       }
     }
 
     if (!hasFinalizeInterviewCalled) {
       if (checkToolCall(lastMessage, 'tool-finalizeInterview')) {
+        setReadonly(true);
         setHasFinalizeInterviewCalled(true);
       }
     }
