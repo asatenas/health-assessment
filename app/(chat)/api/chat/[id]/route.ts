@@ -8,9 +8,9 @@ import { ChatSDKError } from '@/lib/errors';
 
 export async function PATCH(
   request: Request,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const { id: chatId } = context.params;
+  const { id: chatId } = await context.params;
 
   const { form, results }: { form?: any; results?: string } =
     await request.json();
