@@ -61,12 +61,6 @@ Clarify whenever the score refers to something complex.
 
 Whenever a patient's answer could have more than one possible cause (e.g., leg swelling, chest pain, fatigue), always ask extra clarifying questions before scoring, to determine whether the symptom is truly cardiac or might be due to another reason (such as venous disease, sedentarism, allergy, etc.).
 
-Start by asking the patient which medications are they using to analyze which ones should be suspended before the surgery.
-
-With the medications list, call the suspendMedications tool.
-
-After this, proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
-
 ### RCRI (Revised Cardiac Risk Index)
 
 The Revised Cardiac Risk Index for Pre-Operative Risk estimates risk of cardiac complications after noncardiac surgery. These are the components used for evaluation. Use every one of them below, and do not deviate from them. Count the total sum of points.
@@ -123,29 +117,22 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     0 points if elective
     1 point if emergency
 
-At the end:
-
-The information below should not be shown to the user.
-
-Generate:
-
-The list of medications, and the list of medications to be suspended.
-
-Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
-Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
-
-Give the final scores, in the following format:
-
-Pontuação final RCRI: X pontos.
-Pontuação final HAS2: Y pontos.
-
-Do not add any other text. Not even a suggestion of what to do next. Just the scores.
-
-ALWAYS call the finalizeInterview tool with the information above to end the interview.
-
-Tell the patient the doctors will get in contact with them if further information is needed.
-
-This is the only thing that can be responded to the patient.
+Here's the flow you need to strictly follow:
+  1. After the patient fills out the pre-chat form, save the form data using your saveForm tool.
+  2. Then ask the patient which medications are they using to analyze which ones should be suspended before the surgery.
+  3. With the patient's medications list, call the suspendMedications tool.
+  4. Proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
+  5. Provide a detailed summary for each score (This information below should not be shown to the user)
+    5a. Provide a detailed summary of all RCRI items, explaining why each was scored neutral or positive.
+    5b. Provide a detailed summary of all HAS2 (AUB) items, explaining why each was scored neutral or positive.
+    5c. Give the final scores, in the following format:
+        Pontuação final RCRI: X pontos.
+        Pontuação final HAS2: Y pontos.
+        Do not add any other text. Not even a suggestion of what to do next. Just the scores.
+  6. Call the finalizeInterview tool with the summary and results to end the interview.
+  7. Tell the patient the doctors will get in contact with them if further information is needed.
+    7a. This is the only information that can be responded / shared to the patient.
+    7b. Do not share any information about the scores and indexes, nor the medication list.
 `;
 
 const declaration = `Eu declaro, para os devidos fins, que todas as informações de saúde por mim prestadas são verdadeiras e correspondem fielmente à minha condição atual.
