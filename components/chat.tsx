@@ -253,6 +253,72 @@ export function Chat({
     setMessages,
   });
 
+  function formatPacienteInfo(paciente: any) {
+    const {
+      idade,
+      peso,
+      altura,
+      alergias,
+      marcaPasso,
+      bombaMedicamentos,
+      itensUso,
+      exames,
+    } = paciente;
+
+    const formatBool = (value: boolean) => (value ? 'Sim' : 'Não');
+
+    const infoBasica = [
+      `Idade: ${idade || '—'} anos`,
+      `Peso: ${peso || '—'} kg`,
+      `Altura: ${altura || '—'} cm`,
+    ].join(' | ');
+
+    const alergiasTxt = `Alergias: • Látex: ${formatBool(alergias.latex)}`;
+
+    const dispositivosTxt = [
+      'Dispositivos:',
+      `Marca-passo: ${formatBool(marcaPasso)}`,
+      `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
+    ].join(' | ');
+
+    const itensLabels: any = {
+      megaHair: 'Mega Hair',
+      apliques: 'Apliques',
+      unhaGel: 'Unha de Gel',
+      ciliosPosticos: 'Cílios Postiços',
+      piercings: 'Piercings',
+    };
+
+    const itensUsoTxt = `Itens de uso: ${Object.entries(itensUso)
+      .map(
+        ([key, value]) =>
+          `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
+      )
+      .join(' | ')}`;
+
+    const unidades: Record<string, string> = {
+      hemoglobina: 'g/dL',
+      creatinina: 'mg/dL',
+      ecocardiograma: '',
+    };
+
+    const examesTxt = `Exames: ${Object.entries(exames)
+      .map(([key, dados]) => {
+        const nome = key.charAt(0).toUpperCase() + key.slice(1);
+        const dadosTyped = dados as { valor?: string; tipo: string };
+        return `• ${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
+      })
+      .join(' | ')}`;
+
+    return [
+      infoBasica,
+      alergiasTxt,
+      dispositivosTxt,
+      itensUsoTxt,
+      examesTxt,
+    ].join(' | ');
+  }
+
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
@@ -292,7 +358,7 @@ export function Chat({
                 parts: [
                   {
                     type: 'text',
-                    text: JSON.stringify(formData), // TODO: not send as stringified JSON
+                    text: formatPacienteInfo(formData),
                   },
                 ],
               });
@@ -303,7 +369,7 @@ export function Chat({
         )}
 
         {hasCompletedForm && (
-          <div className="sticky bottom-0 flex gap-2 px-4 pb-4 mx-auto w-full bg-background md:pb-6 md:max-w-3xl z-[1] border-t-0">
+          <div className="sticky bottom-0 flex gap-2 px-4 pb-2 mx-auto w-full bg-background md:max-w-3xl z-[1] border-t-0">
             {!currentIsReadonly && (
               <MultimodalInput
                 chatId={id}

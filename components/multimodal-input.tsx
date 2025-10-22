@@ -84,24 +84,6 @@ function PureMultimodalInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      adjustHeight();
-    }
-  }, []);
-
-  const adjustHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '72px';
-    }
-  };
-
-  const resetHeight = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '72px';
-    }
-  }, []);
-
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
     'input',
     '',
@@ -113,7 +95,6 @@ function PureMultimodalInput({
       // Prefer DOM value over localStorage to handle hydration
       const finalValue = domValue || localStorageInput || '';
       setInput(finalValue);
-      adjustHeight();
     }
     // Only run once after hydration
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,7 +143,6 @@ function PureMultimodalInput({
 
     setAttachments([]);
     setLocalStorageInput('');
-    resetHeight();
     setInput('');
 
     if (width && width > 768) {
@@ -175,7 +155,6 @@ function PureMultimodalInput({
     sendMessage,
     setAttachments,
     setLocalStorageInput,
-    resetHeight,
     width,
     chatId,
   ]);
@@ -348,7 +327,6 @@ function PureMultimodalInput({
 
         setAttachments([]);
         setLocalStorageInput('');
-        resetHeight();
         setInput('');
 
         if (width && width > 768) {
@@ -363,7 +341,6 @@ function PureMultimodalInput({
       attachments,
       setAttachments,
       setLocalStorageInput,
-      resetHeight,
       width,
       textareaRef,
     ],
@@ -471,15 +448,11 @@ function PureMultimodalInput({
           placeholder="Digite sua mensagem..."
           value={input}
           onChange={handleInput}
-          minHeight={72}
-          maxHeight={200}
-          disableAutoResize={true}
           allowEmptySubmit={attachments.length > 0}
           className="text-base resize-none p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-transparent !border-0 !border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
-          rows={1}
           autoFocus
         />
-        <PromptInputToolbar className="px-4 py-2 !border-t-0 !border-top-0 shadow-none dark:!border-transparent dark:border-0">
+        <PromptInputToolbar className="px-3 py-1 !border-t-0 !border-top-0 shadow-none dark:!border-transparent dark:border-0">
           <PromptInputTools className="gap-2">
             <AttachmentsButton fileInputRef={fileInputRef} status={status} />
             <ModelSelectorCompact selectedModelId={selectedModelId} />
@@ -501,7 +474,7 @@ function PureMultimodalInput({
                 (!input.trim() || uploadQueue.length > 0) &&
                 attachments.length === 0
               }
-              className="p-3 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
+              className="p-2 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
             >
               <ArrowUpIcon size={20} />
             </PromptInputSubmit>

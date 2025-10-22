@@ -136,11 +136,11 @@ export function PreChatForm({
           {/* Dados Básicos */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="idade">Idade</Label>
+              <Label htmlFor="idade">Idade (anos)</Label>
               <Input
                 id="idade"
                 type="number"
-                // required
+                required
                 value={formData.idade}
                 onChange={(e) =>
                   setFormData({ ...formData, idade: e.target.value })
@@ -155,7 +155,7 @@ export function PreChatForm({
               <Input
                 id="peso"
                 type="number"
-                // required
+                required
                 value={formData.peso}
                 onChange={(e) =>
                   setFormData({ ...formData, peso: e.target.value })
@@ -170,7 +170,7 @@ export function PreChatForm({
               <Input
                 id="altura"
                 type="number"
-                // required
+                required
                 value={formData.altura}
                 onChange={(e) =>
                   setFormData({ ...formData, altura: e.target.value })
@@ -281,8 +281,8 @@ export function PreChatForm({
           <div className="space-y-4">
             <Label>Exames (valor ou arquivo)</Label>
             {[
-              { key: 'hemoglobina', label: 'Hemoglobina' },
-              { key: 'creatinina', label: 'Creatinina' },
+              { key: 'hemoglobina', label: 'Hemoglobina (g/dL)' },
+              { key: 'creatinina', label: 'Creatinina (mg/dL)' },
               { key: 'ecocardiograma', label: 'Ecocardiograma' },
             ].map(({ key, label }) => (
               <div key={key} className="space-y-2">
