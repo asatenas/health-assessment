@@ -92,13 +92,13 @@ function PureMultimodalInput({
 
   const adjustHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '72px';
+      textareaRef.current.style.height = '48px';
     }
   };
 
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '72px';
+      textareaRef.current.style.height = '48px';
     }
   }, []);
 
@@ -471,15 +471,11 @@ function PureMultimodalInput({
           placeholder="Digite sua mensagem..."
           value={input}
           onChange={handleInput}
-          minHeight={72}
-          maxHeight={200}
-          disableAutoResize={true}
           allowEmptySubmit={attachments.length > 0}
           className="text-base resize-none p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-transparent !border-0 !border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
-          rows={1}
           autoFocus
         />
-        <PromptInputToolbar className="px-4 py-2 !border-t-0 !border-top-0 shadow-none dark:!border-transparent dark:border-0">
+        <PromptInputToolbar className="px-3 py-1 !border-t-0 !border-top-0 shadow-none dark:!border-transparent dark:border-0">
           <PromptInputTools className="gap-2">
             <AttachmentsButton fileInputRef={fileInputRef} status={status} />
             <ModelSelectorCompact selectedModelId={selectedModelId} />
@@ -501,7 +497,7 @@ function PureMultimodalInput({
                 (!input.trim() || uploadQueue.length > 0) &&
                 attachments.length === 0
               }
-              className="p-3 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
+              className="p-2 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
             >
               <ArrowUpIcon size={20} />
             </PromptInputSubmit>

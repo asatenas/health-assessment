@@ -34,8 +34,6 @@ export const PromptInput = ({ className, ...props }: PromptInputProps) => (
 export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
   minHeight?: number;
   maxHeight?: number;
-  disableAutoResize?: boolean;
-  resizeOnNewLinesOnly?: boolean;
   allowEmptySubmit?: boolean;
 };
 
@@ -43,10 +41,6 @@ export const PromptInputTextarea = ({
   onChange,
   className,
   placeholder = 'What would you like to know?',
-  minHeight = 48,
-  maxHeight = 164,
-  disableAutoResize = false,
-  resizeOnNewLinesOnly = false,
   allowEmptySubmit = false,
   ...props
 }: PromptInputTextareaProps) => {
@@ -82,7 +76,7 @@ export const PromptInputTextarea = ({
     <Textarea
       className={cn(
         'w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0',
-        disableAutoResize ? 'field-sizing-fixed' : resizeOnNewLinesOnly ? 'field-sizing-fixed' : 'field-sizing-content max-h-[6lh]',
+        'h-auto min-h-0 leading-normal',
         'bg-transparent dark:bg-transparent',
         'focus-visible:ring-0',
         className,
