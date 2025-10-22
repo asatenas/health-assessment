@@ -49,8 +49,8 @@ function PureMessages({
 
   return (
     <div ref={messagesContainerRef} className="flex-1 overflow-y-auto">
-      <Conversation className="flex flex-col min-w-0 gap-6 pt-4 pb-32 px-4 max-w-4xl mx-auto">
-        <ConversationContent className="flex flex-col gap-6">
+      <Conversation className="flex flex-col min-w-0 gap-2 pt-4 pb-2 px-4 max-w-4xl mx-auto">
+        <ConversationContent className="flex flex-col gap-2">
           {messages.map((message, index) => (
             <PreviewMessage
               key={message.id}
@@ -82,7 +82,7 @@ function PureMessages({
 
           <motion.div
             ref={messagesEndRef}
-            className="shrink-0 min-w-[24px] min-h-[24px]"
+            className="shrink-0 min-w-[24px]"
             onViewportLeave={onViewportLeave}
             onViewportEnter={onViewportEnter}
           />

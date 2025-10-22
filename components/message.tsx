@@ -85,7 +85,7 @@ const PurePreviewMessage = ({
 
           <div
             className={cn('flex flex-col gap-4', {
-              'min-h-96': message.role === 'assistant' && requiresScrollPadding,
+              'min-h-24': message.role === 'assistant' && requiresScrollPadding,
               'w-full': message.role === 'assistant',
               'w-fit': message.role === 'user',
             })}
@@ -109,14 +109,18 @@ const PurePreviewMessage = ({
             )}
 
             {/* Show loading indicator if streaming with no visible content */}
-            {isLoading && !message.parts.some(part =>
-              (part.type === 'text' && part.text?.trim().length > 0) ||
-              (part.type === 'reasoning' && part.text?.trim().length > 0)
-            ) && (
-              <MessageContent className="bg-transparent -ml-4">
-                <div className="text-muted-foreground">Continuando entrevista...</div>
-              </MessageContent>
-            )}
+            {isLoading &&
+              !message.parts.some(
+                (part) =>
+                  (part.type === 'text' && part.text?.trim().length > 0) ||
+                  (part.type === 'reasoning' && part.text?.trim().length > 0),
+              ) && (
+                <MessageContent className="bg-transparent -ml-4">
+                  <div className="text-muted-foreground">
+                    Continuando entrevista...
+                  </div>
+                </MessageContent>
+              )}
 
             {message.parts?.map((part, index) => {
               const { type } = part;
@@ -300,7 +304,6 @@ const PurePreviewMessage = ({
                 isLoading={isLoading}
               />
             )}
-
           </div>
         </div>
       </motion.div>
