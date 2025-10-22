@@ -449,7 +449,7 @@ function PureMultimodalInput({
           value={input}
           onChange={handleInput}
           allowEmptySubmit={attachments.length > 0}
-          className="text-base resize-none p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-transparent !border-0 !border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
+          className="text-base resize-none p-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-transparent !border-0 !border-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none !h-[36px] !min-h-[36px]"
           autoFocus
         />
         <PromptInputToolbar className="px-3 py-1 !border-t-0 !border-top-0 shadow-none dark:!border-transparent dark:border-0">
