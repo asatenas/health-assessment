@@ -84,24 +84,6 @@ function PureMultimodalInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      adjustHeight();
-    }
-  }, []);
-
-  const adjustHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '48px';
-    }
-  };
-
-  const resetHeight = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '48px';
-    }
-  }, []);
-
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
     'input',
     '',
@@ -113,7 +95,6 @@ function PureMultimodalInput({
       // Prefer DOM value over localStorage to handle hydration
       const finalValue = domValue || localStorageInput || '';
       setInput(finalValue);
-      adjustHeight();
     }
     // Only run once after hydration
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,7 +143,6 @@ function PureMultimodalInput({
 
     setAttachments([]);
     setLocalStorageInput('');
-    resetHeight();
     setInput('');
 
     if (width && width > 768) {
@@ -175,7 +155,6 @@ function PureMultimodalInput({
     sendMessage,
     setAttachments,
     setLocalStorageInput,
-    resetHeight,
     width,
     chatId,
   ]);
@@ -348,7 +327,6 @@ function PureMultimodalInput({
 
         setAttachments([]);
         setLocalStorageInput('');
-        resetHeight();
         setInput('');
 
         if (width && width > 768) {
@@ -363,7 +341,6 @@ function PureMultimodalInput({
       attachments,
       setAttachments,
       setLocalStorageInput,
-      resetHeight,
       width,
       textareaRef,
     ],
