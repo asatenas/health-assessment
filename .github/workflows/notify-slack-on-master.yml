@@ -13,23 +13,8 @@ jobs:
         with:
           payload: |
             {
+              "text": "main branch updated in ${{ github.repository }} by ${{ github.actor }}",
               "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "main branch updated in ${{ github.repository }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*By:*\n${{ github.actor }}"
-                    }
-                  ]
-                },
                 {
                   "type": "section",
                   "text": {
