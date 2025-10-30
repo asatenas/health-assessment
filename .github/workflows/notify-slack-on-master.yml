@@ -13,26 +13,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "main branch updated in ${{ github.repository }} by ${{ github.actor }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Commit:*\n<${{ github.event.head_commit.url }}|${{ github.event.head_commit.id }}>\n${{ github.event.head_commit.message }}"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "View compare" },
-                      "url": "${{ github.event.compare }}"
-                    }
-                  ]
-                }
-              ]
+              "text": "`main` branch updated by `${{ github.actor }}`. <${{ github.event.compare }}|View diff>",
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
