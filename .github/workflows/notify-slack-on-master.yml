@@ -18,7 +18,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "`main` updated in ${{ github.repository }}"
+                    "text": "main branch updated in ${{ github.repository }}"
                   }
                 },
                 {
@@ -38,11 +38,14 @@ jobs:
                   }
                 },
                 {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*View Diff:*\n<${{ github.event.compare }}"
-                  }
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "View compare" },
+                      "url": "${{ github.event.compare }}"
+                    }
+                  ]
                 }
               ]
             }
