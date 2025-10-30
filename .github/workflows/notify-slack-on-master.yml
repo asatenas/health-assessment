@@ -13,7 +13,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "`main` branch updated by `${{ github.actor }}`. <${{ github.event.compare }}|View diff>",
+              "text": "`main` branch updated by `${{ github.actor }}`. <${{ github.event.compare }}|View compare>"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
