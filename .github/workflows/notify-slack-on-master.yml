@@ -38,14 +38,11 @@ jobs:
                   }
                 },
                 {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "View Compare" },
-                      "url": "${{ github.event.compare }}"
-                    }
-                  ]
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*View Diff:*\n<${{ github.event.compare }}"
+                  }
                 }
               ]
             }
