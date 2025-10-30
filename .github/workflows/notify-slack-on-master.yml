@@ -13,7 +13,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Commit made in `main` branch by `${{ github.actor }}`:\n${{ github.event.head_commit.message }}\n<${{ github.event.compare }}|View compare in GitHub.>"
+              "text": "Commit made in `main` branch by `${{ github.actor }}`:\n```${{ github.event.head_commit.message }}```\n<${{ github.event.compare }}|View compare in GitHub>"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
