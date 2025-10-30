@@ -13,18 +13,40 @@ jobs:
         with:
           payload: |
             {
-              "text": ":bell: `main` updated in ${{ github.repository }} by ${{ github.actor }}",
               "blocks": [
-                { "type": "header", "text": { "type": "plain_text", "text": "main updated" } },
-                { "type": "section", "fields": [
-                  { "type": "mrkdwn", "text": "*Repo:*\n${{ github.repository }}" },
-                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
-                  { "type": "mrkdwn", "text": "*By:*\n${{ github.actor }}" }
-                ]},
-                { "type": "section", "text": { "type": "mrkdwn", "text": "*Latest commit:*\n<${{ github.event.head_commit.url }}|${{ github.event.head_commit.id }}>\n${{ github.event.head_commit.message }}" } },
-                { "type": "actions", "elements": [
-                  { "type": "button", "text": { "type":"plain_text", "text":"View compare" }, "url": "${{ github.event.compare }}" }
-                ]}
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "`main` updated in ${{ github.repository }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*By:*\n${{ github.actor }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Commit:*\n<${{ github.event.head_commit.url }}|${{ github.event.head_commit.id }}>\n${{ github.event.head_commit.message }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "View Compare" },
+                      "url": "${{ github.event.compare }}"
+                    }
+                  ]
+                }
               ]
             }
         env:
