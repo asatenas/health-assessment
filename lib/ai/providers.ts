@@ -30,18 +30,18 @@ export const myProvider = isTestEnvironment
             settings: {
               providerOptions: {
                 openai: {
-                  reasoningEffort: 'low',
+                  reasoningEffort: 'medium',
                   // reasoningSummary: 'auto',
                   serviceTier: 'priority',
                   textVerbosity: 'medium',
-                }
-              }
-            }
-          })
+                },
+              },
+            },
+          }),
         }),
         'chat-model-reasoning': wrapLanguageModel({
-          model: gateway.languageModel('openai/gpt-5'),
-            middleware: defaultSettingsMiddleware({
+          model: gateway.languageModel('openai/gpt-5.1'),
+          middleware: defaultSettingsMiddleware({
             settings: {
               providerOptions: {
                 openai: {
@@ -49,10 +49,10 @@ export const myProvider = isTestEnvironment
                   // reasoningSummary: 'auto',
                   serviceTier: 'priority',
                   textVerbosity: 'medium',
-                }
-              }
-            }
-          })
+                },
+              },
+            },
+          }),
         }),
         'title-model': gateway.languageModel('openai/gpt-4.1-mini'),
         'artifact-model': gateway.languageModel('openai/gpt-4.1-mini'),

@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = 'chat-model-reasoning';
+export const DEFAULT_CHAT_MODEL: string = 'chat-model';
 
 export interface ChatModel {
   id: string;
@@ -9,12 +9,12 @@ export interface ChatModel {
 export const chatModels: Array<ChatModel> = [
   {
     id: 'chat-model',
-    name: 'gpt-5-low',
-    description: 'Low reasoning effort, fast and cost-effective',
+    name: 'gpt-5',
+    description: 'GPT-5 with medium reasoning effort',
   },
   {
     id: 'chat-model-reasoning',
-    name: 'gpt-5-medium',
-    description: 'Medium reasoning effort, balanced performance',
+    name: 'gpt-5.1',
+    description: 'GPT-5.1 with medium reasoning effort',
   },
 ];
