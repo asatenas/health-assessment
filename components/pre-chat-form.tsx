@@ -9,11 +9,10 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
-  alergias: {
-    latex: boolean;
-  };
+  alergias: string;
   marcaPasso: boolean;
   bombaMedicamentos: boolean;
+  dispositivosOutros: string;
   itensUso: {
     megaHair: boolean;
     apliques: boolean;
@@ -48,11 +47,10 @@ export function PreChatForm({
     idade: '',
     peso: '',
     altura: '',
-    alergias: {
-      latex: false,
-    },
+    alergias: '',
     marcaPasso: false,
     bombaMedicamentos: false,
+    dispositivosOutros: '',
     itensUso: {
       megaHair: false,
       apliques: false,
@@ -183,27 +181,16 @@ export function PreChatForm({
 
           {/* Alergias */}
           <div className="space-y-3">
-            <Label>Alergias</Label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="alergia-latex"
-                checked={formData.alergias.latex}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    alergias: {
-                      ...formData.alergias,
-                      latex: e.target.checked,
-                    },
-                  })
-                }
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="alergia-latex" className="font-normal">
-                Látex
-              </Label>
-            </div>
+            <Label htmlFor="alergias">Alergias</Label>
+            <Input
+              id="alergias"
+              type="text"
+              value={formData.alergias}
+              onChange={(e) =>
+                setFormData({ ...formData, alergias: e.target.value })
+              }
+              placeholder="Ex: látex, penicilina, outros medicamentos..."
+            />
           </div>
 
           {/* Dispositivos Médicos */}
@@ -240,10 +227,27 @@ export function PreChatForm({
                 Bomba de medicamentos implantada
               </Label>
             </div>
+            <div>
+              <Label htmlFor="dispositivos-outros" className="text-sm">
+                Outros
+              </Label>
+              <Input
+                id="dispositivos-outros"
+                type="text"
+                value={formData.dispositivosOutros}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    dispositivosOutros: e.target.value,
+                  })
+                }
+                placeholder="Ex: implante coclear, prótese..."
+              />
+            </div>
           </div>
 
           {/* Itens de Uso */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <Label>Usa algum dos itens abaixo?</Label>
             {[
               { key: 'megaHair', label: 'Mega-Hair' },
@@ -275,20 +279,20 @@ export function PreChatForm({
                 </Label>
               </div>
             ))}
-          </div>
+          </div> */}
 
           {/* Exames */}
           <div className="space-y-4">
-            <Label>Exames (valor ou arquivo)</Label>
+            <Label>Exames (valor em um exame realizado recentemente)</Label>
             {[
               { key: 'hemoglobina', label: 'Hemoglobina (g/dL)' },
               { key: 'creatinina', label: 'Creatinina (mg/dL)' },
-              { key: 'ecocardiograma', label: 'Ecocardiograma' },
+              // { key: 'ecocardiograma', label: 'Ecocardiograma' },
             ].map(({ key, label }) => (
               <div key={key} className="space-y-2">
                 <Label className="text-sm font-normal">{label}</Label>
                 <div className="flex gap-2">
-                  <select
+                  {/* <select
                     value={
                       formData.exames[key as keyof typeof formData.exames].tipo
                     }
@@ -303,7 +307,7 @@ export function PreChatForm({
                   >
                     <option value="texto">Valor</option>
                     <option value="arquivo">Arquivo</option>
-                  </select>
+                  </select> */}
                   {formData.exames[key as keyof typeof formData.exames].tipo ===
                   'texto' ? (
                     <Input
