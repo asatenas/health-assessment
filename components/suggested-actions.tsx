@@ -20,7 +20,8 @@ function PureSuggestedActions({
   selectedVisibilityType,
   disabled,
 }: SuggestedActionsProps) {
-  const suggestedActions = ['Sim', 'Não'];
+  // const suggestedActions = ['Sim', 'Não'];
+  const suggestedActions = [];
 
   return (
     <div
