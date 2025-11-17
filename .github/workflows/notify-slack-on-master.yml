@@ -2,25 +2,20 @@ name: Notify Slack on main updates
 
 on:
   push:
-    branches: [ main ]   # fires on any push/merge to main
+    branches: [ main ]
 
 jobs:
   notify-slack:
     runs-on: ubuntu-latest
+    env:
+      SLACK_MESSAGE: "App atualizado por `${{ github.actor }}`:\n```$${{ github.event.head_commit.message }}```\n<${{ github.event.compare }}|Ver no GitHub>"
     steps:
       - name: Post to Slack
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
-              "text": ${{ toJSON(
-                format(
-                  'App atualizado por `{0}`:\n```{1}```\n<{2}|Ver no GitHub>',
-                  github.actor,
-                  github.event.head_commit.message,
-                  github.event.compare
-                )
-              ) }}
+              "text": ${{ toJSON(env.SLACK_MESSAGE) }}
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
