@@ -23,11 +23,11 @@ interface PreChatFormData {
   exames: {
     hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
     creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
-    ecocardiograma: {
-      tipo: 'texto' | 'arquivo';
-      valor: string;
-      arquivo?: File;
-    };
+    // ecocardiograma: {
+    //   tipo: 'texto' | 'arquivo';
+    //   valor: string;
+    //   arquivo?: File;
+    // };
   };
 }
 
@@ -61,7 +61,7 @@ export function PreChatForm({
     exames: {
       hemoglobina: { tipo: 'texto', valor: '' },
       creatinina: { tipo: 'texto', valor: '' },
-      ecocardiograma: { tipo: 'texto', valor: '' },
+      // ecocardiograma: { tipo: 'texto', valor: '' },
     },
   });
 
@@ -71,7 +71,8 @@ export function PreChatForm({
   };
 
   const handleExameChange = (
-    exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    // exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    exame: 'hemoglobina' | 'creatinina',
     field: 'tipo' | 'valor',
     value: string,
   ) => {
@@ -88,7 +89,8 @@ export function PreChatForm({
   };
 
   const handleExameFileChange = (
-    exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    // exame: 'hemoglobina' | 'creatinina' | 'ecocardiograma',
+    exame: 'hemoglobina' | 'creatinina',
     file: File | undefined,
   ) => {
     setFormData({

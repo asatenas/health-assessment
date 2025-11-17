@@ -261,6 +261,7 @@ export function Chat({
       alergias,
       marcaPasso,
       bombaMedicamentos,
+      dispositivosOutros,
       itensUso,
       exames,
     } = paciente;
@@ -273,13 +274,16 @@ export function Chat({
       `Altura: ${altura || '—'} cm`,
     ].join(' | ');
 
-    const alergiasTxt = `Alergias: • Látex: ${formatBool(alergias.latex)}`;
+    const alergiasTxt = `Alergias: ${alergias || '—'}`;
 
-    const dispositivosTxt = [
-      'Dispositivos:',
-      `Marca-passo: ${formatBool(marcaPasso)}`,
+    const dispositivos = [
+      `Dispositivos: Marca-passo: ${formatBool(marcaPasso)}`,
       `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
-    ].join(' | ');
+    ];
+    if (dispositivosOutros) {
+      dispositivos.push(`Outros: ${dispositivosOutros}`);
+    }
+    const dispositivosTxt = dispositivos.join(' | ');
 
     const itensLabels: any = {
       megaHair: 'Mega Hair',
@@ -289,12 +293,14 @@ export function Chat({
       piercings: 'Piercings',
     };
 
-    const itensUsoTxt = `Itens de uso: ${Object.entries(itensUso)
-      .map(
-        ([key, value]) =>
-          `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
-      )
-      .join(' | ')}`;
+    const itensUsoTxt = itensUso
+      ? `Itens de uso: ${Object.entries(itensUso)
+          .map(
+            ([key, value]) =>
+              `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
+          )
+          .join(' | ')}`
+      : '';
 
     const unidades: Record<string, string> = {
       hemoglobina: 'g/dL',
@@ -306,17 +312,17 @@ export function Chat({
       .map(([key, dados]) => {
         const nome = key.charAt(0).toUpperCase() + key.slice(1);
         const dadosTyped = dados as { valor?: string; tipo: string };
-        return `• ${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
+        return `${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
       })
       .join(' | ')}`;
 
-    return [
-      infoBasica,
-      alergiasTxt,
-      dispositivosTxt,
-      itensUsoTxt,
-      examesTxt,
-    ].join(' | ');
+    const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
+
+    // if (itensUsoTxt) {
+    //   sections.splice(3, 0, itensUsoTxt);
+    // }
+
+    return sections.join(' | ');
   }
 
   return (
