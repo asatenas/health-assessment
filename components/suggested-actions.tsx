@@ -21,7 +21,7 @@ function PureSuggestedActions({
   disabled,
 }: SuggestedActionsProps) {
   // const suggestedActions = ['Sim', 'Não'];
-  const suggestedActions = [];
+  const suggestedActions: any[] = [];
 
   return (
     <div
