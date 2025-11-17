@@ -33,7 +33,7 @@ function PureChatHeader({
     <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
       {/* <SidebarToggle /> */}
 
-      {(!open || windowWidth < 768) && (
+      {/* {(!open || windowWidth < 768) && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -50,8 +50,8 @@ function PureChatHeader({
           </TooltipTrigger>
           <TooltipContent>Nova Conversa</TooltipContent>
         </Tooltip>
-      )}
-{/*
+      )} */}
+      {/*
       {!isReadonly && (
         <VisibilitySelector
           chatId={chatId}
@@ -60,7 +60,7 @@ function PureChatHeader({
         />
       )}
 */}
-{/*
+      {/*
       <Button
         className="bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-zinc-50 dark:text-zinc-900 hidden md:flex py-1.5 px-2 h-fit md:h-[34px] order-3 md:ml-auto"
         asChild
