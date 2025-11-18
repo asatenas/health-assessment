@@ -9,9 +9,9 @@ import { SessionProvider } from 'next-auth/react';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Análise de Risco de Cirurgia',
-  description: 'Análise de Risco de Cirurgia.',
+  metadataBase: new URL('https://asatenas.com.br'),
+  title: 'Asatenas',
+  description: 'Asatenas',
 };
 
 export const viewport = {
