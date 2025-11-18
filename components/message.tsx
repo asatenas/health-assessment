@@ -115,7 +115,7 @@ const PurePreviewMessage = ({
                   (part.type === 'text' && part.text?.trim().length > 0) ||
                   (part.type === 'reasoning' && part.text?.trim().length > 0),
               ) && (
-                <MessageContent className="bg-transparent -ml-4">
+                <MessageContent className="bg-transparent text-foreground -ml-4">
                   <div className="text-muted-foreground">
                     Continuando entrevista...
                   </div>
@@ -146,7 +146,7 @@ const PurePreviewMessage = ({
                             <Button
                               data-testid="message-edit-button"
                               variant="ghost"
-                              className="px-2 rounded-full opacity-0 h-fit text-muted-foreground group-hover/message:opacity-100"
+                              className="px-2 rounded-full opacity-0 h-fit text-muted-foreground hover:bg-accent hover:text-muted-foreground group-hover/message:opacity-100"
                               onClick={() => {
                                 setMode('edit');
                               }}
@@ -163,7 +163,8 @@ const PurePreviewMessage = ({
                         className={cn('justify-start items-start text-left', {
                           'bg-primary text-primary-foreground':
                             message.role === 'user',
-                          'bg-transparent -ml-4': message.role === 'assistant',
+                          'bg-transparent text-foreground -ml-4':
+                            message.role === 'assistant',
                         })}
                       >
                         <Response>{sanitizeText(part.text)}</Response>
@@ -342,7 +343,7 @@ export const ThinkingMessage = () => {
         </div> */}
 
         <div className="flex flex-col gap-4 w-full">
-          <MessageContent className="bg-transparent -ml-4">
+          <MessageContent className="bg-transparent text-foreground -ml-4">
             <div className="text-muted-foreground">Analisando...</div>
           </MessageContent>
         </div>

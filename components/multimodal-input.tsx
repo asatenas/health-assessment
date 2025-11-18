@@ -367,7 +367,7 @@ function PureMultimodalInput({
           >
             <Button
               data-testid="scroll-to-bottom-button"
-              className="rounded-full"
+              className="rounded-full hover:bg-accent hover:text-accent-foreground"
               size="icon"
               variant="outline"
               onClick={(event) => {
@@ -474,7 +474,7 @@ function PureMultimodalInput({
                 (!input.trim() || uploadQueue.length > 0) &&
                 attachments.length === 0
               }
-              className="p-2 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300"
+              className="p-2 text-foreground bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               <ArrowUpIcon size={20} />
             </PromptInputSubmit>
@@ -633,8 +633,8 @@ function PureVoiceRecordButton({
       data-testid="voice-record-button"
       className={`p-3 rounded-full transition-colors ${
         isRecording
-          ? 'bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700'
-          : 'text-gray-700 bg-gray-200 hover:bg-gray-300 dark:bg-sidebar-accent dark:hover:bg-sidebar-accent/80 dark:text-gray-300'
+          ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+          : 'text-foreground bg-secondary hover:bg-accent hover:text-accent-foreground'
       }`}
       onClick={(event) => {
         event.preventDefault();

@@ -117,7 +117,7 @@ export function VoiceTranscriptionModal({
             value={editedText}
             onChange={(e) => setEditedText(e.target.value)}
             placeholder="Texto transcrito aparecerá aqui..."
-            className="min-h-[120px] max-h-[200px] resize-none w-full"
+            className="min-h-[120px] max-h-[200px] resize-none w-full focus-visible:ring-0 focus-visible:ring-offset-0"
             autoFocus={false}
           />
         </div>
