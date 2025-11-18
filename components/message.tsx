@@ -146,7 +146,7 @@ const PurePreviewMessage = ({
                             <Button
                               data-testid="message-edit-button"
                               variant="ghost"
-                              className="px-2 rounded-full opacity-0 h-fit text-muted-foreground hover:bg-accent hover:text-muted-foreground group-hover/message:opacity-100"
+                              className="px-2 rounded-full h-fit text-muted-foreground hover:bg-accent hover:text-muted-foreground"
                               onClick={() => {
                                 setMode('edit');
                               }}
