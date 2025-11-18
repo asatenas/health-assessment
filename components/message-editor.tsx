@@ -57,7 +57,7 @@ export function MessageEditor({
       <Textarea
         data-testid="message-editor"
         ref={textareaRef}
-        className="bg-transparent outline-none overflow-hidden resize-none !text-base rounded-xl w-full"
+        className="bg-gray-50 dark:bg-sidebar rounded-3xl border border-gray-300 dark:border-sidebar-border shadow-none transition-all duration-200 hover:ring-1 hover:ring-primary/30 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 outline-none overflow-hidden resize-none text-sm w-full p-4"
         value={draftContent}
         onChange={handleInput}
       />

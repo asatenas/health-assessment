@@ -119,7 +119,7 @@ export function PreChatForm({
               onShowForm();
             }}
             size="lg"
-            className="min-w-[200px]"
+            className="min-w-[140px]"
           >
             Continuar
           </Button>
@@ -345,7 +345,7 @@ export function PreChatForm({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" className="min-w-[200px]" size="lg">
+            <Button type="submit" className="min-w-[140px]" size="lg">
               Continuar
             </Button>
           </div>

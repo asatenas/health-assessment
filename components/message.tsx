@@ -77,11 +77,11 @@ const PurePreviewMessage = ({
             'justify-start -ml-3': message.role === 'assistant',
           })}
         >
-          {message.role === 'assistant' && (
+          {/* {message.role === 'assistant' && (
             <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
               <SparklesIcon size={14} />
             </div>
-          )}
+          )} */}
 
           <div
             className={cn('flex flex-col gap-4', {
@@ -115,7 +115,7 @@ const PurePreviewMessage = ({
                   (part.type === 'text' && part.text?.trim().length > 0) ||
                   (part.type === 'reasoning' && part.text?.trim().length > 0),
               ) && (
-                <MessageContent className="bg-transparent -ml-4">
+                <MessageContent className="bg-transparent text-foreground -ml-4">
                   <div className="text-muted-foreground">
                     Continuando entrevista...
                   </div>
@@ -146,7 +146,7 @@ const PurePreviewMessage = ({
                             <Button
                               data-testid="message-edit-button"
                               variant="ghost"
-                              className="px-2 rounded-full opacity-0 h-fit text-muted-foreground group-hover/message:opacity-100"
+                              className="px-2 rounded-full h-fit text-muted-foreground hover:bg-accent hover:text-muted-foreground"
                               onClick={() => {
                                 setMode('edit');
                               }}
@@ -163,7 +163,8 @@ const PurePreviewMessage = ({
                         className={cn('justify-start items-start text-left', {
                           'bg-primary text-primary-foreground':
                             message.role === 'user',
-                          'bg-transparent -ml-4': message.role === 'assistant',
+                          'bg-transparent text-foreground -ml-4':
+                            message.role === 'assistant',
                         })}
                       >
                         <Response>{sanitizeText(part.text)}</Response>
@@ -337,12 +338,12 @@ export const ThinkingMessage = () => {
       data-role={role}
     >
       <div className="flex items-start gap-3 justify-start -ml-3">
-        <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
+        {/* <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
           <SparklesIcon size={14} />
-        </div>
+        </div> */}
 
         <div className="flex flex-col gap-4 w-full">
-          <MessageContent className="bg-transparent -ml-4">
+          <MessageContent className="bg-transparent text-foreground -ml-4">
             <div className="text-muted-foreground">Analisando...</div>
           </MessageContent>
         </div>

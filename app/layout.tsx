@@ -9,9 +9,9 @@ import { SessionProvider } from 'next-auth/react';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Análise de Risco de Cirurgia',
-  description: 'Análise de Risco de Cirurgia.',
+  metadataBase: new URL('https://asatenas.com.br'),
+  title: 'Asatenas',
+  description: 'Asatenas',
 };
 
 export const viewport = {
@@ -30,8 +30,8 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
 });
 
-const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
-const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
+const LIGHT_THEME_COLOR = 'hsl(200 20% 98%)';
+const DARK_THEME_COLOR = 'hsl(210 35% 8%)';
 const THEME_COLOR_SCRIPT = `\
 (function() {
   var html = document.documentElement;

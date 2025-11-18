@@ -32,37 +32,37 @@ export function PureMessageActions({
 
   return (
     <Actions>
-        <Action
-          tooltip="Ouvir"
-          disabled={isSpeaking}
-          onClick={async () => {
-            const textFromParts = message.parts
-              ?.filter((part) => part.type === 'text')
-              .map((part) => part.text)
-              .join('\n')
-              .trim();
+      <Action
+        tooltip="Ouvir"
+        disabled={isSpeaking}
+        onClick={async () => {
+          const textFromParts = message.parts
+            ?.filter((part) => part.type === 'text')
+            .map((part) => part.text)
+            .join('\n')
+            .trim();
 
-            if (!textFromParts) {
-              toast.error("Não há texto para ler!");
-              return;
-            }
+          if (!textFromParts) {
+            toast.error('Não há texto para ler!');
+            return;
+          }
 
-            setIsSpeaking(true);
+          setIsSpeaking(true);
 
-            try {
-              await speakText(textFromParts);
-            } catch (error) {
-              console.error('TTS error:', error);
-              toast.error("Erro ao reproduzir o áudio. Tente novamente.");
-            } finally {
-              setIsSpeaking(false);
-            }
-          }}
-        >
-          <SpeakerIcon />
-        </Action>
+          try {
+            await speakText(textFromParts);
+          } catch (error) {
+            console.error('TTS error:', error);
+            toast.error('Erro ao reproduzir o áudio. Tente novamente.');
+          } finally {
+            setIsSpeaking(false);
+          }
+        }}
+      >
+        <SpeakerIcon />
+      </Action>
 
-        {/* <Action
+      {/* <Action
           tooltip="Copy"
           onClick={async () => {
             const textFromParts = message.parts
