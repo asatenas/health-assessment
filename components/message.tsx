@@ -77,11 +77,11 @@ const PurePreviewMessage = ({
             'justify-start -ml-3': message.role === 'assistant',
           })}
         >
-          {message.role === 'assistant' && (
+          {/* {message.role === 'assistant' && (
             <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
               <SparklesIcon size={14} />
             </div>
-          )}
+          )} */}
 
           <div
             className={cn('flex flex-col gap-4', {
@@ -337,9 +337,9 @@ export const ThinkingMessage = () => {
       data-role={role}
     >
       <div className="flex items-start gap-3 justify-start -ml-3">
-        <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
+        {/* <div className="flex justify-center items-center mt-1 rounded-full ring-1 size-8 shrink-0 ring-border bg-background">
           <SparklesIcon size={14} />
-        </div>
+        </div> */}
 
         <div className="flex flex-col gap-4 w-full">
           <MessageContent className="bg-transparent -ml-4">
