@@ -1,3 +1,4 @@
+import { isProductionEnvironment } from '@/lib/constants';
 import { getChatByIdAndToken } from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set(`chat_token_${chatId}`, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProductionEnvironment,
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
