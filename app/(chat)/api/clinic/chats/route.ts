@@ -16,7 +16,12 @@ export async function GET(request: NextRequest) {
   }
 
   const searchParams = request.nextUrl.searchParams;
-  const status = searchParams.get('status') || undefined;
+  const allowedStatuses = ['active', 'in_progress', 'expired', 'finished'];
+  const statusParam = searchParams.get('status');
+  const status =
+    statusParam && allowedStatuses.includes(statusParam)
+      ? statusParam
+      : undefined;
   const dateFrom = searchParams.get('dateFrom') || undefined;
   const dateTo = searchParams.get('dateTo') || undefined;
   const page = Number.parseInt(searchParams.get('page') || '1', 10);
