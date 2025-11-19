@@ -75,7 +75,6 @@ export default function ClinicDashboard() {
     dateToFilter,
     currentPage,
     limit,
-    isLoading,
   ]);
 
   useEffect(() => {
