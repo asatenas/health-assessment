@@ -53,6 +53,17 @@ export async function getUser(email: string): Promise<Array<User>> {
   }
 }
 
+export async function getUserById({
+  id,
+}: { id: string }): Promise<User | undefined> {
+  try {
+    const [selectedUser] = await db.select().from(user).where(eq(user.id, id));
+    return selectedUser;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to get user by id');
+  }
+}
+
 export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 
@@ -101,6 +112,54 @@ export async function saveChat({
     });
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to save chat');
+  }
+}
+
+export async function createChatWithToken({
+  id,
+  userId,
+  token,
+}: {
+  id: string;
+  userId: string;
+  token: string;
+}) {
+  try {
+    return await db
+      .insert(chat)
+      .values({
+        id,
+        createdAt: new Date(),
+        userId,
+        title: '',
+        visibility: 'private',
+        token,
+        status: 'active',
+      })
+      .returning();
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create chat with token',
+    );
+  }
+}
+
+export async function getChatByIdAndToken({
+  id,
+  token,
+}: { id: string; token: string }) {
+  try {
+    const [selectedChat] = await db
+      .select()
+      .from(chat)
+      .where(and(eq(chat.id, id), eq(chat.token, token)));
+    return selectedChat;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat by id and token',
+    );
   }
 }
 
@@ -616,6 +675,42 @@ export async function updateChatResultsById({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to update chat results by id',
+    );
+  }
+}
+
+export async function updateChatStatusById({
+  chatId,
+  status,
+}: {
+  chatId: string;
+  status: 'active' | 'expired' | 'finished';
+}) {
+  try {
+    return await db.update(chat).set({ status }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat status by id',
+    );
+  }
+}
+
+export async function getChatsByClinicUserId({ userId }: { userId: string }) {
+  try {
+    return await db
+      .select({
+        id: chat.id,
+        createdAt: chat.createdAt,
+        status: chat.status,
+      })
+      .from(chat)
+      .where(eq(chat.userId, userId))
+      .orderBy(desc(chat.createdAt));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chats by clinic user id',
     );
   }
 }
