@@ -11,6 +11,7 @@ import {
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { convertToUIMessages } from '@/lib/utils';
+import { TokenGate } from '@/components/token-gate';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -21,6 +22,47 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
+  const cookieStore = await cookies();
+
+  // Check if this is a patient chat (has a token)
+  if (chat.token) {
+    // Check if chat status allows access
+    if (chat.status === 'expired' || chat.status === 'finished') {
+      return notFound();
+    }
+
+    // Check if user has provided the correct token
+    const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
+
+    if (!chatTokenCookie || chatTokenCookie.value !== chat.token) {
+      return <TokenGate chatId={id} />;
+    }
+
+    const messagesFromDb = await getMessagesByChatId({ id });
+    const uiMessages = convertToUIMessages(messagesFromDb);
+    const chatModelFromCookie = cookieStore.get('chat-model');
+    const initialFormData = await getChatFormById({ id });
+    const hasInitialMessages = uiMessages.length > 1;
+
+    return (
+      <>
+        <Chat
+          id={chat.id}
+          initialMessages={uiMessages}
+          initialChatModel={chatModelFromCookie?.value || DEFAULT_CHAT_MODEL}
+          initialVisibilityType={chat.visibility}
+          isReadonly={chat.status !== 'active'}
+          // session={null}
+          autoResume={true}
+          initialFormData={initialFormData}
+          hasInitialMessages={hasInitialMessages}
+        />
+        <DataStreamHandler />
+      </>
+    );
+  }
+
+  // Regular authenticated chat (clinic users)
   const session = await auth();
 
   if (!session) {
@@ -47,7 +89,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
-  const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
 
   const isReadOnly = chat.readOnly || session?.user?.id !== chat.userId;
@@ -64,7 +105,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           initialChatModel={DEFAULT_CHAT_MODEL}
           initialVisibilityType={chat.visibility}
           isReadonly={isReadOnly}
-          session={session}
+          // session={session}
           autoResume={true}
           initialFormData={initialFormData}
           hasInitialMessages={hasInitialMessages}
@@ -82,7 +123,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialChatModel={chatModelFromCookie.value}
         initialVisibilityType={chat.visibility}
         isReadonly={isReadOnly}
-        session={session}
+        // session={session}
         autoResume={true}
         initialFormData={initialFormData}
         hasInitialMessages={hasInitialMessages}

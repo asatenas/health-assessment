@@ -4,7 +4,7 @@ import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
-import { ChatHeader } from '@/components/chat-header';
+// import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
 import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { Artifact } from './artifact';
@@ -15,7 +15,7 @@ import { useArtifactSelector } from '@/hooks/use-artifact';
 import { unstable_serialize } from 'swr/infinite';
 import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
-import type { Session } from 'next-auth';
+// import type { Session } from 'next-auth';
 // import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
@@ -34,7 +34,7 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
-  session,
+  // session,
   autoResume,
   initialFormData,
   hasInitialMessages: hasInitialMessagesFromServer,
@@ -44,7 +44,7 @@ export function Chat({
   initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
-  session: Session;
+  // session: Session;
   autoResume: boolean;
   initialFormData?: any;
   hasInitialMessages?: boolean;
@@ -328,12 +328,12 @@ export function Chat({
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
-        <ChatHeader
+        {/* <ChatHeader
           chatId={id}
           selectedVisibilityType={initialVisibilityType}
           isReadonly={currentIsReadonly}
           session={session}
-        />
+        /> */}
 
         {!isFormVisible && (
           <Messages
