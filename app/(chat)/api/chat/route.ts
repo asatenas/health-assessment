@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       return new ChatSDKError('unauthorized:chat').toResponse();
     }
 
-    if (chat.status !== 'active') {
+    if (chat.status === 'finished' || chat.status === 'expired') {
       return new ChatSDKError('not_found:chat').toResponse();
     }
 

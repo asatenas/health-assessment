@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react';
 type Chat = {
   id: string;
   createdAt: string;
-  status: 'active' | 'expired' | 'finished';
+  status: 'active' | 'in_progress' | 'expired' | 'finished';
 };
 
 type CreateChatResponse = {
@@ -92,6 +92,8 @@ export default function ClinicDashboard() {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'expired':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'finished':
@@ -247,7 +249,7 @@ export default function ClinicDashboard() {
                             chat.status,
                           )}`}
                         >
-                          {chat.status}
+                          {chat.status.replace('_', ' ')}
                         </span>
                       </td>
                     </tr>

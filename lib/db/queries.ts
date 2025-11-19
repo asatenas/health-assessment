@@ -547,7 +547,7 @@ export async function makeChatReadOnlyById({ chatId }: { chatId: string }) {
   try {
     return await db
       .update(chat)
-      .set({ readOnly: true })
+      .set({ readOnly: true, status: 'finished' })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
@@ -633,7 +633,10 @@ export async function updateChatFormById({
   form: any;
 }) {
   try {
-    return await db.update(chat).set({ form }).where(eq(chat.id, chatId));
+    return await db
+      .update(chat)
+      .set({ form, status: 'in_progress' })
+      .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -684,7 +687,7 @@ export async function updateChatStatusById({
   status,
 }: {
   chatId: string;
-  status: 'active' | 'expired' | 'finished';
+  status: 'active' | 'in_progress' | 'expired' | 'finished';
 }) {
   try {
     return await db.update(chat).set({ status }).where(eq(chat.id, chatId));

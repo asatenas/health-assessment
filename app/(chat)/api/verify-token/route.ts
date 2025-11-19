@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const chat = await getChatByIdAndToken({ id: chatId, token });
 
-    if (!chat || chat.status !== 'active') {
+    if (!chat || chat.status === 'finished' || chat.status === 'expired') {
       return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
     }
 
