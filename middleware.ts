@@ -17,24 +17,48 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith('/api/verify-token')) {
+    return NextResponse.next();
+  }
+
+  if (pathname.startsWith('/chat/')) {
+    return NextResponse.next();
+  }
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  if (!token) {
-    const redirectUrl = encodeURIComponent(request.url);
-
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url),
-    );
-  }
-
   const isGuest = guestRegex.test(token?.email ?? '');
 
-  if (token && !isGuest && ['/login', '/register'].includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url));
+  if (['/login', '/register'].includes(pathname)) {
+    if (!token) {
+      return NextResponse.next();
+    }
+
+    if (isGuest) {
+      return NextResponse.next();
+    }
+
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  if (pathname === '/dashboard') {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    if (isGuest) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
@@ -45,6 +69,7 @@ export const config = {
     '/',
     '/chat/:id',
     '/api/:path*',
+    '/dashboard',
     '/login',
     '/register',
 
