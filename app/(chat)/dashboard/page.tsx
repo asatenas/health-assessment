@@ -22,6 +22,7 @@ export default function ClinicDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFetchingPage, setIsFetchingPage] = useState(false);
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
@@ -30,16 +31,32 @@ export default function ClinicDashboard() {
   const [dateFromFilter, setDateFromFilter] = useState<string>('');
   const [dateToFilter, setDateToFilter] = useState<string>('');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalChats, setTotalChats] = useState(0);
+  const limit = 20;
+
   useEffect(() => {
-    fetchChats();
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
   }, [statusFilter, dateFromFilter, dateToFilter]);
 
+  useEffect(() => {
+    fetchChats();
+  }, [statusFilter, dateFromFilter, dateToFilter, currentPage]);
+
   const fetchChats = async () => {
+    if (!isLoading) {
+      setIsFetchingPage(true);
+    }
+
     try {
       const params = new URLSearchParams();
       if (statusFilter) params.append('status', statusFilter);
       if (dateFromFilter) params.append('dateFrom', dateFromFilter);
       if (dateToFilter) params.append('dateTo', dateToFilter);
+      params.append('page', currentPage.toString());
+      params.append('limit', limit.toString());
 
       const url = `/api/clinic/chats${params.toString() ? `?${params.toString()}` : ''}`;
       const response = await fetch(url);
@@ -50,6 +67,8 @@ export default function ClinicDashboard() {
 
       const data = await response.json();
       setChats(data.chats);
+      setTotalPages(data.pagination.totalPages);
+      setTotalChats(data.pagination.total);
     } catch (error) {
       toast({
         type: 'error',
@@ -57,6 +76,7 @@ export default function ClinicDashboard() {
       });
     } finally {
       setIsLoading(false);
+      setIsFetchingPage(false);
     }
   };
 
@@ -307,6 +327,9 @@ export default function ClinicDashboard() {
               <thead className="bg-gray-50 dark:bg-gray-900 border-b">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    #
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Chat ID
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -321,49 +344,162 @@ export default function ClinicDashboard() {
                 {isLoading ? (
                   <tr>
                     <td
-                      colSpan={3}
+                      colSpan={4}
                       className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                     >
                       Loading chats...
                     </td>
                   </tr>
+                ) : isFetchingPage ? (
+                  <>
+                    {Array.from({ length: Math.min(limit, 5) }).map(
+                      (_, index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows are temporary and don't need stable keys
+                        <tr key={index}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8" />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32" />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-40" />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20" />
+                          </td>
+                        </tr>
+                      ),
+                    )}
+                  </>
                 ) : chats.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={3}
+                      colSpan={4}
                       className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                     >
                       No chats yet. Create your first chat!
                     </td>
                   </tr>
                 ) : (
-                  chats.map((chat) => (
-                    <tr
-                      key={chat.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-900"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <code className="text-sm font-mono">{chat.id}</code>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        {new Date(chat.createdAt).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
-                            chat.status,
-                          )}`}
-                        >
-                          {chat.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  chats.map((chat, index) => {
+                    const rowNumber = (currentPage - 1) * limit + index + 1;
+                    return (
+                      <tr
+                        key={chat.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-900"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {rowNumber}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <code className="text-sm font-mono">{chat.id}</code>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {new Date(chat.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
+                              chat.status,
+                            )}`}
+                          >
+                            {chat.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Showing {(currentPage - 1) * limit + 1} to{' '}
+              {Math.min(currentPage * limit, totalChats)} of {totalChats} chats
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                variant="outline"
+                size="sm"
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-2">
+                {/* First page */}
+                {currentPage > 3 && (
+                  <>
+                    <Button
+                      onClick={() => setCurrentPage(1)}
+                      variant={currentPage === 1 ? 'default' : 'outline'}
+                      size="sm"
+                    >
+                      1
+                    </Button>
+                    {currentPage > 4 && (
+                      <span className="text-gray-600 dark:text-gray-400">
+                        ...
+                      </span>
+                    )}
+                  </>
+                )}
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === currentPage ||
+                      page === currentPage - 1 ||
+                      page === currentPage + 1 ||
+                      page === currentPage - 2 ||
+                      page === currentPage + 2,
+                  )
+                  .map((page) => (
+                    <Button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && (
+                      <span className="text-gray-600 dark:text-gray-400">
+                        ...
+                      </span>
+                    )}
+                    <Button
+                      onClick={() => setCurrentPage(totalPages)}
+                      variant={
+                        currentPage === totalPages ? 'default' : 'outline'
+                      }
+                      size="sm"
+                    >
+                      {totalPages}
+                    </Button>
+                  </>
+                )}
+              </div>
+              <Button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                variant="outline"
+                size="sm"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

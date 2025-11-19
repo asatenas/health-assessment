@@ -704,11 +704,15 @@ export async function getChatsByClinicUserId({
   status,
   dateFrom,
   dateTo,
+  page = 1,
+  limit = 20,
 }: {
   userId: string;
   status?: 'active' | 'in_progress' | 'expired' | 'finished';
   dateFrom?: string;
   dateTo?: string;
+  page?: number;
+  limit?: number;
 }) {
   try {
     const conditions: SQL<any>[] = [eq(chat.userId, userId)];
@@ -729,7 +733,16 @@ export async function getChatsByClinicUserId({
       conditions.push(lt(chat.createdAt, endDate));
     }
 
-    return await db
+    const [totalResult] = await db
+      .select({ count: count() })
+      .from(chat)
+      .where(and(...conditions));
+
+    const total = totalResult?.count || 0;
+    const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+
+    const chats = await db
       .select({
         id: chat.id,
         createdAt: chat.createdAt,
@@ -737,7 +750,19 @@ export async function getChatsByClinicUserId({
       })
       .from(chat)
       .where(and(...conditions))
-      .orderBy(desc(chat.createdAt));
+      .orderBy(desc(chat.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      chats,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',

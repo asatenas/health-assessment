@@ -19,9 +19,11 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status') || undefined;
   const dateFrom = searchParams.get('dateFrom') || undefined;
   const dateTo = searchParams.get('dateTo') || undefined;
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
+  const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
 
   try {
-    const chats = await getChatsByClinicUserId({
+    const result = await getChatsByClinicUserId({
       userId: session.user.id,
       status: status as
         | 'active'
@@ -31,8 +33,10 @@ export async function GET(request: NextRequest) {
         | undefined,
       dateFrom,
       dateTo,
+      page,
+      limit,
     });
-    return NextResponse.json({ chats });
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch chats' },
