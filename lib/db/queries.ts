@@ -724,13 +724,18 @@ export async function getChatsByClinicUserId({
 
     // Add date range filters if provided
     if (dateFrom) {
-      conditions.push(gte(chat.createdAt, new Date(dateFrom)));
+      const fromDate = new Date(dateFrom);
+      if (!isNaN(fromDate.getTime())) {
+        conditions.push(gte(chat.createdAt, fromDate));
+      }
     }
     if (dateTo) {
-      // Add one day to include the entire end date
       const endDate = new Date(dateTo);
-      endDate.setDate(endDate.getDate() + 1);
-      conditions.push(lt(chat.createdAt, endDate));
+      if (!isNaN(endDate.getTime())) {
+        // Add one day to include the entire end date
+        endDate.setDate(endDate.getDate() + 1);
+        conditions.push(lt(chat.createdAt, endDate));
+      }
     }
 
     const [totalResult] = await db
