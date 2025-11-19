@@ -153,7 +153,7 @@ export default function ClinicDashboard() {
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
-              variant="outline"
+              variant="secondary"
             >
               Sign Out
             </Button>
