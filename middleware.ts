@@ -21,6 +21,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith('/api/chat')) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/chat/')) {
     return NextResponse.next();
   }

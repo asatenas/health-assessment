@@ -6,15 +6,14 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
-import { auth, type UserType } from '@/app/(auth)/auth';
+import { auth } from '@/app/(auth)/auth';
+import { cookies } from 'next/headers';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
   getMessagesByChatId,
-  saveChat,
   saveMessages,
 } from '@/lib/db/queries';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
@@ -91,51 +90,21 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const session = await auth();
+    const cookieStore = await cookies();
+    const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
 
-    if (!session?.user) {
+    if (!chatTokenCookie) {
       return new ChatSDKError('unauthorized:chat').toResponse();
-    }
-
-    const userType: UserType = session.user.type;
-
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
-      return new ChatSDKError('rate_limit:chat').toResponse();
     }
 
     const chat = await getChatById({ id });
 
-    if (!chat) {
-      await saveChat({
-        id,
-        userId: session.user.id,
-        title: '',
-        visibility: selectedVisibilityType,
-      });
+    if (!chat || chat.token !== chatTokenCookie.value) {
+      return new ChatSDKError('unauthorized:chat').toResponse();
+    }
 
-      // save first asssistant message
-      messages?.[0] &&
-        (await saveMessages({
-          messages: [
-            {
-              chatId: id,
-              id: messages[0].id,
-              role: 'assistant',
-              parts: messages[0].parts,
-              attachments: [],
-              createdAt: new Date(),
-            },
-          ],
-        }));
-    } else {
-      if (chat.userId !== session.user.id) {
-        return new ChatSDKError('forbidden:chat').toResponse();
-      }
+    if (chat.status !== 'active') {
+      return new ChatSDKError('not_found:chat').toResponse();
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });

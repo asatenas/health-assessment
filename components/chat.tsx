@@ -15,8 +15,6 @@ import { useArtifactSelector } from '@/hooks/use-artifact';
 import { unstable_serialize } from 'swr/infinite';
 import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
-// import type { Session } from 'next-auth';
-// import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { isProductionEnvironment } from '@/lib/constants';
@@ -34,7 +32,6 @@ export function Chat({
   initialChatModel,
   initialVisibilityType,
   isReadonly,
-  // session,
   autoResume,
   initialFormData,
   hasInitialMessages: hasInitialMessagesFromServer,
@@ -44,7 +41,6 @@ export function Chat({
   initialChatModel: string;
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
-  // session: Session;
   autoResume: boolean;
   initialFormData?: any;
   hasInitialMessages?: boolean;
@@ -149,18 +145,6 @@ export function Chat({
   const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] = useState(
     checkAnyMessageForToolCall(initialMessages, 'tool-finalizeInterview'),
   );
-
-  // useEffect(() => {
-  //   if (query && !hasAppendedQuery) {
-  //     sendMessage({
-  //       role: 'user' as const,
-  //       parts: [{ type: 'text', text: query }],
-  //     });
-
-  //     setHasAppendedQuery(true);
-  //     window.history.replaceState({}, '', `/chat/${id}`);
-  //   }
-  // }, [query, sendMessage, hasAppendedQuery, id]);
 
   useEffect(() => {
     // run only when initiating chat
@@ -356,8 +340,6 @@ export function Chat({
 
               setHasCompletedForm(true);
               setIsFormVisible(false);
-
-              window.history.replaceState({}, '', `/chat/${id}`);
 
               sendMessage({
                 role: 'user',
