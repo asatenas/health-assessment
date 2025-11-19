@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
@@ -36,16 +36,7 @@ export default function ClinicDashboard() {
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
 
-  useEffect(() => {
-    // Reset to page 1 when filters change
-    setCurrentPage(1);
-  }, [statusFilter, dateFromFilter, dateToFilter]);
-
-  useEffect(() => {
-    fetchChats();
-  }, [statusFilter, dateFromFilter, dateToFilter, currentPage]);
-
-  const fetchChats = async () => {
+  const fetchChats = useCallback(async () => {
     if (!isLoading) {
       setIsFetchingPage(true);
     }
@@ -78,7 +69,22 @@ export default function ClinicDashboard() {
       setIsLoading(false);
       setIsFetchingPage(false);
     }
-  };
+  }, [
+    statusFilter,
+    dateFromFilter,
+    dateToFilter,
+    currentPage,
+    limit,
+    isLoading,
+  ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, dateFromFilter, dateToFilter]);
+
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
 
   const createNewChat = async () => {
     setIsCreating(true);
@@ -129,11 +135,46 @@ export default function ClinicDashboard() {
     }
   };
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setStatusFilter('');
     setDateFromFilter('');
     setDateToFilter('');
-  };
+  }, []);
+
+  const setDatePreset = useCallback((preset: string) => {
+    let date = new Date();
+    const today = new Date();
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    switch (preset) {
+      case 'today':
+        setDateFromFilter(formatDate(today));
+        setDateToFilter(formatDate(today));
+        break;
+      case 'last7days':
+        date = new Date(today);
+        date.setDate(today.getDate() - 7);
+        setDateFromFilter(formatDate(date));
+        setDateToFilter(formatDate(today));
+        break;
+      case 'last30days':
+        date = new Date(today);
+        date.setDate(today.getDate() - 30);
+        setDateFromFilter(formatDate(date));
+        setDateToFilter(formatDate(today));
+        break;
+      case 'thisMonth':
+        date = new Date(today.getFullYear(), today.getMonth(), 1);
+        setDateFromFilter(formatDate(date));
+        setDateToFilter(formatDate(today));
+        break;
+    }
+  }, []);
+
+  // Check if filters are active
+  const hasActiveFilters = useMemo(() => {
+    return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
+  }, [statusFilter, dateFromFilter, dateToFilter]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -160,28 +201,35 @@ export default function ClinicDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
-      <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
+      <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Clinic Dashboard</h1>
-            <p className="text-gray-600 dark:text-zinc-400 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">Clinic Dashboard</h1>
+            <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
               Generate patient chat sessions and monitor their status
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={createNewChat} disabled={isCreating}>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={createNewChat}
+              disabled={isCreating}
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
               {isCreating ? 'Creating...' : 'Generate New Chat'}
             </Button>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
               variant="outline"
+              size="sm"
             >
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
+              size="sm"
             >
               Sign Out
             </Button>
@@ -190,20 +238,68 @@ export default function ClinicDashboard() {
 
         <div className="mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Filters
+                Filters{' '}
+                {isFetchingPage && (
+                  <span className="text-xs text-gray-500">(Loading...)</span>
+                )}
               </h3>
               <Button
                 onClick={clearFilters}
                 variant="ghost"
                 size="sm"
                 className="text-xs"
+                disabled={isFetchingPage || !hasActiveFilters}
               >
                 Clear All
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            {/* Date Presets */}
+            <div className="flex flex-wrap gap-2">
+              <span className="text-xs text-gray-600 dark:text-gray-400 self-center">
+                Quick filters:
+              </span>
+              <Button
+                onClick={() => setDatePreset('today')}
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                disabled={isFetchingPage}
+              >
+                Today
+              </Button>
+              <Button
+                onClick={() => setDatePreset('last7days')}
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                disabled={isFetchingPage}
+              >
+                Last 7 Days
+              </Button>
+              <Button
+                onClick={() => setDatePreset('last30days')}
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                disabled={isFetchingPage}
+              >
+                Last 30 Days
+              </Button>
+              <Button
+                onClick={() => setDatePreset('thisMonth')}
+                variant="outline"
+                size="sm"
+                className="text-xs h-8"
+                disabled={isFetchingPage}
+              >
+                This Month
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -212,7 +308,8 @@ export default function ClinicDashboard() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isFetchingPage}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">All Statuses</option>
                   <option value="active">Active</option>
@@ -231,7 +328,8 @@ export default function ClinicDashboard() {
                   type="date"
                   value={dateFromFilter}
                   onChange={(e) => setDateFromFilter(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isFetchingPage}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -244,7 +342,8 @@ export default function ClinicDashboard() {
                   type="date"
                   value={dateToFilter}
                   onChange={(e) => setDateToFilter(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isFetchingPage}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -326,16 +425,16 @@ export default function ClinicDashboard() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900 border-b">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Chat ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Created At
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
                 </tr>
@@ -374,11 +473,46 @@ export default function ClinicDashboard() {
                   </>
                 ) : chats.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
-                    >
-                      No chats yet. Create your first chat!
+                    <td colSpan={4} className="px-6 py-8 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="text-gray-400 dark:text-gray-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-12 w-12"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-gray-700 dark:text-gray-300 font-medium">
+                          {hasActiveFilters
+                            ? 'No chats match your filters'
+                            : 'No chats yet'}
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {hasActiveFilters ? (
+                            <>
+                              Try adjusting your filters or{' '}
+                              <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                clear all filters
+                              </button>
+                            </>
+                          ) : (
+                            'Create your first chat to get started'
+                          )}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -389,16 +523,21 @@ export default function ClinicDashboard() {
                         key={chat.id}
                         className="hover:bg-gray-50 dark:hover:bg-gray-900"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                           {rowNumber}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <code className="text-sm font-mono">{chat.id}</code>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                          <code className="text-xs sm:text-sm font-mono">
+                            {chat.id}
+                          </code>
+                          <div className="md:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {new Date(chat.createdAt).toLocaleDateString()}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        <td className="hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           {new Date(chat.createdAt).toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                           <span
                             className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
                               chat.status,
@@ -417,21 +556,23 @@ export default function ClinicDashboard() {
         </div>
 
         {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
               Showing {(currentPage - 1) * limit + 1} to{' '}
               {Math.min(currentPage * limit, totalChats)} of {totalChats} chats
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
               <Button
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
                 variant="outline"
                 size="sm"
+                className="text-xs sm:text-sm"
               >
-                Previous
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
               </Button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 {/* First page */}
                 {currentPage > 3 && (
                   <>
@@ -494,6 +635,7 @@ export default function ClinicDashboard() {
                 disabled={currentPage === totalPages}
                 variant="outline"
                 size="sm"
+                className="text-xs sm:text-sm"
               >
                 Next
               </Button>
