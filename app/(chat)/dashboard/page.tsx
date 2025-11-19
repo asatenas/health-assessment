@@ -21,6 +21,7 @@ export default function ClinicDashboard() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
@@ -80,6 +81,32 @@ export default function ClinicDashboard() {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await fetch('/api/clinic/chats');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch chats');
+      }
+
+      const data = await response.json();
+      setChats(data.chats);
+
+      toast({
+        type: 'success',
+        description: 'Chats refreshed successfully!',
+      });
+    } catch (error) {
+      toast({
+        type: 'error',
+        description: 'Failed to refresh chats',
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -116,6 +143,13 @@ export default function ClinicDashboard() {
           <div className="flex gap-2">
             <Button onClick={createNewChat} disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Generate New Chat'}
+            </Button>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              variant="outline"
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
