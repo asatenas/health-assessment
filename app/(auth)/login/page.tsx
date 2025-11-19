@@ -30,7 +30,8 @@ export default function Page() {
     if (state.status === 'failed') {
       toast({
         type: 'error',
-        description: 'Invalid credentials!',
+        description:
+          'Invalid credentials or email not verified. Please contact support if you need verification.',
       });
     } else if (state.status === 'invalid_data') {
       toast({
