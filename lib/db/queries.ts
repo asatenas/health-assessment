@@ -699,8 +699,36 @@ export async function updateChatStatusById({
   }
 }
 
-export async function getChatsByClinicUserId({ userId }: { userId: string }) {
+export async function getChatsByClinicUserId({
+  userId,
+  status,
+  dateFrom,
+  dateTo,
+}: {
+  userId: string;
+  status?: 'active' | 'in_progress' | 'expired' | 'finished';
+  dateFrom?: string;
+  dateTo?: string;
+}) {
   try {
+    const conditions: SQL<any>[] = [eq(chat.userId, userId)];
+
+    // Add status filter if provided
+    if (status) {
+      conditions.push(eq(chat.status, status));
+    }
+
+    // Add date range filters if provided
+    if (dateFrom) {
+      conditions.push(gte(chat.createdAt, new Date(dateFrom)));
+    }
+    if (dateTo) {
+      // Add one day to include the entire end date
+      const endDate = new Date(dateTo);
+      endDate.setDate(endDate.getDate() + 1);
+      conditions.push(lt(chat.createdAt, endDate));
+    }
+
     return await db
       .select({
         id: chat.id,
@@ -708,7 +736,7 @@ export async function getChatsByClinicUserId({ userId }: { userId: string }) {
         status: chat.status,
       })
       .from(chat)
-      .where(eq(chat.userId, userId))
+      .where(and(...conditions))
       .orderBy(desc(chat.createdAt));
   } catch (error) {
     throw new ChatSDKError(

@@ -26,13 +26,23 @@ export default function ClinicDashboard() {
     null,
   );
 
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [dateFromFilter, setDateFromFilter] = useState<string>('');
+  const [dateToFilter, setDateToFilter] = useState<string>('');
+
   useEffect(() => {
     fetchChats();
-  }, []);
+  }, [statusFilter, dateFromFilter, dateToFilter]);
 
   const fetchChats = async () => {
     try {
-      const response = await fetch('/api/clinic/chats');
+      const params = new URLSearchParams();
+      if (statusFilter) params.append('status', statusFilter);
+      if (dateFromFilter) params.append('dateFrom', dateFromFilter);
+      if (dateToFilter) params.append('dateTo', dateToFilter);
+
+      const url = `/api/clinic/chats${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error('Failed to fetch chats');
@@ -84,15 +94,7 @@ export default function ClinicDashboard() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      const response = await fetch('/api/clinic/chats');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch chats');
-      }
-
-      const data = await response.json();
-      setChats(data.chats);
-
+      await fetchChats();
       toast({
         type: 'success',
         description: 'Chats refreshed successfully!',
@@ -105,6 +107,12 @@ export default function ClinicDashboard() {
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const clearFilters = () => {
+    setStatusFilter('');
+    setDateFromFilter('');
+    setDateToFilter('');
   };
 
   const copyToClipboard = (text: string) => {
@@ -157,6 +165,69 @@ export default function ClinicDashboard() {
             >
               Sign Out
             </Button>
+          </div>
+        </div>
+
+        <div className="mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Filters
+              </h3>
+              <Button
+                onClick={clearFilters}
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+              >
+                Clear All
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="expired">Expired</option>
+                  <option value="finished">Finished</option>
+                </select>
+              </div>
+
+              <div>
+                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  From Date
+                </label>
+                <input
+                  type="date"
+                  value={dateFromFilter}
+                  onChange={(e) => setDateFromFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  To Date
+                </label>
+                <input
+                  type="date"
+                  value={dateToFilter}
+                  onChange={(e) => setDateToFilter(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
