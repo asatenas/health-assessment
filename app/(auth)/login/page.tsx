@@ -42,7 +42,10 @@ export default function Page() {
       });
     } else if (state.status === 'success') {
       setIsSuccessful(true);
-      router.push('/dashboard');
+      (async () => {
+        await updateSession();
+        router.push('/dashboard');
+      })();
     }
   }, [state.status]);
 
