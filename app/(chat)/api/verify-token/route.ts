@@ -23,8 +23,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate token matches XX-XX pattern (uppercase letters/digits)
-    const tokenRegex = /^[A-Z0-9]{2}-[A-Z0-9]{2}$/;
+    // Validate token matches XXXX-XXXX pattern (uppercase hex digits)
+    const tokenRegex = /^[A-F0-9]{4}-[A-F0-9]{4}$/;
     if (!tokenRegex.test(token)) {
       return NextResponse.json(
         { error: 'Invalid token format' },
