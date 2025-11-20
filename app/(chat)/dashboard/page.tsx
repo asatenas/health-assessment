@@ -190,6 +190,8 @@ export default function ClinicDashboard() {
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'initialized':
+        return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'expired':

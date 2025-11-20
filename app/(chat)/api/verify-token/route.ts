@@ -1,5 +1,5 @@
 import { isProductionEnvironment } from '@/lib/constants';
-import { getChatByIdAndToken } from '@/lib/db/queries';
+import { getChatByIdAndToken, updateChatStatusById } from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
@@ -47,6 +47,11 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24 * 2, // 48 hours
       path: '/',
     });
+
+    // update chat status to initialized if it's new
+    if (chat.status === 'active') {
+      await updateChatStatusById({ chatId, status: 'initialized' });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
