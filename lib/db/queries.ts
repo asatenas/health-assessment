@@ -126,15 +126,19 @@ export async function createChatWithToken({
   token: string;
 }) {
   try {
+    const createdAt = new Date();
+    const tokenExpiresAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from creation
+
     return await db
       .insert(chat)
       .values({
         id,
-        createdAt: new Date(),
+        createdAt,
         userId,
         title: '',
         visibility: 'private',
         token,
+        tokenExpiresAt,
         status: 'active',
       })
       .returning();

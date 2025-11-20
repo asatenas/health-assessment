@@ -35,7 +35,8 @@ export const chat = pgTable('Chat', {
   form: json('form'),
   results: text('results'),
   medications: text('medications'),
-  token: varchar('token', { length: 64 }),
+  token: varchar('token', { length: 9 }),
+  tokenExpiresAt: timestamp('tokenExpiresAt'),
   status: varchar('status', {
     enum: CHAT_STATUSES,
   })
