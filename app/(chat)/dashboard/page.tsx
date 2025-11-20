@@ -621,8 +621,9 @@ export default function ClinicDashboard() {
         {totalPages > 1 && (
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
-              Showing {(currentPage - 1) * limit + 1} to{' '}
-              {Math.min(currentPage * limit, totalChats)} of {totalChats} chats
+              {/* English: 'Showing' */}Mostrando{' '}
+              {(currentPage - 1) * limit + 1} a{' '}
+              {Math.min(currentPage * limit, totalChats)} de {totalChats} chats
             </div>
             <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
               <Button
@@ -632,8 +633,11 @@ export default function ClinicDashboard() {
                 size="sm"
                 className="text-xs sm:text-sm"
               >
-                <span className="hidden sm:inline">Previous</span>
-                <span className="sm:hidden">Prev</span>
+                <span className="hidden sm:inline">
+                  {' '}
+                  {/* English: 'Previous' */}Anterior
+                </span>
+                <span className="sm:hidden">Anterior</span>
               </Button>
               <div className="flex items-center gap-1 sm:gap-2">
                 {/* First page */}
@@ -700,7 +704,7 @@ export default function ClinicDashboard() {
                 size="sm"
                 className="text-xs sm:text-sm"
               >
-                Next
+                {/* English: 'Next' */}Próximo
               </Button>
             </div>
           </div>
