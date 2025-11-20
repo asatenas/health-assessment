@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: isProductionEnvironment,
       sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
+      maxAge: 60 * 60 * 24 * 2, // 48 hours
       path: '/',
     });
 
