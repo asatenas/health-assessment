@@ -317,6 +317,7 @@ export default function ClinicDashboard() {
                 >
                   <option value="">All Statuses</option>
                   <option value="active">Active</option>
+                  <option value="initialized">Initialized</option>
                   <option value="in_progress">In Progress</option>
                   <option value="expired">Expired</option>
                   <option value="finished">Finished</option>
