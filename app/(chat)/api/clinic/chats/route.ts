@@ -24,9 +24,15 @@ export async function GET(request: NextRequest) {
       : undefined;
   const dateFrom = searchParams.get('dateFrom') || undefined;
   const dateTo = searchParams.get('dateTo') || undefined;
-  const page = Number.parseInt(searchParams.get('page') || '1', 10);
-  const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
-
+  let page = Number.parseInt(searchParams.get('page') || '1', 10);
+  let limit = Number.parseInt(searchParams.get('limit') || '20', 10);
+  // Validate page and limit
+  if (isNaN(page) || page < 1) {
+    page = 1;
+  }
+  if (isNaN(limit) || limit < 1 || limit > 100) {
+    limit = 20;
+  }
   try {
     const result = await getChatsByClinicUserId({
       userId: session.user.id,
