@@ -99,7 +99,11 @@ export async function POST(request: Request) {
 
     const chat = await getChatById({ id });
 
-    if (!chat || chat.token !== chatTokenCookie.value) {
+    if (!chat) {
+      return new ChatSDKError('not_found:chat').toResponse();
+    }
+
+    if (chat.token !== chatTokenCookie.value) {
       return new ChatSDKError('unauthorized:chat').toResponse();
     }
 
