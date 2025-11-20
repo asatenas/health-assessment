@@ -182,7 +182,8 @@ function PureMultimodalInput({
       const { error } = await response.json();
       toast.error(error);
     } catch (error) {
-      toast.error('Failed to upload file, please try again!');
+      // English: 'Failed to upload file, please try again!'
+      toast.error('Falha ao enviar o arquivo, por favor tente novamente!');
     }
   };
 
@@ -560,7 +561,8 @@ function PureModelSelectorCompact({
         type="button"
         className="text-xs focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=closed]:ring-0"
       >
-        {selectedModel?.name || 'Select model'}
+        {selectedModel?.name ||
+          /* English: 'Select model' */ 'Selecionar modelo'}
       </PromptInputModelSelectTrigger>
       <PromptInputModelSelectContent>
         {chatModels.map((model) => (

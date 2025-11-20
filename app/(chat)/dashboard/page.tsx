@@ -64,7 +64,8 @@ export default function ClinicDashboard() {
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Failed to load chats',
+        // English: 'Failed to load chats'
+        description: 'Falha ao carregar chats',
       });
     } finally {
       setIsLoading(false);
@@ -96,7 +97,8 @@ export default function ClinicDashboard() {
 
       toast({
         type: 'success',
-        description: 'Chat created successfully!',
+        // English: 'Chat created successfully!'
+        description: 'Chat criado com sucesso!',
       });
 
       // Refresh the chats list
@@ -104,7 +106,8 @@ export default function ClinicDashboard() {
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Failed to create chat',
+        // English: 'Failed to create chat'
+        description: 'Falha ao criar chat',
       });
     } finally {
       setIsCreating(false);
@@ -117,12 +120,14 @@ export default function ClinicDashboard() {
       await fetchChats();
       toast({
         type: 'success',
-        description: 'Chats refreshed successfully!',
+        // English: 'Chats refreshed successfully!'
+        description: 'Chats atualizados com sucesso!',
       });
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Failed to refresh chats',
+        // English: 'Failed to refresh chats'
+        description: 'Falha ao atualizar chats',
       });
     } finally {
       setIsRefreshing(false);
@@ -175,13 +180,15 @@ export default function ClinicDashboard() {
       await navigator.clipboard.writeText(text);
       toast({
         type: 'success',
-        description: 'Copied to clipboard!',
+        // English: 'Copied to clipboard!'
+        description: 'Copiado para a área de transferência!',
       });
     } catch (error) {
       toast({
         type: 'error',
+        // English: 'Failed to copy to clipboard. Please check your browser permissions.'
         description:
-          'Failed to copy to clipboard. Please check your browser permissions.',
+          'Falha ao copiar para a área de transferência. Verifique as permissões do navegador.',
       });
     }
   };
@@ -203,14 +210,40 @@ export default function ClinicDashboard() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active':
+        // English: 'Active'
+        return 'Ativo';
+      case 'initialized':
+        // English: 'Initialized'
+        return 'Iniciado';
+      case 'in_progress':
+        // English: 'In Progress'
+        return 'Em progresso';
+      case 'finished':
+        // English: 'Finished'
+        return 'Finalizado';
+      case 'expired':
+        // English: 'Expired'
+        return 'Expirado';
+      default:
+        return status.replace('_', ' ');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Clinic Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              {/* English: 'Clinic Dashboard' */}
+              Painel da Clínica
+            </h1>
             <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
-              Generate patient chat sessions and monitor their status
+              {/* English: 'Generate patient chat sessions and monitor their status' */}
+              Crie novos chats de pacientes e monitore seus status
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -220,7 +253,11 @@ export default function ClinicDashboard() {
               size="sm"
               className="flex-1 sm:flex-none"
             >
-              {isCreating ? 'Creating...' : 'Generate New Chat'}
+              {isCreating
+                ? // English: 'Creating...'
+                  'Criando...'
+                : // English: 'Generate New Chat'
+                  'Criar novo chat'}
             </Button>
             <Button
               onClick={handleRefresh}
@@ -228,14 +265,19 @@ export default function ClinicDashboard() {
               variant="outline"
               size="sm"
             >
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              {isRefreshing
+                ? // English: 'Refreshing...'
+                  'Atualizando...'
+                : // English: 'Refresh'
+                  'Atualizar'}
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
               size="sm"
             >
-              Sign Out
+              {/* English: 'Sign Out' */}
+              Sair
             </Button>
           </div>
         </div>
@@ -244,9 +286,9 @@ export default function ClinicDashboard() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Filters{' '}
+                {/* English: 'Filters' */} Filtros{' '}
                 {isFetchingPage && (
-                  <span className="text-xs text-gray-500">(Loading...)</span>
+                  <span className="text-xs text-gray-500">(Carregando...)</span>
                 )}
               </h3>
               <Button
@@ -256,14 +298,14 @@ export default function ClinicDashboard() {
                 className="text-xs"
                 disabled={isFetchingPage || !hasActiveFilters}
               >
-                Clear All
+                {/* English: 'Clear All' */} Limpar filtros
               </Button>
             </div>
 
             {/* Date Presets */}
             <div className="flex flex-wrap gap-2">
               <span className="text-xs text-gray-600 dark:text-gray-400 self-center">
-                Quick filters:
+                {/* English: 'Quick filters:' */} Filtros rápidos:
               </span>
               <Button
                 onClick={() => setDatePreset('today')}
@@ -272,7 +314,7 @@ export default function ClinicDashboard() {
                 className="text-xs h-8"
                 disabled={isFetchingPage}
               >
-                Today
+                {/* English: 'Today' */} Hoje
               </Button>
               <Button
                 onClick={() => setDatePreset('last7days')}
@@ -281,7 +323,7 @@ export default function ClinicDashboard() {
                 className="text-xs h-8"
                 disabled={isFetchingPage}
               >
-                Last 7 Days
+                {/* English: 'Last 7 Days' */} Últimos 7 dias
               </Button>
               <Button
                 onClick={() => setDatePreset('last30days')}
@@ -290,7 +332,7 @@ export default function ClinicDashboard() {
                 className="text-xs h-8"
                 disabled={isFetchingPage}
               >
-                Last 30 Days
+                {/* English: 'Last 30 Days' */} Últimos 30 dias
               </Button>
               <Button
                 onClick={() => setDatePreset('thisMonth')}
@@ -299,7 +341,7 @@ export default function ClinicDashboard() {
                 className="text-xs h-8"
                 disabled={isFetchingPage}
               >
-                This Month
+                {/* English: 'This Month' */} Este mês
               </Button>
             </div>
 
@@ -307,7 +349,7 @@ export default function ClinicDashboard() {
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Status
+                  {/* English: 'Status' */} Status
                 </label>
                 <select
                   value={statusFilter}
@@ -315,19 +357,31 @@ export default function ClinicDashboard() {
                   disabled={isFetchingPage}
                   className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="">All Statuses</option>
-                  <option value="active">Active</option>
-                  <option value="initialized">Initialized</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="finished">Finished</option>
-                  <option value="expired">Expired</option>
+                  <option value="">
+                    {/* English: 'All Statuses' */} Todos
+                  </option>
+                  <option value="active">
+                    {/* English: 'Active' */} Ativo
+                  </option>
+                  <option value="initialized">
+                    {/* English: 'Initialized' */} Iniciado
+                  </option>
+                  <option value="in_progress">
+                    {/* English: 'In Progress' */} Em progresso
+                  </option>
+                  <option value="finished">
+                    {/* English: 'Finished' */} Finalizado
+                  </option>
+                  <option value="expired">
+                    {/* English: 'Expired' */} Expirado
+                  </option>
                 </select>
               </div>
 
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  From Date
+                  {/* English: 'From Date' */} Data de início
                 </label>
                 <input
                   type="date"
@@ -341,7 +395,7 @@ export default function ClinicDashboard() {
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  To Date
+                  {/* English: 'To Date' */} Data de fim
                 </label>
                 <input
                   type="date"
@@ -357,12 +411,14 @@ export default function ClinicDashboard() {
 
         {newChatData && (
           <div className="mb-8 p-6 border rounded-lg bg-blue-50 dark:bg-blue-950">
-            <h2 className="text-xl font-semibold mb-4">New Chat Created</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {/* English: 'New Chat Created' */} Novo chat criado
+            </h2>
             <div className="space-y-3">
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Chat ID
+                  {/* English: 'Chat ID' */} ID do chat
                 </label>
                 <div className="flex gap-2 mt-1">
                   <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
@@ -373,14 +429,14 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                   >
-                    Copy
+                    {/* English: 'Copy' */} Copiar
                   </Button>
                 </div>
               </div>
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Token
+                  {/* English: 'Token' */} Token
                 </label>
                 <div className="flex gap-2 mt-1">
                   <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
@@ -391,14 +447,14 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                   >
-                    Copy
+                    {/* English: 'Copy' */} Copiar
                   </Button>
                 </div>
               </div>
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Patient URL
+                  {/* English: 'Patient URL' */} URL do paciente
                 </label>
                 <div className="flex gap-2 mt-1">
                   <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
@@ -409,7 +465,7 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                   >
-                    Copy
+                    {/* English: 'Copy' */} Copiar
                   </Button>
                 </div>
               </div>
@@ -420,7 +476,7 @@ export default function ClinicDashboard() {
               size="sm"
               className="mt-4"
             >
-              Dismiss
+              {/* English: 'Dismiss' */} Fechar
             </Button>
           </div>
         )}
@@ -434,13 +490,13 @@ export default function ClinicDashboard() {
                     #
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Chat ID
+                    {/* English: 'Chat ID' */} ID do chat
                   </th>
                   <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Created At
+                    {/* English: 'Created At' */} Criado em
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
+                    {/* English: 'Status' */} Status
                   </th>
                 </tr>
               </thead>
@@ -451,7 +507,7 @@ export default function ClinicDashboard() {
                       colSpan={4}
                       className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                     >
-                      Loading chats...
+                      {/* English: 'Loading chats...' */} Carregando chats...
                     </td>
                   </tr>
                 ) : isFetchingPage ? (
@@ -498,23 +554,25 @@ export default function ClinicDashboard() {
                         </div>
                         <div className="text-gray-700 dark:text-gray-300 font-medium">
                           {hasActiveFilters
-                            ? 'No chats match your filters'
-                            : 'No chats yet'}
+                            ? /* English: 'No chats match your filters' */ 'Nenhum chat corresponde aos seus filtros'
+                            : /* English: 'No chats yet' */ 'Ainda não há chats'}
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           {hasActiveFilters ? (
                             <>
-                              Try adjusting your filters or{' '}
+                              {/* English: 'Try adjusting your filters or ' */}{' '}
+                              Tente ajustar seus filtros ou{' '}
                               <button
                                 type="button"
                                 onClick={clearFilters}
                                 className="text-blue-600 dark:text-blue-400 hover:underline"
                               >
-                                clear all filters
+                                {/* English: 'clear all filters' */} limpar
+                                todos os filtros
                               </button>
                             </>
                           ) : (
-                            'Create your first chat to get started'
+                            /* English: 'Create your first chat to get started' */ 'Crie seu primeiro chat para começar'
                           )}
                         </p>
                       </div>
@@ -548,7 +606,7 @@ export default function ClinicDashboard() {
                               chat.status,
                             )}`}
                           >
-                            {chat.status.replace('_', ' ')}
+                            {getStatusLabel(chat.status)}
                           </span>
                         </td>
                       </tr>
