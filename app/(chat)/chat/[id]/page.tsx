@@ -10,14 +10,20 @@ import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { convertToUIMessages } from '@/lib/utils';
 import { TokenGate } from '@/components/token-gate';
+import { UUID_REGEX } from '@/lib/validation';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
+
+  if (!UUID_REGEX.test(id)) {
+    return notFound();
+  }
+
   const chat = await getChatById({ id });
 
   if (!chat || chat.readOnly) {
-    notFound();
+    return notFound();
   }
 
   if (!chat.token) {

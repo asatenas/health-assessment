@@ -2,6 +2,7 @@ import { isProductionEnvironment } from '@/lib/constants';
 import { getChatByIdAndToken, updateChatStatusById } from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { UUID_REGEX, TOKEN_REGEX } from '@/lib/validation';
 
 export async function POST(request: Request) {
   try {
@@ -14,19 +15,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate chatId is a valid UUID (v4)
-    const uuidV4Regex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidV4Regex.test(chatId)) {
+    if (!UUID_REGEX.test(chatId)) {
       return NextResponse.json(
         { error: 'Invalid chatId format' },
         { status: 400 },
       );
     }
 
-    // Validate token matches XXXX-XXXX pattern (uppercase hex digits)
-    const tokenRegex = /^[A-F0-9]{4}-[A-F0-9]{4}$/;
-    if (!tokenRegex.test(token)) {
+    if (!TOKEN_REGEX.test(token)) {
       return NextResponse.json(
         { error: 'Invalid token format' },
         { status: 400 },
