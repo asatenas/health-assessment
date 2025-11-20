@@ -194,10 +194,10 @@ export default function ClinicDashboard() {
         return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200';
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'expired':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'finished':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      case 'expired':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
@@ -319,8 +319,8 @@ export default function ClinicDashboard() {
                   <option value="active">Active</option>
                   <option value="initialized">Initialized</option>
                   <option value="in_progress">In Progress</option>
-                  <option value="expired">Expired</option>
                   <option value="finished">Finished</option>
+                  <option value="expired">Expired</option>
                 </select>
               </div>
 
