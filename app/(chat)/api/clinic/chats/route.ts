@@ -1,6 +1,7 @@
 import { auth } from '@/app/(auth)/auth';
 import { getChatsByClinicUserId, getUserById } from '@/lib/db/queries';
 import { type NextRequest, NextResponse } from 'next/server';
+import { CHAT_STATUSES, type ChatStatus } from '@/lib/db/chat-status';
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -16,11 +17,10 @@ export async function GET(request: NextRequest) {
   }
 
   const searchParams = request.nextUrl.searchParams;
-  const allowedStatuses = ['active', 'in_progress', 'expired', 'finished'];
   const statusParam = searchParams.get('status');
   const status =
-    statusParam && allowedStatuses.includes(statusParam)
-      ? statusParam
+    statusParam && CHAT_STATUSES.includes(statusParam as ChatStatus)
+      ? (statusParam as ChatStatus)
       : undefined;
   const dateFrom = searchParams.get('dateFrom') || undefined;
   const dateTo = searchParams.get('dateTo') || undefined;
@@ -36,12 +36,7 @@ export async function GET(request: NextRequest) {
   try {
     const result = await getChatsByClinicUserId({
       userId: session.user.id,
-      status: status as
-        | 'active'
-        | 'in_progress'
-        | 'expired'
-        | 'finished'
-        | undefined,
+      status,
       dateFrom,
       dateTo,
       page,

@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
+import type { ChatStatus } from '@/lib/db/chat-status';
 
 type Chat = {
   id: string;
   createdAt: string;
-  status: 'active' | 'in_progress' | 'expired' | 'finished';
+  status: ChatStatus;
 };
 
 type CreateChatResponse = {
@@ -69,13 +70,7 @@ export default function ClinicDashboard() {
       setIsLoading(false);
       setIsFetchingPage(false);
     }
-  }, [
-    statusFilter,
-    dateFromFilter,
-    dateToFilter,
-    currentPage,
-    limit,
-  ]);
+  }, [statusFilter, dateFromFilter, dateToFilter, currentPage, limit]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -185,7 +180,8 @@ export default function ClinicDashboard() {
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Failed to copy to clipboard. Please check your browser permissions.',
+        description:
+          'Failed to copy to clipboard. Please check your browser permissions.',
       });
     }
   };

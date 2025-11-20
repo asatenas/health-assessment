@@ -33,6 +33,7 @@ import { generateUUID } from '../utils';
 import { generateHashedPassword } from './utils';
 import type { VisibilityType } from '@/components/visibility-selector';
 import { ChatSDKError } from '../errors';
+import type { ChatStatus } from './chat-status';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -687,7 +688,7 @@ export async function updateChatStatusById({
   status,
 }: {
   chatId: string;
-  status: 'active' | 'in_progress' | 'expired' | 'finished';
+  status: ChatStatus;
 }) {
   try {
     return await db.update(chat).set({ status }).where(eq(chat.id, chatId));
@@ -708,7 +709,7 @@ export async function getChatsByClinicUserId({
   limit = 20,
 }: {
   userId: string;
-  status?: 'active' | 'in_progress' | 'expired' | 'finished';
+  status?: ChatStatus;
   dateFrom?: string;
   dateTo?: string;
   page?: number;

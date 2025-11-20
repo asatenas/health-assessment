@@ -10,6 +10,7 @@ import {
   foreignKey,
   boolean,
 } from 'drizzle-orm/pg-core';
+import { CHAT_STATUSES } from './chat-status';
 
 export const user = pgTable('User', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
@@ -36,7 +37,7 @@ export const chat = pgTable('Chat', {
   medications: text('medications'),
   token: varchar('token', { length: 64 }),
   status: varchar('status', {
-    enum: ['active', 'in_progress', 'expired', 'finished'],
+    enum: CHAT_STATUSES,
   })
     .notNull()
     .default('active'),
