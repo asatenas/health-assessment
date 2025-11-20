@@ -725,13 +725,13 @@ export async function getChatsByClinicUserId({
     // Add date range filters if provided
     if (dateFrom) {
       const fromDate = new Date(dateFrom);
-      if (!isNaN(fromDate.getTime())) {
+      if (!Number.isNaN(fromDate.getTime())) {
         conditions.push(gte(chat.createdAt, fromDate));
       }
     }
     if (dateTo) {
       const endDate = new Date(dateTo);
-      if (!isNaN(endDate.getTime())) {
+      if (!Number.isNaN(endDate.getTime())) {
         // Add one day to include the entire end date
         endDate.setDate(endDate.getDate() + 1);
         conditions.push(lt(chat.createdAt, endDate));
