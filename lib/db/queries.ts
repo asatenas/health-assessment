@@ -634,10 +634,7 @@ export async function updateChatFormById({
   form: any;
 }) {
   try {
-    return await db
-      .update(chat)
-      .set({ form, status: 'in_progress' })
-      .where(eq(chat.id, chatId));
+    return await db.update(chat).set({ form }).where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
