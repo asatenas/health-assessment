@@ -35,7 +35,7 @@ export const chat = pgTable('Chat', {
   results: text('results'),
   medications: text('medications'),
   token: varchar('token', { length: 9 }),
-  tokenExpiresAt: timestamp('tokenExpiresAt'),
+  tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
   status: varchar('status', {
     enum: CHAT_STATUSES,
   })
