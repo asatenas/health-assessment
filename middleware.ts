@@ -13,19 +13,7 @@ export async function middleware(request: NextRequest) {
     return new Response('pong', { status: 200 });
   }
 
-  if (pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
-  }
-
-  if (pathname.startsWith('/api/verify-token')) {
-    return NextResponse.next();
-  }
-
-  if (pathname.startsWith('/api/chat')) {
-    return NextResponse.next();
-  }
-
-  if (pathname.startsWith('/chat/')) {
+  if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
@@ -36,32 +24,25 @@ export async function middleware(request: NextRequest) {
   });
 
   const isGuest = guestRegex.test(token?.email ?? '');
+  const isLoggedIn = token && !isGuest;
 
-  if (['/login', '/register'].includes(pathname)) {
-    if (!token) {
-      return NextResponse.next();
-    }
-
-    if (isGuest) {
-      return NextResponse.next();
-    }
-
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  if (pathname === '/dashboard') {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (isGuest) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
+  if (pathname.startsWith('/chat/')) {
     return NextResponse.next();
   }
 
-  if (!token) {
+  if (['/login', '/register'].includes(pathname)) {
+    return isLoggedIn
+      ? NextResponse.redirect(new URL('/dashboard', request.url))
+      : NextResponse.next();
+  }
+
+  if (['/dashboard'].includes(pathname)) {
+    return !isLoggedIn
+      ? NextResponse.redirect(new URL('/login', request.url))
+      : NextResponse.next();
+  }
+
+  if (!isLoggedIn) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
@@ -70,13 +51,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
-    '/chat/:id',
-    '/api/:path*',
-    '/dashboard',
-    '/login',
-    '/register',
-
     /*
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
