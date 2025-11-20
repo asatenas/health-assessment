@@ -95,12 +95,10 @@ export async function createGuestUser() {
 export async function saveChat({
   id,
   userId,
-  title,
   visibility,
 }: {
   id: string;
   userId: string;
-  title: string;
   visibility: VisibilityType;
 }) {
   try {
@@ -108,7 +106,6 @@ export async function saveChat({
       id,
       createdAt: new Date(),
       userId,
-      title,
       visibility,
     });
   } catch (error) {
@@ -135,7 +132,6 @@ export async function createChatWithToken({
         id,
         createdAt,
         userId,
-        title: '',
         visibility: 'private',
         token,
         tokenExpiresAt,
