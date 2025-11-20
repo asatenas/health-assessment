@@ -175,12 +175,19 @@ export default function ClinicDashboard() {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
   }, [statusFilter, dateFromFilter, dateToFilter]);
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      type: 'success',
-      description: 'Copied to clipboard!',
-    });
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        type: 'success',
+        description: 'Copied to clipboard!',
+      });
+    } catch (error) {
+      toast({
+        type: 'error',
+        description: 'Failed to copy to clipboard. Please check your browser permissions.',
+      });
+    }
   };
 
   const getStatusBadgeColor = (status: string) => {
