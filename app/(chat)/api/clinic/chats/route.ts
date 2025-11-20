@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const statusParam = searchParams.get('status');
   const status =
-    statusParam && CHAT_STATUSES.includes(statusParam as ChatStatus)
-      ? (statusParam as ChatStatus)
+    statusParam && (CHAT_STATUSES.includes(statusParam as ChatStatus) || statusParam === 'expired')
+      ? statusParam
       : undefined;
   const dateFrom = searchParams.get('dateFrom') || undefined;
   const dateTo = searchParams.get('dateTo') || undefined;
