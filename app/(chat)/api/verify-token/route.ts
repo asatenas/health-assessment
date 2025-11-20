@@ -34,7 +34,8 @@ export async function POST(request: Request) {
     }
     const chat = await getChatByIdAndToken({ id: chatId, token });
 
-    if (!chat || chat.status === 'finished' || chat.status === 'expired') {
+    const isExpired = new Date(chat.tokenExpiresAt) < new Date();
+    if (!chat || chat.status === 'finished' || isExpired) {
       return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
     }
 

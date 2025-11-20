@@ -28,7 +28,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return notFound();
   }
 
-  if (chat.status === 'expired' || chat.status === 'finished') {
+  const isExpired = new Date(chat.tokenExpiresAt) < new Date();
+  if (chat.status === 'finished' || isExpired) {
     return notFound();
   }
 
