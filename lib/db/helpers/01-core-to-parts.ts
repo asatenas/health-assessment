@@ -13,16 +13,17 @@
 // import { drizzle } from 'drizzle-orm/postgres-js';
 // import { inArray } from 'drizzle-orm';
 // import { appendResponseMessages, type UIMessage } from 'ai';
+// import { postgres_url } from '@/lib/constants';
 
 // config({
 //   path: '.env.local',
 // });
 
-// if (!process.env.POSTGRES_URL) {
+// if (!postgres_url) {
 //   throw new Error('POSTGRES_URL environment variable is not set');
 // }
 
-// const client = postgres(process.env.POSTGRES_URL);
+// const client = postgres(postgres_url!);
 // const db = drizzle(client);
 
 // const BATCH_SIZE = 100; // Process 100 chats at a time

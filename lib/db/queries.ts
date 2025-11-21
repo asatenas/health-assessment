@@ -34,13 +34,14 @@ import { generateUUID } from '../utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../errors';
 import type { ChatStatus } from './chat-status';
+import { postgres_url } from '@/lib/constants';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
 // https://authjs.dev/reference/adapter/drizzle
 
 // biome-ignore lint: Forbidden non-null assertion.
-const client = postgres(process.env.POSTGRES_URL!);
+const client = postgres(postgres_url!);
 const db = drizzle(client);
 
 export async function getUser(email: string): Promise<Array<User>> {
