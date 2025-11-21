@@ -30,7 +30,7 @@ export async function POST() {
     return NextResponse.json({
       chatId,
       token,
-      url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/chat/${chatId}`,
+      url: `https://asatenas.com.br/chat/${chatId}`,
     });
   } catch (error) {
     return NextResponse.json(
