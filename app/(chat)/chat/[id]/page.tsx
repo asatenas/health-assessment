@@ -1,7 +1,5 @@
 import { cookies } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
-
-import { auth } from '@/app/(auth)/auth';
+import { notFound } from 'next/navigation';
 import { Chat } from '@/components/chat';
 import {
   getChatById,
@@ -11,34 +9,42 @@ import {
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { convertToUIMessages } from '@/lib/utils';
+import { TokenGate } from '@/components/token-gate';
+import { UUID_REGEX } from '@/lib/validation';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
+
+  if (!UUID_REGEX.test(id)) {
+    return notFound();
+  }
+
   const chat = await getChatById({ id });
 
-  if (!chat) {
-    notFound();
-  }
-
-  const session = await auth();
-
-  if (!session) {
-    redirect('/api/auth/guest');
-  }
-
-  if (chat.visibility === 'private') {
-    if (!session.user) {
-      return notFound();
-    }
-
-    if (session.user.id !== chat.userId) {
-      return notFound();
-    }
-  }
-
-  if (chat.readOnly) {
+  if (!chat || chat.readOnly) {
     return notFound();
+  }
+
+  if (!chat.token) {
+    return notFound();
+  }
+
+  if (chat.visibility !== 'private') {
+    return notFound();
+  }
+
+  const isExpired = new Date(chat.tokenExpiresAt) < new Date();
+  if (chat.status === 'finished' || isExpired) {
+    return notFound();
+  }
+
+  const cookieStore = await cookies();
+
+  const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
+
+  if (!chatTokenCookie || chatTokenCookie.value !== chat.token) {
+    return <TokenGate chatId={id} />;
   }
 
   const messagesFromDb = await getMessagesByChatId({
@@ -47,42 +53,20 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
-  const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
-
-  const isReadOnly = chat.readOnly || session?.user?.id !== chat.userId;
+  const chatModel = chatModelFromCookie?.value || DEFAULT_CHAT_MODEL;
 
   const initialFormData = await getChatFormById({ id });
   const hasInitialMessages = uiMessages.length > 1;
-
-  if (!chatModelFromCookie) {
-    return (
-      <>
-        <Chat
-          id={chat.id}
-          initialMessages={uiMessages}
-          initialChatModel={DEFAULT_CHAT_MODEL}
-          initialVisibilityType={chat.visibility}
-          isReadonly={isReadOnly}
-          session={session}
-          autoResume={true}
-          initialFormData={initialFormData}
-          hasInitialMessages={hasInitialMessages}
-        />
-        <DataStreamHandler />
-      </>
-    );
-  }
 
   return (
     <>
       <Chat
         id={chat.id}
         initialMessages={uiMessages}
-        initialChatModel={chatModelFromCookie.value}
+        initialChatModel={chatModel}
         initialVisibilityType={chat.visibility}
-        isReadonly={isReadOnly}
-        session={session}
+        isReadonly={chat.readOnly}
         autoResume={true}
         initialFormData={initialFormData}
         hasInitialMessages={hasInitialMessages}

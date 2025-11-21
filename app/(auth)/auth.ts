@@ -59,6 +59,11 @@ export const {
 
         if (!passwordsMatch) return null;
 
+        // Check if email is verified
+        if (!user.emailVerified) {
+          return null;
+        }
+
         return { ...user, type: 'regular' };
       },
     }),

@@ -75,40 +75,54 @@ export class ChatSDKError extends Error {
 
 export function getMessageByErrorCode(errorCode: ErrorCode): string {
   if (errorCode.includes('database')) {
-    return 'An error occurred while executing a database query.';
+    // English: 'An error occurred while executing a database query.'
+    return 'Ocorreu um erro ao executar uma consulta ao banco de dados.';
   }
 
   switch (errorCode) {
     case 'bad_request:api':
-      return "The request couldn't be processed. Please check your input and try again.";
+      // English: "The request couldn't be processed. Please check your input and try again."
+      return 'A solicitação não pôde ser processada. Verifique seus dados e tente novamente.';
 
     case 'unauthorized:auth':
-      return 'You need to sign in before continuing.';
+      // English: 'You need to sign in before continuing.'
+      return 'Você precisa entrar antes de continuar.';
     case 'forbidden:auth':
-      return 'Your account does not have access to this feature.';
+      // English: 'Your account does not have access to this feature.'
+      return 'Sua conta não tem acesso a este recurso.';
 
     case 'rate_limit:chat':
-      return 'You have exceeded your maximum number of messages for the day. Please try again later.';
+      // English: 'You have exceeded your maximum number of messages for the day. Please try again later.'
+      return 'Você excedeu o número máximo de mensagens para o dia. Por favor, tente novamente mais tarde.';
     case 'not_found:chat':
-      return 'The requested chat was not found. Please check the chat ID and try again.';
+      // English: 'The requested chat was not found. Please check the chat ID and try again.'
+      return 'O chat solicitado não foi encontrado. Verifique o ID do chat e tente novamente.';
     case 'forbidden:chat':
-      return 'This chat belongs to another user. Please check the chat ID and try again.';
+      // English: 'This chat belongs to another user. Please check the chat ID and try again.'
+      return 'Este chat pertence a outro usuário. Verifique o ID do chat e tente novamente.';
     case 'unauthorized:chat':
-      return 'You need to sign in to view this chat. Please sign in and try again.';
+      // English: 'You need to sign in to view this chat. Please sign in and try again.'
+      return 'Você precisa entrar para visualizar este chat. Faça login e tente novamente.';
     case 'offline:chat':
-      return "We're having trouble sending your message. Please check your internet connection and try again.";
+      // English: "We're having trouble sending your message. Please check your internet connection and try again."
+      return 'Estamos tendo problemas para enviar sua mensagem. Verifique sua conexão com a internet e tente novamente.';
 
     case 'not_found:document':
-      return 'The requested document was not found. Please check the document ID and try again.';
+      // English: 'The requested document was not found. Please check the document ID and try again.'
+      return 'O documento solicitado não foi encontrado. Verifique o ID do documento e tente novamente.';
     case 'forbidden:document':
-      return 'This document belongs to another user. Please check the document ID and try again.';
+      // English: 'This document belongs to another user. Please check the document ID and try again.'
+      return 'Este documento pertence a outro usuário. Verifique o ID do documento e tente novamente.';
     case 'unauthorized:document':
-      return 'You need to sign in to view this document. Please sign in and try again.';
+      // English: 'You need to sign in to view this document. Please sign in and try again.'
+      return 'Você precisa entrar para visualizar este documento. Faça login e tente novamente.';
     case 'bad_request:document':
-      return 'The request to create or update the document was invalid. Please check your input and try again.';
+      // English: 'The request to create or update the document was invalid. Please check your input and try again.'
+      return 'A solicitação para criar ou atualizar o documento é inválida. Verifique seus dados e tente novamente.';
 
     default:
-      return 'Something went wrong. Please try again later.';
+      // English: 'Something went wrong. Please try again later.'
+      return 'Algo deu errado. Por favor, tente novamente mais tarde.';
   }
 }
 

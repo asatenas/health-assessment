@@ -224,7 +224,8 @@ const PurePreviewMessage = ({
                       key={toolCallId}
                       className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/50"
                     >
-                      Error creating document: {String(part.output.error)}
+                      {/* English: 'Error creating document:' */} Erro ao criar
+                      documento: {String(part.output.error)}
                     </div>
                   );
                 }
@@ -247,7 +248,8 @@ const PurePreviewMessage = ({
                       key={toolCallId}
                       className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/50"
                     >
-                      Error updating document: {String(part.output.error)}
+                      {/* English: 'Error updating document:' */} Erro ao
+                      atualizar documento: {String(part.output.error)}
                     </div>
                   );
                 }
@@ -278,7 +280,8 @@ const PurePreviewMessage = ({
                           output={
                             'error' in part.output ? (
                               <div className="p-2 text-red-500 rounded border">
-                                Error: {String(part.output.error)}
+                                {/* English: 'Error:' */} Erro:{' '}
+                                {String(part.output.error)}
                               </div>
                             ) : (
                               <DocumentToolResult

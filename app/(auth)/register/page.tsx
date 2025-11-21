@@ -28,16 +28,20 @@ export default function Page() {
 
   useEffect(() => {
     if (state.status === 'user_exists') {
-      toast({ type: 'error', description: 'Account already exists!' });
+      // English: 'Account already exists!'
+      toast({ type: 'error', description: 'Conta já existe!' });
     } else if (state.status === 'failed') {
-      toast({ type: 'error', description: 'Failed to create account!' });
+      // English: 'Failed to create account!'
+      toast({ type: 'error', description: 'Falha ao criar a conta!' });
     } else if (state.status === 'invalid_data') {
       toast({
         type: 'error',
-        description: 'Failed validating your submission!',
+        // English: 'Failed validating your submission!'
+        description: 'Falha na validação do seu envio!',
       });
     } else if (state.status === 'success') {
-      toast({ type: 'success', description: 'Account created successfully!' });
+      // English: 'Account created successfully!'
+      toast({ type: 'success', description: 'Conta criada com sucesso!' });
 
       setIsSuccessful(true);
       updateSession();
@@ -54,22 +58,29 @@ export default function Page() {
     <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
       <div className="w-full max-w-md overflow-hidden rounded-2xl gap-12 flex flex-col">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
-          <h3 className="text-xl font-semibold dark:text-zinc-50">Sign Up</h3>
+          <h3 className="text-xl font-semibold dark:text-zinc-50">
+            {/* English: 'Sign Up' */}
+            Cadastre-se
+          </h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Create an account with your email and password
+            {/* English: 'Create an account with your email and password' */}
+            Crie uma conta com seu e-mail e senha
           </p>
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign Up</SubmitButton>
+          <SubmitButton isSuccessful={isSuccessful}>
+            {/* English: 'Sign Up' */}
+            Cadastre-se
+          </SubmitButton>
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-            {'Already have an account? '}
+            {/* English: 'Already have an account? ' */} Já tem uma conta?{' '}
             <Link
               href="/login"
               className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
             >
-              Sign in
-            </Link>
-            {' instead.'}
+              {/* English: 'Sign in' */} Entrar
+            </Link>{' '}
+            {/* English: 'instead.' */} em vez disso.
           </p>
         </AuthForm>
       </div>

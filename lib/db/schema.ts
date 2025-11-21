@@ -10,11 +10,13 @@ import {
   foreignKey,
   boolean,
 } from 'drizzle-orm/pg-core';
+import { CHAT_STATUSES } from './chat-status';
 
 export const user = pgTable('User', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
+  emailVerified: boolean('emailVerified').notNull().default(false),
 });
 
 export type User = InferSelectModel<typeof user>;
@@ -22,7 +24,6 @@ export type User = InferSelectModel<typeof user>;
 export const chat = pgTable('Chat', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   createdAt: timestamp('createdAt').notNull(),
-  title: text('title').notNull(),
   userId: uuid('userId')
     .notNull()
     .references(() => user.id),
@@ -33,6 +34,13 @@ export const chat = pgTable('Chat', {
   form: json('form'),
   results: text('results'),
   medications: text('medications'),
+  token: varchar('token', { length: 9 }),
+  tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
+  status: varchar('status', {
+    enum: CHAT_STATUSES,
+  })
+    .notNull()
+    .default('active'),
 });
 
 export type Chat = InferSelectModel<typeof chat>;

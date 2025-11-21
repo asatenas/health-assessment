@@ -78,6 +78,34 @@
       "when": 1760632616685,
       "tag": "0010_long_betty_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1763568386152,
+      "tag": "0011_careful_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1763648850513,
+      "tag": "0012_wonderful_charles_xavier",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1763650206886,
+      "tag": "0013_icy_pride",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1763650856451,
+      "tag": "0014_cynical_warlock",
+      "breakpoints": true
     }
   ]
 }

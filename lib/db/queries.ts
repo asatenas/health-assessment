@@ -10,6 +10,7 @@ import {
   gte,
   inArray,
   lt,
+  sql,
   type SQL,
 } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -31,8 +32,8 @@ import {
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
 import { generateHashedPassword } from './utils';
-import type { VisibilityType } from '@/components/visibility-selector';
 import { ChatSDKError } from '../errors';
+import type { ChatStatus } from './chat-status';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -50,6 +51,17 @@ export async function getUser(email: string): Promise<Array<User>> {
       'bad_request:database',
       'Failed to get user by email',
     );
+  }
+}
+
+export async function getUserById({
+  id,
+}: { id: string }): Promise<User | undefined> {
+  try {
+    const [selectedUser] = await db.select().from(user).where(eq(user.id, id));
+    return selectedUser;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to get user by id');
   }
 }
 
@@ -80,27 +92,56 @@ export async function createGuestUser() {
   }
 }
 
-export async function saveChat({
+export async function createChatWithToken({
   id,
   userId,
-  title,
-  visibility,
+  token,
 }: {
   id: string;
   userId: string;
-  title: string;
-  visibility: VisibilityType;
+  token: string;
 }) {
   try {
-    return await db.insert(chat).values({
-      id,
-      createdAt: new Date(),
-      userId,
-      title,
-      visibility,
-    });
+    const createdAt = new Date();
+    const tokenExpiresAt = new Date(
+      createdAt.getTime() + 7 * 24 * 60 * 60 * 1000,
+    ); // 7 days from creation
+
+    return await db
+      .insert(chat)
+      .values({
+        id,
+        createdAt,
+        userId,
+        visibility: 'private',
+        token,
+        tokenExpiresAt,
+        status: 'active',
+      })
+      .returning();
   } catch (error) {
-    throw new ChatSDKError('bad_request:database', 'Failed to save chat');
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create chat with token',
+    );
+  }
+}
+
+export async function getChatByIdAndToken({
+  id,
+  token,
+}: { id: string; token: string }) {
+  try {
+    const [selectedChat] = await db
+      .select()
+      .from(chat)
+      .where(and(eq(chat.id, id), eq(chat.token, token)));
+    return selectedChat;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat by id and token',
+    );
   }
 }
 
@@ -205,6 +246,58 @@ export async function getChatById({ id }: { id: string }) {
     return selectedChat;
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to get chat by id');
+  }
+}
+
+export async function getChatWithStatusById({ id }: { id: string }) {
+  try {
+    const [row] =
+      await client`SELECT * FROM "ChatWithStatus" WHERE "id" = ${id} LIMIT 1`;
+    return row || null;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat with computed status by id',
+    );
+  }
+}
+
+export async function getChatsWithStatusByUserId({
+  userId,
+  page = 1,
+  limit = 20,
+}: {
+  userId: string;
+  page?: number;
+  limit?: number;
+}) {
+  try {
+    const offset = (page - 1) * limit;
+
+    const chats = await client`
+      SELECT "id", "createdAt", "computed_status" AS status
+      FROM "ChatWithStatus"
+      WHERE "userId" = ${userId}
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const [{ count }] = await client`
+      SELECT count(*)::int AS count FROM "ChatWithStatus" WHERE "userId" = ${userId}
+    `;
+
+    const total = count ?? 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      chats,
+      pagination: { page, limit, total, totalPages },
+    };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chats with computed status by user id',
+    );
   }
 }
 
@@ -488,7 +581,7 @@ export async function makeChatReadOnlyById({ chatId }: { chatId: string }) {
   try {
     return await db
       .update(chat)
-      .set({ readOnly: true })
+      .set({ readOnly: true, status: 'finished' })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
@@ -616,6 +709,111 @@ export async function updateChatResultsById({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to update chat results by id',
+    );
+  }
+}
+
+export async function updateChatStatusById({
+  chatId,
+  status,
+}: {
+  chatId: string;
+  status: ChatStatus;
+}) {
+  try {
+    return await db.update(chat).set({ status }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat status by id',
+    );
+  }
+}
+
+export async function getChatsByClinicUserId({
+  userId,
+  status,
+  dateFrom,
+  dateTo,
+  page = 1,
+  limit = 20,
+}: {
+  userId: string;
+  status?: ChatStatus | 'expired';
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+}) {
+  try {
+    const conditions: SQL<any>[] = [eq(chat.userId, userId)];
+
+    // Add status filter if provided. Use compute-on-read semantics:
+    // - If requested status is 'expired' consider rows where tokenExpiresAt <= now() OR status = 'expired'
+    // - For other statuses, require the stored status AND tokenExpiresAt > now() (otherwise computed_status would be 'expired')
+    if (status) {
+      if (status === 'expired') {
+        conditions.push(
+          sql`(${chat.tokenExpiresAt} <= now() OR ${chat.status} = 'expired')`,
+        );
+      } else {
+        conditions.push(
+          sql`(${chat.status} = ${status} AND ${chat.tokenExpiresAt} > now())`,
+        );
+      }
+    }
+
+    // Add date range filters if provided
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      if (!Number.isNaN(fromDate.getTime())) {
+        conditions.push(gte(chat.createdAt, fromDate));
+      }
+    }
+    if (dateTo) {
+      const endDate = new Date(dateTo);
+      if (!Number.isNaN(endDate.getTime())) {
+        // Add one day to include the entire end date
+        endDate.setDate(endDate.getDate() + 1);
+        conditions.push(lt(chat.createdAt, endDate));
+      }
+    }
+
+    const [totalResult] = await db
+      .select({ count: count() })
+      .from(chat)
+      .where(and(...conditions));
+
+    const total = totalResult?.count || 0;
+    const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+
+    const chats = await db
+      .select({
+        id: chat.id,
+        createdAt: chat.createdAt,
+        // Project a computed status: expired when tokenExpiresAt <= now(), otherwise original status
+        status: sql`CASE WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
+      })
+      .from(chat)
+      .where(and(...conditions))
+      .orderBy(desc(chat.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      chats,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chats by clinic user id',
     );
   }
 }

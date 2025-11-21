@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     return new Response('pong', { status: 200 });
   }
 
-  if (pathname.startsWith('/api/auth')) {
+  if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
@@ -23,18 +23,27 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  if (!token) {
-    const redirectUrl = encodeURIComponent(request.url);
+  const isGuest = guestRegex.test(token?.email ?? '');
+  const isLoggedIn = token && !isGuest;
 
-    return NextResponse.redirect(
-      new URL(`/api/auth/guest?redirectUrl=${redirectUrl}`, request.url),
-    );
+  if (pathname.startsWith('/chat/')) {
+    return NextResponse.next();
   }
 
-  const isGuest = guestRegex.test(token?.email ?? '');
+  if (['/login', '/register'].includes(pathname)) {
+    return isLoggedIn
+      ? NextResponse.redirect(new URL('/dashboard', request.url))
+      : NextResponse.next();
+  }
 
-  if (token && !isGuest && ['/login', '/register'].includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url));
+  if (['/dashboard'].includes(pathname)) {
+    return !isLoggedIn
+      ? NextResponse.redirect(new URL('/login', request.url))
+      : NextResponse.next();
+  }
+
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
@@ -42,12 +51,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/',
-    '/chat/:id',
-    '/api/:path*',
-    '/login',
-    '/register',
-
     /*
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
