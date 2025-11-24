@@ -47,16 +47,150 @@ export const myProvider = isTestEnvironment
             },
           }),
         }),
-        'chat-model-reasoning': wrapLanguageModel({
+        'gpt-5-medium': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'medium',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5-high': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'high',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5-pro-medium': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5-pro'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'medium',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5-pro-high': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5-pro'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'high',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5.1-medium': wrapLanguageModel({
           model: gateway.languageModel('openai/gpt-5.1'),
           middleware: defaultSettingsMiddleware({
             settings: {
               providerOptions: {
                 openai: {
                   reasoningEffort: 'medium',
-                  // reasoningSummary: 'auto',
+                  reasoningSummary: 'auto',
                   serviceTier: 'priority',
                   textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5.1-high': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5.1'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'high',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5.1-thinking-medium': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5.1-thinking'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'medium',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gpt-5.1-thinking-high': wrapLanguageModel({
+          model: gateway.languageModel('openai/gpt-5.1-thinking'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                openai: {
+                  reasoningEffort: 'high',
+                  reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
+                },
+              },
+            },
+          }),
+        }),
+        'gemini-3-pro-preview-medium': wrapLanguageModel({
+          model: gateway.languageModel('google/gemini-3-pro-preview'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                google: {
+                  thinkingConfig: {
+                    includeThoughts: true,
+                  },
+                },
+              },
+            },
+          }),
+        }),
+        'gemini-3-pro-preview-high': wrapLanguageModel({
+          model: gateway.languageModel('google/gemini-3-pro-preview'),
+          middleware: defaultSettingsMiddleware({
+            settings: {
+              providerOptions: {
+                google: {
+                  thinkingConfig: {
+                    thinkingLevel: 'high',
+                    includeThoughts: true,
+                  },
                 },
               },
             },

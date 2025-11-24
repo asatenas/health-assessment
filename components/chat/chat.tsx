@@ -2,7 +2,7 @@
 
 import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChatHeader } from '@/components/chat/chat-header';
 import { fetchWithErrorHandlers, generateUUID } from '@/lib/shared/utils';
 import { MultimodalInput } from './multimodal-input';
@@ -15,8 +15,10 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/shared/errors';
 import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../providers/data-stream-provider';
+import { regularPrompt } from '@/lib/ai/prompts';
 import { PreChatForm, formatPacienteInfo } from './pre-chat-form';
 import { NPSEvaluation } from './nps-evaluation';
+import { PromptTester } from '../prompt-tester';
 
 export function Chat({
   id,
@@ -48,6 +50,32 @@ export function Chat({
   const { setDataStream } = useDataStream();
 
   const [input, setInput] = useState<string>('');
+  const [customPrompt, setCustomPrompt] = useState<string>(regularPrompt);
+  const [hasPromptChanges, setHasPromptChanges] = useState(false);
+
+  // Use a ref to hold the current prompt so the closure in prepareSendMessagesRequest
+  // always sees the latest value
+  const customPromptRef = useRef<string>(customPrompt);
+
+  // Update ref whenever customPrompt changes
+  useEffect(() => {
+    customPromptRef.current = customPrompt;
+  }, [customPrompt]);
+
+  // Warn user before leaving if they have unsaved prompt changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasPromptChanges) {
+        e.preventDefault();
+        e.returnValue =
+          'Você tem alterações do prompt não salvas. Tem certeza que deseja sair?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasPromptChanges]);
 
   const {
     messages,
@@ -69,6 +97,9 @@ export function Chat({
         const userMessages = messages.filter((m) => m.role === 'user');
         const isFirstUserMessage = userMessages.length === 1;
 
+        // Use the ref to get the current value
+        const currentCustomPrompt = customPromptRef.current;
+
         return {
           body: {
             id,
@@ -76,6 +107,7 @@ export function Chat({
             messages: isFirstUserMessage ? messages : undefined,
             selectedChatModel: initialChatModel,
             selectedVisibilityType: visibilityType,
+            customPrompt: currentCustomPrompt,
             ...body,
           },
         };
@@ -206,7 +238,7 @@ export function Chat({
           />
         )}
 
-        {hasCompletedForm && (
+        {
           <div className="sticky bottom-0 flex gap-2 px-4 pb-2 mx-auto w-full bg-background md:max-w-3xl z-[1] border-t-0">
             {!currentIsReadonly && (
               <MultimodalInput
@@ -227,8 +259,14 @@ export function Chat({
               hasFinalizeInterviewCalled &&
               status === 'ready' && <NPSEvaluation chatId={id} />}
           </div>
-        )}
+        }
       </div>
+
+      <PromptTester
+        onPromptChange={setCustomPrompt}
+        hasChanges={hasPromptChanges}
+        setHasChanges={setHasPromptChanges}
+      />
     </>
   );
 }

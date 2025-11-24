@@ -14,7 +14,7 @@ import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/shared/utils';
 
 import { CheckCircleFillIcon, ChevronDownIcon } from '../ui/icons';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
+// import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import type { Session } from 'next-auth';
 
 export function ModelSelector({
@@ -30,18 +30,15 @@ export function ModelSelector({
     useOptimistic(selectedModelId);
 
   const userType = session.user.type;
-  const { availableChatModelIds } = entitlementsByUserType[userType];
+  // const { availableChatModelIds } = entitlementsByUserType[userType];
 
-  const availableChatModels = chatModels.filter((chatModel) =>
-    availableChatModelIds.includes(chatModel.id),
-  );
+  // const availableChatModels = chatModels.filter((chatModel) =>
+  //   availableChatModelIds.includes(chatModel.id),
+  // );
 
   const selectedChatModel = useMemo(
-    () =>
-      availableChatModels.find(
-        (chatModel) => chatModel.id === optimisticModelId,
-      ),
-    [optimisticModelId, availableChatModels],
+    () => chatModels.find((chatModel) => chatModel.id === optimisticModelId),
+    [optimisticModelId],
   );
 
   return (
@@ -63,7 +60,7 @@ export function ModelSelector({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[300px]">
-        {availableChatModels.map((chatModel) => {
+        {chatModels.map((chatModel) => {
           const { id } = chatModel;
 
           return (

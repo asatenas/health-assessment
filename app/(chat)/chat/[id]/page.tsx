@@ -23,33 +23,43 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const chat = await getChatById({ id });
 
-  if (!chat || chat.readOnly) {
-    return notFound();
-  }
-
-  if (!chat.token) {
-    return notFound();
-  }
-
-  if (chat.visibility !== 'private') {
-    return notFound();
-  }
-
-  const isExpired = new Date(chat.tokenExpiresAt) < new Date();
-  if (chat.status === 'finished' || isExpired) {
+  if (!chat) {
     return notFound();
   }
 
   const cookieStore = await cookies();
 
-  const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
+  const chatModelFromCookie = cookieStore.get('chat-model');
+  const chatModel = chatModelFromCookie?.value || DEFAULT_CHAT_MODEL;
 
+  // if (chat.visibility === 'public') {
+  //   return buildChatInterface(chat, chatModel);
+  // }
+
+  // if (chat.readOnly) {
+  //   return notFound();
+  // }
+
+  if (!chat.token) {
+    return notFound();
+  }
+
+  // const isExpired = new Date(chat.tokenExpiresAt) < new Date();
+  // if (chat.status === 'finished' || isExpired) {
+  //   return notFound();
+  // }
+
+  const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
   if (!chatTokenCookie || chatTokenCookie.value !== chat.token) {
     return <TokenGate chatId={id} />;
   }
 
+  return buildChatInterface(chat, chatModel);
+}
+
+async function buildChatInterface(chat: any, chatModel: string) {
   const messagesFromDb = await getMessagesByChatId({
-    id,
+    id: chat.id,
   });
 
   const uiMessages = convertToUIMessages(messagesFromDb);
@@ -68,10 +78,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     },
   });
 
-  const chatModelFromCookie = cookieStore.get('chat-model');
-  const chatModel = chatModelFromCookie?.value || DEFAULT_CHAT_MODEL;
-
-  const initialFormData = await getChatFormById({ id });
+  const initialFormData = await getChatFormById({
+    id: chat.id,
+  });
 
   return (
     <>

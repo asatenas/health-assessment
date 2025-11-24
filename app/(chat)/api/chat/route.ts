@@ -8,11 +8,7 @@ import {
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { cookies } from 'next/headers';
-import {
-  initialMessage,
-  type RequestHints,
-  systemPrompt,
-} from '@/lib/ai/prompts';
+import { initialMessage, type RequestHints } from '@/lib/ai/prompts';
 import {
   createStreamId,
   deleteChatById,
@@ -86,13 +82,14 @@ export async function POST(request: Request) {
       message,
       messages,
       selectedChatModel,
-      // selectedVisibilityType,
+      customPrompt,
     }: {
       id: string;
       message: ChatMessage;
       messages?: ChatMessage[];
       selectedChatModel: ChatModel['id'];
       selectedVisibilityType: VisibilityType;
+      customPrompt: string;
     } = requestBody;
 
     const cookieStore = await cookies();
@@ -186,8 +183,8 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ requestHints, useGeolocation: false }),
-          messages: convertToModelMessages(deduplicatedMessages),
+          system: customPrompt,
+          messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {

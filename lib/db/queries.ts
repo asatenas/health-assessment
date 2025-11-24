@@ -112,7 +112,7 @@ export async function createChatWithToken({
         id,
         createdAt,
         userId,
-        visibility: 'private',
+        visibility: 'public',
         token,
         tokenExpiresAt,
         status: 'active',
