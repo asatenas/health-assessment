@@ -1,4 +1,5 @@
 import { auth } from '@/app/(auth)/auth';
+import { APP_URL } from '@/lib/constants';
 import { createChatWithToken, getUserById } from '@/lib/db/queries';
 import { generateUUID } from '@/lib/utils';
 import { NextResponse } from 'next/server';
@@ -30,7 +31,7 @@ export async function POST() {
     return NextResponse.json({
       chatId,
       token,
-      url: `https://asatenas.com.br/chat/${chatId}`,
+      url: `${APP_URL}/chat/${chatId}`,
     });
   } catch (error) {
     return NextResponse.json(

@@ -15,3 +15,5 @@ export const postgres_url = isDevelopmentEnvironment
 export const guestRegex = /^guest-\d+$/;
 
 export const DUMMY_PASSWORD = generateDummyPassword();
+
+export const APP_URL = process.env.APP_URL;
