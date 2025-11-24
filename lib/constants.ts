@@ -20,4 +20,4 @@ export const APP_URL = isDevelopmentEnvironment
   ? `http://${process.env.APP_URL_DEV}`
   : isProductionEnvironment
     ? `https://${process.env.APP_URL_PROD}`
-    : `https://${process.env.VERCEL_BRANCH_URL}`;
+    : `https://${process.env.VERCEL_URL}`;
