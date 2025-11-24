@@ -17,5 +17,7 @@ export const guestRegex = /^guest-\d+$/;
 export const DUMMY_PASSWORD = generateDummyPassword();
 
 export const APP_URL = isDevelopmentEnvironment
-  ? `http://${process.env.APP_URL}`
-  : `https://${process.env.VERCEL_URL}`;
+  ? `http://${process.env.APP_URL_DEV}`
+  : isProductionEnvironment
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : `https://${process.env.VERCEL_BRANCH_URL}`;
