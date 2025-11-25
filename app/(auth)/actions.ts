@@ -67,6 +67,16 @@ export const register = async (
       return { status: 'user_exists' } as RegisterActionState;
     }
     await createUser(validatedData.email, validatedData.password);
+
+    if (process.env.NEW_SIGNUPS_WEBHOOK_URL) {
+      await fetch(process.env.NEW_SIGNUPS_WEBHOOK_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          email: validatedData.email,
+        }),
+      });
+    }
+
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
