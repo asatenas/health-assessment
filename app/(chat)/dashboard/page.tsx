@@ -491,21 +491,9 @@ export default function ClinicDashboard() {
           {filtersExpanded && (
             <div className="p-4">
               <div className="flex flex-col gap-4">
-                <div className="flex justify-end">
-                  <Button
-                    onClick={clearFilters}
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs"
-                    disabled={isFetchingPage || !hasActiveFilters}
-                  >
-                    {/* English: 'Clear All' */} Limpar filtros
-                  </Button>
-                </div>
-
                 {/* Date Presets */}
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs text-gray-600 dark:text-gray-400 self-center">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
                     {/* English: 'Quick filters:' */} Filtros rápidos:
                   </span>
                   <Button
@@ -543,6 +531,16 @@ export default function ClinicDashboard() {
                     disabled={isFetchingPage}
                   >
                     {/* English: 'This Month' */} Este mês
+                  </Button>
+                  <div className="flex-1" />
+                  <Button
+                    onClick={clearFilters}
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={isFetchingPage || !hasActiveFilters}
+                  >
+                    {/* English: 'Clear All' */} Limpar filtros
                   </Button>
                 </div>
 
