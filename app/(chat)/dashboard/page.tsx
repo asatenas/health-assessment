@@ -62,7 +62,8 @@ const calculateRiskLevel = (
   if (maxScore === 0) {
     return {
       level: 'Baixo',
-      color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      color:
+        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     };
   }
   if (maxScore === 1) {
@@ -77,7 +78,6 @@ const calculateRiskLevel = (
     color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
   };
 };
-
 
 type MedicationDetail = {
   medicationName: string;
@@ -94,6 +94,7 @@ export default function ClinicDashboard() {
     null,
   );
   const [legendExpanded, setLegendExpanded] = useState(true);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
 
@@ -458,131 +459,157 @@ export default function ClinicDashboard() {
           )}
         </div>
 
-        <div className="mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {/* English: 'Filters' */} Filtros{' '}
-                {isFetchingPage && (
-                  <span className="text-xs text-gray-500">(Carregando...)</span>
-                )}
-              </h3>
-              <Button
-                onClick={clearFilters}
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-                disabled={isFetchingPage || !hasActiveFilters}
+        <div className="mb-6 border rounded-lg bg-gray-50 dark:bg-gray-900">
+          <button
+            type="button"
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-lg"
+          >
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {/* English: 'Filters' */} Filtros{' '}
+              {isFetchingPage && (
+                <span className="text-xs text-gray-500">(Carregando...)</span>
+              )}
+            </h3>
+            <div className="shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`size-5 text-gray-600 dark:text-gray-400 transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                {/* English: 'Clear All' */} Limpar filtros
-              </Button>
-            </div>
-
-            {/* Date Presets */}
-            <div className="flex flex-wrap gap-2">
-              <span className="text-xs text-gray-600 dark:text-gray-400 self-center">
-                {/* English: 'Quick filters:' */} Filtros rápidos:
-              </span>
-              <Button
-                onClick={() => setDatePreset('today')}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                disabled={isFetchingPage}
-              >
-                {/* English: 'Today' */} Hoje
-              </Button>
-              <Button
-                onClick={() => setDatePreset('last7days')}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                disabled={isFetchingPage}
-              >
-                {/* English: 'Last 7 Days' */} Últimos 7 dias
-              </Button>
-              <Button
-                onClick={() => setDatePreset('last30days')}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                disabled={isFetchingPage}
-              >
-                {/* English: 'Last 30 Days' */} Últimos 30 dias
-              </Button>
-              <Button
-                onClick={() => setDatePreset('thisMonth')}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                disabled={isFetchingPage}
-              >
-                {/* English: 'This Month' */} Este mês
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {/* English: 'Status' */} Status
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  disabled={isFetchingPage}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {/* English: 'All Statuses' */} Todos
-                  </option>
-                  <option value="active">
-                    {/* English: 'Active' */} Ativo
-                  </option>
-                  <option value="initialized">
-                    {/* English: 'Initialized' */} Iniciado
-                  </option>
-                  <option value="in_progress">
-                    {/* English: 'In Progress' */} Em progresso
-                  </option>
-                  <option value="finished">
-                    {/* English: 'Finished' */} Finalizado
-                  </option>
-                  <option value="expired">
-                    {/* English: 'Expired' */} Expirado
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {/* English: 'From Date' */} Data de início
-                </label>
-                <input
-                  type="date"
-                  value={dateFromFilter}
-                  onChange={(e) => setDateFromFilter(e.target.value)}
-                  disabled={isFetchingPage}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
-              </div>
+              </svg>
+            </div>
+          </button>
+          {filtersExpanded && (
+            <div className="px-4 pb-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={clearFilters}
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs"
+                    disabled={isFetchingPage || !hasActiveFilters}
+                  >
+                    {/* English: 'Clear All' */} Limpar filtros
+                  </Button>
+                </div>
 
-              <div>
-                {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {/* English: 'To Date' */} Data de fim
-                </label>
-                <input
-                  type="date"
-                  value={dateToFilter}
-                  onChange={(e) => setDateToFilter(e.target.value)}
-                  disabled={isFetchingPage}
-                  className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
+                {/* Date Presets */}
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs text-gray-600 dark:text-gray-400 self-center">
+                    {/* English: 'Quick filters:' */} Filtros rápidos:
+                  </span>
+                  <Button
+                    onClick={() => setDatePreset('today')}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={isFetchingPage}
+                  >
+                    {/* English: 'Today' */} Hoje
+                  </Button>
+                  <Button
+                    onClick={() => setDatePreset('last7days')}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={isFetchingPage}
+                  >
+                    {/* English: 'Last 7 Days' */} Últimos 7 dias
+                  </Button>
+                  <Button
+                    onClick={() => setDatePreset('last30days')}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={isFetchingPage}
+                  >
+                    {/* English: 'Last 30 Days' */} Últimos 30 dias
+                  </Button>
+                  <Button
+                    onClick={() => setDatePreset('thisMonth')}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={isFetchingPage}
+                  >
+                    {/* English: 'This Month' */} Este mês
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {/* English: 'Status' */} Status
+                    </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      disabled={isFetchingPage}
+                      className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {/* English: 'All Statuses' */} Todos
+                      </option>
+                      <option value="active">
+                        {/* English: 'Active' */} Ativo
+                      </option>
+                      <option value="initialized">
+                        {/* English: 'Initialized' */} Iniciado
+                      </option>
+                      <option value="in_progress">
+                        {/* English: 'In Progress' */} Em progresso
+                      </option>
+                      <option value="finished">
+                        {/* English: 'Finished' */} Finalizado
+                      </option>
+                      <option value="expired">
+                        {/* English: 'Expired' */} Expirado
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {/* English: 'From Date' */} Data de início
+                    </label>
+                    <input
+                      type="date"
+                      value={dateFromFilter}
+                      onChange={(e) => setDateFromFilter(e.target.value)}
+                      disabled={isFetchingPage}
+                      className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div>
+                    {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {/* English: 'To Date' */} Data de fim
+                    </label>
+                    <input
+                      type="date"
+                      value={dateToFilter}
+                      onChange={(e) => setDateToFilter(e.target.value)}
+                      disabled={isFetchingPage}
+                      className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {newChatData && (
