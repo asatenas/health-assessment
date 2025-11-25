@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     if (!audioFile) {
       return NextResponse.json(
         { error: 'Audio file is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -22,19 +22,25 @@ export async function POST(request: NextRequest) {
     whisperFormData.append('model', 'whisper-1');
     whisperFormData.append('language', 'pt');
 
-    const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+    const transcriptionResponse = await fetch(
+      'https://api.openai.com/v1/audio/transcriptions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: whisperFormData,
       },
-      body: whisperFormData,
-    });
+    );
 
     if (!transcriptionResponse.ok) {
-      console.error('OpenAI Whisper API error:', await transcriptionResponse.text());
+      console.error(
+        'OpenAI Whisper API error:',
+        await transcriptionResponse.text(),
+      );
       return NextResponse.json(
         { error: 'Failed to transcribe audio' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -47,7 +53,7 @@ export async function POST(request: NextRequest) {
     console.error('Voice message API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

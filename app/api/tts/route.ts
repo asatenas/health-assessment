@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,14 +7,14 @@ export async function POST(request: NextRequest) {
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
         { error: 'Text is required and must be a string' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -37,7 +37,7 @@ Language: Brazilian Portuguese`,
       console.error('OpenAI TTS API error:', await response.text());
       return NextResponse.json(
         { error: 'Failed to generate speech' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -53,7 +53,7 @@ Language: Brazilian Portuguese`,
     console.error('TTS API error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
