@@ -467,10 +467,7 @@ export default function ClinicDashboard() {
             className="w-full p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-lg"
           >
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              {/* English: 'Filters' */} Filtros{' '}
-              {isFetchingPage && (
-                <span className="text-xs text-gray-500">(Carregando...)</span>
-              )}
+              {/* English: 'Filters' */} Filtros
             </h3>
             <div className="shrink-0">
               <svg
