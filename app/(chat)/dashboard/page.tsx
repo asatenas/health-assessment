@@ -71,7 +71,7 @@ export default function ClinicDashboard() {
       setIsLoading(false);
       setIsFetchingPage(false);
     }
-  }, [statusFilter, dateFromFilter, dateToFilter, currentPage, limit]);
+  }, [isLoading, statusFilter, dateFromFilter, dateToFilter, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -486,16 +486,16 @@ export default function ClinicDashboard() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900 border-b">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     #
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {/* English: 'Chat ID' */} ID do chat
                   </th>
-                  <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="hidden md:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {/* English: 'Created At' */} Criado em
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {/* English: 'Status' */} Status
                   </th>
                 </tr>
@@ -539,7 +539,7 @@ export default function ClinicDashboard() {
                         <div className="text-gray-400 dark:text-gray-500">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-12 w-12"
+                            className="h-12"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -586,10 +586,10 @@ export default function ClinicDashboard() {
                         key={chat.id}
                         className="hover:bg-gray-50 dark:hover:bg-gray-900"
                       >
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                           {rowNumber}
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                           <code className="text-xs sm:text-sm font-mono">
                             {chat.id}
                           </code>
@@ -597,10 +597,10 @@ export default function ClinicDashboard() {
                             {new Date(chat.createdAt).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        <td className="hidden md:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           {new Date(chat.createdAt).toLocaleString()}
                         </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                           <span
                             className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
                               chat.status,
