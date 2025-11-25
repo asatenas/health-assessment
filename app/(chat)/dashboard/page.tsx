@@ -18,6 +18,7 @@ type Chat = {
     medicalDevices?: {
       paceMaker?: boolean;
       medicationPump?: boolean;
+      others?: string;
     };
     hemoglobin?: number;
     creatinine?: number;
@@ -1042,15 +1043,28 @@ export default function ClinicDashboard() {
                               Médicos
                             </div>
                             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                              {selectedChat.form.medicalDevices.paceMaker &&
-                              selectedChat.form.medicalDevices.medicationPump
-                                ? 'Marcapasso, Bomba de medicação'
-                                : selectedChat.form.medicalDevices.paceMaker
-                                  ? 'Marcapasso'
-                                  : selectedChat.form.medicalDevices
-                                        .medicationPump
-                                    ? 'Bomba de medicação'
-                                    : 'Nenhum'}
+                              {(() => {
+                                const devices = [];
+                                if (
+                                  selectedChat.form.medicalDevices?.paceMaker
+                                ) {
+                                  devices.push('Marcapasso');
+                                }
+                                if (
+                                  selectedChat.form.medicalDevices
+                                    ?.medicationPump
+                                ) {
+                                  devices.push('Bomba de medicação');
+                                }
+                                if (selectedChat.form.medicalDevices?.others) {
+                                  devices.push(
+                                    selectedChat.form.medicalDevices.others,
+                                  );
+                                }
+                                return devices.length > 0
+                                  ? devices.join(', ')
+                                  : 'Nenhum';
+                              })()}
                             </div>
                           </div>
                         )}

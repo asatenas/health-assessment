@@ -23,6 +23,7 @@ This tool should not be used to save the medications list to suspend.`,
         .object({
           paceMaker: z.boolean().optional(),
           medicationPump: z.boolean().optional(),
+          others: z.string().optional(),
         })
         .optional()
         .describe('Medical devices used by patient'),

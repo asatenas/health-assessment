@@ -19,6 +19,7 @@ Use this tool even if there are no medications to suspend.`,
             suspensionDays: z
               .string()
               .describe('Number of days to suspend the medication'),
+            others: z.string().optional(),
           }),
         )
         .describe('Array of medications with their suspension times'),
