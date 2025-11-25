@@ -1,8 +1,5 @@
 import { auth } from '@/app/(auth)/auth';
-import {
-  isDevelopmentEnvironment,
-  isProductionEnvironment,
-} from '@/lib/constants';
+import { isDevelopmentEnvironment } from '@/lib/constants';
 import { createChatWithToken, getUserById } from '@/lib/db/queries';
 import { generateUUID } from '@/lib/utils';
 import { NextResponse } from 'next/server';
@@ -32,10 +29,8 @@ export async function POST() {
     });
 
     const APP_URL = isDevelopmentEnvironment
-      ? `http://${process.env.APP_URL_DEV}`
-      : isProductionEnvironment
-        ? `https://${process.env.APP_URL_PROD}`
-        : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+      ? `http://${process.env.APP_URL}`
+      : `https://${process.env.APP_URL}`;
 
     return NextResponse.json({
       chatId,
