@@ -67,11 +67,27 @@ export const register = async (
       return { status: 'user_exists' } as RegisterActionState;
     }
     await createUser(validatedData.email, validatedData.password);
-    await signIn('credentials', {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
+
+    if (process.env.NEW_SIGNUPS_WEBHOOK_URL) {
+      await fetch(process.env.NEW_SIGNUPS_WEBHOOK_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          email: validatedData.email,
+        }),
+      });
+    }
+
+    try {
+      await signIn('credentials', {
+        email: validatedData.email,
+        password: validatedData.password,
+        redirect: false,
+      });
+    } catch (error) {
+      // let sign up fail
+      // TODO: remove manual email verification
+      return { status: 'success' };
+    }
 
     return { status: 'success' };
   } catch (error) {
