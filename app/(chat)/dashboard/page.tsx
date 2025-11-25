@@ -420,7 +420,7 @@ export default function ClinicDashboard() {
             </div>
           </button>
           {legendExpanded && (
-            <div className="px-4 pb-4">
+            <div className="p-4">
               <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
                 {/* English: 'The risk level is determined by the higher score between two cardiac risk assessments (RCRI and HAS2):' */}
                 O nível de risco é determinado pela maior pontuação entre duas
@@ -489,7 +489,7 @@ export default function ClinicDashboard() {
             </div>
           </button>
           {filtersExpanded && (
-            <div className="px-4 pb-4">
+            <div className="p-4">
               <div className="flex flex-col gap-4">
                 <div className="flex justify-end">
                   <Button
