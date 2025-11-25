@@ -1068,7 +1068,6 @@ export default function ClinicDashboard() {
                             </div>
                           </div>
                         )}
-
                       </div>
                     </div>
                   )}
@@ -1077,7 +1076,8 @@ export default function ClinicDashboard() {
                   {selectedChat.medications && (
                     <div>
                       <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                        {/* English: 'Medications' */} Medicamentos
+                        {/* English: 'Medications in use' */} Medicamentos em
+                        uso
                       </h3>
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-line">
                         {(() => {
