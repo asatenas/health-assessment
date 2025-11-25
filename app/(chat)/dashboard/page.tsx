@@ -1069,32 +1069,6 @@ export default function ClinicDashboard() {
                           </div>
                         )}
 
-                        {/* Hemoglobin and Creatinine */}
-                        {(selectedChat.form.hemoglobin ||
-                          selectedChat.form.creatinine) && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {selectedChat.form.hemoglobin && (
-                              <div>
-                                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {/* English: 'Hemoglobin' */} Hemoglobina
-                                </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                                  {selectedChat.form.hemoglobin} g/dL
-                                </div>
-                              </div>
-                            )}
-                            {selectedChat.form.creatinine && (
-                              <div>
-                                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {/* English: 'Creatinine' */} Creatinina
-                                </div>
-                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                                  {selectedChat.form.creatinine} mg/dL
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
                   )}
