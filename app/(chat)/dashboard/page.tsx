@@ -10,12 +10,78 @@ type Chat = {
   id: string;
   createdAt: string;
   status: ChatStatus;
+  form?: {
+    age: number;
+    weight: number;
+    height: number;
+    allergies?: string[];
+    medicalDevices?: {
+      paceMaker?: boolean;
+      medicationPump?: boolean;
+    };
+    hemoglobin?: number;
+    creatinine?: number;
+  };
+  results?: string;
+  medications?: string;
 };
 
 type CreateChatResponse = {
   chatId: string;
   token: string;
   url: string;
+};
+
+const extractRCRIScore = (results?: string): number => {
+  if (!results) return -1;
+  const match = results.match(/Pontuação final RCRI:\s*(\d+)\s*pontos?/i);
+  return match ? Number.parseInt(match[1], 10) : -1;
+};
+
+const extractHAS2Score = (results?: string): number => {
+  if (!results) return -1;
+  const match = results.match(/Pontuação final HAS2:\s*(\d+)\s*pontos?/i);
+  return match ? Number.parseInt(match[1], 10) : -1;
+};
+
+const calculateRiskLevel = (
+  results?: string,
+): { level: string; color: string } => {
+  const rcri = extractRCRIScore(results);
+  const has2 = extractHAS2Score(results);
+
+  if (rcri === -1 || has2 === -1) {
+    return {
+      level: '-',
+      color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    };
+  }
+
+  const maxScore = Math.max(rcri, has2);
+
+  if (maxScore === 0) {
+    return {
+      level: 'Baixo',
+      color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    };
+  }
+  if (maxScore === 1) {
+    return {
+      level: 'Moderado',
+      color:
+        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    };
+  }
+  return {
+    level: 'Alto',
+    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  };
+};
+
+
+type MedicationDetail = {
+  medicationName: string;
+  suspensionDays: string;
 };
 
 export default function ClinicDashboard() {
@@ -27,10 +93,25 @@ export default function ClinicDashboard() {
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
+  const [legendExpanded, setLegendExpanded] = useState(true);
+  const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
 
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [dateFromFilter, setDateFromFilter] = useState<string>('');
   const [dateToFilter, setDateToFilter] = useState<string>('');
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (chatDetailsModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [chatDetailsModalOpen]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -232,6 +313,16 @@ export default function ClinicDashboard() {
     }
   };
 
+  const openChatDetailsModal = (
+    chat: Chat,
+    event?: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    setSelectedChat(chat);
+    setChatDetailsModalOpen(true);
+    // Remove focus from the button to prevent pointer cursor state
+    event?.currentTarget.blur();
+  };
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <div className="flex-1 flex flex-col max-w-6xl w-full mx-auto p-4 sm:p-6">
@@ -280,6 +371,91 @@ export default function ClinicDashboard() {
               Sair
             </Button>
           </div>
+        </div>
+
+        <div className="mb-6 border rounded-lg bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+          <button
+            type="button"
+            onClick={() => setLegendExpanded(!legendExpanded)}
+            className="w-full p-4 flex items-start gap-3 hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors rounded-lg"
+          >
+            <div className="shrink-0 mt-0.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-5 text-blue-600 dark:text-blue-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                {/* English: 'Risk Level Calculation' */} Cálculo do Nível de
+                Risco
+              </h3>
+            </div>
+            <div className="shrink-0 mt-0.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`size-5 text-blue-600 dark:text-blue-400 transition-transform ${legendExpanded ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </button>
+          {legendExpanded && (
+            <div className="px-4 pb-4">
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                {/* English: 'The risk level is determined by the higher score between two cardiac risk assessments (RCRI and HAS2):' */}
+                O nível de risco é determinado pela maior pontuação entre duas
+                avaliações de risco cardíaco (RCRI e HAS2):
+              </p>
+              <ul className="space-y-1.5 text-sm text-blue-800 dark:text-blue-200">
+                <li className="flex items-start gap-2">
+                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    Baixo
+                  </span>
+                  <span className="mt-1">
+                    {/* English: 'Both scores are 0' */}
+                    Ambas as pontuações são 0
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                    Moderado
+                  </span>
+                  <span className="mt-1">
+                    {/* English: 'The highest score between the two is 1' */}A
+                    maior pontuação entre as duas é 1
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                    Alto
+                  </span>
+                  <span className="mt-1">
+                    {/* English: 'The highest score between the two is 2 or more' */}
+                    A maior pontuação entre as duas é 2 ou mais
+                  </span>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
@@ -498,13 +674,16 @@ export default function ClinicDashboard() {
                   <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {/* English: 'Status' */} Status
                   </th>
+                  <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {/* English: 'Risk' */} Risco
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-background divide-y divide-gray-200 dark:divide-gray-800">
                 {isLoading ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5}
                       className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                     >
                       {/* English: 'Loading chats...' */} Carregando chats...
@@ -522,11 +701,14 @@ export default function ClinicDashboard() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32" />
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-40" />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20" />
+                          </td>
+                          <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
                           </td>
                         </tr>
                       ),
@@ -534,7 +716,7 @@ export default function ClinicDashboard() {
                   </>
                 ) : chats.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center">
+                    <td colSpan={5} className="px-6 py-8 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="text-gray-400 dark:text-gray-500">
                           <svg
@@ -590,9 +772,21 @@ export default function ClinicDashboard() {
                           {rowNumber}
                         </td>
                         <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                          <code className="text-xs sm:text-sm font-mono">
-                            {chat.id}
-                          </code>
+                          {chat.status === 'finished' ? (
+                            <button
+                              type="button"
+                              onClick={(e) => openChatDetailsModal(chat, e)}
+                              className="text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                            >
+                              <code className="text-xs sm:text-sm font-mono">
+                                {chat.id}
+                              </code>
+                            </button>
+                          ) : (
+                            <code className="text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100">
+                              {chat.id}
+                            </code>
+                          )}
                           <div className="md:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
                             {new Date(chat.createdAt).toLocaleDateString()}
                           </div>
@@ -607,6 +801,13 @@ export default function ClinicDashboard() {
                             )}`}
                           >
                             {getStatusLabel(chat.status)}
+                          </span>
+                        </td>
+                        <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat.results).color}`}
+                          >
+                            {calculateRiskLevel(chat.results).level}
                           </span>
                         </td>
                       </tr>
@@ -706,6 +907,208 @@ export default function ClinicDashboard() {
               >
                 {/* English: 'Next' */}Próximo
               </Button>
+            </div>
+          </div>
+        )}
+
+        {chatDetailsModalOpen && selectedChat && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <button
+              type="button"
+              className="absolute inset-0 cursor-default"
+              onClick={() => setChatDetailsModalOpen(false)}
+              aria-label="Close modal"
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            >
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-gray-800">
+                <h2 className="text-xl font-semibold">
+                  {/* English: 'Chat Details' */} Detalhes do Chat
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setChatDetailsModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="size-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4 sm:p-6">
+                <div className="space-y-6">
+                  {/* Chat ID */}
+                  <div>
+                    <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {/* English: 'Chat ID' */} ID do Chat
+                    </div>
+                    <code className="block p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono text-gray-900 dark:text-gray-100">
+                      {selectedChat.id}
+                    </code>
+                  </div>
+
+                  {/* Patient Info */}
+                  {selectedChat.form && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                        {/* English: 'Patient Information' */} Informações do
+                        Paciente
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              {/* English: 'Age' */} Idade
+                            </div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                              {selectedChat.form.age} anos
+                            </div>
+                          </div>
+                          <div>
+                            <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              {/* English: 'Weight' */} Peso
+                            </div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                              {selectedChat.form.weight} kg
+                            </div>
+                          </div>
+                          <div>
+                            <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              {/* English: 'Height' */} Altura
+                            </div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                              {selectedChat.form.height} cm
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Allergies */}
+                        <div>
+                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {/* English: 'Allergies' */} Alergias
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                            {selectedChat.form.allergies &&
+                            selectedChat.form.allergies.length > 0
+                              ? selectedChat.form.allergies.join(', ')
+                              : 'Nenhuma'}
+                          </div>
+                        </div>
+
+                        {/* Medical Devices */}
+                        {selectedChat.form.medicalDevices && (
+                          <div>
+                            <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              {/* English: 'Medical Devices' */} Dispositivos
+                              Médicos
+                            </div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                              {selectedChat.form.medicalDevices.paceMaker &&
+                              selectedChat.form.medicalDevices.medicationPump
+                                ? 'Marcapasso, Bomba de medicação'
+                                : selectedChat.form.medicalDevices.paceMaker
+                                  ? 'Marcapasso'
+                                  : selectedChat.form.medicalDevices
+                                        .medicationPump
+                                    ? 'Bomba de medicação'
+                                    : 'Nenhum'}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Hemoglobin and Creatinine */}
+                        {(selectedChat.form.hemoglobin ||
+                          selectedChat.form.creatinine) && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {selectedChat.form.hemoglobin && (
+                              <div>
+                                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                  {/* English: 'Hemoglobin' */} Hemoglobina
+                                </div>
+                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                                  {selectedChat.form.hemoglobin} g/dL
+                                </div>
+                              </div>
+                            )}
+                            {selectedChat.form.creatinine && (
+                              <div>
+                                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                  {/* English: 'Creatinine' */} Creatinina
+                                </div>
+                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                                  {selectedChat.form.creatinine} mg/dL
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Medications */}
+                  {selectedChat.medications && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                        {/* English: 'Medications' */} Medicamentos
+                      </h3>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-line">
+                        {(() => {
+                          try {
+                            const meds = JSON.parse(selectedChat.medications);
+                            if (Array.isArray(meds) && meds.length > 0) {
+                              return meds
+                                .map(
+                                  (med: MedicationDetail) =>
+                                    `${med.medicationName}: ${med.suspensionDays}`,
+                                )
+                                .join('\n');
+                            }
+                            return 'Nenhum medicamento';
+                          } catch {
+                            return 'Erro ao carregar medicamentos';
+                          }
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Results */}
+                  {selectedChat.results && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                        {/* English: 'Risk Assessment Results' */} Resultados da
+                        Avaliação de Risco
+                      </h3>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                        {selectedChat.results}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
+                <Button
+                  onClick={() => setChatDetailsModalOpen(false)}
+                  variant="outline"
+                >
+                  {/* English: 'Close' */} Fechar
+                </Button>
+              </div>
             </div>
           </div>
         )}
