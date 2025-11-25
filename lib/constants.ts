@@ -18,4 +18,6 @@ export const DUMMY_PASSWORD = generateDummyPassword();
 
 export const APP_URL = isDevelopmentEnvironment
   ? `http://${process.env.APP_URL_DEV}`
-  : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+  : isProductionEnvironment
+    ? `https://${process.env.APP_URL_PROD}`
+    : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
