@@ -84,6 +84,8 @@ export const register = async (
         redirect: false,
       });
     } catch (error) {
+      // let sign up fail
+      // TODO: remove manual email verification
       return { status: 'success' };
     }
 
