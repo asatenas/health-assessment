@@ -41,7 +41,12 @@ export default function Page() {
       });
     } else if (state.status === 'success') {
       // English: 'Account created successfully!'
-      toast({ type: 'success', description: 'Conta criada com sucesso!' });
+      // toast({ type: 'success', description: 'Conta criada com sucesso!' });
+      toast({
+        type: 'success',
+        description:
+          'Conta criada com sucesso. Nosso time foi notificado e realizará a verificação do email.',
+      });
 
       setIsSuccessful(true);
       updateSession();

@@ -77,11 +77,15 @@ export const register = async (
       });
     }
 
-    await signIn('credentials', {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
+    try {
+      await signIn('credentials', {
+        email: validatedData.email,
+        password: validatedData.password,
+        redirect: false,
+      });
+    } catch (error) {
+      return { status: 'success' };
+    }
 
     return { status: 'success' };
   } catch (error) {
