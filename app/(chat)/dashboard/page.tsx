@@ -90,7 +90,6 @@ export default function ClinicDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isFetchingPage, setIsFetchingPage] = useState(false);
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
@@ -121,9 +120,8 @@ export default function ClinicDashboard() {
   const limit = 20;
 
   const fetchChats = useCallback(async () => {
-    if (!isLoading) {
-      setIsFetchingPage(true);
-    }
+    setIsLoading(true);
+    setChats([]);
 
     try {
       const params = new URLSearchParams();
@@ -152,9 +150,8 @@ export default function ClinicDashboard() {
       });
     } finally {
       setIsLoading(false);
-      setIsFetchingPage(false);
     }
-  }, [isLoading, statusFilter, dateFromFilter, dateToFilter, currentPage]);
+  }, [statusFilter, dateFromFilter, dateToFilter, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -499,7 +496,7 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                     className="text-xs h-8"
-                    disabled={isFetchingPage}
+                    disabled={isLoading}
                   >
                     {/* English: 'Today' */} Hoje
                   </Button>
@@ -508,7 +505,7 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                     className="text-xs h-8"
-                    disabled={isFetchingPage}
+                    disabled={isLoading}
                   >
                     {/* English: 'Last 7 Days' */} Últimos 7 dias
                   </Button>
@@ -517,7 +514,7 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                     className="text-xs h-8"
-                    disabled={isFetchingPage}
+                    disabled={isLoading}
                   >
                     {/* English: 'Last 30 Days' */} Últimos 30 dias
                   </Button>
@@ -526,7 +523,7 @@ export default function ClinicDashboard() {
                     variant="outline"
                     size="sm"
                     className="text-xs h-8"
-                    disabled={isFetchingPage}
+                    disabled={isLoading}
                   >
                     {/* English: 'This Month' */} Este mês
                   </Button>
@@ -536,7 +533,7 @@ export default function ClinicDashboard() {
                     variant="ghost"
                     size="sm"
                     className="text-xs h-8"
-                    disabled={isFetchingPage || !hasActiveFilters}
+                    disabled={isLoading || !hasActiveFilters}
                   >
                     {/* English: 'Clear All' */} Limpar filtros
                   </Button>
@@ -551,7 +548,7 @@ export default function ClinicDashboard() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      disabled={isFetchingPage}
+                      disabled={isLoading}
                       className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="">
@@ -584,7 +581,7 @@ export default function ClinicDashboard() {
                       type="date"
                       value={dateFromFilter}
                       onChange={(e) => setDateFromFilter(e.target.value)}
-                      disabled={isFetchingPage}
+                      disabled={isLoading}
                       className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
@@ -598,7 +595,7 @@ export default function ClinicDashboard() {
                       type="date"
                       value={dateToFilter}
                       onChange={(e) => setDateToFilter(e.target.value)}
-                      disabled={isFetchingPage}
+                      disabled={isLoading}
                       className="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
@@ -682,7 +679,20 @@ export default function ClinicDashboard() {
 
         <div className="border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
+              <colgroup>
+                <col style={{ width: '60px' }} />
+                <col />
+                <col
+                  className="hidden md:table-column"
+                  style={{ width: '200px' }}
+                />
+                <col style={{ width: '140px' }} />
+                <col
+                  className="hidden lg:table-column"
+                  style={{ width: '120px' }}
+                />
+              </colgroup>
               <thead className="bg-gray-50 dark:bg-gray-900 border-b">
                 <tr>
                   <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -704,15 +714,6 @@ export default function ClinicDashboard() {
               </thead>
               <tbody className="bg-white dark:bg-background divide-y divide-gray-200 dark:divide-gray-800">
                 {isLoading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
-                    >
-                      {/* English: 'Loading chats...' */} Carregando chats...
-                    </td>
-                  </tr>
-                ) : isFetchingPage ? (
                   <>
                     {Array.from({ length: Math.min(limit, 5) }).map(
                       (_, index) => (
@@ -842,28 +843,41 @@ export default function ClinicDashboard() {
           </div>
         </div>
 
-        {totalPages > 1 && (
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
-              {/* English: 'Showing' */}Mostrando{' '}
-              {(currentPage - 1) * limit + 1} a{' '}
-              {Math.min(currentPage * limit, totalChats)} de {totalChats} chats
-            </div>
-            <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
-              <Button
-                onClick={() => setCurrentPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                variant="outline"
-                size="sm"
-                className="text-xs sm:text-sm"
-              >
-                <span className="hidden sm:inline">
-                  {' '}
-                  {/* English: 'Previous' */}Anterior
-                </span>
-                <span className="sm:hidden">Anterior</span>
-              </Button>
-              <div className="flex items-center gap-1 sm:gap-2">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
+            {isLoading ? (
+              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-48" />
+            ) : (
+              <>
+                {/* English: 'Showing' */}Mostrando{' '}
+                {(currentPage - 1) * limit + 1} a{' '}
+                {Math.min(currentPage * limit, totalChats)} de {totalChats} chats
+              </>
+            )}
+          </div>
+          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
+            {isLoading ? (
+              <>
+                <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
+                <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-10" />
+                <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm"
+                >
+                  <span className="hidden sm:inline">
+                    {' '}
+                    {/* English: 'Previous' */}Anterior
+                  </span>
+                  <span className="sm:hidden">Anterior</span>
+                </Button>
+                <div className="flex items-center gap-1 sm:gap-2">
                 {/* First page */}
                 {currentPage > 3 && (
                   <>
@@ -921,18 +935,19 @@ export default function ClinicDashboard() {
                   </>
                 )}
               </div>
-              <Button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                variant="outline"
-                size="sm"
-                className="text-xs sm:text-sm"
-              >
-                {/* English: 'Next' */}Próximo
-              </Button>
-            </div>
+                <Button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm"
+                >
+                  {/* English: 'Next' */}Próximo
+                </Button>
+              </>
+            )}
           </div>
-        )}
+        </div>
 
         {chatDetailsModalOpen && selectedChat && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
