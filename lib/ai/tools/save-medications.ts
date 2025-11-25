@@ -10,15 +10,24 @@ export const saveMedications = ({ chatId }: SaveMedicationsProps) =>
   tool({
     description: `Save the medications suspension table to the database.
 Call this tool immediately after generating the medications suspension table from the suspend-medications tool.
-Pass the complete markdown table (including headers and all rows) as the medicationsTable parameter.
 Use this tool even if there are no medications to suspend.`,
     inputSchema: z.object({
-      medicationsTable: z.string(),
+      medications: z
+        .array(
+          z.object({
+            medicationName: z.string().describe('Name of the medication'),
+            suspensionDays: z
+              .string()
+              .describe('Number of days to suspend the medication'),
+            others: z.string().optional(),
+          }),
+        )
+        .describe('Array of medications with their suspension times'),
     }),
-    execute: async ({ medicationsTable }) => {
+    execute: async ({ medications }) => {
       await updateChatMedicationsById({
         chatId,
-        medications: medicationsTable,
+        medications: JSON.stringify(medications),
       });
       return 'Medications table saved to database';
     },

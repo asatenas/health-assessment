@@ -793,6 +793,9 @@ export async function getChatsByClinicUserId({
       .select({
         id: chat.id,
         createdAt: chat.createdAt,
+        form: chat.form,
+        results: chat.results,
+        medications: chat.medications,
         // Project a computed status: expired when tokenExpiresAt <= now(), otherwise original status
         status: sql`CASE WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
       })
