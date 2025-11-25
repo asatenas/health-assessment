@@ -152,10 +152,6 @@ export function Chat({
       return;
     }
 
-    if (isProductionEnvironment) {
-      fetch('/api/notify', { method: 'POST' }); // simple notification for new chats
-    }
-
     setMessages([
       {
         id: generateUUID(),
