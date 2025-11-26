@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
@@ -11,9 +12,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold" style={{ color: '#2cc1ce' }}>
-                Asatenas Health
-              </span>
+              <div className="relative w-[200px] h-[50px] overflow-hidden">
+                <Image
+                  src="/images/logo_full_v2.png"
+                  alt="Asatenas Health"
+                  width={200}
+                  height={200}
+                  className="object-cover size-full object-center"
+                />
+              </div>
             </div>
             <nav className="hidden md:flex items-center gap-8">
               <Link href="/login">
