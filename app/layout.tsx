@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: 'Asatenas Health',
   description:
     'Automatize a coleta de dados pré-operatórios com índices inteligentes (Lee Revisado e AUB-HAS2). Mais segurança para o paciente, menos burocracia para sua equipe.',
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export const viewport = {
