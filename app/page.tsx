@@ -719,18 +719,10 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/login"
+                    href="/about"
                     className="hover:text-white transition-colors"
                   >
-                    Entrar
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/register"
-                    className="hover:text-white transition-colors"
-                  >
-                    Criar Conta
+                    Sobre nós
                   </Link>
                 </li>
               </ul>
