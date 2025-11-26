@@ -25,7 +25,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button className="text-black hover:bg-[#2cc1ce]">
+                <Button className="text-black bg-[#2cc1ce]/80 hover:bg-[#2cc1ce]/70">
                   Criar Conta
                 </Button>
               </Link>
