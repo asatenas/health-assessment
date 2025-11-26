@@ -12,13 +12,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="relative w-[200px] h-[50px] overflow-hidden">
+              <div className="relative w-[200px] h-[50px] overflow-hidden flex items-center justify-center">
                 <Image
                   src="/images/logo_full_v2.png"
                   alt="Asatenas Health"
                   width={200}
                   height={200}
-                  className="object-cover size-full object-center"
+                  className="min-w-[220px] object-cover object-center"
                 />
               </div>
             </div>
