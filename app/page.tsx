@@ -73,7 +73,7 @@ export default function HomePage() {
               <div className="flex items-center justify-center gap-8 pt-4">
                 <div className="flex items-center gap-2">
                   <svg
-                    className="w-5 h-5 text-green-600"
+                    className="w-5 text-green-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -89,7 +89,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <svg
-                    className="w-5 h-5 text-green-600"
+                    className="w-5 text-green-600"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -138,7 +138,7 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -154,7 +154,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -170,7 +170,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -186,7 +186,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -216,7 +216,7 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -227,12 +227,12 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-gray-700 dark:text-gray-300">
-                    Anemia
+                    Detecção de Anemia
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -248,7 +248,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -264,7 +264,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 h-6 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0"
+                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -302,9 +302,9 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Medications */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
-                  className="w-7 h-7 text-blue-600 dark:text-blue-400"
+                  className="w-7 text-blue-600 dark:text-blue-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -329,9 +329,9 @@ export default function HomePage() {
 
             {/* Allergies */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
-                  className="w-7 h-7 text-red-600 dark:text-red-400"
+                  className="w-7 text-red-600 dark:text-red-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -356,9 +356,9 @@ export default function HomePage() {
 
             {/* Medical Devices */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
-                  className="w-7 h-7 text-purple-600 dark:text-purple-400"
+                  className="w-7 text-purple-600 dark:text-purple-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -432,7 +432,7 @@ export default function HomePage() {
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -453,7 +453,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -474,7 +474,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -495,7 +495,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -516,7 +516,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -537,7 +537,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
