@@ -35,7 +35,7 @@ export default function HomePage() {
                 Preços
               </a>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="default">
                   Entrar
                 </Button>
               </Link>
