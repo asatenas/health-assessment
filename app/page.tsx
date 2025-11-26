@@ -57,8 +57,8 @@ export default function HomePage() {
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 Automatize a coleta de dados pré-operatórios com nossos índices
-                inteligentes (Lee Revisado e AUB-HAS2). Mais segurança para o
-                paciente, menos burocracia para sua equipe.
+                inteligentes (RCRI e AUB-HAS2). Mais segurança para o paciente,
+                menos burocracia para sua equipe.
               </p>
               <div className="flex justify-center">
                 <Link href="/register">
@@ -66,7 +66,7 @@ export default function HomePage() {
                     size="lg"
                     className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all"
                   >
-                    Começar Agora
+                    Começar
                   </Button>
                 </Link>
               </div>
@@ -117,11 +117,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Funcionalidades Chave
+              Análise Clínica Profunda
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Índices inteligentes para uma avaliação completa e precisa do
-              risco cirúrgico
+              Dois índices para uma avaliação mais completa e precisa do risco
+              cirúrgico
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
@@ -227,7 +227,7 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-gray-700 dark:text-gray-300">
-                    Detecção de Anemia
+                    Verificação do nível de hemoglobina
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -243,7 +243,7 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-gray-700 dark:text-gray-300">
-                    Angina
+                    Sinais de dor torácica compatível com isquemia
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -259,7 +259,7 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-gray-700 dark:text-gray-300">
-                    Dispineia
+                    Falta de ar sugestiva de causa cardíaca
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -275,7 +275,7 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-gray-700 dark:text-gray-300">
-                    Cirurgia vascular
+                    Cirurgias vasculares de maior risco
                   </span>
                 </li>
               </ul>
@@ -292,7 +292,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Segurança do Paciente em Primeiro Lugar
+              Segurança do Paciente
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Detecção inteligente de fatores críticos para a segurança do
@@ -421,7 +421,7 @@ export default function HomePage() {
                           99
                         </span>
                         <span className="text-xl font-bold text-white mt-1">
-                          ,90
+                          ,99
                         </span>
                       </div>
                       <div className="text-blue-100 text-sm">/mês</div>
@@ -510,7 +510,7 @@ export default function HomePage() {
                           Link compartilhável com pacientes
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Email
+                          Envie o link automaticamente por email
                         </div>
                       </div>
                     </li>
@@ -531,7 +531,7 @@ export default function HomePage() {
                           Dashboard de gerenciamento
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Acompanhe todos os pacientes
+                          Acompanhe todos os seus pacientes
                         </div>
                       </div>
                     </li>
@@ -552,8 +552,7 @@ export default function HomePage() {
                           Segurança e confidencialidade
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Dados anonimizados e criptografados e em conformidade
-                          com LGPD
+                          Anonimização e criptografia em conformidade com a LGPD
                         </div>
                       </div>
                     </li>
@@ -567,7 +566,8 @@ export default function HomePage() {
                     </Button>
                   </Link>
                   <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                    Cancele a qualquer momento, sem multas ou taxas extras
+                    7 dias grátis para testar, sem cartão de crédito. Cancele
+                    quando quiser, sem multas ou taxas extras.
                   </p>
                 </div>
               </div>
