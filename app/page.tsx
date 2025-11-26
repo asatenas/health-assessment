@@ -19,8 +19,7 @@ export default function HomePage() {
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  size="default"
-                  className="text-black hover:bg-[#2cc1ce]/70"
+                  className="text-black hover:bg-transparent hover:underline"
                 >
                   Entrar
                 </Button>
