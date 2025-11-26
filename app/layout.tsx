@@ -11,8 +11,9 @@ import { ImpersonationBannerWrapper } from '@/components/admin/impersonation-ban
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
-  title: 'Asatenas',
-  description: 'Asatenas',
+  title: 'Asatenas Health',
+  description:
+    'Automatize a coleta de dados pré-operatórios com índices inteligentes (Lee Revisado e AUB-HAS2). Mais segurança para o paciente, menos burocracia para sua equipe.',
 };
 
 export const viewport = {
@@ -58,7 +59,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       // `next-themes` injects an extra classname to the body element to avoid
       // visual flicker before hydration. Hence the `suppressHydrationWarning`
       // prop is necessary to avoid the React hydration mismatch warning.
