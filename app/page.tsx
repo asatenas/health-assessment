@@ -8,12 +8,15 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation */}
-      <header className="fixed top-0 w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 z-50">
+      <header className="fixed top-0 w-full bg-white/90 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="relative w-[200px] h-[50px] overflow-hidden flex items-center justify-center select-none">
                 <Image
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }
                   src="/images/logo_full_v2.png"
                   alt="Asatenas Health"
                   width={200}
