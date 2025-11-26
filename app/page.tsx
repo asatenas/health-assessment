@@ -674,28 +674,43 @@ export default function HomePage() {
               <h3 className="font-semibold text-white mb-4">Produto</h3>
               <ul className="space-y-2">
                 <li>
-                  <a
-                    href="#funcionalidades"
-                    className="hover:text-white transition-colors"
+                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+                  <button
+                    onClick={() => {
+                      document
+                        .getElementById('funcionalidades')
+                        ?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-white transition-colors cursor-pointer"
                   >
                     Funcionalidades
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a
-                    href="#seguranca"
-                    className="hover:text-white transition-colors"
+                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+                  <button
+                    onClick={() => {
+                      document
+                        .getElementById('seguranca')
+                        ?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-white transition-colors cursor-pointer"
                   >
                     Segurança
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a
-                    href="#precos"
-                    className="hover:text-white transition-colors"
+                  {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
+                  <button
+                    onClick={() => {
+                      document
+                        .getElementById('precos')
+                        ?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="hover:text-white transition-colors cursor-pointer"
                   >
                     Preços
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>
