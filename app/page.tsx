@@ -11,13 +11,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+              <span className="text-2xl font-bold" style={{ color: '#2cc1ce' }}>
                 Asatenas Health
               </span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
               <Link href="/login">
-                <Button variant="ghost" size="default">
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="text-black hover:bg-[#2cc1ce]/70"
+                >
                   Entrar
                 </Button>
               </Link>
@@ -31,7 +35,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center">
             <div className="max-w-4xl space-y-8 text-center">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-medium">
+              <div
+                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium"
+                style={{
+                  backgroundColor: 'rgba(150, 226, 233, 0.5)',
+                  color: '#008E9B',
+                }}
+              >
                 Feito para cirurgiões
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -46,7 +56,8 @@ export default function HomePage() {
                 <Link href="/register">
                   <Button
                     size="lg"
-                    className="text-lg px-8 py-6 bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
+                    className="text-lg px-8 py-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                    style={{ backgroundColor: '#2cc1ce' }}
                   >
                     Começar
                   </Button>
@@ -108,19 +119,26 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* RCRI Card */}
-            <div className="group relative bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-2xl p-8 border border-cyan-200 dark:border-cyan-800 hover:shadow-xl transition-all duration-300">
+            <div
+              className="group relative bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-2xl p-8 border hover:shadow-xl transition-all duration-300"
+              style={{ borderColor: '#2cc1ce' }}
+            >
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   RCRI
                 </h3>
-                <div className="text-sm text-cyan-600 dark:text-cyan-400 font-medium">
+                <div
+                  className="text-sm font-medium"
+                  style={{ color: '#2cc1ce' }}
+                >
                   Revised Cardiac Risk Index for Pre-Operative Risk
                 </div>
               </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#2cc1ce' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -136,7 +154,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#2cc1ce' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -152,7 +171,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#2cc1ce' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -168,7 +188,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#2cc1ce' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -186,19 +207,26 @@ export default function HomePage() {
             </div>
 
             {/* AUB-HAS2 Card */}
-            <div className="group relative bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-2xl p-8 border border-teal-200 dark:border-teal-800 hover:shadow-xl transition-all duration-300">
+            <div
+              className="group relative bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-2xl p-8 border hover:shadow-xl transition-all duration-300"
+              style={{ borderColor: '#7dd4dc' }}
+            >
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   AUB-HAS2
                 </h3>
-                <div className="text-sm text-teal-600 dark:text-teal-400 font-medium">
+                <div
+                  className="text-sm font-medium"
+                  style={{ color: '#7dd4dc' }}
+                >
                   American University of Beirut Cardiovascular Risk Index
                 </div>
               </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#7dd4dc' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -214,7 +242,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#7dd4dc' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -230,7 +259,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#7dd4dc' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -246,7 +276,8 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
+                    className="w-6 mt-0.5 shrink-0"
+                    style={{ color: '#7dd4dc' }}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -284,9 +315,13 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Medications */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div
+                className="w-14 rounded-xl flex items-center justify-center mb-4"
+                style={{ backgroundColor: 'rgba(150, 226, 233, 0.2)' }}
+              >
                 <svg
-                  className="w-7 text-cyan-600 dark:text-cyan-400"
+                  className="w-7"
+                  style={{ color: '#2cc1ce' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -338,9 +373,13 @@ export default function HomePage() {
 
             {/* Medical Devices */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div
+                className="w-14 rounded-xl flex items-center justify-center mb-4"
+                style={{ backgroundColor: 'rgba(125, 212, 220, 0.2)' }}
+              >
                 <svg
-                  className="w-7 text-teal-600 dark:text-teal-400"
+                  className="w-7"
+                  style={{ color: '#7dd4dc' }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -382,9 +421,22 @@ export default function HomePage() {
           </div>
           <div className="max-w-lg mx-auto">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-teal-600 rounded-3xl blur-xl opacity-20" />
-              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-cyan-600 dark:border-cyan-500 overflow-hidden">
-                <div className="bg-gradient-to-r from-cyan-600 to-teal-600 px-8 py-6">
+              <div
+                className="absolute inset-0 rounded-3xl blur-xl opacity-20"
+                style={{
+                  background: 'linear-gradient(to right, #2cc1ce, #7dd4dc)',
+                }}
+              />
+              <div
+                className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 overflow-hidden"
+                style={{ borderColor: '#2cc1ce' }}
+              >
+                <div
+                  className="px-8 py-6"
+                  style={{
+                    background: 'linear-gradient(to right, #2cc1ce, #7dd4dc)',
+                  }}
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-2xl font-bold text-white">
@@ -414,7 +466,8 @@ export default function HomePage() {
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -435,7 +488,8 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -456,7 +510,8 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -477,7 +532,8 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -498,7 +554,8 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -519,7 +576,8 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
+                        className="w-6 mt-0.5 shrink-0"
+                        style={{ color: '#2cc1ce' }}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -542,7 +600,11 @@ export default function HomePage() {
                   <Link href="/register" className="block">
                     <Button
                       size="lg"
-                      className="w-full text-lg py-6 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all"
+                      className="w-full text-lg py-6 text-white shadow-lg hover:shadow-xl transition-all"
+                      style={{
+                        background:
+                          'linear-gradient(to right, #2cc1ce, #7dd4dc)',
+                      }}
                     >
                       Começar Agora
                     </Button>
@@ -559,7 +621,10 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-600 to-teal-600">
+      <section
+        className="py-20 px-4 sm:px-6 lg:px-8"
+        style={{ background: 'linear-gradient(to right, #2cc1ce, #7dd4dc)' }}
+      >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
             Pronto para revolucionar sua estratificação de risco?
@@ -571,7 +636,8 @@ export default function HomePage() {
           <Link href="/register">
             <Button
               size="lg"
-              className="text-lg px-8 py-6 bg-white text-cyan-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
+              className="text-lg px-8 py-6 bg-white hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
+              style={{ color: '#2cc1ce' }}
             >
               Criar Conta Gratuitamente
             </Button>
