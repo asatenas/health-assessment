@@ -42,8 +42,8 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-cyan-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-cyan-950">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-cyan-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-cyan-950">
+        <div className="max-w-7xl mx-auto w-full">
           <div className="flex justify-center">
             <div className="max-w-4xl space-y-8 text-center">
               <div
