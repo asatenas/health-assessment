@@ -16,24 +16,6 @@ export default function HomePage() {
               </span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
-              <a
-                href="#funcionalidades"
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
-              >
-                Funcionalidades
-              </a>
-              <a
-                href="#seguranca"
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
-              >
-                Segurança
-              </a>
-              <a
-                href="#precos"
-                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
-              >
-                Preços
-              </a>
               <Link href="/login">
                 <Button variant="ghost" size="default">
                   Entrar
