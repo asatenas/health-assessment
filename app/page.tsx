@@ -56,7 +56,7 @@ export default function HomePage() {
                 <Link href="/register">
                   <Button
                     size="lg"
-                    className="text-lg px-8 py-6 text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                    className="text-lg px-8 py-6 text-white shadow-lg transition-all hover:scale-105"
                     style={{ backgroundColor: '#2cc1ce' }}
                   >
                     Começar
@@ -120,7 +120,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* RCRI Card */}
             <div
-              className="group relative bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-2xl p-8 border hover:shadow-xl transition-all duration-300"
+              className="group relative bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-2xl p-8 border transition-all duration-300"
               style={{ borderColor: '#2cc1ce' }}
             >
               <div className="mb-6">
@@ -208,7 +208,7 @@ export default function HomePage() {
 
             {/* AUB-HAS2 Card */}
             <div
-              className="group relative bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-2xl p-8 border hover:shadow-xl transition-all duration-300"
+              className="group relative bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-2xl p-8 border transition-all duration-300"
               style={{ borderColor: '#7dd4dc' }}
             >
               <div className="mb-6">
@@ -314,7 +314,7 @@ export default function HomePage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Medications */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 transition-shadow">
               <div
                 className="w-14 rounded-xl flex items-center justify-center mb-4"
                 style={{ backgroundColor: 'rgba(150, 226, 233, 0.2)' }}
@@ -345,7 +345,7 @@ export default function HomePage() {
             </div>
 
             {/* Allergies */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 transition-shadow">
               <div className="w-14 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
                   className="w-7 text-red-600 dark:text-red-400"
@@ -372,7 +372,7 @@ export default function HomePage() {
             </div>
 
             {/* Medical Devices */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 transition-shadow">
               <div
                 className="w-14 rounded-xl flex items-center justify-center mb-4"
                 style={{ backgroundColor: 'rgba(125, 212, 220, 0.2)' }}
@@ -600,10 +600,18 @@ export default function HomePage() {
                   <Link href="/register" className="block">
                     <Button
                       size="lg"
-                      className="w-full text-lg py-6 text-white shadow-lg hover:shadow-xl transition-all"
+                      className="w-full text-lg py-6 text-white shadow-lg transition-all"
                       style={{
                         background:
                           'linear-gradient(to right, #2cc1ce, #7dd4dc)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background =
+                          'linear-gradient(to right, #26adb9, #6bc4cd)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background =
+                          'linear-gradient(to right, #2cc1ce, #7dd4dc)';
                       }}
                     >
                       Começar Agora
@@ -636,7 +644,7 @@ export default function HomePage() {
           <Link href="/register">
             <Button
               size="lg"
-              className="text-lg px-8 py-6 bg-white hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
+              className="text-lg px-8 py-6 bg-white hover:bg-gray-100 shadow-xl transition-all"
               style={{ color: '#2cc1ce' }}
             >
               Criar Conta Gratuitamente
