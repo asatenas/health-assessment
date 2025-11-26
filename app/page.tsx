@@ -11,7 +11,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
                 Asatenas Health
               </span>
             </div>
@@ -45,11 +45,11 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950">
+      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-cyan-50 via-white to-cyan-50 dark:from-gray-950 dark:via-gray-900 dark:to-cyan-950">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center">
             <div className="max-w-4xl space-y-8 text-center">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-medium">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-medium">
                 Feito para cirurgiões
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -64,7 +64,7 @@ export default function HomePage() {
                 <Link href="/register">
                   <Button
                     size="lg"
-                    className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all"
+                    className="text-lg px-8 py-6 bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
                   >
                     Começar
                   </Button>
@@ -126,19 +126,19 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* RCRI Card */}
-            <div className="group relative bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300">
+            <div className="group relative bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 rounded-2xl p-8 border border-cyan-200 dark:border-cyan-800 hover:shadow-xl transition-all duration-300">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   RCRI
                 </h3>
-                <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                <div className="text-sm text-cyan-600 dark:text-cyan-400 font-medium">
                   Revised Cardiac Risk Index for Pre-Operative Risk
                 </div>
               </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -154,7 +154,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -170,7 +170,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -186,7 +186,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                    className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -204,19 +204,19 @@ export default function HomePage() {
             </div>
 
             {/* AUB-HAS2 Card */}
-            <div className="group relative bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800 hover:shadow-xl transition-all duration-300">
+            <div className="group relative bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-2xl p-8 border border-teal-200 dark:border-teal-800 hover:shadow-xl transition-all duration-300">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   AUB-HAS2
                 </h3>
-                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
+                <div className="text-sm text-teal-600 dark:text-teal-400 font-medium">
                   American University of Beirut Cardiovascular Risk Index
                 </div>
               </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
+                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -232,7 +232,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
+                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -248,7 +248,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
+                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -264,7 +264,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <svg
-                    className="w-6 text-purple-600 dark:text-purple-400 mt-0.5 shrink-0"
+                    className="w-6 text-teal-600 dark:text-teal-400 mt-0.5 shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -302,9 +302,9 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Medications */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
-                  className="w-7 text-blue-600 dark:text-blue-400"
+                  className="w-7 text-cyan-600 dark:text-cyan-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -356,9 +356,9 @@ export default function HomePage() {
 
             {/* Medical Devices */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="w-14 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-14 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mb-4">
                 <svg
-                  className="w-7 text-purple-600 dark:text-purple-400"
+                  className="w-7 text-teal-600 dark:text-teal-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -400,15 +400,15 @@ export default function HomePage() {
           </div>
           <div className="max-w-lg mx-auto">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-xl opacity-20" />
-              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-blue-600 dark:border-blue-500 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-teal-600 rounded-3xl blur-xl opacity-20" />
+              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-cyan-600 dark:border-cyan-500 overflow-hidden">
+                <div className="bg-gradient-to-r from-cyan-600 to-teal-600 px-8 py-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-2xl font-bold text-white">
                         Plano Mensal
                       </h3>
-                      <p className="text-blue-100 mt-1">
+                      <p className="text-cyan-100 mt-1">
                         Acesso completo à plataforma
                       </p>
                     </div>
@@ -424,7 +424,7 @@ export default function HomePage() {
                           ,99
                         </span>
                       </div>
-                      <div className="text-blue-100 text-sm">/mês</div>
+                      <div className="text-cyan-100 text-sm">/mês</div>
                     </div>
                   </div>
                 </div>
@@ -432,7 +432,7 @@ export default function HomePage() {
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -453,7 +453,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -474,7 +474,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -495,7 +495,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -516,7 +516,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -537,7 +537,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <svg
-                        className="w-6 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0"
+                        className="w-6 text-cyan-600 dark:text-cyan-400 mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -560,7 +560,7 @@ export default function HomePage() {
                   <Link href="/register" className="block">
                     <Button
                       size="lg"
-                      className="w-full text-lg py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all"
+                      className="w-full text-lg py-6 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all"
                     >
                       Começar Agora
                     </Button>
@@ -577,19 +577,19 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-cyan-600 to-teal-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
             Pronto para revolucionar sua estratificação de risco?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-cyan-100 mb-8">
             Junte-se às clínicas e hospitais que já confiam na Asatenas Health
             para garantir mais segurança aos seus pacientes.
           </p>
           <Link href="/register">
             <Button
               size="lg"
-              className="text-lg px-8 py-6 bg-white text-blue-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
+              className="text-lg px-8 py-6 bg-white text-cyan-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
             >
               Criar Conta Gratuitamente
             </Button>
