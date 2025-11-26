@@ -25,6 +25,11 @@ export default function HomePage() {
                   Entrar
                 </Button>
               </Link>
+              <Link href="/register">
+                <Button className="text-black hover:bg-[#2cc1ce]">
+                  Criar Conta
+                </Button>
+              </Link>
             </nav>
           </div>
         </div>
