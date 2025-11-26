@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="relative w-[200px] h-[50px] overflow-hidden flex items-center justify-center select-none">
+              <div className="relative w-[200px] h-[50px] overflow-hidden flex items-center justify-center select-none cursor-pointer">
                 <Image
                   onClick={() =>
                     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -21,7 +21,7 @@ export default function HomePage() {
                   alt="Asatenas Health"
                   width={200}
                   height={200}
-                  className="min-w-[220px] object-cover object-center select-none"
+                  className="min-w-[220px] object-cover object-center select-none pointer-events-auto"
                   draggable={false}
                 />
               </div>
