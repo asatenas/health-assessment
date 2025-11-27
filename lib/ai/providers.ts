@@ -25,35 +25,20 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         'chat-model': wrapLanguageModel({
-          model: gateway.languageModel('google/gemini-3-pro-preview'),
+          model: gateway.languageModel('openai/gpt-5'),
           middleware: defaultSettingsMiddleware({
             settings: {
               providerOptions: {
-                google: {
-                  thinkingConfig: {
-                    thinkingLevel: 'high',
-                    includeThoughts: false,
-                  },
+                openai: {
+                  reasoningEffort: 'medium',
+                  // reasoningSummary: 'auto',
+                  serviceTier: 'priority',
+                  textVerbosity: 'medium',
                 },
               },
             },
           }),
         }),
-        // 'chat-model': wrapLanguageModel({
-        //   model: gateway.languageModel('openai/gpt-5'),
-        //   middleware: defaultSettingsMiddleware({
-        //     settings: {
-        //       providerOptions: {
-        //         openai: {
-        //           reasoningEffort: 'medium',
-        //           // reasoningSummary: 'auto',
-        //           serviceTier: 'priority',
-        //           textVerbosity: 'medium',
-        //         },
-        //       },
-        //     },
-        //   }),
-        // }),
         'chat-model-reasoning': wrapLanguageModel({
           model: gateway.languageModel('openai/gpt-5.1'),
           middleware: defaultSettingsMiddleware({
