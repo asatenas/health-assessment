@@ -153,7 +153,7 @@ export async function POST(request: Request) {
           tools: {
             saveMedications: saveMedications({ chatId: id }),
             saveForm: saveForm({ chatId: id }),
-            suspendMedications: suspendMedications({ chatId: id }),
+            // suspendMedications: suspendMedications({ chatId: id }),
             finalizeInterview: finalizeInterview({ chatId: id }),
             // getWeather,
             // createDocument: createDocument({ session, dataStream }),
