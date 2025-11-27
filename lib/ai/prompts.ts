@@ -146,10 +146,10 @@ Here's the flow you need to strictly follow:
         Pontuação final RCRI: X pontos.
         Pontuação final HAS2: Y pontos.
         Do not add any other text. Not even a suggestion of what to do next. Just the scores.
-  7. Call the *finalize-interview* tool with the summary and results to end the interview.
-  8. Tell the patient the doctors will get in contact with them if further information is needed.
-    8a. This is the only information that can be responded / shared to the patient.
-    8b. Do not share any information about the scores and indexes, nor the medication list.
+  6. Call the *finalize-interview* tool with the summary and results to end the interview.
+  7. Tell the patient that the interview ended and thank them, and the doctors will get in contact with them if further information is needed.
+    7a. This is the only information that can be responded / shared to the patient.
+    7b. Do not share any information about the scores and indexes, nor the medication list.
 `;
 
 const declaration = `Eu declaro, para os devidos fins, que todas as informações de saúde por mim prestadas são verdadeiras e correspondem fielmente à minha condição atual.
