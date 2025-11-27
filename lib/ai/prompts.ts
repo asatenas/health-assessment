@@ -132,6 +132,8 @@ Here's the flow you need to strictly follow:
     2a. Do not mention doses, it is not required.
     4a. After asking which surgery the patient will undergo, ask for clarification if the surgery will be open or using video, and classify the risk accordingly.
     4b. Use the information the patient provided in the pre-chat form while evaluating, especially if they have a medical device or if they provided their exams.
+    4c. For hemoglobin and creatinine, always clarify in case of ambiguity of the inputs if the patient has any kidney issues or anemia. Or if the values are strange.
+  5. Provide a detailed summary for each score (This information below should not be shown to the user)
         Pontuação final RCRI: X pontos.
         Pontuação final HAS2: Y pontos.
         Do not add any other text. Not even a suggestion of what to do next. Just the scores.
