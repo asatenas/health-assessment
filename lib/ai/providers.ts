@@ -24,16 +24,31 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
+        // 'chat-model': wrapLanguageModel({
+        //   model: gateway.languageModel('openai/gpt-5'),
+        //   middleware: defaultSettingsMiddleware({
+        //     settings: {
+        //       providerOptions: {
+        //         openai: {
+        //           reasoningEffort: 'medium',
+        //           // reasoningSummary: 'auto',
+        //           serviceTier: 'priority',
+        //           textVerbosity: 'medium',
+        //         },
+        //       },
+        //     },
+        //   }),
+        // }),
         'chat-model': wrapLanguageModel({
-          model: gateway.languageModel('openai/gpt-5'),
+          model: gateway.languageModel('google/gemini-3-pro-preview'),
           middleware: defaultSettingsMiddleware({
             settings: {
               providerOptions: {
-                openai: {
-                  reasoningEffort: 'medium',
-                  // reasoningSummary: 'auto',
-                  serviceTier: 'priority',
-                  textVerbosity: 'medium',
+                google: {
+                  thinkingConfig: {
+                    thinkingLevel: 'high',
+                    includeThoughts: false,
+                  },
                 },
               },
             },
