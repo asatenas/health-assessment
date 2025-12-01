@@ -145,25 +145,27 @@ function PureChatHeader() {
                 Asatenas.
               </p>
               <p>
-                É com grande responsabilidade e determinação que embarcamos na
-                missão de trazer melhorias para a área da saúde, garantindo
-                eficiência, segurança, privacidade e humanidade ao paciente.
-                Conhecemos de perto o quanto o sistema de saúde está pressionado
-                e as dificuldades que enfrenta.
+                Com grande responsabilidade e determinação embarcamos na missão
+                de trazer melhorias concretas para a área da saúde, unindo
+                eficiência, segurança, privacidade e humanidade no cuidado ao
+                paciente. Sabemos de perto o quanto o sistema de saúde é
+                desafiador e as pressões que todos os seus profissionais e
+                usuários enfrentam.
               </p>
               <p>
-                Nosso objetivo é incorporar tecnologia de forma humanizada, de
-                modo a beneficiar todas as pontas do ecossistema de saúde,
-                mantendo o paciente sempre no centro. Nossa visão é que todos
-                tenham acesso à saúde de qualidade, avançando um passo de cada
-                vez.
+                Nosso propósito é integrar tecnologia de forma humanizada,
+                beneficiando cada ponto do ecossistema de saúde, mantendo o
+                paciente sempre no centro. Acreditamos que todos merecem acesso
+                a um cuidado de qualidade, e vamos passo a passo, no caminho em
+                direção a esta realidade.
               </p>
               <p>
-                Compreendemos a delicadeza de cada situação médica e desejamos
-                que, neste aspecto específico de todo o processo pelo qual você
-                está passando, sua experiência pré-operatória seja a melhor
-                possível. Somos gratos pela sua confiança e desejamos que, mesmo
-                neste momento desafiador, você siga forte e corajosamente.
+                Compreendemos a sensibilidade de cada situação médica e
+                desejamos que, neste momento de todo o processo pelo qual você
+                passa, sua experiência pré-operatória seja a mais tranquila
+                possível. Agradecemos pela confiança depositada em nós e
+                esperamos que, mesmo neste momento desafiador, você siga forte e
+                corajosamente.
               </p>
               <p className="italic">
                 Com carinho,
@@ -179,10 +181,10 @@ function PureChatHeader() {
                 </h4>
                 <p className="text-sm">
                   Médico anestesiologista formado pela Universidade Estadual de
-                  Campinas. Vivenciou na prática o que poderia ser aprimorado no
-                  processo de preparação pré-operatória e decidiu pausar sua
-                  carreira como médico para se dedicar a trazer essas melhorias
-                  aos pacientes.
+                  Campinas. Vivenciou de perto as oportunidades de aprimoramento
+                  no processo de preparação pré-operatória e decidiu pausar sua
+                  carreira como médico para se dedicar a desenvolver soluções
+                  aos pacientes dentro da área de saúde.
                 </p>
               </div>
 
@@ -193,10 +195,10 @@ function PureChatHeader() {
                 <p className="text-sm">
                   Formado em Ciência da Computação pela Universidade Estadual de
                   Campinas. Em sua carreira como desenvolvedor, atuou em
-                  diversas aplicações de sistemas de software. Ao acompanhar de
-                  perto os desafios do sistema de saúde brasileiro, decidiu
-                  migrar para esse ecossistema e aplicar seus conhecimentos
-                  técnicos nesta área.
+                  diversas aplicações de sistemas de software. Ao se deparar com
+                  os desafios do sistema de saúde brasileiro, decidiu migrar
+                  para esse ecossistema e aplicar sua experiência técnica nesta
+                  área.
                 </p>
               </div>
             </div>
