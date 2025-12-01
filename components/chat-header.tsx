@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -48,84 +47,83 @@ function PureChatHeader() {
         <DialogContent className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle className="sr-only">Como Usar</DialogTitle>
-            <DialogDescription className="space-y-6 text-foreground/90 text-left">
-              <div className="space-y-3">
-                <h4 className="font-semibold text-foreground text-base">
-                  Como Usar
-                </h4>
-                <p>
-                  Bem-vindo à plataforma de avaliação pré-operatória da Asatenas
-                  Health.
-                </p>
-                <p>
-                  Esta é uma interface de conversa baseada em chat, onde nosso
-                  assistente virtual treinado fará perguntas sobre suas
-                  informações de saúde e condições médicas. Use a caixa de
-                  entrada de texto na parte inferior para digitar e enviar suas
-                  respostas conforme o assistente solicitar.
-                </p>
-                <p>
-                  O assistente fará perguntas de acompanhamento para garantir
-                  que as informações estejam claras. Após coletar todas as
-                  informações necessárias, os médicos serão notificados e
-                  revisarão os dados fornecidos, entrando em contato caso
-                  precisem de esclarecimentos adicionais. As informações
-                  coletadas serão utilizadas para preparar adequadamente sua
-                  cirurgia, garantindo sua segurança.
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-4 border-t">
-                <h4 className="font-semibold text-foreground text-base">
-                  Como garantimos sua segurança
-                </h4>
-                <p>
-                  Os médicos sempre analisarão previamente as informações
-                  fornecidas para compreender suas condições de saúde e
-                  tratá-las adequadamente. Esta análise permite que a equipe
-                  médica faça os preparativos necessários para a cirurgia,
-                  considerando alergias, dispositivos externos e internos, e
-                  outras particularidades do seu caso.
-                </p>
-                <p>
-                  Caso seja necessário, a equipe médica irá solicitar que faça
-                  consultas médicas adicionais ou exames complementares.
-                </p>
-                <p>
-                  Suas condições serão sempre verificadas novamente antes da
-                  realização da cirurgia, proporcionando tranquilidade e
-                  segurança durante todo o processo.
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-4 border-t">
-                <h4 className="font-semibold text-foreground text-base">
-                  Como garantimos sua privacidade
-                </h4>
-                <p>
-                  Seus dados são tão importantes quanto sua segurança de saúde.
-                  Todas as informações são protegidas com criptografia de ponta
-                  a ponta, tanto durante a transmissão quanto em repouso. Seus
-                  dados são anonimizados, ou seja, não há identificação pessoal
-                  vinculada às conversas.
-                </p>
-                <p>
-                  <strong>
-                    Recomendamos não enviar informações de identificação
-                  </strong>{' '}
-                  como nome completo, número de documentos, e-mail ou dados
-                  pessoais similares.
-                </p>
-                <p>
-                  Não compartilhamos ou vendemos seus dados com terceiros. Não
-                  utilizamos suas informações para treinamento de modelos. Seus
-                  dados são revisados exclusivamente pela equipe médica
-                  responsável pela preparação da sua cirurgia e/ou pelo
-                  responsável técnico da Asatenas.
-                </p>
-              </div>
-            </DialogDescription>
           </DialogHeader>
+          <div className="space-y-6 text-foreground/90 text-left">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-foreground text-base">
+                Como Usar
+              </h4>
+              <p>
+                Bem-vindo à plataforma de avaliação pré-operatória da Asatenas
+                Health.
+              </p>
+              <p>
+                Esta é uma interface de conversa baseada em chat, onde nosso
+                assistente virtual treinado fará perguntas sobre suas
+                informações de saúde e condições médicas. Use a caixa de entrada
+                de texto na parte inferior para digitar e enviar suas respostas
+                conforme o assistente solicitar.
+              </p>
+              <p>
+                O assistente fará perguntas de acompanhamento para garantir que
+                as informações estejam claras. Após coletar todas as informações
+                necessárias, os médicos serão notificados e revisarão os dados
+                fornecidos, entrando em contato caso precisem de esclarecimentos
+                adicionais. As informações coletadas serão utilizadas para
+                preparar adequadamente sua cirurgia, garantindo sua segurança.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <h4 className="font-semibold text-foreground text-base">
+                Como garantimos sua segurança
+              </h4>
+              <p>
+                Os médicos sempre analisarão previamente as informações
+                fornecidas para compreender suas condições de saúde e tratá-las
+                adequadamente. Esta análise permite que a equipe médica faça os
+                preparativos necessários para a cirurgia, considerando alergias,
+                dispositivos externos e internos, e outras particularidades do
+                seu caso.
+              </p>
+              <p>
+                Caso seja necessário, a equipe médica irá solicitar que faça
+                consultas médicas adicionais ou exames complementares.
+              </p>
+              <p>
+                Suas condições serão sempre verificadas novamente antes da
+                realização da cirurgia, proporcionando tranquilidade e segurança
+                durante todo o processo.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <h4 className="font-semibold text-foreground text-base">
+                Como garantimos sua privacidade
+              </h4>
+              <p>
+                Seus dados são tão importantes quanto sua segurança de saúde.
+                Todas as informações são protegidas com criptografia de ponta a
+                ponta, tanto durante a transmissão quanto em repouso. Seus dados
+                são anonimizados, ou seja, não há identificação pessoal
+                vinculada às conversas.
+              </p>
+              <p>
+                <strong>
+                  Recomendamos não enviar informações de identificação
+                </strong>{' '}
+                como nome completo, número de documentos, e-mail ou dados
+                pessoais similares.
+              </p>
+              <p>
+                Não compartilhamos ou vendemos seus dados com terceiros. Não
+                utilizamos suas informações para treinamento de modelos. Seus
+                dados são revisados exclusivamente pela equipe médica
+                responsável pela preparação da sua cirurgia e/ou pelo
+                responsável técnico da Asatenas.
+              </p>
+            </div>
+          </div>
           <div className="flex justify-end pt-4">
             <Button onClick={() => setIsComoUsarOpen(false)}>Entendi</Button>
           </div>
@@ -136,74 +134,73 @@ function PureChatHeader() {
         <DialogContent className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle className="sr-only">Quem Somos</DialogTitle>
-            <DialogDescription className="space-y-6 text-foreground/90 text-left">
-              <div className="space-y-4">
-                <h4 className="font-semibold text-foreground text-base">
-                  Quem Somos
-                </h4>
-                <p>
-                  Olá! É um imenso privilégio apresentar a equipe fundadora da
-                  Asatenas.
-                </p>
-                <p>
-                  É com grande responsabilidade e determinação que embarcamos na
-                  missão de trazer melhorias para a área da saúde, garantindo
-                  eficiência, segurança, privacidade e humanidade ao paciente.
-                  Conhecemos de perto o quanto o sistema de saúde está
-                  pressionado e as dificuldades que enfrenta.
-                </p>
-                <p>
-                  Nosso objetivo é incorporar tecnologia de forma humanizada, de
-                  modo a beneficiar todas as pontas do ecossistema de saúde,
-                  mantendo o paciente sempre no centro. Nossa visão é que todos
-                  tenham acesso à saúde de qualidade, avançando um passo de cada
-                  vez.
-                </p>
-                <p>
-                  Compreendemos a delicadeza de cada situação médica e desejamos
-                  que, neste aspecto específico de todo o processo pelo qual
-                  você está passando, sua experiência pré-operatória seja a
-                  melhor possível. Somos gratos pela sua confiança e desejamos
-                  que, mesmo neste momento desafiador, você siga forte e
-                  corajosamente.
-                </p>
-                <p className="italic">
-                  Com carinho,
-                  <br />
-                  Asatenas
-                </p>
-              </div>
-
-              <div className="space-y-6 pt-4 border-t">
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-foreground text-base">
-                    Dr. Pedro Henrique Hitoshi Ueda
-                  </h4>
-                  <p className="text-sm">
-                    Médico anestesiologista formado pela Universidade Estadual
-                    de Campinas. Vivenciou na prática o que poderia ser
-                    aprimorado no processo de preparação pré-operatória e
-                    decidiu pausar sua carreira como médico para se dedicar a
-                    trazer essas melhorias aos pacientes.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-foreground text-base">
-                    Andrew Jye Shih Chuang
-                  </h4>
-                  <p className="text-sm">
-                    Formado em Ciência da Computação pela Universidade Estadual
-                    de Campinas. Em sua carreira como desenvolvedor, atuou em
-                    diversas aplicações de sistemas de software. Ao acompanhar
-                    de perto os desafios do sistema de saúde brasileiro, decidiu
-                    migrar para esse ecossistema e aplicar seus conhecimentos
-                    técnicos nesta área.
-                  </p>
-                </div>
-              </div>
-            </DialogDescription>
           </DialogHeader>
+          <div className="space-y-6 text-foreground/90 text-left">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-foreground text-base">
+                Quem Somos
+              </h4>
+              <p>
+                Olá! É um imenso privilégio apresentar a equipe fundadora da
+                Asatenas.
+              </p>
+              <p>
+                É com grande responsabilidade e determinação que embarcamos na
+                missão de trazer melhorias para a área da saúde, garantindo
+                eficiência, segurança, privacidade e humanidade ao paciente.
+                Conhecemos de perto o quanto o sistema de saúde está pressionado
+                e as dificuldades que enfrenta.
+              </p>
+              <p>
+                Nosso objetivo é incorporar tecnologia de forma humanizada, de
+                modo a beneficiar todas as pontas do ecossistema de saúde,
+                mantendo o paciente sempre no centro. Nossa visão é que todos
+                tenham acesso à saúde de qualidade, avançando um passo de cada
+                vez.
+              </p>
+              <p>
+                Compreendemos a delicadeza de cada situação médica e desejamos
+                que, neste aspecto específico de todo o processo pelo qual você
+                está passando, sua experiência pré-operatória seja a melhor
+                possível. Somos gratos pela sua confiança e desejamos que, mesmo
+                neste momento desafiador, você siga forte e corajosamente.
+              </p>
+              <p className="italic">
+                Com carinho,
+                <br />
+                Asatenas
+              </p>
+            </div>
+
+            <div className="space-y-6 pt-4 border-t">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-foreground text-base">
+                  Dr. Pedro Henrique Hitoshi Ueda
+                </h4>
+                <p className="text-sm">
+                  Médico anestesiologista formado pela Universidade Estadual de
+                  Campinas. Vivenciou na prática o que poderia ser aprimorado no
+                  processo de preparação pré-operatória e decidiu pausar sua
+                  carreira como médico para se dedicar a trazer essas melhorias
+                  aos pacientes.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-semibold text-foreground text-base">
+                  Andrew Jye Shih Chuang
+                </h4>
+                <p className="text-sm">
+                  Formado em Ciência da Computação pela Universidade Estadual de
+                  Campinas. Em sua carreira como desenvolvedor, atuou em
+                  diversas aplicações de sistemas de software. Ao acompanhar de
+                  perto os desafios do sistema de saúde brasileiro, decidiu
+                  migrar para esse ecossistema e aplicar seus conhecimentos
+                  técnicos nesta área.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end pt-4">
             <Button onClick={() => setIsQuemSomosOpen(false)}>Fechar</Button>
           </div>
