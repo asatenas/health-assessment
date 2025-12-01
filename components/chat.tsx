@@ -4,10 +4,9 @@ import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
-// import { ChatHeader } from '@/components/chat-header';
+import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
 import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
-import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from './visibility-selector';
@@ -17,7 +16,6 @@ import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
-import { isProductionEnvironment } from '@/lib/constants';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
@@ -308,12 +306,7 @@ export function Chat({
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
-        {/* <ChatHeader
-          chatId={id}
-          selectedVisibilityType={initialVisibilityType}
-          isReadonly={currentIsReadonly}
-          session={session}
-        /> */}
+        <ChatHeader />
 
         {!isFormVisible && (
           <Messages
@@ -373,24 +366,6 @@ export function Chat({
           </div>
         )}
       </div>
-
-      <Artifact
-        chatId={id}
-        input={input}
-        setInput={setInput}
-        status={status}
-        stop={stop}
-        attachments={attachments}
-        setAttachments={setAttachments}
-        sendMessage={sendMessage}
-        messages={messages}
-        setMessages={setMessages}
-        regenerate={regenerate}
-        votes={votes}
-        isReadonly={currentIsReadonly}
-        selectedVisibilityType={visibilityType}
-        selectedModelId={initialChatModel}
-      />
     </>
   );
 }

@@ -1,9 +1,14 @@
 import type { ArtifactKind } from '@/components/artifact';
 import type { Geo } from '@vercel/functions';
 
-export const initialMessage = `Eu sou seu assistente virtual de saúde e estou aqui para ajudar você a se preparar da melhor forma possível para sua cirurgia.
+export const initialMessage = `
+Olá! Eu sou o assistente de saúde da Asatenas e estou aqui para ajudar na sua avaliação pré-operatória.
 
-O meu objetivo é realizar uma avaliação pré-anestésica. Para isso, preciso que primeiro preencha o formulário abaixo. Depois, vou fazer algumas perguntas rápidas e fáceis, sempre em uma conversa tranquila. É muito importante que você responda com sinceridade — assim conseguimos cuidar melhor da sua segurança.
+Para isso, preciso que continue abaixo e preencha o formulário. Depois, vou fazer algumas perguntas rápidas, mantendo uma conversa tranquila.
+
+É muito importante que você responda com sinceridade — assim conseguimos cuidar da sua segurança.
+
+Para entender como esta avaliação funciona e como nós garantimos sua segurança e privacidade, veja em **Como Usar** acima. Para conhecer os criadores e nossa missão, veja em **Quem Somos**.
 
 Por favor leia as perguntas com atenção e responda de forma mais completa possível.
 `;
