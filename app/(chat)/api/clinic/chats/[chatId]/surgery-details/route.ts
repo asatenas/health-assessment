@@ -3,7 +3,7 @@ import { getChatById, updateChatSurgeryDetails } from '@/lib/db/queries';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { chatId: string } },
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
   const session = await auth();
 
@@ -12,7 +12,7 @@ export async function PATCH(
   }
 
   try {
-    const { chatId } = params;
+    const { chatId } = await params;
 
     // Verify the chat belongs to the user
     const chat = await getChatById({ id: chatId });
