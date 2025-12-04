@@ -10,7 +10,7 @@ config({
 
 const runMigrate = async () => {
   // biome-ignore lint: Forbidden non-null assertion.
-  const connection = postgres(postgres_url!, { max: 1 });
+  const connection = postgres(postgres_url!, { max: 1, ssl: 'require' });
   const db = drizzle(connection);
 
   console.log('⏳ Running migrations...');
