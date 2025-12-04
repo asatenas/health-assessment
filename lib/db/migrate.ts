@@ -9,7 +9,9 @@ config({
 
 const runMigrate = async () => {
   const isDevelopment = process.env.NODE_ENV === 'development';
-  const dbUrl = isDevelopment ? process.env.POSTGRES_URL_DEV : process.env.POSTGRES_URL;
+  const dbUrl = isDevelopment
+    ? process.env.POSTGRES_URL_DEV
+    : process.env.POSTGRES_URL;
 
   console.log(`🔍 Environment: ${process.env.NODE_ENV}`);
   console.log(`📍 Using database: ${isDevelopment ? 'DEV' : 'MAIN'}`);
