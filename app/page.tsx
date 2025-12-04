@@ -63,9 +63,10 @@ export default function HomePage() {
                 Revolucionando a estratificação de risco cirúrgico.
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                Automatize a coleta de dados pré-operatórios com nossos índices
-                inteligentes (RCRI e AUB-HAS2). Mais segurança para o paciente,
-                menos burocracia para sua equipe.
+                Evite até 40% do cancelamentos de cirurgias. Automatize a coleta
+                de dados pré-operatórios com nossos índices inteligentes (RCRI e
+                AUB-HAS2). Mais segurança para o paciente, menos burocracia para
+                sua equipe.
               </p>
               <div className="flex justify-center">
                 <Link href="/register">
@@ -563,7 +564,7 @@ export default function HomePage() {
                           Link compartilhável com pacientes
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Envie o link automaticamente por email
+                          Envie o link automaticamente por Email e WhatsApp
                         </div>
                       </div>
                     </li>
