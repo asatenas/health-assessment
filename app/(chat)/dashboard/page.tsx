@@ -42,7 +42,8 @@ const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
   if (rcri == null || has2 == null || rcri === -1 || has2 === -1) {
     return {
       level: '-',
-      color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+      color:
+        'hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
     };
   }
 
