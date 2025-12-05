@@ -9,10 +9,14 @@ import {
   primaryKey,
   foreignKey,
   boolean,
+  integer,
+  check,
+  unique,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
 
-export const user = pgTable('User', {
+export const user = pgTable('Clinic', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
@@ -21,27 +25,62 @@ export const user = pgTable('User', {
 
 export type User = InferSelectModel<typeof user>;
 
-export const chat = pgTable('Chat', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  createdAt: timestamp('createdAt').notNull(),
-  userId: uuid('userId')
-    .notNull()
-    .references(() => user.id),
-  visibility: varchar('visibility', { enum: ['public', 'private'] })
-    .notNull()
-    .default('private'),
-  readOnly: boolean('readOnly').notNull().default(false),
-  form: json('form'),
-  results: text('results'),
-  medications: text('medications'),
-  token: varchar('token', { length: 9 }),
-  tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
-  status: varchar('status', {
-    enum: CHAT_STATUSES,
-  })
-    .notNull()
-    .default('active'),
-});
+export const patient = pgTable(
+  'Patient',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    clinicId: uuid('clinicId')
+      .notNull()
+      .references(() => user.id),
+    cpf: varchar('cpf', { length: 14 }).notNull(),
+    phoneNumber: varchar('phoneNumber', { length: 20 }),
+    email: varchar('email', { length: 255 }),
+  },
+  (table) => ({
+    clinicCpfUnique: unique().on(table.clinicId, table.cpf),
+  }),
+);
+
+export type Patient = InferSelectModel<typeof patient>;
+
+export const chat = pgTable(
+  'Assessment',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    createdAt: timestamp('createdAt').notNull(),
+    userId: uuid('userId')
+      .notNull()
+      .references(() => user.id),
+    patientId: uuid('patientId').references(() => patient.id),
+    visibility: varchar('visibility', { enum: ['public', 'private'] })
+      .notNull()
+      .default('private'),
+    readOnly: boolean('readOnly').notNull().default(false),
+    form: json('form'),
+    results: text('results'),
+    medications: text('medications'),
+    token: varchar('token', { length: 9 }),
+    tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
+    status: varchar('status', {
+      enum: CHAT_STATUSES,
+    })
+      .notNull()
+      .default('active'),
+    completedAt: timestamp('completedAt'),
+    score_rcri: integer('score_rcri'),
+    score_aub_has2: integer('score_aub_has2'),
+  },
+  (table) => ({
+    scoreRcriCheck: check(
+      'score_rcri_non_negative',
+      sql`${table.score_rcri} >= 0`,
+    ),
+    scoreAubHas2Check: check(
+      'score_aub_has2_non_negative',
+      sql`${table.score_aub_has2} >= 0`,
+    ),
+  }),
+);
 
 export type Chat = InferSelectModel<typeof chat>;
 

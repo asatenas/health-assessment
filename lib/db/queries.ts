@@ -751,12 +751,15 @@ export async function getChatsByClinicUserId({
 
     // Add status filter if provided. Use compute-on-read semantics:
     // - If requested status is 'expired' consider rows where tokenExpiresAt <= now() OR status = 'expired'
+    // - If requested status is 'finalized', only check stored status (ignore token expiration)
     // - For other statuses, require the stored status AND tokenExpiresAt > now() (otherwise computed_status would be 'expired')
     if (status) {
       if (status === 'expired') {
         conditions.push(
           sql`(${chat.tokenExpiresAt} <= now() OR ${chat.status} = 'expired')`,
         );
+      } else if (status === 'finished') {
+        conditions.push(sql`(${chat.status} = 'finished'`);
       } else {
         conditions.push(
           sql`(${chat.status} = ${status} AND ${chat.tokenExpiresAt} > now())`,
@@ -796,8 +799,8 @@ export async function getChatsByClinicUserId({
         form: chat.form,
         results: chat.results,
         medications: chat.medications,
-        // Project a computed status: expired when tokenExpiresAt <= now(), otherwise original status
-        status: sql`CASE WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
+        // Project a computed status: preserve 'finalized', otherwise expired when tokenExpiresAt <= now()
+        status: sql`CASE WHEN ${chat.status} = 'finished' THEN 'finished' WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
       })
       .from(chat)
       .where(and(...conditions))

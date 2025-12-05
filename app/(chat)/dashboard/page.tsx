@@ -9,7 +9,7 @@ import type { ChatStatus } from '@/lib/db/chat-status';
 type Chat = {
   id: string;
   createdAt: string;
-  status: ChatStatus;
+  status: ChatStatus | 'expired';
   form?: {
     age: number;
     weight: number;
@@ -796,7 +796,7 @@ export default function ClinicDashboard() {
                           {rowNumber}
                         </td>
                         <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                          {chat.status === 'finished' ? (
+                          {chat.status !== 'expired' ? (
                             <button
                               type="button"
                               onClick={(e) => openChatDetailsModal(chat, e)}
@@ -851,7 +851,8 @@ export default function ClinicDashboard() {
               <>
                 {/* English: 'Showing' */}Mostrando{' '}
                 {(currentPage - 1) * limit + 1} a{' '}
-                {Math.min(currentPage * limit, totalChats)} de {totalChats} chats
+                {Math.min(currentPage * limit, totalChats)} de {totalChats}{' '}
+                chats
               </>
             )}
           </div>
@@ -878,63 +879,63 @@ export default function ClinicDashboard() {
                   <span className="sm:hidden">Anterior</span>
                 </Button>
                 <div className="flex items-center gap-1 sm:gap-2">
-                {/* First page */}
-                {currentPage > 3 && (
-                  <>
-                    <Button
-                      onClick={() => setCurrentPage(1)}
-                      variant={currentPage === 1 ? 'default' : 'outline'}
-                      size="sm"
-                    >
-                      1
-                    </Button>
-                    {currentPage > 4 && (
-                      <span className="text-gray-600 dark:text-gray-400">
-                        ...
-                      </span>
-                    )}
-                  </>
-                )}
+                  {/* First page */}
+                  {currentPage > 3 && (
+                    <>
+                      <Button
+                        onClick={() => setCurrentPage(1)}
+                        variant={currentPage === 1 ? 'default' : 'outline'}
+                        size="sm"
+                      >
+                        1
+                      </Button>
+                      {currentPage > 4 && (
+                        <span className="text-gray-600 dark:text-gray-400">
+                          ...
+                        </span>
+                      )}
+                    </>
+                  )}
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(
-                    (page) =>
-                      page === currentPage ||
-                      page === currentPage - 1 ||
-                      page === currentPage + 1 ||
-                      page === currentPage - 2 ||
-                      page === currentPage + 2,
-                  )
-                  .map((page) => (
-                    <Button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      variant={currentPage === page ? 'default' : 'outline'}
-                      size="sm"
-                    >
-                      {page}
-                    </Button>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(
+                      (page) =>
+                        page === currentPage ||
+                        page === currentPage - 1 ||
+                        page === currentPage + 1 ||
+                        page === currentPage - 2 ||
+                        page === currentPage + 2,
+                    )
+                    .map((page) => (
+                      <Button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        variant={currentPage === page ? 'default' : 'outline'}
+                        size="sm"
+                      >
+                        {page}
+                      </Button>
+                    ))}
 
-                {currentPage < totalPages - 2 && (
-                  <>
-                    {currentPage < totalPages - 3 && (
-                      <span className="text-gray-600 dark:text-gray-400">
-                        ...
-                      </span>
-                    )}
-                    <Button
-                      onClick={() => setCurrentPage(totalPages)}
-                      variant={
-                        currentPage === totalPages ? 'default' : 'outline'
-                      }
-                      size="sm"
-                    >
-                      {totalPages}
-                    </Button>
-                  </>
-                )}
-              </div>
+                  {currentPage < totalPages - 2 && (
+                    <>
+                      {currentPage < totalPages - 3 && (
+                        <span className="text-gray-600 dark:text-gray-400">
+                          ...
+                        </span>
+                      )}
+                      <Button
+                        onClick={() => setCurrentPage(totalPages)}
+                        variant={
+                          currentPage === totalPages ? 'default' : 'outline'
+                        }
+                        size="sm"
+                      >
+                        {totalPages}
+                      </Button>
+                    </>
+                  )}
+                </div>
                 <Button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
