@@ -41,6 +41,7 @@ export const chat = pgTable('Chat', {
   })
     .notNull()
     .default('active'),
+  completedAt: timestamp('completedAt'),
 });
 
 export type Chat = InferSelectModel<typeof chat>;
