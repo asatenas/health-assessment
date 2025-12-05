@@ -700,12 +700,19 @@ export async function updateChatMedicationsById({
 export async function updateChatResultsById({
   chatId,
   results,
+  score_rcri,
+  score_aub_has2,
 }: {
   chatId: string;
   results: string;
+  score_rcri: number;
+  score_aub_has2: number;
 }) {
   try {
-    return await db.update(chat).set({ results }).where(eq(chat.id, chatId));
+    return await db
+      .update(chat)
+      .set({ results, score_rcri, score_aub_has2, completedAt: new Date() })
+      .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -799,6 +806,8 @@ export async function getChatsByClinicUserId({
         form: chat.form,
         results: chat.results,
         medications: chat.medications,
+        score_rcri: chat.score_rcri,
+        score_aub_has2: chat.score_aub_has2,
         // Project a computed status: preserve 'finalized', otherwise expired when tokenExpiresAt <= now()
         status: sql`CASE WHEN ${chat.status} = 'finished' THEN 'finished' WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
       })

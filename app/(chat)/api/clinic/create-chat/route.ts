@@ -5,6 +5,37 @@ import { generateUUID } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
 
+/**
+ * Generate a cryptographically secure random alphanumeric string
+ * Uses A-Z and 0-9 (excludes lowercase for better readability)
+ *
+ * This implementation uses rejection sampling to avoid modulo bias,
+ * ensuring truly uniform distribution across all characters.
+ */
+function generateAlphanumeric(length: number): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const charsLength = chars.length;
+  const maxValidValue = 256 - (256 % charsLength); // 252 for 36 chars
+
+  let result = '';
+
+  while (result.length < length) {
+    // Generate more bytes than needed to account for rejections
+    const bytes = randomBytes(length * 2);
+
+    for (let i = 0; i < bytes.length && result.length < length; i++) {
+      const byte = bytes[i];
+
+      // Reject values >= maxValidValue to avoid modulo bias
+      if (byte < maxValidValue) {
+        result += chars[byte % charsLength];
+      }
+    }
+  }
+
+  return result;
+}
+
 export async function POST() {
   const session = await auth();
 
@@ -19,7 +50,7 @@ export async function POST() {
   }
 
   const chatId = generateUUID();
-  const token = `${randomBytes(2).toString('hex').toUpperCase()}-${randomBytes(2).toString('hex').toUpperCase()}`;
+  const token = `${generateAlphanumeric(4)}-${generateAlphanumeric(4)}`;
 
   try {
     await createChatWithToken({

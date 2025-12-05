@@ -25,6 +25,8 @@ type Chat = {
   };
   results?: string;
   medications?: string;
+  score_rcri?: number | null;
+  score_aub_has2?: number | null;
 };
 
 type CreateChatResponse = {
@@ -33,28 +35,15 @@ type CreateChatResponse = {
   url: string;
 };
 
-const extractRCRIScore = (results?: string): number => {
-  if (!results) return -1;
-  const match = results.match(/Pontuação final RCRI:\s*(\d+)\s*pontos?/i);
-  return match ? Number.parseInt(match[1], 10) : -1;
-};
+const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
+  const rcri = chat.score_rcri;
+  const has2 = chat.score_aub_has2;
 
-const extractHAS2Score = (results?: string): number => {
-  if (!results) return -1;
-  const match = results.match(/Pontuação final HAS2:\s*(\d+)\s*pontos?/i);
-  return match ? Number.parseInt(match[1], 10) : -1;
-};
-
-const calculateRiskLevel = (
-  results?: string,
-): { level: string; color: string } => {
-  const rcri = extractRCRIScore(results);
-  const has2 = extractHAS2Score(results);
-
-  if (rcri === -1 || has2 === -1) {
+  if (rcri == null || has2 == null || rcri === -1 || has2 === -1) {
     return {
       level: '-',
-      color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+      color:
+        'hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
     };
   }
 
@@ -692,6 +681,14 @@ export default function ClinicDashboard() {
                   className="hidden lg:table-column"
                   style={{ width: '120px' }}
                 />
+                <col
+                  className="hidden xl:table-column"
+                  style={{ width: '100px' }}
+                />
+                <col
+                  className="hidden xl:table-column"
+                  style={{ width: '130px' }}
+                />
               </colgroup>
               <thead className="bg-gray-50 dark:bg-gray-900 border-b">
                 <tr>
@@ -709,6 +706,12 @@ export default function ClinicDashboard() {
                   </th>
                   <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {/* English: 'Risk' */} Risco
+                  </th>
+                  <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {/* English: 'RCRI' */} RCRI
+                  </th>
+                  <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {/* English: 'AUB-HAS2' */} AUB-HAS2
                   </th>
                 </tr>
               </thead>
@@ -734,13 +737,19 @@ export default function ClinicDashboard() {
                           <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
                           </td>
+                          <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                          </td>
+                          <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                          </td>
                         </tr>
                       ),
                     )}
                   </>
                 ) : chats.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center">
+                    <td colSpan={7} className="px-6 py-8 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="text-gray-400 dark:text-gray-500">
                           <svg
@@ -829,10 +838,22 @@ export default function ClinicDashboard() {
                         </td>
                         <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat.results).color}`}
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat).color}`}
                           >
-                            {calculateRiskLevel(chat.results).level}
+                            {calculateRiskLevel(chat).level}
                           </span>
+                        </td>
+                        <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_rcri !== null &&
+                          chat.score_rcri !== undefined
+                            ? chat.score_rcri
+                            : '-'}
+                        </td>
+                        <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_aub_has2 !== null &&
+                          chat.score_aub_has2 !== undefined
+                            ? chat.score_aub_has2
+                            : '-'}
                         </td>
                       </tr>
                     );
@@ -1112,6 +1133,42 @@ export default function ClinicDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {/* Risk Scores */}
+                  {(selectedChat.score_rcri !== null &&
+                    selectedChat.score_rcri !== undefined) ||
+                  (selectedChat.score_aub_has2 !== null &&
+                    selectedChat.score_aub_has2 !== undefined) ? (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                        {/* English: 'Risk Scores' */} Pontuações de Risco
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            RCRI
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                            {selectedChat.score_rcri !== null &&
+                            selectedChat.score_rcri !== undefined
+                              ? selectedChat.score_rcri
+                              : '-'}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            AUB-HAS2
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                            {selectedChat.score_aub_has2 !== null &&
+                            selectedChat.score_aub_has2 !== undefined
+                              ? selectedChat.score_aub_has2
+                              : '-'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
 
                   {/* Results */}
                   {selectedChat.results && (

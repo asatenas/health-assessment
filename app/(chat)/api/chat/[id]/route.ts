@@ -12,8 +12,17 @@ export async function PATCH(
 ) {
   const { id: chatId } = await context.params;
 
-  const { form, results }: { form?: any; results?: string } =
-    await request.json();
+  const {
+    form,
+    results,
+    score_rcri,
+    score_aub_has2,
+  }: {
+    form?: any;
+    results?: string;
+    score_rcri?: number;
+    score_aub_has2?: number;
+  } = await request.json();
 
   if (!chatId) {
     return new ChatSDKError(
@@ -45,10 +54,16 @@ export async function PATCH(
     });
   }
 
-  if (results !== undefined) {
+  if (
+    results !== undefined &&
+    score_rcri !== undefined &&
+    score_aub_has2 !== undefined
+  ) {
     await updateChatResultsById({
       chatId,
       results,
+      score_rcri,
+      score_aub_has2,
     });
   }
 
