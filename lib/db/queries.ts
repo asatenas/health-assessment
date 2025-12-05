@@ -806,6 +806,8 @@ export async function getChatsByClinicUserId({
         form: chat.form,
         results: chat.results,
         medications: chat.medications,
+        score_rcri: chat.score_rcri,
+        score_aub_has2: chat.score_aub_has2,
         // Project a computed status: preserve 'finalized', otherwise expired when tokenExpiresAt <= now()
         status: sql`CASE WHEN ${chat.status} = 'finished' THEN 'finished' WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
       })
