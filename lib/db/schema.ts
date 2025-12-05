@@ -9,7 +9,10 @@ import {
   primaryKey,
   foreignKey,
   boolean,
+  integer,
+  check,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
 
 export const user = pgTable('User', {
@@ -21,28 +24,43 @@ export const user = pgTable('User', {
 
 export type User = InferSelectModel<typeof user>;
 
-export const chat = pgTable('Chat', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  createdAt: timestamp('createdAt').notNull(),
-  userId: uuid('userId')
-    .notNull()
-    .references(() => user.id),
-  visibility: varchar('visibility', { enum: ['public', 'private'] })
-    .notNull()
-    .default('private'),
-  readOnly: boolean('readOnly').notNull().default(false),
-  form: json('form'),
-  results: text('results'),
-  medications: text('medications'),
-  token: varchar('token', { length: 9 }),
-  tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
-  status: varchar('status', {
-    enum: CHAT_STATUSES,
-  })
-    .notNull()
-    .default('active'),
-  completedAt: timestamp('completedAt'),
-});
+export const chat = pgTable(
+  'Chat',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    createdAt: timestamp('createdAt').notNull(),
+    userId: uuid('userId')
+      .notNull()
+      .references(() => user.id),
+    visibility: varchar('visibility', { enum: ['public', 'private'] })
+      .notNull()
+      .default('private'),
+    readOnly: boolean('readOnly').notNull().default(false),
+    form: json('form'),
+    results: text('results'),
+    medications: text('medications'),
+    token: varchar('token', { length: 9 }),
+    tokenExpiresAt: timestamp('tokenExpiresAt').notNull(),
+    status: varchar('status', {
+      enum: CHAT_STATUSES,
+    })
+      .notNull()
+      .default('active'),
+    completedAt: timestamp('completedAt'),
+    score_rcri: integer('score_rcri'),
+    score_aub_has2: integer('score_aub_has2'),
+  },
+  (table) => ({
+    scoreRcriCheck: check(
+      'score_rcri_non_negative',
+      sql`${table.score_rcri} >= 0`,
+    ),
+    scoreAubHas2Check: check(
+      'score_aub_has2_non_negative',
+      sql`${table.score_aub_has2} >= 0`,
+    ),
+  }),
+);
 
 export type Chat = InferSelectModel<typeof chat>;
 
