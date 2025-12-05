@@ -1,7 +1,7 @@
 'use client';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolResult } from './document';
 import { PencilEditIcon, SparklesIcon, LoaderIcon } from './icons';
@@ -27,6 +27,7 @@ import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import type { ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
+import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 
 // Type narrowing is handled by TypeScript's control flow analysis
 // The AI SDK provides proper discriminated unions for tool calls
@@ -53,12 +54,20 @@ const PurePreviewMessage = ({
   isArtifactVisible: boolean;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const { scrollToBottom } = useScrollToBottom();
 
   const attachmentsFromMessage = message.parts.filter(
     (part) => part.type === 'file',
   );
 
   useDataStream();
+
+  // Scroll to bottom when AI message stream completes
+  useEffect(() => {
+    if (message.role === 'assistant' && !isLoading) {
+      scrollToBottom();
+    }
+  }, [isLoading, message.role, scrollToBottom]);
 
   return (
     <AnimatePresence>
