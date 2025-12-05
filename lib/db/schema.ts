@@ -15,7 +15,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
 
-export const user = pgTable('User', {
+export const user = pgTable('Clinic', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
@@ -25,7 +25,7 @@ export const user = pgTable('User', {
 export type User = InferSelectModel<typeof user>;
 
 export const chat = pgTable(
-  'Chat',
+  'Assessment',
   {
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     createdAt: timestamp('createdAt').notNull(),
