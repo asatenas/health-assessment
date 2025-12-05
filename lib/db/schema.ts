@@ -41,6 +41,7 @@ export const chat = pgTable(
     userId: uuid('userId')
       .notNull()
       .references(() => user.id),
+    patientId: uuid('patientId').references(() => patient.id),
     visibility: varchar('visibility', { enum: ['public', 'private'] })
       .notNull()
       .default('private'),
