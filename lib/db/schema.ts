@@ -11,6 +11,7 @@ import {
   boolean,
   integer,
   check,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
@@ -24,15 +25,21 @@ export const user = pgTable('Clinic', {
 
 export type User = InferSelectModel<typeof user>;
 
-export const patient = pgTable('Patient', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  clinicId: uuid('clinicId')
-    .notNull()
-    .references(() => user.id),
-  cpf: varchar('cpf', { length: 14 }).notNull().unique(),
-  phoneNumber: varchar('phoneNumber', { length: 20 }),
-  email: varchar('email', { length: 255 }),
-});
+export const patient = pgTable(
+  'Patient',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    clinicId: uuid('clinicId')
+      .notNull()
+      .references(() => user.id),
+    cpf: varchar('cpf', { length: 14 }).notNull(),
+    phoneNumber: varchar('phoneNumber', { length: 20 }),
+    email: varchar('email', { length: 255 }),
+  },
+  (table) => ({
+    clinicCpfUnique: unique().on(table.clinicId, table.cpf),
+  }),
+);
 
 export type Patient = InferSelectModel<typeof patient>;
 
