@@ -26,6 +26,9 @@ export type User = InferSelectModel<typeof user>;
 
 export const patient = pgTable('Patient', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
+  clinicId: uuid('clinicId')
+    .notNull()
+    .references(() => user.id),
   cpf: varchar('cpf', { length: 14 }).notNull().unique(),
   phoneNumber: varchar('phoneNumber', { length: 20 }),
   email: varchar('email', { length: 255 }),
