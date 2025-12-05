@@ -700,12 +700,19 @@ export async function updateChatMedicationsById({
 export async function updateChatResultsById({
   chatId,
   results,
+  score_rcri,
+  score_aub_has2,
 }: {
   chatId: string;
   results: string;
+  score_rcri: number;
+  score_aub_has2: number;
 }) {
   try {
-    return await db.update(chat).set({ results }).where(eq(chat.id, chatId));
+    return await db
+      .update(chat)
+      .set({ results, score_rcri, score_aub_has2, completedAt: new Date() })
+      .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
