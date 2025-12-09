@@ -185,6 +185,7 @@ export default function ClinicDashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setNewChatData(null);
     try {
       await fetchChats();
       toast({
