@@ -578,11 +578,15 @@ export async function updateChatVisiblityById({
   }
 }
 
-export async function makeChatReadOnlyById({ chatId }: { chatId: string }) {
+export async function makeChatReadOnlyById({
+  chatId,
+  incomplete,
+}: { chatId: string; incomplete: boolean }) {
+  const status = incomplete ? 'incomplete' : 'finished';
   try {
     return await db
       .update(chat)
-      .set({ readOnly: true, status: 'finished' })
+      .set({ readOnly: true, status })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(

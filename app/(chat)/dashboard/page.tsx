@@ -39,7 +39,13 @@ const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
   const rcri = chat.score_rcri;
   const has2 = chat.score_aub_has2;
 
-  if (rcri == null || has2 == null || rcri === -1 || has2 === -1) {
+  if (
+    rcri == null ||
+    has2 == null ||
+    rcri === -1 ||
+    has2 === -1 ||
+    chat.status === 'incomplete'
+  ) {
     return {
       level: '-',
       color:
@@ -272,6 +278,7 @@ export default function ClinicDashboard() {
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'finished':
+      case 'imcomplete':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
       case 'expired':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
@@ -294,6 +301,9 @@ export default function ClinicDashboard() {
       case 'finished':
         // English: 'Finished'
         return 'Finalizado';
+      case 'incomplete':
+        // English: 'Incomplete'
+        return 'Incompleto';
       case 'expired':
         // English: 'Expired'
         return 'Expirado';
@@ -555,6 +565,9 @@ export default function ClinicDashboard() {
                       </option>
                       <option value="finished">
                         {/* English: 'Finished' */} Finalizado
+                      </option>
+                      <option value="incompleto">
+                        {/* English: 'Incomplete' */} Incompleto
                       </option>
                       <option value="expired">
                         {/* English: 'Expired' */} Expirado
