@@ -196,6 +196,7 @@ export default function ClinicDashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setNewChatData(null);
     try {
       if (view === 'analytics') {
         await fetchDashboardMetrics();
