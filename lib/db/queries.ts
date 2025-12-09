@@ -653,8 +653,13 @@ export async function deleteSequentialAssistantMessages({
     }
 
     // If there's more than 1 sequential assistant message, delete all but the most recent
-    if (sequentialAssistantCount > 1 && sequentialAssistantMessages.length > 0) {
-      const assistantMessageIds = sequentialAssistantMessages.map((msg) => msg.id);
+    if (
+      sequentialAssistantCount > 1 &&
+      sequentialAssistantMessages.length > 0
+    ) {
+      const assistantMessageIds = sequentialAssistantMessages.map(
+        (msg) => msg.id,
+      );
 
       // Delete votes for these messages
       await db
