@@ -592,14 +592,14 @@ function PureStopButton({
   return (
     <Button
       data-testid="stop-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="p-3 text-foreground bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
       onClick={(event) => {
         event.preventDefault();
         stop();
         setMessages((messages) => messages);
       }}
     >
-      <StopIcon size={14} />
+      <StopIcon size={20} />
     </Button>
   );
 }
@@ -619,9 +619,9 @@ function PureVoiceRecordButton({
 }) {
   const getButtonState = () => {
     if (isTranscribing)
-      return { icon: <LoaderIcon size={16} />, tooltip: 'Transcrevendo...' };
+      return { icon: <LoaderIcon size={20} />, tooltip: 'Transcrevendo...' };
     if (isRecording)
-      return { icon: <MicrophoneIcon size={16} />, tooltip: 'Parar gravação' };
+      return { icon: <MicrophoneIcon size={20} />, tooltip: 'Parar gravação' };
     return {
       icon: <MicrophoneIcon size={20} />,
       tooltip: 'Gravar mensagem de voz',
