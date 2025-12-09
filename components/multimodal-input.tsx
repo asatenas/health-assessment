@@ -106,10 +106,18 @@ function PureMultimodalInput({
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
+    // If AI is processing and user starts typing, stop the AI
+    if (status === 'submitted' || status === 'streaming') {
+      stop();
+      setWasAutoStopped(true);
+    }
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
+
+  // Track if AI was auto-stopped by user typing
+  const [wasAutoStopped, setWasAutoStopped] = useState(false);
 
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -120,8 +128,21 @@ function PureMultimodalInput({
   const [showTranscriptionModal, setShowTranscriptionModal] = useState(false);
   const [pendingTranscription, setPendingTranscription] = useState('');
 
-  const submitForm = useCallback(() => {
+  const submitForm = useCallback(async () => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
+
+    // If user interrupted AI, cleanup partial messages before sending new one
+    if (wasAutoStopped) {
+      try {
+        await fetch('/api/chat/cleanup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId }),
+        });
+      } catch (error) {
+        console.error('Failed to cleanup partial messages:', error);
+      }
+    }
 
     sendMessage({
       role: 'user',
@@ -144,6 +165,7 @@ function PureMultimodalInput({
     setAttachments([]);
     setLocalStorageInput('');
     setInput('');
+    setWasAutoStopped(false);
 
     if (width && width > 768) {
       textareaRef.current?.focus();
@@ -157,6 +179,8 @@ function PureMultimodalInput({
     setLocalStorageInput,
     width,
     chatId,
+    wasAutoStopped,
+    setWasAutoStopped,
   ]);
 
   const uploadFile = async (file: File) => {
@@ -307,8 +331,21 @@ function PureMultimodalInput({
       setPendingTranscription('');
 
       // Auto-send the confirmed transcription
-      setTimeout(() => {
+      setTimeout(async () => {
         window.history.replaceState({}, '', `/chat/${chatId}`);
+
+        // If user interrupted AI, cleanup partial messages before sending new one
+        if (wasAutoStopped) {
+          try {
+            await fetch('/api/chat/cleanup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chatId }),
+            });
+          } catch (error) {
+            console.error('Failed to cleanup partial messages:', error);
+          }
+        }
 
         sendMessage({
           role: 'user',
@@ -329,6 +366,7 @@ function PureMultimodalInput({
         setAttachments([]);
         setLocalStorageInput('');
         setInput('');
+        setWasAutoStopped(false);
 
         if (width && width > 768) {
           textareaRef.current?.focus();
@@ -344,6 +382,8 @@ function PureMultimodalInput({
       setLocalStorageInput,
       width,
       textareaRef,
+      wasAutoStopped,
+      setWasAutoStopped,
     ],
   );
 
@@ -402,11 +442,7 @@ function PureMultimodalInput({
         className="bg-gray-50 rounded-3xl border border-gray-300 shadow-none transition-all duration-200 dark:bg-sidebar dark:border-sidebar-border hover:ring-1 hover:ring-primary/30 focus-within:ring-1 focus-within:ring-primary/50"
         onSubmit={(event) => {
           event.preventDefault();
-          if (status !== 'ready') {
-            toast.error('Por favor espere receber a resposta por completo.');
-          } else {
-            submitForm();
-          }
+          submitForm();
         }}
       >
         {(attachments.length > 0 || uploadQueue.length > 0) && (
@@ -446,7 +482,12 @@ function PureMultimodalInput({
         <PromptInputTextarea
           data-testid="multimodal-input"
           ref={textareaRef}
-          placeholder="Digite sua mensagem..."
+          placeholder={
+            (status === 'submitted' || status === 'streaming') &&
+            !wasAutoStopped
+              ? 'Digite para interromper a análise...'
+              : 'Digite sua mensagem...'
+          }
           value={input}
           onChange={handleInput}
           allowEmptySubmit={attachments.length > 0}
