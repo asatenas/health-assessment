@@ -131,17 +131,15 @@ function PureMultimodalInput({
   const submitForm = useCallback(async () => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
-    // If user interrupted AI, cleanup partial messages before sending new one
+    // If user interrupted AI, cleanup partial messages in background (don't await)
     if (wasAutoStopped) {
-      try {
-        await fetch('/api/chat/cleanup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chatId }),
-        });
-      } catch (error) {
+      fetch('/api/chat/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId }),
+      }).catch((error) => {
         console.error('Failed to cleanup partial messages:', error);
-      }
+      });
     }
 
     sendMessage({
@@ -334,17 +332,15 @@ function PureMultimodalInput({
       setTimeout(async () => {
         window.history.replaceState({}, '', `/chat/${chatId}`);
 
-        // If user interrupted AI, cleanup partial messages before sending new one
+        // If user interrupted AI, cleanup partial messages in background (don't await)
         if (wasAutoStopped) {
-          try {
-            await fetch('/api/chat/cleanup', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ chatId }),
-            });
-          } catch (error) {
+          fetch('/api/chat/cleanup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chatId }),
+          }).catch((error) => {
             console.error('Failed to cleanup partial messages:', error);
-          }
+          });
         }
 
         sendMessage({
