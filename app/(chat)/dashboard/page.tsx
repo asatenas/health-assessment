@@ -39,7 +39,13 @@ const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
   const rcri = chat.score_rcri;
   const has2 = chat.score_aub_has2;
 
-  if (rcri == null || has2 == null || rcri === -1 || has2 === -1) {
+  if (
+    rcri == null ||
+    has2 == null ||
+    rcri === -1 ||
+    has2 === -1 ||
+    chat.status === 'incomplete'
+  ) {
     return {
       level: '-',
       color:
@@ -185,6 +191,7 @@ export default function ClinicDashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setNewChatData(null);
     try {
       await fetchChats();
       toast({
@@ -271,6 +278,7 @@ export default function ClinicDashboard() {
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'finished':
+      case 'imcomplete':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
       case 'expired':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
@@ -293,6 +301,9 @@ export default function ClinicDashboard() {
       case 'finished':
         // English: 'Finished'
         return 'Finalizado';
+      case 'incomplete':
+        // English: 'Incomplete'
+        return 'Incompleto';
       case 'expired':
         // English: 'Expired'
         return 'Expirado';
@@ -555,6 +566,9 @@ export default function ClinicDashboard() {
                       <option value="finished">
                         {/* English: 'Finished' */} Finalizado
                       </option>
+                      <option value="incompleto">
+                        {/* English: 'Incomplete' */} Incompleto
+                      </option>
                       <option value="expired">
                         {/* English: 'Expired' */} Expirado
                       </option>
@@ -596,9 +610,32 @@ export default function ClinicDashboard() {
 
         {newChatData && (
           <div className="mb-8 p-6 border rounded-lg bg-blue-50 dark:bg-blue-950">
-            <h2 className="text-xl font-semibold mb-4">
-              {/* English: 'New Chat Created' */} Novo chat criado
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">
+                {/* English: 'New Chat Created' */} Novo chat criado
+              </h2>
+              <button
+                type="button"
+                onClick={() => setNewChatData(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                aria-label="Fechar"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="space-y-3">
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
@@ -655,14 +692,6 @@ export default function ClinicDashboard() {
                 </div>
               </div>
             </div>
-            <Button
-              onClick={() => setNewChatData(null)}
-              variant="ghost"
-              size="sm"
-              className="mt-4"
-            >
-              {/* English: 'Dismiss' */} Fechar
-            </Button>
           </div>
         )}
 

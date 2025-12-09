@@ -561,6 +561,129 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   }
 }
 
+export async function deleteAssistantMessagesAfterLastUser({
+  chatId,
+}: {
+  chatId: string;
+}) {
+  try {
+    // Get all messages for this chat
+    const messages = await db
+      .select()
+      .from(message)
+      .where(eq(message.chatId, chatId))
+      .orderBy(desc(message.createdAt));
+
+    // Find the last user message
+    const lastUserMessageIndex = messages.findIndex(
+      (msg) => msg.role === 'user',
+    );
+
+    if (lastUserMessageIndex === -1) {
+      // No user messages found, nothing to delete
+      return;
+    }
+
+    // Get all assistant messages that come after the last user message
+    const messagesToDelete = messages.slice(0, lastUserMessageIndex);
+    const assistantMessageIds = messagesToDelete
+      .filter((msg) => msg.role === 'assistant')
+      .map((msg) => msg.id);
+
+    if (assistantMessageIds.length > 0) {
+      // Delete votes for these messages
+      await db
+        .delete(vote)
+        .where(
+          and(
+            eq(vote.chatId, chatId),
+            inArray(vote.messageId, assistantMessageIds),
+          ),
+        );
+
+      // Delete the messages
+      return await db
+        .delete(message)
+        .where(
+          and(
+            eq(message.chatId, chatId),
+            inArray(message.id, assistantMessageIds),
+          ),
+        );
+    }
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to delete assistant messages after last user message',
+    );
+  }
+}
+
+export async function deleteSequentialAssistantMessages({
+  chatId,
+}: {
+  chatId: string;
+}) {
+  try {
+    // Get all messages for this chat
+    const messages = await db
+      .select()
+      .from(message)
+      .where(eq(message.chatId, chatId))
+      .orderBy(desc(message.createdAt));
+
+    if (messages.length < 2) {
+      return; // Not enough messages to have duplicates
+    }
+
+    // Count sequential assistant messages from the end
+    let sequentialAssistantCount = 0;
+    const sequentialAssistantMessages = [];
+
+    for (let i = 0; i < messages.length; i++) {
+      if (messages[i].role === 'assistant') {
+        sequentialAssistantCount++;
+        // Don't add the first (most recent) one to the delete list
+        if (i > 0) {
+          sequentialAssistantMessages.push(messages[i]);
+        }
+      } else {
+        break; // Stop when we hit a non-assistant message
+      }
+    }
+
+    // If there's more than 1 sequential assistant message, delete all but the most recent
+    if (sequentialAssistantCount > 1 && sequentialAssistantMessages.length > 0) {
+      const assistantMessageIds = sequentialAssistantMessages.map((msg) => msg.id);
+
+      // Delete votes for these messages
+      await db
+        .delete(vote)
+        .where(
+          and(
+            eq(vote.chatId, chatId),
+            inArray(vote.messageId, assistantMessageIds),
+          ),
+        );
+
+      // Delete the messages
+      return await db
+        .delete(message)
+        .where(
+          and(
+            eq(message.chatId, chatId),
+            inArray(message.id, assistantMessageIds),
+          ),
+        );
+    }
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to delete sequential assistant messages',
+    );
+  }
+}
+
 export async function updateChatVisiblityById({
   chatId,
   visibility,
@@ -578,11 +701,15 @@ export async function updateChatVisiblityById({
   }
 }
 
-export async function makeChatReadOnlyById({ chatId }: { chatId: string }) {
+export async function makeChatReadOnlyById({
+  chatId,
+  incomplete,
+}: { chatId: string; incomplete: boolean }) {
+  const status = incomplete ? 'incomplete' : 'finished';
   try {
     return await db
       .update(chat)
-      .set({ readOnly: true, status: 'finished' })
+      .set({ readOnly: true, status })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(

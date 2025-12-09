@@ -67,7 +67,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         initialChatModel={chatModel}
         initialVisibilityType={chat.visibility}
         isReadonly={chat.readOnly}
-        autoResume={true}
+        autoResume={false}
         initialFormData={initialFormData}
         hasInitialMessages={hasInitialMessages}
       />

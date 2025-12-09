@@ -6,7 +6,7 @@
 // import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
 import { SpeakerIcon } from './icons';
 import { Actions, Action } from './elements/actions';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 // import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/lib/types';
@@ -26,42 +26,42 @@ export function PureMessageActions({
   // const { mutate } = useSWRConfig();
   // const [_, copyToClipboard] = useCopyToClipboard();
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [textFromParts, setTextFromParts] = useState('');
+
+  useEffect(() => {
+    setTextFromParts(
+      message.parts
+        ?.filter((part) => part.type === 'text')
+        .map((part) => part.text)
+        .join('\n')
+        .trim(),
+    );
+  }, [message]);
 
   if (isLoading) return null;
   if (message.role === 'user') return null;
 
   return (
     <Actions>
-      <Action
-        tooltip="Ouvir"
-        disabled={isSpeaking}
-        onClick={async () => {
-          const textFromParts = message.parts
-            ?.filter((part) => part.type === 'text')
-            .map((part) => part.text)
-            .join('\n')
-            .trim();
-
-          if (!textFromParts) {
-            toast.error('Não há texto para ler!');
-            return;
-          }
-
-          setIsSpeaking(true);
-
-          try {
-            await speakText(textFromParts);
-          } catch (error) {
-            console.error('TTS error:', error);
-            toast.error('Erro ao reproduzir o áudio. Tente novamente.');
-          } finally {
-            setIsSpeaking(false);
-          }
-        }}
-      >
-        <SpeakerIcon />
-      </Action>
-
+      {textFromParts && (
+        <Action
+          tooltip="Ouvir"
+          disabled={isSpeaking}
+          onClick={async () => {
+            setIsSpeaking(true);
+            try {
+              await speakText(textFromParts);
+            } catch (error) {
+              console.error('TTS error:', error);
+              toast.error('Erro ao reproduzir o áudio. Tente novamente.');
+            } finally {
+              setIsSpeaking(false);
+            }
+          }}
+        >
+          <SpeakerIcon />
+        </Action>
+      )}
       {/* <Action
           tooltip="Copy"
           onClick={async () => {

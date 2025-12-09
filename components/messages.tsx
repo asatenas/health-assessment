@@ -1,4 +1,4 @@
-import { PreviewMessage, ThinkingMessage } from './message';
+import { PreviewMessage } from './message';
 import { memo } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import equal from 'fast-deep-equal';
@@ -56,8 +56,10 @@ function PureMessages({
               key={message.id}
               chatId={chatId}
               message={message}
+              status={status}
               isLoading={
-                status === 'streaming' && messages.length - 1 === index
+                messages.length - 1 === index && // only check status from the last message
+                (status === 'submitted' || status === 'streaming')
               }
               vote={
                 votes
@@ -73,12 +75,6 @@ function PureMessages({
               isArtifactVisible={isArtifactVisible}
             />
           ))}
-
-          {status === 'submitted' &&
-            messages.length > 0 &&
-            messages[messages.length - 1].role === 'user' && (
-              <ThinkingMessage />
-            )}
 
           <motion.div
             ref={messagesEndRef}
