@@ -2,12 +2,13 @@ import { cookies } from 'next/headers';
 import {
   getChatById,
   deleteAssistantMessagesAfterLastUser,
+  deleteSequentialAssistantMessages,
 } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
 
 export async function POST(request: Request) {
   try {
-    const { chatId }: { chatId: string } = await request.json();
+    const { chatId, mode }: { chatId: string; mode?: 'all' | 'sequential' } = await request.json();
 
     if (!chatId) {
       return new ChatSDKError(
@@ -33,16 +34,22 @@ export async function POST(request: Request) {
       return new ChatSDKError('unauthorized:chat').toResponse();
     }
 
-    // Delete assistant messages after the last user message
-    await deleteAssistantMessagesAfterLastUser({ chatId });
+    // Delete based on mode
+    if (mode === 'sequential') {
+      // Delete sequential assistant messages (keep the most recent one)
+      await deleteSequentialAssistantMessages({ chatId });
+    } else {
+      // Default: delete all assistant messages after the last user message
+      await deleteAssistantMessagesAfterLastUser({ chatId });
+    }
 
-    return new Response('Partial messages cleaned up', { status: 200 });
+    return new Response('Messages cleaned up', { status: 200 });
   } catch (error) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
 
-    console.error('Unhandled error in cleanup-partial API:', error);
+    console.error('Unhandled error in cleanup API:', error);
     return new ChatSDKError('offline:chat').toResponse();
   }
 }

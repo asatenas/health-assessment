@@ -119,6 +119,32 @@ function PureMultimodalInput({
   // Track if AI was auto-stopped by user typing
   const [wasAutoStopped, setWasAutoStopped] = useState(false);
 
+  // Cleanup sequential assistant messages when response completes
+  useEffect(() => {
+    if (status === 'ready' && messages.length >= 2) {
+      // Check if there are multiple sequential assistant messages
+      let sequentialAssistantCount = 0;
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].role === 'assistant') {
+          sequentialAssistantCount++;
+        } else {
+          break; // Stop when we hit a non-assistant message
+        }
+      }
+
+      // If there's more than 1 sequential assistant message, cleanup the extras (keep most recent)
+      if (sequentialAssistantCount > 1) {
+        fetch('/api/chat/cleanup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId, mode: 'sequential' }),
+        }).catch((error) => {
+          console.error('Failed to cleanup sequential assistant messages:', error);
+        });
+      }
+    }
+  }, [status, messages, chatId]);
+
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
   const [voiceRecorder] = useState(() => new VoiceRecorder());
