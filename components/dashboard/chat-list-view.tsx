@@ -7,7 +7,7 @@ import type { ChatStatus } from '@/lib/db/chat-status';
 type Chat = {
   id: string;
   createdAt: string;
-  status: ChatStatus;
+  status: ChatStatus | 'expired';
   form?: {
     age: number;
     weight: number;
@@ -23,6 +23,8 @@ type Chat = {
   };
   results?: string;
   medications?: string;
+  score_rcri?: number | null;
+  score_aub_has2?: number | null;
 };
 
 interface ChatListViewProps {
@@ -42,23 +44,9 @@ interface ChatListViewProps {
   onClearFilters: () => void;
 }
 
-const extractRCRIScore = (results?: string): number => {
-  if (!results) return -1;
-  const match = results.match(/Pontuação final RCRI:\s*(\d+)\s*pontos?/i);
-  return match ? Number.parseInt(match[1], 10) : -1;
-};
-
-const extractHAS2Score = (results?: string): number => {
-  if (!results) return -1;
-  const match = results.match(/Pontuação final HAS2:\s*(\d+)\s*pontos?/i);
-  return match ? Number.parseInt(match[1], 10) : -1;
-};
-
-const calculateRiskLevel = (
-  results?: string,
-): { level: string; color: string } => {
-  const rcri = extractRCRIScore(results);
-  const has2 = extractHAS2Score(results);
+const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
+  const rcri = chat.score_rcri ?? -1;
+  const has2 = chat.score_aub_has2 ?? -1;
 
   if (rcri === -1 || has2 === -1) {
     return {
@@ -483,9 +471,9 @@ export function ChatListView({
                       </td>
                       <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat.results).color}`}
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat).color}`}
                         >
-                          {calculateRiskLevel(chat.results).level}
+                          {calculateRiskLevel(chat).level}
                         </span>
                       </td>
                     </tr>

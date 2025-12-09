@@ -1,11 +1,6 @@
 import { auth } from '@/app/(auth)/auth';
 import type { ChatStatus } from '@/lib/db/chat-status';
-import {
-  extractRCRIScore,
-  extractHAS2Score,
-  calculateRiskLevel,
-  getChatsByClinicUserId,
-} from '@/lib/db/queries';
+import { calculateRiskLevel, getChatsByClinicUserId } from '@/lib/db/queries';
 
 // Get Portuguese status label
 function getStatusLabel(status: string): string {
@@ -101,13 +96,9 @@ export async function GET(request: Request) {
           chat.id,
           getStatusLabel(chat.status),
           form?.age || 'N/A',
-          calculateRiskLevel(chat.results),
-          extractRCRIScore(chat.results) >= 0
-            ? extractRCRIScore(chat.results)
-            : 'N/A',
-          extractHAS2Score(chat.results) >= 0
-            ? extractHAS2Score(chat.results)
-            : 'N/A',
+          calculateRiskLevel(chat.score_rcri, chat.score_aub_has2),
+          chat.score_rcri >= 0 ? chat.score_rcri : 'N/A',
+          chat.score_aub_has2 >= 0 ? chat.score_aub_has2 : 'N/A',
           chat.surgeryDate
             ? new Date(chat.surgeryDate).toLocaleDateString('pt-BR')
             : 'N/A',
