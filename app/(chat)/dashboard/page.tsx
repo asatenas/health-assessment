@@ -13,7 +13,7 @@ import { RiskDistributionChart } from '@/components/dashboard/risk-distribution-
 import { TimelineChart } from '@/components/dashboard/timeline-chart';
 import { CancellationsAndReschedulesChart } from '@/components/dashboard/cancellations-reschedules-chart';
 import { TodaysSurgeriesPanel } from '@/components/dashboard/todays-surgeries-panel';
-import { ThisWeeksSurgeriesPanel } from '@/components/dashboard/this-weeks-surgeries-panel';
+import { ThisMonthsSurgeriesPanel } from '@/components/dashboard/this-months-surgeries-panel';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
@@ -64,7 +64,7 @@ export default function ClinicDashboard() {
   const [timeline, setTimeline] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [todaysSurgeries, setTodaysSurgeries] = useState<any[]>([]);
-  const [thisWeeksSurgeries, setThisWeeksSurgeries] = useState<
+  const [thisMonthsSurgeries, setThisMonthsSurgeries] = useState<
     Record<string, any[]>
   >({});
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
@@ -100,7 +100,7 @@ export default function ClinicDashboard() {
       setMetrics(data.metrics);
       setTimeline(data.timeline);
       setNotifications(data.notifications);
-      setThisWeeksSurgeries(data.thisWeeksSurgeries || {});
+      setThisMonthsSurgeries(data.thisMonthsSurgeries || {});
     } catch (error) {
       toast({
         type: 'error',
@@ -498,7 +498,9 @@ export default function ClinicDashboard() {
                   surgeries={todaysSurgeries}
                   onUpdateStatus={handleSurgeryStatusUpdate}
                 />
-                <ThisWeeksSurgeriesPanel surgeriesByDay={thisWeeksSurgeries} />
+                <ThisMonthsSurgeriesPanel
+                  surgeriesByDay={thisMonthsSurgeries}
+                />
                 <NotificationsPanel notifications={notifications} />
               </div>
             )}

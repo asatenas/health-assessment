@@ -18,13 +18,13 @@ interface Surgery {
   has2Score?: number;
 }
 
-interface ThisWeeksSurgeriesPanelProps {
+interface ThisMonthsSurgeriesPanelProps {
   surgeriesByDay: Record<string, Surgery[]>;
 }
 
-export function ThisWeeksSurgeriesPanel({
+export function ThisMonthsSurgeriesPanel({
   surgeriesByDay,
-}: ThisWeeksSurgeriesPanelProps) {
+}: ThisMonthsSurgeriesPanelProps) {
   const router = useRouter();
 
   const getRiskColor = (risk: string) => {
@@ -91,16 +91,16 @@ export function ThisWeeksSurgeriesPanel({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Cirurgias da Semana
+            <Calendar className="size-5" />
+            Cirurgias do Mês
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex h-[300px] flex-col items-center justify-center gap-2 text-center">
-            <Calendar className="h-12 w-12 text-muted-foreground" />
+            <Calendar className="size-12 text-muted-foreground" />
             <p className="text-sm font-medium">Nenhuma cirurgia agendada</p>
             <p className="text-xs text-muted-foreground">
-              Não há cirurgias programadas até sábado
+              Não há cirurgias programadas
             </p>
           </div>
         </CardContent>
@@ -112,8 +112,8 @@ export function ThisWeeksSurgeriesPanel({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          Cirurgias da Semana
+          <Calendar className="size-5" />
+          Cirurgias do mês
         </CardTitle>
         <Badge
           variant="outline"
@@ -129,7 +129,7 @@ export function ThisWeeksSurgeriesPanel({
               <div key={day} className="space-y-3">
                 {/* Day Header */}
                 <div className="flex items-center gap-2 border-b pb-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <Calendar className="size-4 text-blue-600" />
                   <h3 className="text-sm font-semibold capitalize">{day}</h3>
                   <Badge variant="outline" className="ml-auto">
                     {surgeries.length}
@@ -148,7 +148,7 @@ export function ThisWeeksSurgeriesPanel({
                         <div className="flex-1 space-y-2">
                           {/* Patient Info */}
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                            <User className="size-4 text-muted-foreground" />
                             <span className="text-sm font-medium">
                               {surgery.patientAge} anos
                             </span>
@@ -170,14 +170,14 @@ export function ThisWeeksSurgeriesPanel({
                             {surgery.rcriScore !== undefined &&
                               surgery.rcriScore >= 0 && (
                                 <div className="flex items-center gap-1">
-                                  <Activity className="h-3 w-3" />
+                                  <Activity className="size-3" />
                                   <span>RCRI: {surgery.rcriScore}</span>
                                 </div>
                               )}
                             {surgery.has2Score !== undefined &&
                               surgery.has2Score >= 0 && (
                                 <div className="flex items-center gap-1">
-                                  <Activity className="h-3 w-3" />
+                                  <Activity className="size-3" />
                                   <span>HAS2: {surgery.has2Score}</span>
                                 </div>
                               )}
