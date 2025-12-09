@@ -362,7 +362,30 @@ export default function ClinicDashboard() {
         {/* New Chat Data Display */}
         {newChatData && (
           <div className="mb-8 p-6 border rounded-lg bg-blue-50 dark:bg-blue-950">
-            <h2 className="text-xl font-semibold mb-4">Novo chat criado</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Novo chat criado</h2>
+              <button
+                type="button"
+                onClick={() => setNewChatData(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                aria-label="Fechar"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="space-y-3">
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
@@ -419,14 +442,6 @@ export default function ClinicDashboard() {
                 </div>
               </div>
             </div>
-            <Button
-              onClick={() => setNewChatData(null)}
-              variant="ghost"
-              size="sm"
-              className="mt-4"
-            >
-              Fechar
-            </Button>
           </div>
         )}
 

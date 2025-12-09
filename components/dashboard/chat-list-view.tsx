@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatStatus } from '@/lib/db/chat-status';
 
@@ -51,7 +51,8 @@ const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
   if (rcri === -1 || has2 === -1) {
     return {
       level: '-',
-      color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+      color:
+        'hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
     };
   }
 
@@ -98,9 +99,22 @@ export function ChatListView({
   onDateToFilterChange,
   onClearFilters,
 }: ChatListViewProps) {
+  const [legendExpanded, setLegendExpanded] = useState(true);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (chatDetailsModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [chatDetailsModalOpen]);
 
   const hasActiveFilters = useMemo(() => {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
@@ -148,6 +162,7 @@ export function ChatListView({
       case 'in_progress':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'finished':
+      case 'imcomplete':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
       case 'expired':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
@@ -166,6 +181,8 @@ export function ChatListView({
         return 'Em progresso';
       case 'finished':
         return 'Finalizado';
+      case 'incomplete':
+        return 'Incompleto';
       case 'expired':
         return 'Expirado';
       default:
@@ -184,6 +201,85 @@ export function ChatListView({
 
   return (
     <div className="space-y-6">
+      {/* Risk Level Calculation Info */}
+      <div className="border rounded-lg bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+        <button
+          type="button"
+          onClick={() => setLegendExpanded(!legendExpanded)}
+          className="w-full p-4 flex items-start gap-3 hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors rounded-lg"
+        >
+          <div className="shrink-0 mt-0.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="size-5 text-blue-600 dark:text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="flex-1 text-left">
+            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+              Cálculo do Nível de Risco
+            </h3>
+          </div>
+          <div className="shrink-0 mt-0.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`size-5 text-blue-600 dark:text-blue-400 transition-transform ${legendExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+        </button>
+        {legendExpanded && (
+          <div className="p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+              O nível de risco é determinado pela maior pontuação entre duas
+              avaliações de risco cardíaco (RCRI e HAS2):
+            </p>
+            <ul className="space-y-1.5 text-sm text-blue-800 dark:text-blue-200">
+              <li className="flex items-start gap-2">
+                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  Baixo
+                </span>
+                <span className="mt-1">Ambas as pontuações são 0</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  Moderado
+                </span>
+                <span className="mt-1">
+                  A maior pontuação entre as duas é 1
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  Alto
+                </span>
+                <span className="mt-1">
+                  A maior pontuação entre as duas é 2 ou mais
+                </span>
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="border rounded-lg bg-gray-50 dark:bg-gray-900">
         <button
@@ -283,6 +379,7 @@ export function ChatListView({
                     <option value="initialized">Iniciado</option>
                     <option value="in_progress">Em progresso</option>
                     <option value="finished">Finalizado</option>
+                    <option value="incompleto">Incompleto</option>
                     <option value="expired">Expirado</option>
                   </select>
                 </div>
@@ -336,6 +433,14 @@ export function ChatListView({
                 className="hidden lg:table-column"
                 style={{ width: '120px' }}
               />
+              <col
+                className="hidden xl:table-column"
+                style={{ width: '100px' }}
+              />
+              <col
+                className="hidden xl:table-column"
+                style={{ width: '130px' }}
+              />
             </colgroup>
             <thead className="bg-gray-50 dark:bg-gray-900 border-b">
               <tr>
@@ -353,6 +458,12 @@ export function ChatListView({
                 </th>
                 <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Risco
+                </th>
+                <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  RCRI
+                </th>
+                <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  AUB-HAS2
                 </th>
               </tr>
             </thead>
@@ -378,13 +489,19 @@ export function ChatListView({
                         <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
                         </td>
+                        <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                        </td>
+                        <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                        </td>
                       </tr>
                     ),
                   )}
                 </>
               ) : chats.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center">
+                  <td colSpan={7} className="px-6 py-8 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <div className="text-gray-400 dark:text-gray-500">
                         <svg
@@ -438,7 +555,7 @@ export function ChatListView({
                         {rowNumber}
                       </td>
                       <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                        {chat.status === 'finished' ? (
+                        {chat.status !== 'expired' ? (
                           <button
                             type="button"
                             onClick={(e) => openChatDetailsModal(chat, e)}
@@ -475,6 +592,18 @@ export function ChatListView({
                         >
                           {calculateRiskLevel(chat).level}
                         </span>
+                      </td>
+                      <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        {chat.score_rcri !== null &&
+                        chat.score_rcri !== undefined
+                          ? chat.score_rcri
+                          : '-'}
+                      </td>
+                      <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        {chat.score_aub_has2 !== null &&
+                        chat.score_aub_has2 !== undefined
+                          ? chat.score_aub_has2
+                          : '-'}
                       </td>
                     </tr>
                   );
@@ -736,6 +865,41 @@ export function ChatListView({
                     </div>
                   </div>
                 )}
+
+                {(selectedChat.score_rcri !== null &&
+                  selectedChat.score_rcri !== undefined) ||
+                (selectedChat.score_aub_has2 !== null &&
+                  selectedChat.score_aub_has2 !== undefined) ? (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                      Pontuações de Risco
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          RCRI
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                          {selectedChat.score_rcri !== null &&
+                          selectedChat.score_rcri !== undefined
+                            ? selectedChat.score_rcri
+                            : '-'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          AUB-HAS2
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                          {selectedChat.score_aub_has2 !== null &&
+                          selectedChat.score_aub_has2 !== undefined
+                            ? selectedChat.score_aub_has2
+                            : '-'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
                 {selectedChat.results && (
                   <div>
