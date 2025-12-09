@@ -448,10 +448,10 @@ export function ChatListView({
                   #
                 </th>
                 <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  ID do chat
+                  ID da avaliação
                 </th>
                 <th className="hidden md:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Criado em
+                  Criada em
                 </th>
                 <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
@@ -521,8 +521,8 @@ export function ChatListView({
                       </div>
                       <div className="text-gray-700 dark:text-gray-300 font-medium">
                         {hasActiveFilters
-                          ? 'Nenhum chat corresponde aos seus filtros'
-                          : 'Ainda não há chats'}
+                          ? 'Nenhuma avaliação corresponde aos seus filtros'
+                          : 'Ainda não há avaliações'}
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {hasActiveFilters ? (
@@ -537,7 +537,7 @@ export function ChatListView({
                             </button>
                           </>
                         ) : (
-                          'Crie seu primeiro chat para começar'
+                          'Crie sua primeira avaliação para começar'
                         )}
                       </p>
                     </div>
@@ -622,7 +622,8 @@ export function ChatListView({
           ) : (
             <>
               Mostrando {(currentPage - 1) * limit + 1} a{' '}
-              {Math.min(currentPage * limit, totalChats)} de {totalChats} chats
+              {Math.min(currentPage * limit, totalChats)} de {totalChats}{' '}
+              avaliações
             </>
           )}
         </div>
@@ -730,7 +731,7 @@ export function ChatListView({
             className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col"
           >
             <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-gray-800">
-              <h2 className="text-xl font-semibold">Detalhes do Chat</h2>
+              <h2 className="text-xl font-semibold">Detalhes da Avaliação</h2>
               <button
                 type="button"
                 onClick={() => setChatDetailsModalOpen(false)}
@@ -756,7 +757,7 @@ export function ChatListView({
               <div className="space-y-6">
                 <div>
                   <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    ID do Chat
+                    ID da Avaliação
                   </div>
                   <code className="block p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono text-gray-900 dark:text-gray-100">
                     {selectedChat.id}

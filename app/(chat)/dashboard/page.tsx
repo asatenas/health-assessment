@@ -128,7 +128,7 @@ export default function ClinicDashboard() {
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch chats');
+        throw new Error('Falha ao buscar avaliações');
       }
 
       const data = await response.json();
@@ -138,7 +138,7 @@ export default function ClinicDashboard() {
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Falha ao carregar chats',
+        description: 'Falha ao carregar avaliações',
       });
     } finally {
       setIsLoading(false);
@@ -175,7 +175,7 @@ export default function ClinicDashboard() {
 
       toast({
         type: 'success',
-        description: 'Chat criado com sucesso!',
+        description: 'Avaliação criada com sucesso!',
       });
 
       // Refresh data
@@ -187,7 +187,7 @@ export default function ClinicDashboard() {
     } catch (error) {
       toast({
         type: 'error',
-        description: 'Falha ao criar chat',
+        description: 'Falha ao criar avaliação',
       });
     } finally {
       setIsCreating(false);
@@ -305,7 +305,7 @@ export default function ClinicDashboard() {
             <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
               {view === 'analytics'
                 ? 'Visualize métricas e análises das avaliações pré-anestésicas'
-                : 'Gerencie todos os chats de pacientes'}
+                : 'Gerencie todos as avaliações dos pacientes'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -315,7 +315,7 @@ export default function ClinicDashboard() {
               size="sm"
               className="flex-1 sm:flex-none"
             >
-              {isCreating ? 'Criando...' : 'Criar novo chat'}
+              {isCreating ? 'Criando...' : 'Criar nova avaliação'}
             </Button>
             <Button
               onClick={handleRefresh}
@@ -354,7 +354,7 @@ export default function ClinicDashboard() {
               className="gap-2"
             >
               <List className="size-4" />
-              Lista de Chats
+              Lista de Avaliações
             </Button>
           </div>
         </div>
@@ -363,7 +363,7 @@ export default function ClinicDashboard() {
         {newChatData && (
           <div className="mb-8 p-6 border rounded-lg bg-blue-50 dark:bg-blue-950">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Novo chat criado</h2>
+              <h2 className="text-xl font-semibold">Nova avaliação criada</h2>
               <button
                 type="button"
                 onClick={() => setNewChatData(null)}
@@ -390,7 +390,7 @@ export default function ClinicDashboard() {
               <div>
                 {/* biome-ignore lint/a11y/noLabelWithoutControl: <explanation> */}
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  ID do chat
+                  ID da avaliação
                 </label>
                 <div className="flex gap-2 mt-1">
                   <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
