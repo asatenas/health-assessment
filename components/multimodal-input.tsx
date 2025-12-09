@@ -458,7 +458,7 @@ function PureMultimodalInput({
             {/* <AttachmentsButton fileInputRef={fileInputRef} status={status} /> */}
             {/* <ModelSelectorCompact selectedModelId={selectedModelId} /> */}
           </PromptInputTools>
-          {status === 'submitted' ? (
+          {status === 'submitted' || status === 'streaming' ? (
             <StopButton stop={stop} setMessages={setMessages} />
           ) : (!input.trim() || uploadQueue.length > 0) &&
             attachments.length === 0 ? (

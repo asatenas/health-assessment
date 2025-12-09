@@ -36,6 +36,7 @@ const PurePreviewMessage = ({
   chatId,
   message,
   vote,
+  status,
   isLoading,
   setMessages,
   regenerate,
@@ -46,6 +47,7 @@ const PurePreviewMessage = ({
   chatId: string;
   message: ChatMessage;
   vote: Vote | undefined;
+  status: UseChatHelpers<ChatMessage>['status'];
   isLoading: boolean;
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   regenerate: UseChatHelpers<ChatMessage>['regenerate'];
@@ -64,10 +66,13 @@ const PurePreviewMessage = ({
 
   // Scroll to bottom when AI message stream completes
   useEffect(() => {
-    if (message.role === 'assistant' && !isLoading) {
+    if (
+      message.role === 'assistant' &&
+      (status === 'streaming' || status === 'ready')
+    ) {
       scrollToBottom();
     }
-  }, [isLoading, message.role, scrollToBottom]);
+  }, [status, message.role, scrollToBottom]);
 
   return (
     <AnimatePresence>
@@ -125,9 +130,7 @@ const PurePreviewMessage = ({
                   (part.type === 'reasoning' && part.text?.trim().length > 0),
               ) && (
                 <MessageContent className="bg-transparent text-foreground -ml-4">
-                  <div className="text-muted-foreground">
-                    Continuando entrevista...
-                  </div>
+                  <div className="text-muted-foreground">Analisando...</div>
                 </MessageContent>
               )}
 
