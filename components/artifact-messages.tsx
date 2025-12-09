@@ -49,7 +49,11 @@ function PureArtifactMessages({
           chatId={chatId}
           key={message.id}
           message={message}
-          isLoading={status === 'streaming' && index === messages.length - 1}
+          status={status}
+          isLoading={
+            messages.length - 1 === index && // only check status from the last message
+            (status === 'submitted' || status === 'streaming')
+          }
           vote={
             votes
               ? votes.find((vote) => vote.messageId === message.id)
