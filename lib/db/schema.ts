@@ -43,6 +43,20 @@ export const patient = pgTable(
 
 export type Patient = InferSelectModel<typeof patient>;
 
+export type ChatForm = {
+  age: number;
+  weight: number;
+  height: number;
+  allergies?: string[];
+  medicalDevices?: {
+    paceMaker?: boolean;
+    medicationPump?: boolean;
+    others?: string;
+  };
+  hemoglobin?: number;
+  creatinine?: number;
+};
+
 export const chat = pgTable(
   'Assessment',
   {
