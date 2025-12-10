@@ -1,0 +1,109 @@
+name: Block blocked-branches → main
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  block-branches:
+    name: Prevent merges from blocked branches into main
+    runs-on: ubuntu-latest
+    env:
+      # Space-separated list of branches to block from being merged into main.
+      # Add more branch names here later, e.g. "preview-test-branch experimental temp-branch"
+      BLOCKED_BRANCHES: preview-test-branch
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup git user (for safe fetches)
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+
+      - name: Debug info
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Blocked branches: $BLOCKED_BRANCHES"
+          echo "Repository: ${{ github.repository }}"
+
+      - name: Fetch all refs (ensure blocked branches are available)
+        run: |
+          # Try to fetch each blocked branch from origin into refs/remotes/origin/<branch>
+          for br in $BLOCKED_BRANCHES; do
+            # don't fail the job if a blocked branch doesn't exist yet; capture result
+            git fetch origin "refs/heads/${br}:refs/remotes/origin/${br}" || true
+          done
+
+      - name: Check for blocked-branch content in PR or push
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Convert space-separated string into an array
+          read -r -a BLOCKED <<< "$BLOCKED_BRANCHES"
+
+          # Helper: test if remote ref exists
+          remote_exists() {
+            local remote_ref="refs/remotes/origin/$1"
+            git show-ref --verify --quiet "$remote_ref"
+          }
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_HEAD_REF="${{ github.event.pull_request.head.ref }}"
+            PR_HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            echo "Pull request head: $PR_HEAD_REF ($PR_HEAD_SHA)"
+
+            for br in "${BLOCKED[@]}"; do
+              if [ "$PR_HEAD_REF" = "$br" ]; then
+                echo "❌ BLOCKED: PR head branch '$br' is forbidden to target main."
+                exit 1
+              fi
+
+              if remote_exists "$br"; then
+                echo "Checking if origin/$br is ancestor of PR head..."
+                if git merge-base --is-ancestor "refs/remotes/origin/$br" "$PR_HEAD_SHA"; then
+                  echo "❌ BLOCKED: PR contains commits from blocked branch 'origin/$br'."
+                  exit 1
+                fi
+              else
+                echo "Note: origin/$br not found; skipping ancestor check for this branch."
+              fi
+            done
+
+            echo "OK: PR does not originate from or contain commits from blocked branches."
+            exit 0
+          fi
+
+          # For push events (push to main)
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # The commit being pushed to main:
+            TARGET_SHA="${{ github.sha }}"  # current HEAD for the push
+            echo "Push to main detected. New main commit: $TARGET_SHA"
+
+            for br in "${BLOCKED[@]}"; do
+              if remote_exists "$br"; then
+                echo "Checking whether origin/$br is ancestor of new main..."
+                if git merge-base --is-ancestor "refs/remotes/origin/$br" "$TARGET_SHA"; then
+                  echo "❌ BLOCKED: 'main' now contains commits from blocked branch 'origin/$br'. Merge blocked."
+                  exit 1
+                fi
+              else
+                echo "Note: origin/$br not found; skipping check for $br."
+              fi
+            done
+
+            echo "OK: push to main does not contain commits from blocked branches."
+            exit 0
+          fi
+
+          echo "Event not handled by this workflow: ${{ github.event_name }}"
+          exit 0
