@@ -5,7 +5,6 @@ import { toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
 import { BarChart3, List } from 'lucide-react';
-import type { ChatStatus } from '@/lib/db/chat-status';
 
 // Import new dashboard components
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
@@ -17,29 +16,8 @@ import { ThisMonthsSurgeriesPanel } from '@/components/dashboard/this-months-sur
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
-import { ChatListView } from '@/components/dashboard/chat-list-view';
+import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type Chat = {
-  id: string;
-  createdAt: string;
-  status: ChatStatus;
-  form?: {
-    age: number;
-    weight: number;
-    height: number;
-    allergies?: string[];
-    medicalDevices?: {
-      paceMaker?: boolean;
-      medicationPump?: boolean;
-      others?: string;
-    };
-    hemoglobin?: number;
-    creatinine?: number;
-  };
-  results?: string;
-  medications?: string;
-};
 
 type CreateChatResponse = {
   chatId: string;

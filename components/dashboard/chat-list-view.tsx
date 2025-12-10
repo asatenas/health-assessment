@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatStatus } from '@/lib/db/chat-status';
 
-type Chat = {
+export type Chat = {
   id: string;
   createdAt: string;
   status: ChatStatus | 'expired';
@@ -23,8 +23,8 @@ type Chat = {
   };
   results?: string;
   medications?: string;
-  score_rcri?: number | null;
-  score_aub_has2?: number | null;
+  score_rcri: number | null;
+  score_aub_has2: number | null;
 };
 
 interface ChatListViewProps {
@@ -44,37 +44,53 @@ interface ChatListViewProps {
   onClearFilters: () => void;
 }
 
-const calculateRiskLevel = (chat: Chat): { level: string; color: string } => {
-  const rcri = chat.score_rcri ?? -1;
-  const has2 = chat.score_aub_has2 ?? -1;
-
-  if (rcri === -1 || has2 === -1) {
-    return {
-      level: '-',
-      color:
-        'hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100',
-    };
-  }
+/**
+ * Same as queries.db. Should create an API?
+ */
+export function calculateRiskLevel(
+  rcri: number | null,
+  has2: number | null,
+): 'low' | 'medium' | 'high' | 'unknown' {
+  if (rcri == null || has2 == null) return 'unknown';
+  if (rcri === -1 || has2 === -1) return 'unknown';
 
   const maxScore = Math.max(rcri, has2);
+  if (maxScore === 0) return 'low';
+  if (maxScore === 1) return 'medium';
+  return 'high';
+}
 
-  if (maxScore === 0) {
-    return {
-      level: 'Baixo',
-      color:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    };
+const getRiskLevel = (chat: Chat): { level: string; color: string } => {
+  const riskLevel = calculateRiskLevel(chat.score_rcri, chat.score_aub_has2);
+
+  let level: string;
+  let color: string;
+
+  switch (riskLevel) {
+    case 'low':
+      level = 'Baixo';
+      color =
+        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      break;
+    case 'medium':
+      level = 'Moderado';
+      color =
+        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      break;
+    case 'high':
+      level = 'Alto';
+      color = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      break;
+    default:
+      level = '-';
+      color =
+        'hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100';
+      break;
   }
-  if (maxScore === 1) {
-    return {
-      level: 'Moderado',
-      color:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    };
-  }
+
   return {
-    level: 'Alto',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    level,
+    color,
   };
 };
 
@@ -588,9 +604,9 @@ export function ChatListView({
                       </td>
                       <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${calculateRiskLevel(chat).color}`}
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRiskLevel(chat).color}`}
                         >
-                          {calculateRiskLevel(chat).level}
+                          {getRiskLevel(chat).level}
                         </span>
                       </td>
                       <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
