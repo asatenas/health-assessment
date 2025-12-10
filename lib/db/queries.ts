@@ -979,8 +979,8 @@ export function calculateRiskLevel(
   if (rcri === -1 || has2 === -1) return 'unknown';
 
   const maxScore = Math.max(rcri, has2);
-  if (maxScore === 0) return 'low';
-  if (maxScore === 1) return 'medium';
+  if (maxScore <= 1) return 'low';
+  if (maxScore <= 3) return 'medium';
   return 'high';
 }
 
