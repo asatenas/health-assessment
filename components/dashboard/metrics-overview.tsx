@@ -45,7 +45,7 @@ export function MetricsOverview({
       bgColor: 'bg-red-50',
     },
     {
-      title: 'Alergias à Látex',
+      title: 'Alergias a Látex',
       value: latexAllergies,
       icon: AlertTriangle,
       description: 'Requerem atenção especial',
