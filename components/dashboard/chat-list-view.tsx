@@ -55,8 +55,8 @@ export function calculateRiskLevel(
   if (rcri === -1 || has2 === -1) return 'unknown';
 
   const maxScore = Math.max(rcri, has2);
-  if (maxScore === 0) return 'low';
-  if (maxScore === 1) return 'medium';
+  if (maxScore <= 1) return 'low';
+  if (maxScore <= 3) return 'medium';
   return 'high';
 }
 
@@ -273,14 +273,16 @@ export function ChatListView({
                 <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                   Baixo
                 </span>
-                <span className="mt-1">Ambas as pontuações são 0</span>
+                <span className="mt-1">
+                  A maior pontuação entre as duas é 0 ou 1
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                   Moderado
                 </span>
                 <span className="mt-1">
-                  A maior pontuação entre as duas é 1
+                  A maior pontuação entre as duas é 2 ou 3
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -288,7 +290,7 @@ export function ChatListView({
                   Alto
                 </span>
                 <span className="mt-1">
-                  A maior pontuação entre as duas é 2 ou mais
+                  A maior pontuação entre as duas é 4 ou mais
                 </span>
               </li>
             </ul>
