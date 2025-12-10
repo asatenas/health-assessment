@@ -28,6 +28,7 @@ import {
   vote,
   type DBMessage,
   type Chat,
+  type ChatForm,
   stream,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
@@ -1042,7 +1043,8 @@ export async function getDashboardMetrics({
     // Latex Allergies
     let latexAllergies = 0;
     for (const chatItem of allChats) {
-      const allergies = chatItem.form?.allergies || [];
+      const form = chatItem.form as ChatForm | null;
+      const allergies = form?.allergies || [];
       if (allergies.includes('latex') || allergies.includes('látex')) {
         latexAllergies++;
       }
