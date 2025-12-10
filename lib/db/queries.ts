@@ -1044,7 +1044,9 @@ export async function getDashboardMetrics({
     let latexAllergies = 0;
     for (const chatItem of allChats) {
       const form = chatItem.form as ChatForm | null;
-      const allergies = form?.allergies || [];
+      const allergies = (form?.allergies || []).map((a) =>
+        a.trim().toLowerCase(),
+      );
       if (allergies.includes('latex') || allergies.includes('látex')) {
         latexAllergies++;
       }
