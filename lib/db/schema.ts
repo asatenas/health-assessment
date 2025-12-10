@@ -62,7 +62,7 @@ export const chat = pgTable(
   {
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     createdAt: timestamp('createdAt').notNull(),
-    userId: uuid('userId')
+    clinicId: uuid('clinicId')
       .notNull()
       .references(() => user.id),
     patientId: uuid('patientId').references(() => patient.id),
