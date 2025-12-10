@@ -62,7 +62,7 @@ export const chat = pgTable(
   {
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     createdAt: timestamp('createdAt').notNull(),
-    userId: uuid('userId')
+    userId: uuid('clinicId')
       .notNull()
       .references(() => user.id),
     patientId: uuid('patientId').references(() => patient.id),
@@ -114,7 +114,7 @@ export type MessageDeprecated = InferSelectModel<typeof messageDeprecated>;
 
 export const message = pgTable('Message_v2', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId')
+  chatId: uuid('assessmentId')
     .notNull()
     .references(() => chat.id),
   role: varchar('role').notNull(),
@@ -150,7 +150,7 @@ export type VoteDeprecated = InferSelectModel<typeof voteDeprecated>;
 export const vote = pgTable(
   'Vote_v2',
   {
-    chatId: uuid('chatId')
+    chatId: uuid('assessmentId')
       .notNull()
       .references(() => chat.id),
     messageId: uuid('messageId')
@@ -220,7 +220,7 @@ export const stream = pgTable(
   'Stream',
   {
     id: uuid('id').notNull().defaultRandom(),
-    chatId: uuid('chatId').notNull(),
+    chatId: uuid('assessmentId').notNull(),
     createdAt: timestamp('createdAt').notNull(),
   },
   (table) => ({

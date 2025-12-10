@@ -169,6 +169,20 @@
       "when": 1764952000000,
       "tag": "0023_fix_chat_with_status_view",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1764952100000,
+      "tag": "0024_rename_userid_to_clinicid",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1764952200000,
+      "tag": "0025_rename_chatid_to_assessmentid",
+      "breakpoints": true
     }
   ]
 }
