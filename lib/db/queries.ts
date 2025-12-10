@@ -1039,6 +1039,15 @@ export async function getDashboardMetrics({
       riskDistribution[riskLevel]++;
     }
 
+    // Latex Allergies
+    let latexAllergies = 0;
+    for (const chatItem of allChats) {
+      const allergies = chatItem.form?.allergies || [];
+      if (allergies.includes('latex') || allergies.includes('látex')) {
+        latexAllergies++;
+      }
+    }
+
     // Surgery tracking
     // const totalSurgeriesScheduled = allChats.filter(
     //   (c) => c.surgeryDate !== null,
@@ -1053,10 +1062,7 @@ export async function getDashboardMetrics({
     //   (c) => c.surgeryRescheduled === true,
     // ).length;
 
-    // Interventions
-    // const interventionsRequired = allChats.filter(
-    //   (c) => c.medicalInterventionRequired === true,
-    // ).length;
+    // Adjustments
     // const adjustmentsRequired = allChats.filter(
     //   (c) => c.adjustmentsRequired === true,
     // ).length;
@@ -1140,11 +1146,11 @@ export async function getDashboardMetrics({
       completedAssessments,
       completionRate,
       riskDistribution,
+      latexAllergies,
       // totalSurgeriesScheduled,
       // surgeriesCompleted,
       // surgeriesCancelled,
       // surgeriesRescheduled,
-      // interventionsRequired,
       // adjustmentsRequired,
       todaysSurgeries,
       tomorrowsSurgeries,

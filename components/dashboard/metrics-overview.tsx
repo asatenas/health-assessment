@@ -1,19 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Activity,
-  CheckCircle2,
-  AlertTriangle,
-  Stethoscope,
-} from 'lucide-react';
+import { Activity, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface MetricsOverviewProps {
   totalAssessments: number;
   completionRate: number;
   highRiskPatients: number;
-  interventionsRequired: number;
+  latexAllergies: number;
   isLoading?: boolean;
 }
 
@@ -21,7 +16,7 @@ export function MetricsOverview({
   totalAssessments,
   completionRate,
   highRiskPatients,
-  interventionsRequired,
+  latexAllergies,
   isLoading = false,
 }: MetricsOverviewProps) {
   const metrics = [
@@ -50,12 +45,12 @@ export function MetricsOverview({
       bgColor: 'bg-red-50',
     },
     {
-      title: 'Intervenções Necessárias',
-      value: interventionsRequired,
-      icon: Stethoscope,
-      description: 'Avaliações médicas pendentes',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      title: 'Alergias à Látex',
+      value: latexAllergies,
+      icon: AlertTriangle,
+      description: 'Requerem atenção especial',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50',
     },
   ];
 
@@ -70,7 +65,7 @@ export function MetricsOverview({
                 {metric.title}
               </CardTitle>
               <div className={`rounded-full p-2 ${metric.bgColor}`}>
-                <Icon className={`h-4 w-4 ${metric.color}`} />
+                <Icon className={`size-4 ${metric.color}`} />
               </div>
             </CardHeader>
             <CardContent>

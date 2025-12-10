@@ -466,7 +466,7 @@ export default function ClinicDashboard() {
               totalAssessments={metrics?.totalAssessments || 0}
               completionRate={metrics?.completionRate || 0}
               highRiskPatients={metrics?.riskDistribution?.high || 0}
-              interventionsRequired={metrics?.interventionsRequired || 0}
+              latexAllergies={metrics?.latexAllergies || 0}
               isLoading={isLoadingMetrics}
             />
 
