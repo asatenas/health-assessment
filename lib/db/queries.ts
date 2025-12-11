@@ -310,7 +310,7 @@ export async function getChatFormById({ id }: { id: string }) {
       .select({ form: chat.form })
       .from(chat)
       .where(eq(chat.id, id));
-    return result?.form || null;
+    return result?.form;
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',

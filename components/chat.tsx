@@ -20,7 +20,6 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
-import { useMessages } from '@/hooks/use-messages';
 import { PreChatForm } from './pre-chat-form';
 import { NPSEvaluation } from './nps-evaluation';
 
@@ -32,7 +31,6 @@ export function Chat({
   isReadonly,
   autoResume,
   initialFormData,
-  hasInitialMessages: hasInitialMessagesFromServer,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -41,7 +39,6 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
   initialFormData?: any;
-  hasInitialMessages?: boolean;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -106,11 +103,6 @@ export function Chat({
     },
   });
 
-  const { setHasSentMessage } = useMessages({
-    chatId: id,
-    status,
-  });
-
   // Helper function to check if any message contains a specific tool call
   const checkAnyMessageForToolCall = (
     messages: ChatMessage[],
@@ -123,17 +115,9 @@ export function Chat({
     );
   };
 
-  // Initialize state based on database data
-  const [hasInitialMessage, setHasInitialMessage] = useState(
-    hasInitialMessagesFromServer || false,
-  );
-  const [hasCompletedForm, setHasCompletedForm] = useState(
-    !!initialFormData || false,
-  );
+  const [hasCompletedForm, setHasCompletedForm] = useState(!!initialFormData);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [storedFormData, setStoredFormData] = useState<any>(
-    initialFormData || null,
-  );
+  const [storedFormData, setStoredFormData] = useState(initialFormData);
 
   // tool calls for flow control - check initial messages for tool calls
   const [hasSuspendMedicationsCalled, setHasSuspendMedicationsCalled] =
@@ -143,21 +127,6 @@ export function Chat({
   const [hasFinalizeInterviewCalled, setHasFinalizeInterviewCalled] = useState(
     checkAnyMessageForToolCall(initialMessages, 'tool-finalizeInterview'),
   );
-
-  useEffect(() => {
-    // run only when initiating chat
-    if (hasInitialMessage || currentIsReadonly) {
-      return;
-    }
-
-    setHasInitialMessage(true);
-    setHasSentMessage(true);
-  }, [
-    hasInitialMessage,
-    currentIsReadonly,
-    setHasInitialMessage,
-    setHasSentMessage,
-  ]);
 
   function checkToolCall(lastMessage: ChatMessage, toolName: string) {
     return (
@@ -303,7 +272,7 @@ export function Chat({
           />
         )}
 
-        {!hasCompletedForm && hasInitialMessage && (
+        {!hasCompletedForm && (
           <PreChatForm
             onComplete={async (formData) => {
               // Store form data for later saving

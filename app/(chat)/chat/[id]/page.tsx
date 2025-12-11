@@ -72,7 +72,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const chatModel = chatModelFromCookie?.value || DEFAULT_CHAT_MODEL;
 
   const initialFormData = await getChatFormById({ id });
-  const hasInitialMessages = messagesFromDb.length > 1;
 
   return (
     <>
@@ -84,7 +83,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         isReadonly={chat.readOnly}
         autoResume={false}
         initialFormData={initialFormData}
-        hasInitialMessages={hasInitialMessages}
       />
       <DataStreamHandler />
     </>
