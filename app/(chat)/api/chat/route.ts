@@ -17,18 +17,12 @@ import {
   saveMessages,
 } from '@/lib/db/queries';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-// import { generateTitleFromUserMessage } from '../../actions';
-// import { createDocument } from '@/lib/ai/tools/create-document';
-// import { updateDocument } from '@/lib/ai/tools/update-document';
-// import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-// import { getWeather } from '@/lib/ai/tools/get-weather';
 import { saveForm } from '@/lib/ai/tools/save-form';
-import { suspendMedications } from '@/lib/ai/tools/suspend-medications';
 import { saveMedications } from '@/lib/ai/tools/save-medications';
 import { finalizeInterview } from '@/lib/ai/tools/finalize-interview';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
+// import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
 import { geolocation } from '@vercel/functions';
 import {
@@ -81,7 +75,7 @@ export async function POST(request: Request) {
       message,
       messages,
       selectedChatModel,
-      selectedVisibilityType,
+      // selectedVisibilityType,
     }: {
       id: string;
       message: ChatMessage;
@@ -146,22 +140,14 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
             saveMedications: saveMedications({ chatId: id }),
             saveForm: saveForm({ chatId: id }),
-            // suspendMedications: suspendMedications({ chatId: id }),
             finalizeInterview: finalizeInterview({ chatId: id }),
-            // getWeather,
-            // createDocument: createDocument({ session, dataStream }),
-            // updateDocument: updateDocument({ session, dataStream }),
-            // requestSuggestions: requestSuggestions({
-            //   session,
-            //   dataStream,
-            // }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
