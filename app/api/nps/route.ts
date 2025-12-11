@@ -1,10 +1,11 @@
+import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
-import { updateChatNpsById } from '@/lib/db/queries';
+import { updateChatNpsById, getChatById } from '@/lib/db/queries';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { chatId, score } = body;
+    const { chatId } = body;
 
     if (!chatId || typeof chatId !== 'string') {
       return NextResponse.json(
@@ -12,6 +13,36 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const cookieStore = await cookies();
+    const chatTokenCookie = cookieStore.get(`chat_token_${chatId}`);
+
+    if (!chatTokenCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const chat = await getChatById({ id: chatId });
+
+    if (!chat) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    if (chat.token !== chatTokenCookie.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (new Date() > chat.tokenExpiresAt) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!chat.readOnly) {
+      return NextResponse.json(
+        { error: 'Chat is in progress' },
+        { status: 400 },
+      );
+    }
+
+    const { score } = body;
 
     if (
       typeof score !== 'number' ||
