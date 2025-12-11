@@ -8,7 +8,8 @@ import {
 } from '@/lib/db/queries';
 import { DataStreamHandler } from '@/components/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
-import { convertToUIMessages } from '@/lib/utils';
+import { initialMessage } from '@/lib/ai/prompts';
+import { convertToUIMessages, generateUUID } from '@/lib/utils';
 import { TokenGate } from '@/components/token-gate';
 import { UUID_REGEX } from '@/lib/validation';
 
@@ -53,11 +54,25 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
+  uiMessages.unshift({
+    id: generateUUID(),
+    role: 'assistant',
+    parts: [
+      {
+        type: 'text',
+        text: initialMessage,
+      },
+    ],
+    metadata: {
+      createdAt: new Date(0).toISOString(),
+    },
+  });
+
   const chatModelFromCookie = cookieStore.get('chat-model');
   const chatModel = chatModelFromCookie?.value || DEFAULT_CHAT_MODEL;
 
   const initialFormData = await getChatFormById({ id });
-  const hasInitialMessages = uiMessages.length > 1;
+  const hasInitialMessages = messagesFromDb.length > 1;
 
   return (
     <>
