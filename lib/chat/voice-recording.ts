@@ -58,9 +58,8 @@ export class VoiceRecorder {
       this.mediaRecorder.start(100); // Collect data every 100ms
       this.options.onRecordingStart?.();
     } catch (error) {
-      const recordingError = error instanceof Error
-        ? error
-        : new Error('Failed to start recording');
+      const recordingError =
+        error instanceof Error ? error : new Error('Failed to start recording');
       this.options.onError?.(recordingError);
       this.cleanup();
     }
@@ -101,11 +100,11 @@ export async function requestMicrophonePermission(): Promise<boolean> {
         echoCancellation: true,
         noiseSuppression: true,
         sampleRate: 44100,
-      }
+      },
     });
 
     // If successful, stop the tracks and return true
-    stream.getTracks().forEach(track => track.stop());
+    stream.getTracks().forEach((track) => track.stop());
     return true;
   } catch (error) {
     console.error('Microphone permission denied or not available:', error);
@@ -116,8 +115,10 @@ export async function requestMicrophonePermission(): Promise<boolean> {
 export async function checkMicrophonePermission(): Promise<boolean> {
   try {
     // Check if permissions API is available
-    if (navigator.permissions && navigator.permissions.query) {
-      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+    if (navigator.permissions?.query) {
+      const result = await navigator.permissions.query({
+        name: 'microphone' as PermissionName,
+      });
       return result.state === 'granted';
     }
   } catch (error) {

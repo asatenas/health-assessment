@@ -10,7 +10,7 @@ import { memo, useEffect, useState } from 'react';
 // import equal from 'fast-deep-equal';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/lib/types';
-import { speakText } from '@/lib/tts';
+import { speakText } from '@/lib/chat/tts';
 
 export function PureMessageActions({
   chatId,
