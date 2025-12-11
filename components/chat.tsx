@@ -23,6 +23,7 @@ import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
 import { initialMessage } from '@/lib/ai/prompts';
 import { PreChatForm } from './pre-chat-form';
+import { NPSEvaluation } from './nps-evaluation';
 
 export function Chat({
   id,
@@ -363,6 +364,9 @@ export function Chat({
                 selectedModelId={initialChatModel}
               />
             )}
+            {currentIsReadonly &&
+              hasFinalizeInterviewCalled &&
+              status === 'ready' && <NPSEvaluation chatId={id} />}
           </div>
         )}
       </div>

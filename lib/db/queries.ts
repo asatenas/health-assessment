@@ -872,6 +872,23 @@ export async function updateChatStatusById({
   }
 }
 
+export async function updateChatNpsById({
+  chatId,
+  nps,
+}: {
+  chatId: string;
+  nps: number;
+}) {
+  try {
+    return await db.update(chat).set({ nps }).where(eq(chat.id, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update chat nps by id',
+    );
+  }
+}
+
 export async function getChatsByClinicUserId({
   userId,
   status,
