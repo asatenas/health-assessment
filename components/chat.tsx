@@ -21,7 +21,6 @@ import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { useDataStream } from './data-stream-provider';
 import { useMessages } from '@/hooks/use-messages';
-import { initialMessage } from '@/lib/ai/prompts';
 import { PreChatForm } from './pre-chat-form';
 import { NPSEvaluation } from './nps-evaluation';
 
@@ -151,31 +150,13 @@ export function Chat({
       return;
     }
 
-    setMessages([
-      {
-        id: generateUUID(),
-        role: 'assistant',
-        parts: [
-          {
-            type: 'text',
-            text: initialMessage,
-          },
-        ],
-        metadata: {
-          createdAt: new Date().toISOString(),
-        },
-      },
-    ]);
-
     setHasInitialMessage(true);
     setHasSentMessage(true);
   }, [
-    messages.length,
     hasInitialMessage,
-    setMessages,
     currentIsReadonly,
+    setHasInitialMessage,
     setHasSentMessage,
-    hasCompletedForm,
   ]);
 
   function checkToolCall(lastMessage: ChatMessage, toolName: string) {
