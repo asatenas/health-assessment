@@ -48,9 +48,9 @@ import { startTransition } from 'react';
 import {
   VoiceRecorder,
   requestMicrophonePermission,
-} from '@/lib/voice-recording';
+} from '@/lib/chat/voice-recording';
 import { VoiceTranscriptionModal } from './voice-transcription-modal';
-import { stopSpeaking } from '@/lib/tts';
+import { stopSpeaking } from '@/lib/chat/tts';
 
 function PureMultimodalInput({
   chatId,
@@ -139,7 +139,10 @@ function PureMultimodalInput({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chatId, mode: 'sequential' }),
         }).catch((error) => {
-          console.error('Failed to cleanup sequential assistant messages:', error);
+          console.error(
+            'Failed to cleanup sequential assistant messages:',
+            error,
+          );
         });
       }
     }
