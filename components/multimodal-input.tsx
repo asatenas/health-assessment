@@ -308,6 +308,7 @@ function PureMultimodalInput({
         try {
           const formData = new FormData();
           formData.append('audio', audioBlob, 'voice-message.webm');
+          formData.append('chatId', chatId);
 
           const response = await fetch('/api/voice-message', {
             method: 'POST',

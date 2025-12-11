@@ -1,14 +1,40 @@
+import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
+import { getChatById } from '@/lib/db/queries';
 
 export async function POST(request: NextRequest) {
   try {
-    const { text } = await request.json();
+    const { text, chatId } = await request.json();
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
         { error: 'Text is required and must be a string' },
         { status: 400 },
       );
+    }
+
+    if (!chatId || typeof chatId !== 'string') {
+      return NextResponse.json(
+        { error: 'Chat ID is required' },
+        { status: 400 },
+      );
+    }
+
+    const cookieStore = await cookies();
+    const chatTokenCookie = cookieStore.get(`chat_token_${chatId}`);
+
+    if (!chatTokenCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const chat = await getChatById({ id: chatId });
+
+    if (!chat) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    if (chat.token !== chatTokenCookie.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const response = await fetch('https://api.openai.com/v1/audio/speech', {

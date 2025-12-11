@@ -1,15 +1,42 @@
+import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
+import { getChatById } from '@/lib/db/queries';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
+    const chatId = formData.get('chatId') as string;
 
     if (!audioFile) {
       return NextResponse.json(
         { error: 'Audio file is required' },
         { status: 400 },
       );
+    }
+
+    if (!chatId) {
+      return NextResponse.json(
+        { error: 'Chat ID is required' },
+        { status: 400 },
+      );
+    }
+
+    const cookieStore = await cookies();
+    const chatTokenCookie = cookieStore.get(`chat_token_${chatId}`);
+
+    if (!chatTokenCookie) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const chat = await getChatById({ id: chatId });
+
+    if (!chat) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    if (chat.token !== chatTokenCookie.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Convert audio to buffer for OpenAI
