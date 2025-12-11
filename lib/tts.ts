@@ -3,7 +3,7 @@ let currentAudio: HTMLAudioElement | null = null;
 let currentResolve: (() => void) | null = null;
 let currentReject: ((reason?: any) => void) | null = null;
 
-export async function speakText(text: string): Promise<void> {
+export async function speakText(text: string, chatId: string): Promise<void> {
   try {
     // Stop any currently playing audio
     stopSpeaking();
@@ -23,7 +23,7 @@ export async function speakText(text: string): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, chatId }),
     });
 
     if (!response.ok) {

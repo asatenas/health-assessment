@@ -50,7 +50,7 @@ export function PureMessageActions({
           onClick={async () => {
             setIsSpeaking(true);
             try {
-              await speakText(textFromParts);
+              await speakText(textFromParts, chatId);
             } catch (error) {
               console.error('TTS error:', error);
               toast.error('Erro ao reproduzir o áudio. Tente novamente.');
