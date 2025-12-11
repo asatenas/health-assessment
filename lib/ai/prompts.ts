@@ -179,11 +179,16 @@ About the origin of user's request:
 
 export const systemPrompt = ({
   requestHints,
+  useGeolocation,
 }: {
   requestHints: RequestHints;
+  useGeolocation: boolean;
 }) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-  return `${regularPrompt}\n\n${requestPrompt}`;
+  if (useGeolocation) {
+    const requestPrompt = getRequestPromptFromHints(requestHints);
+    return `${regularPrompt}\n\n${requestPrompt}`;
+  }
+  return regularPrompt;
 };
 
 export const codePrompt = `

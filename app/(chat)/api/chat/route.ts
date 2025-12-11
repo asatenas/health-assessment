@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ requestHints }),
+          system: systemPrompt({ requestHints, useGeolocation: false }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
