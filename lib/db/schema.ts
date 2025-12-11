@@ -83,6 +83,7 @@ export const chat = pgTable(
     completedAt: timestamp('completedAt'),
     score_rcri: integer('score_rcri'),
     score_aub_has2: integer('score_aub_has2'),
+    nps: integer('nps'),
   },
   (table) => ({
     scoreRcriCheck: check(
@@ -92,6 +93,10 @@ export const chat = pgTable(
     scoreAubHas2Check: check(
       'score_aub_has2_non_negative',
       sql`${table.score_aub_has2} >= 0`,
+    ),
+    npsCheck: check(
+      'nps_range',
+      sql`${table.nps} >= 0 AND ${table.nps} <= 10`,
     ),
   }),
 );
