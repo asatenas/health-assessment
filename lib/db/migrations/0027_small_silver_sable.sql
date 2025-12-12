@@ -24,4 +24,6 @@ INSERT INTO "Checkpoint" ("assessmentId", "created", "completed")
 SELECT "id", "createdAt", "completedAt"
 FROM "Assessment";
 --> statement-breakpoint
+DROP VIEW IF EXISTS "ChatWithStatus";
+--> statement-breakpoint
 ALTER TABLE "Assessment" DROP COLUMN IF EXISTS "completedAt";
