@@ -8,7 +8,11 @@ import {
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { cookies } from 'next/headers';
-import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
+import {
+  initialMessage,
+  type RequestHints,
+  systemPrompt,
+} from '@/lib/ai/prompts';
 import {
   createStreamId,
   deleteChatById,
@@ -110,6 +114,22 @@ export async function POST(request: Request) {
     const uiMessages = messages
       ? messages // Use provided messages for first user message (includes initial assistant message)
       : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
+
+    if (!messages) {
+      uiMessages.unshift({
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'text',
+            text: initialMessage,
+          },
+        ],
+        metadata: {
+          createdAt: new Date(0).toISOString(),
+        },
+      });
+    }
 
     const { longitude, latitude, city, country } = geolocation(request);
 
