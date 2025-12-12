@@ -125,7 +125,7 @@ export async function createChatWithToken({
       .returning();
 
     await db.insert(checkpoint).values({
-      assessmentId: id,
+      chatId: id,
       created: createdAt,
     });
 
@@ -861,11 +861,11 @@ export async function updateChatResultsById({
     return await db
       .insert(checkpoint)
       .values({
-        assessmentId: chatId,
+        chatId,
         completed: completedAt,
       })
       .onConflictDoUpdate({
-        target: checkpoint.assessmentId,
+        target: checkpoint.chatId,
         set: { completed: completedAt },
       });
   } catch (error) {

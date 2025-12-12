@@ -93,10 +93,7 @@ export const chat = pgTable(
       'score_aub_has2_non_negative',
       sql`${table.score_aub_has2} >= 0`,
     ),
-    npsCheck: check(
-      'nps_range',
-      sql`${table.nps} >= 0 AND ${table.nps} <= 10`,
-    ),
+    npsCheck: check('nps_range', sql`${table.nps} >= 0 AND ${table.nps} <= 10`),
   }),
 );
 
@@ -239,7 +236,7 @@ export const stream = pgTable(
 export type Stream = InferSelectModel<typeof stream>;
 
 export const checkpoint = pgTable('Checkpoint', {
-  assessmentId: uuid('assessmentId')
+  chatId: uuid('assessmentId')
     .primaryKey()
     .notNull()
     .references(() => chat.id, { onDelete: 'cascade' }),
