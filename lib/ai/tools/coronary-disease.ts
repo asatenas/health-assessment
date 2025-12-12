@@ -1,0 +1,14 @@
+import { tool } from 'ai';
+import { z } from 'zod';
+import { updateCheckpointByChatId } from '@/lib/db/queries';
+
+export const coronaryDisease = ({ chatId }: { chatId: string }) =>
+  tool({
+    description: `Use this tool after identifying whether the patient has any coronary diseases.
+    This tool will update the checkpoint timestamp for coronaryDisease.`,
+    inputSchema: z.object({}),
+    execute: async () => {
+      console.log('checkpoint coronaryDisease');
+      await updateCheckpointByChatId({ chatId, name: 'coronaryDisease' });
+    },
+  });
