@@ -36,7 +36,7 @@ import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../errors';
-import type { ChatStatus } from './chat-status';
+import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/constants';
 
 // Optionally, if not using email/pass login, you can
@@ -906,6 +906,26 @@ export async function updateChatNpsById({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to update chat nps by id',
+    );
+  }
+}
+
+export async function updateCheckpointByChatId({
+  chatId,
+  name,
+}: {
+  chatId: string;
+  name: CheckpointNames;
+}) {
+  try {
+    return await db
+      .update(checkpoint)
+      .set({ [name]: new Date() })
+      .where(eq(checkpoint.chatId, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update checkpoint by chat id',
     );
   }
 }
