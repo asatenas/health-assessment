@@ -30,6 +30,7 @@ import {
   type Chat,
   type ChatForm,
   stream,
+  checkpoint,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
@@ -110,7 +111,7 @@ export async function createChatWithToken({
       createdAt.getTime() + 7 * 24 * 60 * 60 * 1000,
     ); // 7 days from creation
 
-    return await db
+    const result = await db
       .insert(chat)
       .values({
         id,
@@ -122,6 +123,13 @@ export async function createChatWithToken({
         status: 'active',
       })
       .returning();
+
+    await db.insert(checkpoint).values({
+      assessmentId: id,
+      created: createdAt,
+    });
+
+    return result;
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
