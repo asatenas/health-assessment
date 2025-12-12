@@ -851,10 +851,23 @@ export async function updateChatResultsById({
   score_aub_has2: number;
 }) {
   try {
-    return await db
+    const completedAt = new Date();
+
+    await db
       .update(chat)
       .set({ results, score_rcri, score_aub_has2 })
       .where(eq(chat.id, chatId));
+
+    return await db
+      .insert(checkpoint)
+      .values({
+        assessmentId: chatId,
+        completed: completedAt,
+      })
+      .onConflictDoUpdate({
+        target: checkpoint.assessmentId,
+        set: { completed: completedAt },
+      });
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
