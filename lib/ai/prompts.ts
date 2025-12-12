@@ -178,19 +178,17 @@ About the origin of user's request:
 `;
 
 export const systemPrompt = ({
-  selectedChatModel,
   requestHints,
+  useGeolocation,
 }: {
-  selectedChatModel: string;
   requestHints: RequestHints;
+  useGeolocation: boolean;
 }) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-
-  if (selectedChatModel === 'chat-model-reasoning') {
+  if (useGeolocation) {
+    const requestPrompt = getRequestPromptFromHints(requestHints);
     return `${regularPrompt}\n\n${requestPrompt}`;
-  } else {
-    return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
   }
+  return regularPrompt;
 };
 
 export const codePrompt = `

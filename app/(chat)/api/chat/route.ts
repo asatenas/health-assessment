@@ -8,7 +8,11 @@ import {
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { cookies } from 'next/headers';
-import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
+import {
+  initialMessage,
+  type RequestHints,
+  systemPrompt,
+} from '@/lib/ai/prompts';
 import {
   createStreamId,
   deleteChatById,
@@ -17,18 +21,12 @@ import {
   saveMessages,
 } from '@/lib/db/queries';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-// import { generateTitleFromUserMessage } from '../../actions';
-// import { createDocument } from '@/lib/ai/tools/create-document';
-// import { updateDocument } from '@/lib/ai/tools/update-document';
-// import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-// import { getWeather } from '@/lib/ai/tools/get-weather';
 import { saveForm } from '@/lib/ai/tools/save-form';
-import { suspendMedications } from '@/lib/ai/tools/suspend-medications';
 import { saveMedications } from '@/lib/ai/tools/save-medications';
 import { finalizeInterview } from '@/lib/ai/tools/finalize-interview';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
+// import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
 import { geolocation } from '@vercel/functions';
 import {
@@ -81,7 +79,7 @@ export async function POST(request: Request) {
       message,
       messages,
       selectedChatModel,
-      selectedVisibilityType,
+      // selectedVisibilityType,
     }: {
       id: string;
       message: ChatMessage;
@@ -117,6 +115,41 @@ export async function POST(request: Request) {
       ? messages // Use provided messages for first user message (includes initial assistant message)
       : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
 
+    if (!messages) {
+      uiMessages.unshift({
+        id: generateUUID(),
+        role: 'assistant',
+        parts: [
+          {
+            type: 'text',
+            text: initialMessage,
+          },
+        ],
+        metadata: {
+          createdAt: new Date(0).toISOString(),
+        },
+      });
+    }
+
+    // Filter out sequential assistant messages, keeping only the last one in each sequence
+    const deduplicatedMessages = uiMessages.reduce<typeof uiMessages>(
+      (acc, message, index) => {
+        // If it's an assistant message, check if the next message is also from assistant
+        if (message.role === 'assistant') {
+          // Look ahead to see if next message is also from assistant
+          const nextMessage = uiMessages[index + 1];
+          if (nextMessage && nextMessage.role === 'assistant') {
+            // Skip this message, as there's another assistant message coming
+            return acc;
+          }
+        }
+        // Keep this message
+        acc.push(message);
+        return acc;
+      },
+      [],
+    );
+
     const { longitude, latitude, city, country } = geolocation(request);
 
     const requestHints: RequestHints = {
@@ -146,22 +179,14 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
-          messages: convertToModelMessages(uiMessages),
+          system: systemPrompt({ requestHints, useGeolocation: false }),
+          messages: convertToModelMessages(deduplicatedMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
             saveMedications: saveMedications({ chatId: id }),
             saveForm: saveForm({ chatId: id }),
-            // suspendMedications: suspendMedications({ chatId: id }),
             finalizeInterview: finalizeInterview({ chatId: id }),
-            // getWeather,
-            // createDocument: createDocument({ session, dataStream }),
-            // updateDocument: updateDocument({ session, dataStream }),
-            // requestSuggestions: requestSuggestions({
-            //   session,
-            //   dataStream,
-            // }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
