@@ -131,6 +131,25 @@ export async function POST(request: Request) {
       });
     }
 
+    // Filter out sequential assistant messages, keeping only the last one in each sequence
+    const deduplicatedMessages = uiMessages.reduce<typeof uiMessages>(
+      (acc, message, index) => {
+        // If it's an assistant message, check if the next message is also from assistant
+        if (message.role === 'assistant') {
+          // Look ahead to see if next message is also from assistant
+          const nextMessage = uiMessages[index + 1];
+          if (nextMessage && nextMessage.role === 'assistant') {
+            // Skip this message, as there's another assistant message coming
+            return acc;
+          }
+        }
+        // Keep this message
+        acc.push(message);
+        return acc;
+      },
+      [],
+    );
+
     const { longitude, latitude, city, country } = geolocation(request);
 
     const requestHints: RequestHints = {
@@ -161,7 +180,7 @@ export async function POST(request: Request) {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ requestHints, useGeolocation: false }),
-          messages: convertToModelMessages(uiMessages),
+          messages: convertToModelMessages(deduplicatedMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
