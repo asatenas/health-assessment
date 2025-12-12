@@ -80,7 +80,6 @@ export const chat = pgTable(
     })
       .notNull()
       .default('active'),
-    completedAt: timestamp('completedAt'),
     score_rcri: integer('score_rcri'),
     score_aub_has2: integer('score_aub_has2'),
     nps: integer('nps'),
@@ -238,3 +237,24 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const checkpoint = pgTable('Checkpoint', {
+  assessmentId: uuid('assessmentId')
+    .primaryKey()
+    .notNull()
+    .references(() => chat.id, { onDelete: 'cascade' }),
+  created: timestamp('created'),
+  opened: timestamp('opened'),
+  formOpened: timestamp('formOpened'),
+  formSubmitted: timestamp('formSubmitted'),
+  medications: timestamp('medications'),
+  surgeryType: timestamp('surgeryType'),
+  insulin: timestamp('insulin'),
+  creatinine: timestamp('creatinine'),
+  anemia: timestamp('anemia'),
+  nps: timestamp('nps'),
+  completed: timestamp('completed'),
+  interrupted: timestamp('interrupted'),
+});
+
+export type Checkpoint = InferSelectModel<typeof checkpoint>;

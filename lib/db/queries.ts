@@ -845,7 +845,7 @@ export async function updateChatResultsById({
   try {
     return await db
       .update(chat)
-      .set({ results, score_rcri, score_aub_has2, completedAt: new Date() })
+      .set({ results, score_rcri, score_aub_has2 })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(

@@ -190,6 +190,13 @@
       "when": 1765463386631,
       "tag": "0026_rapid_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1765559573363,
+      "tag": "0027_small_silver_sable",
+      "breakpoints": true
     }
   ]
 }
