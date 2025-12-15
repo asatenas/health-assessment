@@ -325,11 +325,16 @@ export function PreChatForm({
               <div className="flex gap-2">
                 {formData.exames.hemoglobina.tipo === 'texto' ? (
                   <Input
+                    type="text"
                     value={formData.exames.hemoglobina.valor}
-                    onChange={(e) =>
-                      handleExameChange('hemoglobina', 'valor', e.target.value)
-                    }
-                    placeholder="Ex: 13,2 (g/dl)"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty or valid decimal with comma and exactly 1 decimal place
+                      if (value === '' || /^\d*,?\d{0,1}$/.test(value)) {
+                        handleExameChange('hemoglobina', 'valor', value);
+                      }
+                    }}
+                    placeholder="Ex: 13,2"
                     className="flex-1"
                   />
                 ) : (
@@ -357,11 +362,16 @@ export function PreChatForm({
               <div className="flex gap-2">
                 {formData.exames.creatinina.tipo === 'texto' ? (
                   <Input
+                    type="text"
                     value={formData.exames.creatinina.valor}
-                    onChange={(e) =>
-                      handleExameChange('creatinina', 'valor', e.target.value)
-                    }
-                    placeholder="Ex: 1,1 (mg/dl)"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty or valid decimal with comma and exactly 1 decimal place
+                      if (value === '' || /^\d*,?\d{0,1}$/.test(value)) {
+                        handleExameChange('creatinina', 'valor', value);
+                      }
+                    }}
+                    placeholder="Ex: 1,1"
                     className="flex-1"
                   />
                 ) : (
