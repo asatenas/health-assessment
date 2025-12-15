@@ -168,7 +168,7 @@ export function PreChatForm({
             </div>
 
             <div>
-              <Label htmlFor="altura">Altura (cm)</Label>
+              <Label htmlFor="altura">Altura (metros)</Label>
               <Input
                 id="altura"
                 type="number"
@@ -177,7 +177,7 @@ export function PreChatForm({
                 onChange={(e) =>
                   setFormData({ ...formData, altura: e.target.value })
                 }
-                placeholder="Ex: 175"
+                placeholder="Ex: 1,75"
                 onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
