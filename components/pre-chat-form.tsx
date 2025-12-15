@@ -163,7 +163,9 @@ export function PreChatForm({
                 required
                 value={formData.peso}
                 onChange={(e) => {
-                  const value = e.target.value;
+                  let value = e.target.value;
+                  // Replace period with comma
+                  value = value.replace('.', ',');
                   // Allow max 3 digits before comma, then optional comma with max 1 decimal place
                   if (
                     value === '' ||
@@ -185,7 +187,9 @@ export function PreChatForm({
                 required
                 value={formData.altura}
                 onChange={(e) => {
-                  const value = e.target.value;
+                  let value = e.target.value;
+                  // Replace period with comma
+                  value = value.replace('.', ',');
                   // Allow max 1 digit before comma, then optional comma with max 2 decimal places
                   if (
                     value === '' ||
@@ -345,7 +349,9 @@ export function PreChatForm({
                     type="text"
                     value={formData.exames.hemoglobina.valor}
                     onChange={(e) => {
-                      const value = e.target.value;
+                      let value = e.target.value;
+                      // Replace period with comma
+                      value = value.replace('.', ',');
                       // Allow max 2 digits before comma, then optional comma with max 1 decimal place
                       if (
                         value === '' ||
@@ -386,7 +392,9 @@ export function PreChatForm({
                     type="text"
                     value={formData.exames.creatinina.valor}
                     onChange={(e) => {
-                      const value = e.target.value;
+                      let value = e.target.value;
+                      // Replace period with comma
+                      value = value.replace('.', ',');
                       // Allow max 1 digit before comma, then optional comma with max 1 decimal place
                       if (
                         value === '' ||
