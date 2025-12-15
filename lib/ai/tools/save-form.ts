@@ -1,6 +1,10 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { updateChatFormById, updateChatStatusById } from '@/lib/db/queries';
+import {
+  updateChatFormById,
+  updateChatStatusById,
+  updateCheckpointByChatId,
+} from '@/lib/db/queries';
 
 interface SaveFormProps {
   chatId: string;
@@ -33,5 +37,6 @@ This tool should not be used to save the medications list to suspend.`,
     execute: async (form, messages) => {
       await updateChatFormById({ chatId, form: JSON.stringify(form) });
       await updateChatStatusById({ chatId, status: 'in_progress' });
+      await updateCheckpointByChatId({ chatId, name: 'formSubmitted' });
     },
   });

@@ -1,6 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { updateChatMedicationsById } from '@/lib/db/queries';
+import {
+  updateChatMedicationsById,
+  updateCheckpointByChatId,
+} from '@/lib/db/queries';
 
 interface SaveMedicationsProps {
   chatId: string;
@@ -78,6 +81,9 @@ Use this tool even if there are no medications to suspend.`,
         chatId,
         medications: JSON.stringify(medications),
       });
+
+      await updateCheckpointByChatId({ chatId, name: 'medications' });
+
       return 'Medications table saved to database';
     },
   });

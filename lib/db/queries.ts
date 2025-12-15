@@ -30,12 +30,13 @@ import {
   type Chat,
   type ChatForm,
   stream,
+  checkpoint,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../errors';
-import type { ChatStatus } from './chat-status';
+import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/constants';
 
 // Optionally, if not using email/pass login, you can
@@ -110,7 +111,7 @@ export async function createChatWithToken({
       createdAt.getTime() + 7 * 24 * 60 * 60 * 1000,
     ); // 7 days from creation
 
-    return await db
+    const result = await db
       .insert(chat)
       .values({
         id,
@@ -122,6 +123,13 @@ export async function createChatWithToken({
         status: 'active',
       })
       .returning();
+
+    await db.insert(checkpoint).values({
+      chatId: id,
+      created: createdAt,
+    });
+
+    return result;
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -845,7 +853,7 @@ export async function updateChatResultsById({
   try {
     return await db
       .update(chat)
-      .set({ results, score_rcri, score_aub_has2, completedAt: new Date() })
+      .set({ results, score_rcri, score_aub_has2 })
       .where(eq(chat.id, chatId));
   } catch (error) {
     throw new ChatSDKError(
@@ -885,6 +893,26 @@ export async function updateChatNpsById({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to update chat nps by id',
+    );
+  }
+}
+
+export async function updateCheckpointByChatId({
+  chatId,
+  name,
+}: {
+  chatId: string;
+  name: CheckpointNames;
+}) {
+  try {
+    return await db
+      .update(checkpoint)
+      .set({ [name]: new Date() })
+      .where(eq(checkpoint.chatId, chatId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update checkpoint by chat id',
     );
   }
 }

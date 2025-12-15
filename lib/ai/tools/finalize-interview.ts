@@ -4,6 +4,7 @@ import {
   getChatById,
   makeChatReadOnlyById,
   updateChatResultsById,
+  updateCheckpointByChatId,
 } from '@/lib/db/queries';
 
 interface finalizeInterviewProps {
@@ -26,12 +27,18 @@ export const finalizeInterview = ({ chatId }: finalizeInterviewProps) =>
       messages,
     ) => {
       await makeChatReadOnlyById({ chatId, incomplete });
-      await updateChatResultsById({
-        chatId,
-        results,
-        score_rcri,
-        score_aub_has2,
-      });
+
+      if (incomplete) {
+        await updateCheckpointByChatId({ chatId, name: 'interrupted' });
+      } else {
+        await updateChatResultsById({
+          chatId,
+          results,
+          score_rcri,
+          score_aub_has2,
+        });
+        await updateCheckpointByChatId({ chatId, name: 'completed' });
+      }
 
       // send to external service
       const chat = await getChatById({ id: chatId });

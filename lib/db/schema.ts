@@ -80,7 +80,6 @@ export const chat = pgTable(
     })
       .notNull()
       .default('active'),
-    completedAt: timestamp('completedAt'),
     score_rcri: integer('score_rcri'),
     score_aub_has2: integer('score_aub_has2'),
     nps: integer('nps'),
@@ -94,10 +93,7 @@ export const chat = pgTable(
       'score_aub_has2_non_negative',
       sql`${table.score_aub_has2} >= 0`,
     ),
-    npsCheck: check(
-      'nps_range',
-      sql`${table.nps} >= 0 AND ${table.nps} <= 10`,
-    ),
+    npsCheck: check('nps_range', sql`${table.nps} >= 0 AND ${table.nps} <= 10`),
   }),
 );
 
@@ -238,3 +234,26 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const checkpoint = pgTable('Checkpoint', {
+  chatId: uuid('assessmentId')
+    .primaryKey()
+    .notNull()
+    .references(() => chat.id, { onDelete: 'cascade' }),
+  created: timestamp('created'),
+  opened: timestamp('opened'),
+  formSubmitted: timestamp('formSubmitted'),
+  medications: timestamp('medications'),
+  surgeryType: timestamp('surgeryType'),
+  insulin: timestamp('insulin'),
+  creatinine: timestamp('creatinine'),
+  hemoglobin: timestamp('hemoglobin'),
+  cerebralIschemia: timestamp('cerebralIschemia'),
+  coronaryDisease: timestamp('coronaryDisease'),
+  cardiacStructure: timestamp('cardiacStructure'),
+  nps: timestamp('nps'),
+  completed: timestamp('completed'),
+  interrupted: timestamp('interrupted'),
+});
+
+export type Checkpoint = InferSelectModel<typeof checkpoint>;

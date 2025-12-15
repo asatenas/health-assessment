@@ -1,6 +1,10 @@
 import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
-import { updateChatNpsById, getChatById } from '@/lib/db/queries';
+import {
+  updateChatNpsById,
+  getChatById,
+  updateCheckpointByChatId,
+} from '@/lib/db/queries';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,6 +61,8 @@ export async function POST(request: NextRequest) {
     }
 
     await updateChatNpsById({ chatId, nps: score });
+
+    await updateCheckpointByChatId({ chatId, name: 'nps' });
 
     return NextResponse.json({ success: true });
   } catch (error) {

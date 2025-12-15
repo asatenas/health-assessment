@@ -1,5 +1,9 @@
 import { isProductionEnvironment } from '@/lib/constants';
-import { getChatByIdAndToken, updateChatStatusById } from '@/lib/db/queries';
+import {
+  getChatByIdAndToken,
+  updateChatStatusById,
+  updateCheckpointByChatId,
+} from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { UUID_REGEX, TOKEN_REGEX } from '@/lib/validation';
@@ -52,6 +56,10 @@ export async function POST(request: Request) {
     // update chat status to initialized if it's new
     if (chat.status === 'active') {
       await updateChatStatusById({ chatId, status: 'initialized' });
+      await updateCheckpointByChatId({
+        chatId,
+        name: 'opened',
+      });
     }
 
     return NextResponse.json({ success: true });

@@ -38,6 +38,13 @@ import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { ChatModel } from '@/lib/ai/models';
 import type { VisibilityType } from '@/components/visibility-selector';
+import { surgeryType } from '@/lib/ai/tools/surgery-type';
+import { insulin } from '@/lib/ai/tools/insulin';
+import { creatinine } from '@/lib/ai/tools/creatinine';
+import { hemoglobin } from '@/lib/ai/tools/hemoglobin';
+import { cerebralIschemia } from '@/lib/ai/tools/cerebral-ischemia';
+import { coronaryDisease } from '@/lib/ai/tools/coronary-disease';
+import { cardiacStructure } from '@/lib/ai/tools/cardiac-structure';
 
 export const maxDuration = 60;
 
@@ -184,8 +191,15 @@ export async function POST(request: Request) {
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
-            saveMedications: saveMedications({ chatId: id }),
             saveForm: saveForm({ chatId: id }),
+            saveMedications: saveMedications({ chatId: id }),
+            surgeryType: surgeryType({ chatId: id }),
+            insulin: insulin({ chatId: id }),
+            creatinine: creatinine({ chatId: id }),
+            hemoglobin: hemoglobin({ chatId: id }),
+            cerebralIschemia: cerebralIschemia({ chatId: id }),
+            coronaryDisease: coronaryDisease({ chatId: id }),
+            cardiacStructure: cardiacStructure({ chatId: id }),
             finalizeInterview: finalizeInterview({ chatId: id }),
           },
           experimental_telemetry: {
