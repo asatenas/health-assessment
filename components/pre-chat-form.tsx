@@ -9,6 +9,7 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
+  alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
   bombaMedicamentos: boolean;
@@ -47,6 +48,7 @@ export function PreChatForm({
     idade: '',
     peso: '',
     altura: '',
+    alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
     bombaMedicamentos: false,
@@ -183,16 +185,35 @@ export function PreChatForm({
 
           {/* Alergias */}
           <div className="space-y-3">
-            <Label htmlFor="alergias">Alergias</Label>
-            <Input
-              id="alergias"
-              type="text"
-              value={formData.alergias}
-              onChange={(e) =>
-                setFormData({ ...formData, alergias: e.target.value })
-              }
-              placeholder="Ex: látex, penicilina, outros medicamentos..."
-            />
+            <Label>Alergias</Label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="alergia-latex"
+                checked={formData.alergiaLatex}
+                onChange={(e) =>
+                  setFormData({ ...formData, alergiaLatex: e.target.checked })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="alergia-latex" className="font-normal">
+                Alergia a látex
+              </Label>
+            </div>
+            <div>
+              <Label htmlFor="alergias" className="text-sm">
+                Outras alergias
+              </Label>
+              <Input
+                id="alergias"
+                type="text"
+                value={formData.alergias}
+                onChange={(e) =>
+                  setFormData({ ...formData, alergias: e.target.value })
+                }
+                placeholder="Ex: penicilina, outros medicamentos..."
+              />
+            </div>
           </div>
 
           {/* Dispositivos Médicos */}
