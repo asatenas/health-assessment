@@ -329,7 +329,7 @@ export function PreChatForm({
                     onChange={(e) =>
                       handleExameChange('hemoglobina', 'valor', e.target.value)
                     }
-                    placeholder="Ex: 14 (g/dl)"
+                    placeholder="Ex: 13,2 (g/dl)"
                     className="flex-1"
                   />
                 ) : (
@@ -361,7 +361,7 @@ export function PreChatForm({
                     onChange={(e) =>
                       handleExameChange('creatinina', 'valor', e.target.value)
                     }
-                    placeholder="Ex: 2,0 (mg/dl)"
+                    placeholder="Ex: 1,1 (mg/dl)"
                     className="flex-1"
                   />
                 ) : (
