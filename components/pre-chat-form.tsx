@@ -141,14 +141,17 @@ export function PreChatForm({
               <Label htmlFor="idade">Idade (anos)</Label>
               <Input
                 id="idade"
-                type="number"
+                type="text"
                 required
                 value={formData.idade}
-                onChange={(e) =>
-                  setFormData({ ...formData, idade: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only integers with max 2 digits (no decimals)
+                  if (value === '' || /^\d{1,2}$/.test(value)) {
+                    setFormData({ ...formData, idade: value });
+                  }
+                }}
                 placeholder="Ex: 45"
-                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
 
@@ -156,14 +159,21 @@ export function PreChatForm({
               <Label htmlFor="peso">Peso (kg)</Label>
               <Input
                 id="peso"
-                type="number"
+                type="text"
                 required
                 value={formData.peso}
-                onChange={(e) =>
-                  setFormData({ ...formData, peso: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow max 3 digits before comma, then optional comma with max 1 decimal place
+                  if (
+                    value === '' ||
+                    /^\d{1,3}$/.test(value) ||
+                    /^\d{1,3},\d{0,1}$/.test(value)
+                  ) {
+                    setFormData({ ...formData, peso: value });
+                  }
+                }}
                 placeholder="Ex: 70,5"
-                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
 
@@ -171,14 +181,21 @@ export function PreChatForm({
               <Label htmlFor="altura">Altura (metros)</Label>
               <Input
                 id="altura"
-                type="number"
+                type="text"
                 required
                 value={formData.altura}
-                onChange={(e) =>
-                  setFormData({ ...formData, altura: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow max 1 digit before comma, then optional comma with max 2 decimal places
+                  if (
+                    value === '' ||
+                    /^\d{1}$/.test(value) ||
+                    /^\d{1},\d{0,2}$/.test(value)
+                  ) {
+                    setFormData({ ...formData, altura: value });
+                  }
+                }}
                 placeholder="Ex: 1,75"
-                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
           </div>
@@ -329,8 +346,12 @@ export function PreChatForm({
                     value={formData.exames.hemoglobina.valor}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Allow empty or valid decimal with comma and exactly 1 decimal place
-                      if (value === '' || /^\d*,?\d{0,1}$/.test(value)) {
+                      // Allow max 2 digits before comma, then optional comma with max 1 decimal place
+                      if (
+                        value === '' ||
+                        /^\d{1,2}$/.test(value) ||
+                        /^\d{1,2},\d{0,1}$/.test(value)
+                      ) {
                         handleExameChange('hemoglobina', 'valor', value);
                       }
                     }}
@@ -366,8 +387,12 @@ export function PreChatForm({
                     value={formData.exames.creatinina.valor}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Allow empty or valid decimal with comma and exactly 1 decimal place
-                      if (value === '' || /^\d*,?\d{0,1}$/.test(value)) {
+                      // Allow max 1 digit before comma, then optional comma with max 1 decimal place
+                      if (
+                        value === '' ||
+                        /^\d{1}$/.test(value) ||
+                        /^\d{1},\d{0,1}$/.test(value)
+                      ) {
                         handleExameChange('creatinina', 'valor', value);
                       }
                     }}
