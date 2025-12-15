@@ -8,7 +8,6 @@ export const cardiacStructure = ({ chatId }: { chatId: string }) =>
     This tool will update the checkpoint timestamp for cardiacStructure.`,
     inputSchema: z.object({}),
     execute: async () => {
-      console.log('checkpoint cardiacStructure');
       await updateCheckpointByChatId({ chatId, name: 'cardiacStructure' });
     },
   });

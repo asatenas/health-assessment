@@ -8,7 +8,6 @@ export const surgeryType = ({ chatId }: { chatId: string }) =>
     This tool will update the checkpoint timestamp for surgeryType.`,
     inputSchema: z.object({}),
     execute: async () => {
-      console.log('checkpoint surgeryType');
       await updateCheckpointByChatId({ chatId, name: 'surgeryType' });
     },
   });

@@ -8,7 +8,6 @@ export const cerebralIschemia = ({ chatId }: { chatId: string }) =>
     This tool will update the checkpoint timestamp for cerebralIschemia.`,
     inputSchema: z.object({}),
     execute: async () => {
-      console.log('checkpoint cerebralIschemia');
       await updateCheckpointByChatId({ chatId, name: 'cerebralIschemia' });
     },
   });

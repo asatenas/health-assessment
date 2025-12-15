@@ -8,7 +8,6 @@ export const hemoglobin = ({ chatId }: { chatId: string }) =>
     This tool will update the checkpoint timestamp for hemoglobin.`,
     inputSchema: z.object({}),
     execute: async () => {
-      console.log('checkpoint hemoglobin');
       await updateCheckpointByChatId({ chatId, name: 'hemoglobin' });
     },
   });
