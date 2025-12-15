@@ -162,7 +162,7 @@ export function PreChatForm({
                 onChange={(e) =>
                   setFormData({ ...formData, peso: e.target.value })
                 }
-                placeholder="Ex: 70.5"
+                placeholder="Ex: 70,5"
                 onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
