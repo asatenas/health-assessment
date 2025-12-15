@@ -9,6 +9,7 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
+  alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
   bombaMedicamentos: boolean;
@@ -47,6 +48,7 @@ export function PreChatForm({
     idade: '',
     peso: '',
     altura: '',
+    alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
     bombaMedicamentos: false,
@@ -139,14 +141,17 @@ export function PreChatForm({
               <Label htmlFor="idade">Idade (anos)</Label>
               <Input
                 id="idade"
-                type="number"
+                type="text"
                 required
                 value={formData.idade}
-                onChange={(e) =>
-                  setFormData({ ...formData, idade: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow only integers with max 2 digits (no decimals)
+                  if (value === '' || /^\d{1,2}$/.test(value)) {
+                    setFormData({ ...formData, idade: value });
+                  }
+                }}
                 placeholder="Ex: 45"
-                onWheel={(e) => e.currentTarget.blur()}
               />
             </div>
 
@@ -154,45 +159,90 @@ export function PreChatForm({
               <Label htmlFor="peso">Peso (kg)</Label>
               <Input
                 id="peso"
-                type="number"
+                type="text"
                 required
                 value={formData.peso}
-                onChange={(e) =>
-                  setFormData({ ...formData, peso: e.target.value })
-                }
-                placeholder="Ex: 70.5"
-                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  // Replace period with comma
+                  value = value.replace('.', ',');
+                  // Allow max 3 digits before comma, then optional comma with max 1 decimal place
+                  if (
+                    value === '' ||
+                    /^\d{1,3}$/.test(value) ||
+                    /^\d{1,3},\d{0,1}$/.test(value)
+                  ) {
+                    setFormData({ ...formData, peso: value });
+                  }
+                }}
+                placeholder="Ex: 70,5"
               />
             </div>
 
             <div>
-              <Label htmlFor="altura">Altura (cm)</Label>
+              <Label htmlFor="altura">Altura (metros)</Label>
               <Input
                 id="altura"
-                type="number"
+                type="text"
                 required
                 value={formData.altura}
-                onChange={(e) =>
-                  setFormData({ ...formData, altura: e.target.value })
-                }
-                placeholder="Ex: 175"
-                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  // Replace period with comma
+                  value = value.replace('.', ',');
+                  // Allow max 1 digit before comma, then optional comma with max 2 decimal places
+                  if (
+                    value === '' ||
+                    /^\d{1}$/.test(value) ||
+                    /^\d{1},\d{0,2}$/.test(value)
+                  ) {
+                    setFormData({ ...formData, altura: value });
+                  }
+                }}
+                placeholder="Ex: 1,75"
               />
             </div>
           </div>
 
           {/* Alergias */}
           <div className="space-y-3">
-            <Label htmlFor="alergias">Alergias</Label>
-            <Input
-              id="alergias"
-              type="text"
-              value={formData.alergias}
-              onChange={(e) =>
-                setFormData({ ...formData, alergias: e.target.value })
-              }
-              placeholder="Ex: látex, penicilina, outros medicamentos..."
-            />
+            <Label>Alergias</Label>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="alergia-latex"
+                  checked={formData.alergiaLatex}
+                  onChange={(e) =>
+                    setFormData({ ...formData, alergiaLatex: e.target.checked })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label
+                  htmlFor="alergia-latex"
+                  className="font-bold text-red-600"
+                >
+                  Alergia a látex
+                </Label>
+              </div>
+              <p className="text-xs text-gray-600 ml-6">
+                Informação crítica para seleção de luvas e materiais cirúrgicos
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="alergias" className="text-sm">
+                Outras alergias
+              </Label>
+              <Input
+                id="alergias"
+                type="text"
+                value={formData.alergias}
+                onChange={(e) =>
+                  setFormData({ ...formData, alergias: e.target.value })
+                }
+                placeholder="Ex: penicilina, outros medicamentos..."
+              />
+            </div>
           </div>
 
           {/* Dispositivos Médicos */}
@@ -231,7 +281,7 @@ export function PreChatForm({
             </div>
             <div>
               <Label htmlFor="dispositivos-outros" className="text-sm">
-                Outros
+                Outros dispositivos
               </Label>
               <Input
                 id="dispositivos-outros"
@@ -285,63 +335,89 @@ export function PreChatForm({
 
           {/* Exames */}
           <div className="space-y-4">
-            <Label>Exames (valor em um exame realizado recentemente)</Label>
-            {[
-              { key: 'hemoglobina', label: 'Hemoglobina (g/dL)' },
-              { key: 'creatinina', label: 'Creatinina (mg/dL)' },
-              // { key: 'ecocardiograma', label: 'Ecocardiograma' },
-            ].map(({ key, label }) => (
-              <div key={key} className="space-y-2">
-                <Label className="text-sm font-normal">{label}</Label>
-                <div className="flex gap-2">
-                  {/* <select
-                    value={
-                      formData.exames[key as keyof typeof formData.exames].tipo
-                    }
+            <div>
+              <Label>Exame de hemograma recente</Label>
+              <p className="text-xs text-gray-600 mt-1">
+                Procure pelo valor de hemoglobina no seu exame de sangue
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-normal">Hemoglobina (g/dL)</Label>
+              <div className="flex gap-2">
+                {formData.exames.hemoglobina.tipo === 'texto' ? (
+                  <Input
+                    type="text"
+                    value={formData.exames.hemoglobina.valor}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Replace period with comma
+                      value = value.replace('.', ',');
+                      // Allow max 2 digits before comma, then optional comma with max 1 decimal place
+                      if (
+                        value === '' ||
+                        /^\d{1,2}$/.test(value) ||
+                        /^\d{1,2},\d{0,1}$/.test(value)
+                      ) {
+                        handleExameChange('hemoglobina', 'valor', value);
+                      }
+                    }}
+                    placeholder="Ex: 13,2"
+                    className="flex-1"
+                  />
+                ) : (
+                  <Input
+                    type="file"
                     onChange={(e) =>
-                      handleExameChange(
-                        key as keyof typeof formData.exames,
-                        'tipo',
-                        e.target.value,
-                      )
+                      handleExameFileChange('hemoglobina', e.target.files?.[0])
                     }
-                    className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="texto">Valor</option>
-                    <option value="arquivo">Arquivo</option>
-                  </select> */}
-                  {formData.exames[key as keyof typeof formData.exames].tipo ===
-                  'texto' ? (
-                    <Input
-                      value={
-                        formData.exames[key as keyof typeof formData.exames]
-                          .valor
-                      }
-                      onChange={(e) =>
-                        handleExameChange(
-                          key as keyof typeof formData.exames,
-                          'valor',
-                          e.target.value,
-                        )
-                      }
-                      placeholder={`Ex: valor de ${label.toLowerCase()}`}
-                      className="flex-1"
-                    />
-                  ) : (
-                    <Input
-                      type="file"
-                      onChange={(e) =>
-                        handleExameFileChange(
-                          key as keyof typeof formData.exames,
-                          e.target.files?.[0],
-                        )
-                      }
-                      className="flex-1"
-                    />
-                  )}
-                </div>
+                    className="flex-1"
+                  />
+                )}
               </div>
-            ))}
+            </div>
+
+            <div>
+              <Label>Exame de creatinina recente</Label>
+              <p className="text-xs text-gray-600 mt-1">
+                Procure pelo valor de creatinina no seu exame de sangue ou de
+                urina
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-normal">Creatinina (mg/dL)</Label>
+              <div className="flex gap-2">
+                {formData.exames.creatinina.tipo === 'texto' ? (
+                  <Input
+                    type="text"
+                    value={formData.exames.creatinina.valor}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Replace period with comma
+                      value = value.replace('.', ',');
+                      // Allow max 1 digit before comma, then optional comma with max 1 decimal place
+                      if (
+                        value === '' ||
+                        /^\d{1}$/.test(value) ||
+                        /^\d{1},\d{0,1}$/.test(value)
+                      ) {
+                        handleExameChange('creatinina', 'valor', value);
+                      }
+                    }}
+                    placeholder="Ex: 1,1"
+                    className="flex-1"
+                  />
+                ) : (
+                  <Input
+                    type="file"
+                    onChange={(e) =>
+                      handleExameFileChange('creatinina', e.target.files?.[0])
+                    }
+                    className="flex-1"
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end">

@@ -187,6 +187,7 @@ export function Chat({
       idade,
       peso,
       altura,
+      alergiaLatex,
       alergias,
       marcaPasso,
       bombaMedicamentos,
@@ -200,10 +201,14 @@ export function Chat({
     const infoBasica = [
       `Idade: ${idade || '—'} anos`,
       `Peso: ${peso || '—'} kg`,
-      `Altura: ${altura || '—'} cm`,
+      `Altura: ${altura || '—'} m`,
     ].join(' | ');
 
-    const alergiasTxt = `Alergias: ${alergias || '—'}`;
+    const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
+    if (alergias) {
+      alergiasTexts.push(`Outras: ${alergias}`);
+    }
+    const alergiasTxt = `Alergias: ${alergiasTexts.join(' | ')}`;
 
     const dispositivos = [
       `Dispositivos: Marca-passo: ${formatBool(marcaPasso)}`,
