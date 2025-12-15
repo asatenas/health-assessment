@@ -186,19 +186,27 @@ export function PreChatForm({
           {/* Alergias */}
           <div className="space-y-3">
             <Label>Alergias</Label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="alergia-latex"
-                checked={formData.alergiaLatex}
-                onChange={(e) =>
-                  setFormData({ ...formData, alergiaLatex: e.target.checked })
-                }
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="alergia-latex" className="font-normal">
-                Alergia a látex
-              </Label>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="alergia-latex"
+                  checked={formData.alergiaLatex}
+                  onChange={(e) =>
+                    setFormData({ ...formData, alergiaLatex: e.target.checked })
+                  }
+                  className="rounded border-gray-300"
+                />
+                <Label
+                  htmlFor="alergia-latex"
+                  className="font-bold text-red-600"
+                >
+                  Alergia a látex
+                </Label>
+              </div>
+              <p className="text-xs text-gray-600 ml-6">
+                Informação crítica para seleção de luvas e materiais cirúrgicos
+              </p>
             </div>
             <div>
               <Label htmlFor="alergias" className="text-sm">
