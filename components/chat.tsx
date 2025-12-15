@@ -201,7 +201,7 @@ export function Chat({
     const infoBasica = [
       `Idade: ${idade || '—'} anos`,
       `Peso: ${peso || '—'} kg`,
-      `Altura: ${altura || '—'} cm`,
+      `Altura: ${altura || '—'} m`,
     ].join(' | ');
 
     const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
