@@ -314,63 +314,67 @@ export function PreChatForm({
 
           {/* Exames */}
           <div className="space-y-4">
-            <Label>Exames (valor em um exame realizado recentemente)</Label>
-            {[
-              { key: 'hemoglobina', label: 'Hemoglobina (g/dL)' },
-              { key: 'creatinina', label: 'Creatinina (mg/dL)' },
-              // { key: 'ecocardiograma', label: 'Ecocardiograma' },
-            ].map(({ key, label }) => (
-              <div key={key} className="space-y-2">
-                <Label className="text-sm font-normal">{label}</Label>
-                <div className="flex gap-2">
-                  {/* <select
-                    value={
-                      formData.exames[key as keyof typeof formData.exames].tipo
-                    }
+            <div>
+              <Label>Exame de hemograma recente</Label>
+              <p className="text-xs text-gray-600 mt-1">
+                Procure pelo valor de hemoglobina no seu exame de sangue
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-normal">Hemoglobina (g/dL)</Label>
+              <div className="flex gap-2">
+                {formData.exames.hemoglobina.tipo === 'texto' ? (
+                  <Input
+                    value={formData.exames.hemoglobina.valor}
                     onChange={(e) =>
-                      handleExameChange(
-                        key as keyof typeof formData.exames,
-                        'tipo',
-                        e.target.value,
-                      )
+                      handleExameChange('hemoglobina', 'valor', e.target.value)
                     }
-                    className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="texto">Valor</option>
-                    <option value="arquivo">Arquivo</option>
-                  </select> */}
-                  {formData.exames[key as keyof typeof formData.exames].tipo ===
-                  'texto' ? (
-                    <Input
-                      value={
-                        formData.exames[key as keyof typeof formData.exames]
-                          .valor
-                      }
-                      onChange={(e) =>
-                        handleExameChange(
-                          key as keyof typeof formData.exames,
-                          'valor',
-                          e.target.value,
-                        )
-                      }
-                      placeholder={`Ex: valor de ${label.toLowerCase()}`}
-                      className="flex-1"
-                    />
-                  ) : (
-                    <Input
-                      type="file"
-                      onChange={(e) =>
-                        handleExameFileChange(
-                          key as keyof typeof formData.exames,
-                          e.target.files?.[0],
-                        )
-                      }
-                      className="flex-1"
-                    />
-                  )}
-                </div>
+                    placeholder="Ex: 14 (g/dl)"
+                    className="flex-1"
+                  />
+                ) : (
+                  <Input
+                    type="file"
+                    onChange={(e) =>
+                      handleExameFileChange('hemoglobina', e.target.files?.[0])
+                    }
+                    className="flex-1"
+                  />
+                )}
               </div>
-            ))}
+            </div>
+
+            <div>
+              <Label>Exame de creatinina recente</Label>
+              <p className="text-xs text-gray-600 mt-1">
+                Procure pelo valor de creatinina no seu exame de sangue ou de
+                urina
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-normal">Creatinina (mg/dL)</Label>
+              <div className="flex gap-2">
+                {formData.exames.creatinina.tipo === 'texto' ? (
+                  <Input
+                    value={formData.exames.creatinina.valor}
+                    onChange={(e) =>
+                      handleExameChange('creatinina', 'valor', e.target.value)
+                    }
+                    placeholder="Ex: 2,0 (mg/dl)"
+                    className="flex-1"
+                  />
+                ) : (
+                  <Input
+                    type="file"
+                    onChange={(e) =>
+                      handleExameFileChange('creatinina', e.target.files?.[0])
+                    }
+                    className="flex-1"
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end">
