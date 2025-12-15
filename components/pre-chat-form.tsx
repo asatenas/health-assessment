@@ -260,7 +260,7 @@ export function PreChatForm({
             </div>
             <div>
               <Label htmlFor="dispositivos-outros" className="text-sm">
-                Outros
+                Outros dispositivos
               </Label>
               <Input
                 id="dispositivos-outros"
