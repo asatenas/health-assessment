@@ -29,6 +29,13 @@ interface PreChatFormData {
     ciliosPosticos: boolean;
     piercings: boolean;
   };
+  drogasRecreativas: {
+    cocaina: boolean;
+    maconha: boolean;
+    crack: boolean;
+    opiaceos: boolean;
+    metanfetamina: boolean;
+  };
   exames: {
     hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
     creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
@@ -68,6 +75,13 @@ export function PreChatForm({
       unhaGel: false,
       ciliosPosticos: false,
       piercings: false,
+    },
+    drogasRecreativas: {
+      cocaina: false,
+      maconha: false,
+      crack: false,
+      opiaceos: false,
+      metanfetamina: false,
     },
     exames: {
       hemoglobina: { tipo: 'texto', valor: '' },
@@ -398,6 +412,92 @@ export function PreChatForm({
                         ...formData,
                         itensUso: {
                           ...formData.itensUso,
+                          [key]: checked,
+                        },
+                      })
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Drogas Recreativas */}
+          <div className="space-y-3">
+            <Label>Uso de drogas recreativas</Label>
+            <p className="text-xs text-gray-600">
+              Selecione todas as drogas que você utiliza. Caso não utilize
+              nenhuma, deixe o campo em branco. Esta informação é confidencial e
+              essencial para sua segurança durante a cirurgia.
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  <span
+                    className={`text-sm truncate ${
+                      Object.values(formData.drogasRecreativas).some((v) => v)
+                        ? ''
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {(() => {
+                      const selected = Object.entries(
+                        formData.drogasRecreativas,
+                      )
+                        .filter(([, value]) => value)
+                        .map(([key]) => {
+                          const items = {
+                            cocaina: 'Cocaína',
+                            maconha: 'Maconha',
+                            crack: 'Crack',
+                            opiaceos:
+                              'Opiáceos (fentanil, morfina, codeína...)',
+                            metanfetamina: 'Metanfetamina',
+                          };
+                          return items[key as keyof typeof items];
+                        });
+                      if (selected.length === 0) {
+                        return 'Selecione os itens aqui...';
+                      } else if (selected.length === 1) {
+                        return `${selected.length} item selecionado`;
+                      } else {
+                        return `${selected.length} itens selecionados`;
+                      }
+                    })()}
+                  </span>
+                  <ChevronDown className="size-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                {[
+                  { key: 'cocaina', label: 'Cocaína' },
+                  { key: 'maconha', label: 'Maconha' },
+                  { key: 'crack', label: 'Crack' },
+                  {
+                    key: 'opiaceos',
+                    label: 'Opiáceos (Fentanil, morfina, codeína...)',
+                  },
+                  { key: 'metanfetamina', label: 'Metanfetamina' },
+                ].map(({ key, label }) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={
+                      formData.drogasRecreativas[
+                        key as keyof typeof formData.drogasRecreativas
+                      ]
+                    }
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
                           [key]: checked,
                         },
                       })

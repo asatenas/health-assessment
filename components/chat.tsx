@@ -194,6 +194,7 @@ export function Chat({
       bombaMedicamentos,
       dispositivosOutros,
       itensUso,
+      drogasRecreativas,
       exames,
     } = paciente;
 
@@ -239,6 +240,23 @@ export function Chat({
           .join(' | ')}`
       : '';
 
+    const drogasLabels: any = {
+      cocaina: 'Cocaína',
+      maconha: 'Maconha',
+      crack: 'Crack',
+      opiaceos: 'Opiáceos',
+      metanfetamina: 'Metanfetamina',
+    };
+
+    const drogasRecreativasTxt = drogasRecreativas
+      ? `Drogas recreativas: ${Object.entries(drogasRecreativas)
+          .map(
+            ([key, value]) =>
+              `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
+          )
+          .join(' | ')}`
+      : '';
+
     const unidades: Record<string, string> = {
       hemoglobina: 'g/dL',
       creatinina: 'mg/dL',
@@ -257,6 +275,10 @@ export function Chat({
 
     if (itensUsoTxt) {
       sections.splice(3, 0, itensUsoTxt);
+    }
+
+    if (drogasRecreativasTxt) {
+      sections.splice(itensUsoTxt ? 4 : 3, 0, drogasRecreativasTxt);
     }
 
     return sections.join(' | ');
