@@ -228,7 +228,7 @@ export function PreChatForm({
                 </Label>
               </div>
               <p className="text-xs text-gray-600 ml-6">
-                Informação crítica para seleção de luvas e materiais cirúrgicos
+                Deixe selecionado caso você tenha alergia a látex
               </p>
             </div>
             <div>
@@ -261,7 +261,8 @@ export function PreChatForm({
                 className="rounded border-gray-300"
               />
               <Label htmlFor="marca-passo" className="font-normal">
-                Marca-passos ou dispositivo para arritmia
+                Marca-passos
+              </Label>
             </div>
             <p className="text-xs text-gray-600 ml-6">
               Deixe selecionado caso você tenha um marca passo
@@ -281,8 +282,8 @@ export function PreChatForm({
               </Label>
             </div>
             <p className="text-xs text-gray-600 ml-6">
-              Deixe selecionado caso você tenha um CDI (Cardioversor
-              Desfibrilador Implantável)
+              Deixe selecionado caso você tenha um CDI (cardioversor
+              desfibrilador implantável)
             </p>
             <div className="flex items-center space-x-2">
               <input
@@ -307,7 +308,7 @@ export function PreChatForm({
             </p>
             <div>
               <Label htmlFor="dispositivos-outros" className="text-sm">
-                Outros dispositivos
+                Outros dispositivos médicos
               </Label>
               <Input
                 id="dispositivos-outros"
@@ -319,14 +320,14 @@ export function PreChatForm({
                     dispositivosOutros: e.target.value,
                   })
                 }
-                placeholder="Ex: implante coclear, prótese..."
+                placeholder="Ex: implante coclear, próteses..."
               />
             </div>
           </div>
 
           {/* Itens de Uso */}
-          {/* <div className="space-y-3">
-            <Label>Usa algum dos itens abaixo?</Label>
+          <div className="space-y-3">
+            <Label>Itens estéticos</Label>
             {[
               { key: 'megaHair', label: 'Mega-Hair' },
               { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
@@ -357,14 +358,15 @@ export function PreChatForm({
                 </Label>
               </div>
             ))}
-          </div> */}
+          </div>
 
           {/* Exames */}
           <div className="space-y-4">
             <div>
-              <Label>Exame de hemograma recente</Label>
+              <Label>Exame de hemograma</Label>
               <p className="text-xs text-gray-600 mt-1">
-                Procure pelo valor de hemoglobina no seu exame de sangue
+                Procure pelo valor de hemoglobina no seu exame de sangue. Caso
+                não tenha disponível, deixe o campo em branco.
               </p>
             </div>
             <div className="space-y-2">
@@ -405,8 +407,8 @@ export function PreChatForm({
             <div>
               <Label>Exame de creatinina recente</Label>
               <p className="text-xs text-gray-600 mt-1">
-                Procure pelo valor de creatinina no seu exame de sangue ou de
-                urina
+                Procure pelo valor de creatinina no seu exame de sangue. Caso
+                não tenha disponível, deixe o campo em branco.
               </p>
             </div>
 
