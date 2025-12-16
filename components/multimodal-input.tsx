@@ -512,7 +512,7 @@ function PureMultimodalInput({
             (status === 'submitted' || status === 'streaming') &&
             !wasAutoStopped
               ? 'Digite para interromper a análise...'
-              : 'Digite sua mensagem...'
+              : 'Envie uma mensagem para continuar...'
           }
           value={input}
           onChange={handleInput}
