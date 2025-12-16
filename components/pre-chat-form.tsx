@@ -263,6 +263,9 @@ export function PreChatForm({
               <Label htmlFor="marca-passo" className="font-normal">
                 Marca-passos ou dispositivo para arritmia
             </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha um marca passo
+            </p>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -277,6 +280,10 @@ export function PreChatForm({
                 CDI
               </Label>
             </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha um CDI (Cardioversor
+              Desfibrilador Implantável)
+            </p>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -294,6 +301,10 @@ export function PreChatForm({
                 Bomba de medicamentos implantada
               </Label>
             </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha uma bomba de medicamentos
+              implantada
+            </p>
             <div>
               <Label htmlFor="dispositivos-outros" className="text-sm">
                 Outros dispositivos
