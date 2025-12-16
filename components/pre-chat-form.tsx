@@ -123,7 +123,7 @@ export function PreChatForm({
             size="lg"
             className="min-w-[140px]"
           >
-            Continuar
+            Começar
           </Button>
         </div>
       </div>
