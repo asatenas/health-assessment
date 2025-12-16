@@ -194,7 +194,9 @@ export function Chat({
       bombaMedicamentos,
       dispositivosOutros,
       itensUso,
+      itensUsoOutros,
       drogasRecreativas,
+      drogasRecreativasOutros,
       exames,
     } = paciente;
 
@@ -231,13 +233,20 @@ export function Chat({
       lenteContato: 'Lente de contato',
     };
 
-    const itensUsoTxt = itensUso
-      ? `Itens de uso: ${Object.entries(itensUso)
+    const itensUsoParts = itensUso
+      ? Object.entries(itensUso)
           .map(
             ([key, value]) =>
               `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
           )
-          .join(' | ')}`
+      : [];
+
+    if (itensUsoOutros) {
+      itensUsoParts.push(`• Outros: ${itensUsoOutros}`);
+    }
+
+    const itensUsoTxt = itensUsoParts.length > 0
+      ? `Itens de uso: ${itensUsoParts.join(' | ')}`
       : '';
 
     const drogasLabels: any = {
@@ -248,13 +257,20 @@ export function Chat({
       metanfetamina: 'Metanfetamina',
     };
 
-    const drogasRecreativasTxt = drogasRecreativas
-      ? `Drogas recreativas: ${Object.entries(drogasRecreativas)
+    const drogasRecreativasParts = drogasRecreativas
+      ? Object.entries(drogasRecreativas)
           .map(
             ([key, value]) =>
               `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
           )
-          .join(' | ')}`
+      : [];
+
+    if (drogasRecreativasOutros) {
+      drogasRecreativasParts.push(`• Outros: ${drogasRecreativasOutros}`);
+    }
+
+    const drogasRecreativasTxt = drogasRecreativasParts.length > 0
+      ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
       : '';
 
     const unidades: Record<string, string> = {

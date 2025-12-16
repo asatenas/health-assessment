@@ -29,6 +29,7 @@ interface PreChatFormData {
     ciliosPosticos: boolean;
     piercings: boolean;
   };
+  itensUsoOutros: string;
   drogasRecreativas: {
     cocaina: boolean;
     maconha: boolean;
@@ -36,6 +37,7 @@ interface PreChatFormData {
     opiaceos: boolean;
     metanfetamina: boolean;
   };
+  drogasRecreativasOutros: string;
   exames: {
     hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
     creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
@@ -76,6 +78,7 @@ export function PreChatForm({
       ciliosPosticos: false,
       piercings: false,
     },
+    itensUsoOutros: '',
     drogasRecreativas: {
       cocaina: false,
       maconha: false,
@@ -83,6 +86,7 @@ export function PreChatForm({
       opiaceos: false,
       metanfetamina: false,
     },
+    drogasRecreativasOutros: '',
     exames: {
       hemoglobina: { tipo: 'texto', valor: '' },
       creatinina: { tipo: 'texto', valor: '' },
@@ -423,6 +427,23 @@ export function PreChatForm({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            <div>
+              <Label htmlFor="itens-uso-outros" className="text-sm">
+                Outros itens estéticos
+              </Label>
+              <Input
+                id="itens-uso-outros"
+                type="text"
+                value={formData.itensUsoOutros}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    itensUsoOutros: e.target.value,
+                  })
+                }
+                placeholder="Ex: extensões de cabelo, procedimentos estéticos..."
+              />
+            </div>
           </div>
 
           {/* Drogas Recreativas */}
@@ -509,6 +530,23 @@ export function PreChatForm({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            <div>
+              <Label htmlFor="drogas-recreativas-outros" className="text-sm">
+                Outras drogas recreativas
+              </Label>
+              <Input
+                id="drogas-recreativas-outros"
+                type="text"
+                value={formData.drogasRecreativasOutros}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    drogasRecreativasOutros: e.target.value,
+                  })
+                }
+                placeholder="Ex: LSD, ecstasy, outras substâncias..."
+              />
+            </div>
           </div>
 
           {/* Exames */}
