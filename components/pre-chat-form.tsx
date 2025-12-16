@@ -169,6 +169,7 @@ export function PreChatForm({
               <Input
                 id="idade"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.idade}
                 onChange={(e) => {
@@ -187,6 +188,7 @@ export function PreChatForm({
               <Input
                 id="peso"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.peso}
                 onChange={(e) => {
@@ -211,6 +213,7 @@ export function PreChatForm({
               <Input
                 id="altura"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.altura}
                 onChange={(e) => {
@@ -263,6 +266,7 @@ export function PreChatForm({
               <Input
                 id="alergias"
                 type="text"
+                className="text-sm"
                 value={formData.alergias}
                 onChange={(e) =>
                   setFormData({ ...formData, alergias: e.target.value })
@@ -338,6 +342,7 @@ export function PreChatForm({
               <Input
                 id="dispositivos-outros"
                 type="text"
+                className="text-sm"
                 value={formData.dispositivosOutros}
                 onChange={(e) =>
                   setFormData({
@@ -434,6 +439,7 @@ export function PreChatForm({
               <Input
                 id="itens-uso-outros"
                 type="text"
+                className="text-sm"
                 value={formData.itensUsoOutros}
                 onChange={(e) =>
                   setFormData({
@@ -537,6 +543,7 @@ export function PreChatForm({
               <Input
                 id="drogas-recreativas-outros"
                 type="text"
+                className="text-sm"
                 value={formData.drogasRecreativasOutros}
                 onChange={(e) =>
                   setFormData({
@@ -564,6 +571,7 @@ export function PreChatForm({
                 {formData.exames.hemoglobina.tipo === 'texto' ? (
                   <Input
                     type="text"
+                    className="flex-1 text-sm"
                     value={formData.exames.hemoglobina.valor}
                     onChange={(e) => {
                       let value = e.target.value;
@@ -579,7 +587,6 @@ export function PreChatForm({
                       }
                     }}
                     placeholder="Ex: 13,2"
-                    className="flex-1"
                   />
                 ) : (
                   <Input
@@ -607,6 +614,7 @@ export function PreChatForm({
                 {formData.exames.creatinina.tipo === 'texto' ? (
                   <Input
                     type="text"
+                    className="flex-1 text-sm"
                     value={formData.exames.creatinina.valor}
                     onChange={(e) => {
                       let value = e.target.value;
@@ -622,7 +630,6 @@ export function PreChatForm({
                       }
                     }}
                     placeholder="Ex: 1,1"
-                    className="flex-1"
                   />
                 ) : (
                   <Input
