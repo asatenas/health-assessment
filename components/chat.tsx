@@ -190,6 +190,7 @@ export function Chat({
       alergiaLatex,
       alergias,
       marcaPasso,
+      cdi,
       bombaMedicamentos,
       dispositivosOutros,
       itensUso,
@@ -212,6 +213,7 @@ export function Chat({
 
     const dispositivos = [
       `Dispositivos: Marca-passo: ${formatBool(marcaPasso)}`,
+      `CDI: ${formatBool(cdi)}`,
       `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
     ];
     if (dispositivosOutros) {

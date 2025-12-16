@@ -12,6 +12,7 @@ interface PreChatFormData {
   alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
+  cdi: boolean;
   bombaMedicamentos: boolean;
   dispositivosOutros: string;
   itensUso: {
@@ -51,6 +52,7 @@ export function PreChatForm({
     alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
+    cdi: false,
     bombaMedicamentos: false,
     dispositivosOutros: '',
     itensUso: {
@@ -260,6 +262,19 @@ export function PreChatForm({
               />
               <Label htmlFor="marca-passo" className="font-normal">
                 Marca-passos ou dispositivo para arritmia
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="cdi"
+                checked={formData.cdi}
+                onChange={(e) =>
+                  setFormData({ ...formData, cdi: e.target.checked })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="cdi" className="font-normal">
+                CDI
               </Label>
             </div>
             <div className="flex items-center space-x-2">
