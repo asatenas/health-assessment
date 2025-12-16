@@ -38,7 +38,7 @@ import { SelectItem } from '@/components/ui/select';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, X } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import type { VisibilityType } from './visibility-selector';
 import type { Attachment, ChatMessage } from '@/lib/types';
@@ -157,6 +157,9 @@ function PureMultimodalInput({
   const [showTranscriptionModal, setShowTranscriptionModal] = useState(false);
   const [pendingTranscription, setPendingTranscription] = useState('');
 
+  // Voice tip state
+  const [hasSeenVoiceTip, setHasSeenVoiceTip] = useState(false);
+
   const submitForm = useCallback(async () => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
@@ -274,6 +277,11 @@ function PureMultimodalInput({
 
   // Voice recording handlers
   const handleVoiceRecording = useCallback(async () => {
+    // Dismiss the voice tip when user clicks the microphone
+    if (!hasSeenVoiceTip) {
+      setHasSeenVoiceTip(true);
+    }
+
     if (isRecording) {
       // Stop recording
       voiceRecorder.stopRecording();
@@ -294,7 +302,7 @@ function PureMultimodalInput({
 
     // Start recording
     voiceRecorder.startRecording();
-  }, [isRecording, voiceRecorder]);
+  }, [isRecording, voiceRecorder, hasSeenVoiceTip, setHasSeenVoiceTip]);
 
   // Set up voice recorder callbacks
   useEffect(() => {
@@ -446,6 +454,45 @@ function PureMultimodalInput({
             </Button>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Voice tip tooltip */}
+      <AnimatePresence>
+        {!hasSeenVoiceTip &&
+          !isRecording &&
+          !isTranscribing &&
+          (!input.trim() || uploadQueue.length > 0) &&
+          attachments.length === 0 &&
+          status === 'ready' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 20,
+              }}
+              className="absolute bottom-[72px] right-0 z-50"
+            >
+              <div className="relative bg-primary text-primary-foreground px-4 py-3 rounded-lg shadow-lg max-w-[280px] text-sm">
+                <button
+                  type="button"
+                  onClick={() => setHasSeenVoiceTip(true)}
+                  className="absolute top-2 right-2 p-0.5 rounded-full hover:bg-primary-foreground/20 transition-colors"
+                  aria-label="Fechar dica"
+                >
+                  <X size={14} />
+                </button>
+                <p className="pr-4">
+                  Prefere falar? Clique aqui e transforme sua voz em texto, no
+                  idioma que você quiser!
+                </p>
+                {/* Arrow pointing down to the button */}
+                <div className="absolute top-full right-6 size-0 border-x-8 border-t-8 border-x-transparent border-t-primary" />
+              </div>
+            </motion.div>
+          )}
       </AnimatePresence>
 
       <SuggestedActions
