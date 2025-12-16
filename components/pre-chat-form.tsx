@@ -4,6 +4,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 interface PreChatFormData {
   idade: string;
@@ -12,6 +19,7 @@ interface PreChatFormData {
   alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
+  cdi: boolean;
   bombaMedicamentos: boolean;
   dispositivosOutros: string;
   itensUso: {
@@ -21,6 +29,15 @@ interface PreChatFormData {
     ciliosPosticos: boolean;
     piercings: boolean;
   };
+  itensUsoOutros: string;
+  drogasRecreativas: {
+    cocaina: boolean;
+    maconha: boolean;
+    crack: boolean;
+    opiaceos: boolean;
+    metanfetamina: boolean;
+  };
+  drogasRecreativasOutros: string;
   exames: {
     hemoglobina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
     creatinina: { tipo: 'texto' | 'arquivo'; valor: string; arquivo?: File };
@@ -51,6 +68,7 @@ export function PreChatForm({
     alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
+    cdi: false,
     bombaMedicamentos: false,
     dispositivosOutros: '',
     itensUso: {
@@ -60,6 +78,15 @@ export function PreChatForm({
       ciliosPosticos: false,
       piercings: false,
     },
+    itensUsoOutros: '',
+    drogasRecreativas: {
+      cocaina: false,
+      maconha: false,
+      crack: false,
+      opiaceos: false,
+      metanfetamina: false,
+    },
+    drogasRecreativasOutros: '',
     exames: {
       hemoglobina: { tipo: 'texto', valor: '' },
       creatinina: { tipo: 'texto', valor: '' },
@@ -123,7 +150,7 @@ export function PreChatForm({
             size="lg"
             className="min-w-[140px]"
           >
-            Continuar
+            Começar
           </Button>
         </div>
       </div>
@@ -138,10 +165,11 @@ export function PreChatForm({
           {/* Dados Básicos */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="idade">Idade (anos)</Label>
+              <Label htmlFor="idade">Idade (anos) *</Label>
               <Input
                 id="idade"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.idade}
                 onChange={(e) => {
@@ -156,10 +184,11 @@ export function PreChatForm({
             </div>
 
             <div>
-              <Label htmlFor="peso">Peso (kg)</Label>
+              <Label htmlFor="peso">Peso (kg) *</Label>
               <Input
                 id="peso"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.peso}
                 onChange={(e) => {
@@ -180,10 +209,11 @@ export function PreChatForm({
             </div>
 
             <div>
-              <Label htmlFor="altura">Altura (metros)</Label>
+              <Label htmlFor="altura">Altura (metros) *</Label>
               <Input
                 id="altura"
                 type="text"
+                className="text-sm"
                 required
                 value={formData.altura}
                 onChange={(e) => {
@@ -226,7 +256,7 @@ export function PreChatForm({
                 </Label>
               </div>
               <p className="text-xs text-gray-600 ml-6">
-                Informação crítica para seleção de luvas e materiais cirúrgicos
+                Deixe selecionado caso você tenha alergia a látex
               </p>
             </div>
             <div>
@@ -236,6 +266,7 @@ export function PreChatForm({
               <Input
                 id="alergias"
                 type="text"
+                className="text-sm"
                 value={formData.alergias}
                 onChange={(e) =>
                   setFormData({ ...formData, alergias: e.target.value })
@@ -259,9 +290,30 @@ export function PreChatForm({
                 className="rounded border-gray-300"
               />
               <Label htmlFor="marca-passo" className="font-normal">
-                Marca-passos ou dispositivo para arritmia
+                Marca-passos
               </Label>
             </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha um marca passo
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="cdi"
+                checked={formData.cdi}
+                onChange={(e) =>
+                  setFormData({ ...formData, cdi: e.target.checked })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="cdi" className="font-normal">
+                CDI
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha um CDI (cardioversor
+              desfibrilador implantável)
+            </p>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -279,13 +331,18 @@ export function PreChatForm({
                 Bomba de medicamentos implantada
               </Label>
             </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Deixe selecionado caso você tenha uma bomba de medicamentos
+              implantada
+            </p>
             <div>
               <Label htmlFor="dispositivos-outros" className="text-sm">
-                Outros dispositivos
+                Outros dispositivos médicos
               </Label>
               <Input
                 id="dispositivos-outros"
                 type="text"
+                className="text-sm"
                 value={formData.dispositivosOutros}
                 onChange={(e) =>
                   setFormData({
@@ -293,52 +350,219 @@ export function PreChatForm({
                     dispositivosOutros: e.target.value,
                   })
                 }
-                placeholder="Ex: implante coclear, prótese..."
+                placeholder="Ex: implante coclear, próteses..."
               />
             </div>
           </div>
 
           {/* Itens de Uso */}
-          {/* <div className="space-y-3">
-            <Label>Usa algum dos itens abaixo?</Label>
-            {[
-              { key: 'megaHair', label: 'Mega-Hair' },
-              { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
-              { key: 'unhaGel', label: 'Unha de gel' },
-              { key: 'ciliosPosticos', label: 'Cílios postiços' },
-              { key: 'piercings', label: 'Piercings' },
-            ].map(({ key, label }) => (
-              <div key={key} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`item-${key}`}
-                  checked={
-                    formData.itensUso[key as keyof typeof formData.itensUso]
-                  }
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      itensUso: {
-                        ...formData.itensUso,
-                        [key]: e.target.checked,
-                      },
-                    })
-                  }
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor={`item-${key}`} className="font-normal">
-                  {label}
-                </Label>
-              </div>
-            ))}
-          </div> */}
+          <div className="space-y-3">
+            <Label>Itens estéticos</Label>
+            <p className="text-xs text-gray-600">
+              Selecione todos os itens abaixo que você utiliza no dia a dia.
+              Caso não utilize nenhum, deixe o campo em branco.
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  <span
+                    className={`text-sm truncate ${
+                      Object.values(formData.itensUso).some((v) => v)
+                        ? ''
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {(() => {
+                      const selected = Object.entries(formData.itensUso)
+                        .filter(([, value]) => value)
+                        .map(([key]) => {
+                          const items = {
+                            megaHair: 'Mega-Hair',
+                            apliques: 'Apliques sintéticos no cabelo',
+                            unhaGel: 'Unha de gel',
+                            ciliosPosticos: 'Cílios postiços',
+                            piercings: 'Piercings',
+                            lenteContato: 'Lente de contato',
+                          };
+                          return items[key as keyof typeof items];
+                        });
+                      if (selected.length === 0) {
+                        return 'Selecione os itens aqui...';
+                      } else if (selected.length === 1) {
+                        return `${selected.length} item selecionado`;
+                      } else {
+                        return `${selected.length} itens selecionados`;
+                      }
+                    })()}
+                  </span>
+                  <ChevronDown className="size-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                {[
+                  { key: 'megaHair', label: 'Mega-Hair' },
+                  { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
+                  { key: 'unhaGel', label: 'Unha de gel' },
+                  { key: 'ciliosPosticos', label: 'Cílios postiços' },
+                  { key: 'piercings', label: 'Piercings' },
+                  { key: 'lenteContato', label: 'Lente de contato' },
+                ].map(({ key, label }) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={
+                      formData.itensUso[key as keyof typeof formData.itensUso]
+                    }
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        itensUso: {
+                          ...formData.itensUso,
+                          [key]: checked,
+                        },
+                      })
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div>
+              <Label htmlFor="itens-uso-outros" className="text-sm">
+                Outros itens estéticos
+              </Label>
+              <Input
+                id="itens-uso-outros"
+                type="text"
+                className="text-sm"
+                value={formData.itensUsoOutros}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    itensUsoOutros: e.target.value,
+                  })
+                }
+                placeholder="Ex: extensões de cabelo, procedimentos estéticos..."
+              />
+            </div>
+          </div>
+
+          {/* Drogas Recreativas */}
+          <div className="space-y-3">
+            <Label>Uso de drogas recreativas</Label>
+            <p className="text-xs text-gray-600">
+              Selecione todas as drogas que você utiliza. Caso não utilize
+              nenhuma, deixe o campo em branco. Esta informação é confidencial e
+              essencial para sua segurança durante a cirurgia.
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  <span
+                    className={`text-sm truncate ${
+                      Object.values(formData.drogasRecreativas).some((v) => v)
+                        ? ''
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {(() => {
+                      const selected = Object.entries(
+                        formData.drogasRecreativas,
+                      )
+                        .filter(([, value]) => value)
+                        .map(([key]) => {
+                          const items = {
+                            cocaina: 'Cocaína',
+                            maconha: 'Maconha',
+                            crack: 'Crack',
+                            opiaceos:
+                              'Opiáceos (fentanil, morfina, codeína...)',
+                            metanfetamina: 'Metanfetamina',
+                          };
+                          return items[key as keyof typeof items];
+                        });
+                      if (selected.length === 0) {
+                        return 'Selecione os itens aqui...';
+                      } else if (selected.length === 1) {
+                        return `${selected.length} item selecionado`;
+                      } else {
+                        return `${selected.length} itens selecionados`;
+                      }
+                    })()}
+                  </span>
+                  <ChevronDown className="size-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                {[
+                  { key: 'cocaina', label: 'Cocaína' },
+                  { key: 'maconha', label: 'Maconha' },
+                  { key: 'crack', label: 'Crack' },
+                  {
+                    key: 'opiaceos',
+                    label: 'Opiáceos (Fentanil, morfina, codeína...)',
+                  },
+                  { key: 'metanfetamina', label: 'Metanfetamina' },
+                ].map(({ key, label }) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={
+                      formData.drogasRecreativas[
+                        key as keyof typeof formData.drogasRecreativas
+                      ]
+                    }
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
+                          [key]: checked,
+                        },
+                      })
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div>
+              <Label htmlFor="drogas-recreativas-outros" className="text-sm">
+                Outras drogas recreativas
+              </Label>
+              <Input
+                id="drogas-recreativas-outros"
+                type="text"
+                className="text-sm"
+                value={formData.drogasRecreativasOutros}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    drogasRecreativasOutros: e.target.value,
+                  })
+                }
+                placeholder="Ex: LSD, ecstasy, outras substâncias..."
+              />
+            </div>
+          </div>
 
           {/* Exames */}
           <div className="space-y-4">
             <div>
-              <Label>Exame de hemograma recente</Label>
+              <Label>Exame de hemograma</Label>
               <p className="text-xs text-gray-600 mt-1">
-                Procure pelo valor de hemoglobina no seu exame de sangue
+                Procure pelo valor de hemoglobina no seu exame de sangue. Caso
+                não tenha disponível, deixe o campo em branco.
               </p>
             </div>
             <div className="space-y-2">
@@ -347,6 +571,7 @@ export function PreChatForm({
                 {formData.exames.hemoglobina.tipo === 'texto' ? (
                   <Input
                     type="text"
+                    className="flex-1 text-sm"
                     value={formData.exames.hemoglobina.valor}
                     onChange={(e) => {
                       let value = e.target.value;
@@ -362,7 +587,6 @@ export function PreChatForm({
                       }
                     }}
                     placeholder="Ex: 13,2"
-                    className="flex-1"
                   />
                 ) : (
                   <Input
@@ -379,8 +603,8 @@ export function PreChatForm({
             <div>
               <Label>Exame de creatinina recente</Label>
               <p className="text-xs text-gray-600 mt-1">
-                Procure pelo valor de creatinina no seu exame de sangue ou de
-                urina
+                Procure pelo valor de creatinina no seu exame de sangue. Caso
+                não tenha disponível, deixe o campo em branco.
               </p>
             </div>
 
@@ -390,6 +614,7 @@ export function PreChatForm({
                 {formData.exames.creatinina.tipo === 'texto' ? (
                   <Input
                     type="text"
+                    className="flex-1 text-sm"
                     value={formData.exames.creatinina.valor}
                     onChange={(e) => {
                       let value = e.target.value;
@@ -405,7 +630,6 @@ export function PreChatForm({
                       }
                     }}
                     placeholder="Ex: 1,1"
-                    className="flex-1"
                   />
                 ) : (
                   <Input

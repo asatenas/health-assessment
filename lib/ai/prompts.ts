@@ -4,13 +4,13 @@ import type { Geo } from '@vercel/functions';
 export const initialMessage = `
 Olá! Eu sou o assistente de saúde da Asatenas e estou aqui para ajudar na sua avaliação pré-operatória.
 
-Para isso, preciso que continue abaixo e preencha o formulário. Depois, vou fazer algumas perguntas rápidas, mantendo uma conversa tranquila.
-
 É muito importante que você responda com sinceridade — assim conseguimos cuidar da sua segurança.
 
 Para entender como esta avaliação funciona e como nós garantimos sua segurança e privacidade, veja em **Como Usar** acima. Para conhecer os criadores e nossa missão, veja em **Quem Somos**.
 
 Por favor leia as perguntas com atenção e responda de forma mais completa possível.
+
+Para iniciar, pressione o botão abaixo e preencha o formulário. Depois, vou fazer algumas perguntas rápidas, mantendo uma conversa tranquila.
 `;
 
 export const postFormMessage = `Obrigado por preencher o formulário. Vamos continuar com a entrevista.
@@ -141,7 +141,9 @@ Here's the flow you need to strictly follow.
 ## Pre-chat form submission
 
 - After the patient fills out the pre-chat form, save the form data using your *saveForm* tool.
-- Verify the form data. Ask the patient to confirm the input if a value doesn't make sense realistically. Update the form data using your *saveForm* tool if any value changes.
+- Verify the form data. Ask the patient to confirm the input if a value doesn't make sense realistically.
+- Don't ask about drugs and aesthetic items.
+- Update the form data using your *saveForm* tool if any value changes.
 
 ## Medications to suspend
 
