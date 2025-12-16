@@ -227,6 +227,7 @@ export function Chat({
       unhaGel: 'Unha de Gel',
       ciliosPosticos: 'Cílios Postiços',
       piercings: 'Piercings',
+      lenteContato: 'Lente de contato',
     };
 
     const itensUsoTxt = itensUso
@@ -254,9 +255,9 @@ export function Chat({
 
     const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
 
-    // if (itensUsoTxt) {
-    //   sections.splice(3, 0, itensUsoTxt);
-    // }
+    if (itensUsoTxt) {
+      sections.splice(3, 0, itensUsoTxt);
+    }
 
     return sections.join(' | ');
   }

@@ -4,6 +4,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 interface PreChatFormData {
   idade: string;
@@ -328,36 +335,80 @@ export function PreChatForm({
           {/* Itens de Uso */}
           <div className="space-y-3">
             <Label>Itens estéticos</Label>
-            {[
-              { key: 'megaHair', label: 'Mega-Hair' },
-              { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
-              { key: 'unhaGel', label: 'Unha de gel' },
-              { key: 'ciliosPosticos', label: 'Cílios postiços' },
-              { key: 'piercings', label: 'Piercings' },
-            ].map(({ key, label }) => (
-              <div key={key} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`item-${key}`}
-                  checked={
-                    formData.itensUso[key as keyof typeof formData.itensUso]
-                  }
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      itensUso: {
-                        ...formData.itensUso,
-                        [key]: e.target.checked,
-                      },
-                    })
-                  }
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor={`item-${key}`} className="font-normal">
-                  {label}
-                </Label>
-              </div>
-            ))}
+            <p className="text-xs text-gray-600">
+              Selecione todos os itens abaixo que você utiliza no dia a dia.
+              Caso não utilize nenhum, deixe o campo em branco.
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between font-normal"
+                  type="button"
+                >
+                  <span
+                    className={`text-sm truncate ${
+                      Object.values(formData.itensUso).some((v) => v)
+                        ? ''
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {(() => {
+                      const selected = Object.entries(formData.itensUso)
+                        .filter(([, value]) => value)
+                        .map(([key]) => {
+                          const items = {
+                            megaHair: 'Mega-Hair',
+                            apliques: 'Apliques sintéticos no cabelo',
+                            unhaGel: 'Unha de gel',
+                            ciliosPosticos: 'Cílios postiços',
+                            piercings: 'Piercings',
+                            lenteContato: 'Lente de contato',
+                          };
+                          return items[key as keyof typeof items];
+                        });
+                      if (selected.length === 0) {
+                        return 'Selecione os itens aqui...';
+                      } else if (selected.length === 1) {
+                        return `${selected.length} item selecionado`;
+                      } else {
+                        return `${selected.length} itens selecionados`;
+                      }
+                    })()}
+                  </span>
+                  <ChevronDown className="size-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                {[
+                  { key: 'megaHair', label: 'Mega-Hair' },
+                  { key: 'apliques', label: 'Apliques sintéticos no cabelo' },
+                  { key: 'unhaGel', label: 'Unha de gel' },
+                  { key: 'ciliosPosticos', label: 'Cílios postiços' },
+                  { key: 'piercings', label: 'Piercings' },
+                  { key: 'lenteContato', label: 'Lente de contato' },
+                ].map(({ key, label }) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={
+                      formData.itensUso[key as keyof typeof formData.itensUso]
+                    }
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        itensUso: {
+                          ...formData.itensUso,
+                          [key]: checked,
+                        },
+                      })
+                    }
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Exames */}
