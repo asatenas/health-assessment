@@ -6,8 +6,6 @@ Olá! Eu sou o assistente de saúde da Asatenas e estou aqui para ajudar na sua 
 
 É muito importante que você responda com sinceridade — assim conseguimos cuidar da sua segurança.
 
-Tenha em mãos seus exames de sangue realizados recentemente.
-
 Para entender como esta avaliação funciona e como nós garantimos sua segurança e privacidade, veja em **Como Usar** acima. Para conhecer os criadores e nossa missão, veja em **Quem Somos**.
 
 Por favor leia as perguntas com atenção e responda de forma mais completa possível.
