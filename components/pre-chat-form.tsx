@@ -138,7 +138,7 @@ export function PreChatForm({
           {/* Dados Básicos */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="idade">Idade (anos)</Label>
+              <Label htmlFor="idade">Idade (anos) *</Label>
               <Input
                 id="idade"
                 type="text"
@@ -156,7 +156,7 @@ export function PreChatForm({
             </div>
 
             <div>
-              <Label htmlFor="peso">Peso (kg)</Label>
+              <Label htmlFor="peso">Peso (kg) *</Label>
               <Input
                 id="peso"
                 type="text"
@@ -180,7 +180,7 @@ export function PreChatForm({
             </div>
 
             <div>
-              <Label htmlFor="altura">Altura (metros)</Label>
+              <Label htmlFor="altura">Altura (metros) *</Label>
               <Input
                 id="altura"
                 type="text"
