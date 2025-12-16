@@ -341,7 +341,7 @@ function PureMultimodalInput({
         setIsTranscribing(false);
       },
     };
-  }, [voiceRecorder, setInput]);
+  }, [chatId, voiceRecorder, setInput]);
 
   // Cleanup voice recorder on unmount
   useEffect(() => {
