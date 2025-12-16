@@ -18,19 +18,50 @@ This tool should not be used to save the medications list to suspend.`,
     inputSchema: z.object({
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
-      height: z.number().describe('Patient height in cm'),
-      allergies: z
-        .array(z.string())
-        .optional()
-        .describe('List of patient allergies'),
+      height: z.number().describe('Patient height in meters'),
+      latexAllergy: z.boolean().describe('Whether patient has latex allergy'),
+      allergies: z.string().optional().describe('Other patient allergies'),
       medicalDevices: z
         .object({
-          paceMaker: z.boolean().optional(),
-          medicationPump: z.boolean().optional(),
-          others: z.string().optional(),
+          paceMaker: z.boolean().optional().describe('Has pacemaker'),
+          cdi: z
+            .boolean()
+            .optional()
+            .describe('Has CDI (implantable cardioverter defibrillator)'),
+          medicationPump: z
+            .boolean()
+            .optional()
+            .describe('Has medication pump'),
+          others: z.string().optional().describe('Other medical devices'),
         })
         .optional()
         .describe('Medical devices used by patient'),
+      aestheticItems: z
+        .object({
+          megaHair: z.boolean().optional(),
+          hairExtensions: z.boolean().optional(),
+          gelNails: z.boolean().optional(),
+          falseLashes: z.boolean().optional(),
+          piercings: z.boolean().optional(),
+          contactLenses: z.boolean().optional(),
+          others: z.string().optional().describe('Other aesthetic items'),
+        })
+        .optional()
+        .describe('Aesthetic items used by patient'),
+      recreationalDrugs: z
+        .object({
+          cocaine: z.boolean().optional(),
+          marijuana: z.boolean().optional(),
+          crack: z.boolean().optional(),
+          opioids: z.boolean().optional(),
+          methamphetamine: z.boolean().optional(),
+          others: z
+            .string()
+            .optional()
+            .describe('Other recreational drugs used'),
+        })
+        .optional()
+        .describe('Recreational drugs used by patient'),
       hemoglobin: z.number().optional().describe('Hemoglobin level in g/dL'),
       creatinine: z.number().optional().describe('Creatinine level in mg/dL'),
     }),
