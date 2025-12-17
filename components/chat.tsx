@@ -10,7 +10,6 @@ import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from './visibility-selector';
-import { useArtifactSelector } from '@/hooks/use-artifact';
 import { unstable_serialize } from 'swr/infinite';
 import { getChatHistoryPaginationKey } from './sidebar-history';
 import { toast } from './toast';
@@ -173,7 +172,6 @@ export function Chat({
   );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
   useAutoResume({
     autoResume,
@@ -234,20 +232,20 @@ export function Chat({
     };
 
     const itensUsoParts = itensUso
-      ? Object.entries(itensUso)
-          .map(
-            ([key, value]) =>
-              `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
-          )
+      ? Object.entries(itensUso).map(
+          ([key, value]) =>
+            `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
+        )
       : [];
 
     if (itensUsoOutros) {
       itensUsoParts.push(`• Outros: ${itensUsoOutros}`);
     }
 
-    const itensUsoTxt = itensUsoParts.length > 0
-      ? `Itens de uso: ${itensUsoParts.join(' | ')}`
-      : '';
+    const itensUsoTxt =
+      itensUsoParts.length > 0
+        ? `Itens de uso: ${itensUsoParts.join(' | ')}`
+        : '';
 
     const drogasLabels: any = {
       cocaina: 'Cocaína',
@@ -258,20 +256,20 @@ export function Chat({
     };
 
     const drogasRecreativasParts = drogasRecreativas
-      ? Object.entries(drogasRecreativas)
-          .map(
-            ([key, value]) =>
-              `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
-          )
+      ? Object.entries(drogasRecreativas).map(
+          ([key, value]) =>
+            `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
+        )
       : [];
 
     if (drogasRecreativasOutros) {
       drogasRecreativasParts.push(`• Outros: ${drogasRecreativasOutros}`);
     }
 
-    const drogasRecreativasTxt = drogasRecreativasParts.length > 0
-      ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
-      : '';
+    const drogasRecreativasTxt =
+      drogasRecreativasParts.length > 0
+        ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
+        : '';
 
     const unidades: Record<string, string> = {
       hemoglobina: 'g/dL',
@@ -314,7 +312,6 @@ export function Chat({
             setMessages={setMessages}
             regenerate={regenerate}
             isReadonly={currentIsReadonly}
-            isArtifactVisible={isArtifactVisible}
           />
         )}
 

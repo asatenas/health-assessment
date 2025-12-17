@@ -1,28 +1,17 @@
 'use client';
-import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState, useEffect } from 'react';
 import type { Vote } from '@/lib/db/schema';
-import { DocumentToolResult } from './document';
-import { PencilEditIcon, SparklesIcon, LoaderIcon } from './icons';
+import { PencilEditIcon } from './icons';
 import { Response } from './elements/response';
 import { MessageContent } from './elements/message';
-import {
-  Tool,
-  ToolHeader,
-  ToolContent,
-  ToolInput,
-  ToolOutput,
-} from './elements/tool';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
-import { Weather } from './weather';
 import equal from 'fast-deep-equal';
 import { cn, sanitizeText } from '@/lib/utils';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
-import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import type { ChatMessage } from '@/lib/types';
@@ -42,7 +31,6 @@ const PurePreviewMessage = ({
   regenerate,
   isReadonly,
   requiresScrollPadding,
-  isArtifactVisible,
 }: {
   chatId: string;
   message: ChatMessage;
@@ -53,7 +41,6 @@ const PurePreviewMessage = ({
   regenerate: UseChatHelpers<ChatMessage>['regenerate'];
   isReadonly: boolean;
   requiresScrollPadding: boolean;
-  isArtifactVisible: boolean;
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const { scrollToBottom } = useScrollToBottom();
@@ -204,111 +191,6 @@ const PurePreviewMessage = ({
                     </div>
                   );
                 }
-              }
-
-              if (type === 'tool-getWeather') {
-                const { toolCallId, state } = part;
-
-                return (
-                  <Tool key={toolCallId} defaultOpen={true}>
-                    <ToolHeader type="tool-getWeather" state={state} />
-                    <ToolContent>
-                      {state === 'input-available' && (
-                        <ToolInput input={part.input} />
-                      )}
-                      {state === 'output-available' && (
-                        <ToolOutput
-                          output={<Weather weatherAtLocation={part.output} />}
-                          errorText={undefined}
-                        />
-                      )}
-                    </ToolContent>
-                  </Tool>
-                );
-              }
-
-              if (type === 'tool-createDocument') {
-                const { toolCallId } = part;
-
-                if (part.output && 'error' in part.output) {
-                  return (
-                    <div
-                      key={toolCallId}
-                      className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/50"
-                    >
-                      {/* English: 'Error creating document:' */} Erro ao criar
-                      documento: {String(part.output.error)}
-                    </div>
-                  );
-                }
-
-                return (
-                  <DocumentPreview
-                    key={toolCallId}
-                    isReadonly={isReadonly}
-                    result={part.output}
-                  />
-                );
-              }
-
-              if (type === 'tool-updateDocument') {
-                const { toolCallId } = part;
-
-                if (part.output && 'error' in part.output) {
-                  return (
-                    <div
-                      key={toolCallId}
-                      className="p-4 text-red-500 bg-red-50 rounded-lg border border-red-200 dark:bg-red-950/50"
-                    >
-                      {/* English: 'Error updating document:' */} Erro ao
-                      atualizar documento: {String(part.output.error)}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div key={toolCallId} className="relative">
-                    <DocumentPreview
-                      isReadonly={isReadonly}
-                      result={part.output}
-                      args={{ ...part.output, isUpdate: true }}
-                    />
-                  </div>
-                );
-              }
-
-              if (type === 'tool-requestSuggestions') {
-                const { toolCallId, state } = part;
-
-                return (
-                  <Tool key={toolCallId} defaultOpen={true}>
-                    <ToolHeader type="tool-requestSuggestions" state={state} />
-                    <ToolContent>
-                      {state === 'input-available' && (
-                        <ToolInput input={part.input} />
-                      )}
-                      {state === 'output-available' && (
-                        <ToolOutput
-                          output={
-                            'error' in part.output ? (
-                              <div className="p-2 text-red-500 rounded border">
-                                {/* English: 'Error:' */} Erro:{' '}
-                                {String(part.output.error)}
-                              </div>
-                            ) : (
-                              <DocumentToolResult
-                                type="request-suggestions"
-                                result={part.output}
-                                isReadonly={isReadonly}
-                              />
-                            )
-                          }
-                          errorText={undefined}
-                        />
-                      )}
-                    </ToolContent>
-                  </Tool>
-                );
               }
             })}
 
