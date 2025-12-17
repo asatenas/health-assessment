@@ -1,4 +1,4 @@
-import { SpeakerIcon } from '../../shared/icons';
+import { SpeakerIcon } from '../../ui/icons';
 import { Actions, Action } from '../../elements/actions';
 import { memo, useEffect, useState } from 'react';
 import { toast } from 'sonner';

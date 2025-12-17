@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 
 import { AuthForm } from '@/components/modules/auth/auth-form';
-import { SubmitButton } from '@/components/shared/submit-button';
+import { SubmitButton } from '@/components/modules/auth/submit-button';
 
 import { register, type RegisterActionState } from '../actions';
-import { toast } from '@/components/shared/toast';
+import { toast } from '@/components/ui/toast';
 import { useSession } from 'next-auth/react';
 
 export default function Page() {

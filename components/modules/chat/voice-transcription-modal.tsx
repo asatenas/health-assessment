@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from '../../ui/alert-dialog';
 import { Textarea } from '../../ui/textarea';
-import { MicrophoneIcon } from '../../shared/icons';
+import { MicrophoneIcon } from '../../ui/icons';
 
 interface VoiceTranscriptionModalProps {
   isOpen: boolean;

@@ -20,8 +20,8 @@ import {
   StopIcon,
   MicrophoneIcon,
   LoaderIcon,
-} from '../../shared/icons';
-import { PreviewAttachment } from '../../shared/preview-attachment';
+} from '../../ui/icons';
+import { PreviewAttachment } from './preview-attachment';
 import { Button } from '../../ui/button';
 import { SuggestedActions } from './suggested-actions';
 import {

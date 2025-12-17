@@ -14,7 +14,7 @@ import {
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from '../../shared/visibility-selector';
-import { toast } from '../../shared/toast';
+import { toast } from '../../ui/toast';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { useAutoResume } from '@/hooks/use-auto-resume';
@@ -22,7 +22,7 @@ import { ChatSDKError } from '@/lib/shared/errors';
 import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../../providers/data-stream-provider';
 import { PreChatForm } from './pre-chat-form';
-import { NPSEvaluation } from '../../shared/nps-evaluation';
+import { NPSEvaluation } from './nps-evaluation';
 
 export function Chat({
   id,

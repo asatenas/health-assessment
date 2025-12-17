@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from '@/components/shared/toast';
+import { toast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
 import { BarChart3, List } from 'lucide-react';

@@ -2,11 +2,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState, useEffect } from 'react';
 import type { Vote } from '@/lib/db/schema';
-import { PencilEditIcon } from '../../shared/icons';
+import { PencilEditIcon } from '../../ui/icons';
 import { Response } from '../../elements/response';
 import { MessageContent } from '../../elements/message';
 import { MessageActions } from './message-actions';
-import { PreviewAttachment } from '../../shared/preview-attachment';
+import { PreviewAttachment } from './preview-attachment';
 import equal from 'fast-deep-equal';
 import { cn, sanitizeText } from '@/lib/shared/utils';
 import { Button } from '../../ui/button';

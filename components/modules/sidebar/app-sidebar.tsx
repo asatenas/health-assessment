@@ -3,7 +3,7 @@
 import type { User } from 'next-auth';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon } from '@/components/shared/icons';
+import { PlusIcon } from '@/components/ui/icons';
 import { SidebarUserNav } from '@/components/modules/sidebar/sidebar-user-nav';
 import { Button } from '@/components/ui/button';
 import {
