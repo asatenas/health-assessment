@@ -47,11 +47,30 @@ export type ChatForm = {
   age: number;
   weight: number;
   height: number;
+  latexAllergy?: boolean;
   allergies?: string[];
   medicalDevices?: {
     paceMaker?: boolean;
+    cdi?: boolean;
     medicationPump?: boolean;
-    others?: string;
+    others?: string[];
+  };
+  aestheticItems?: {
+    megaHair?: boolean;
+    hairExtensions?: boolean;
+    gelNails?: boolean;
+    falseLashes?: boolean;
+    piercings?: boolean;
+    contactLenses?: boolean;
+    others?: string[];
+  };
+  recreationalDrugs?: {
+    cocaine?: boolean;
+    marijuana?: boolean;
+    crack?: boolean;
+    opioids?: boolean;
+    methamphetamine?: boolean;
+    others?: string[];
   };
   hemoglobin?: number;
   creatinine?: number;

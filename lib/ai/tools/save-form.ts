@@ -19,8 +19,14 @@ This tool should not be used to save the medications list to suspend.`,
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
       height: z.number().describe('Patient height in meters'),
-      latexAllergy: z.boolean().describe('Whether patient has latex allergy'),
-      allergies: z.string().optional().describe('Other patient allergies'),
+      latexAllergy: z
+        .boolean()
+        .optional()
+        .describe('Whether patient has latex allergy'),
+      allergies: z
+        .array(z.string())
+        .optional()
+        .describe('Other patient allergies'),
       medicalDevices: z
         .object({
           paceMaker: z.boolean().optional().describe('Has pacemaker'),
@@ -32,7 +38,10 @@ This tool should not be used to save the medications list to suspend.`,
             .boolean()
             .optional()
             .describe('Has medication pump'),
-          others: z.string().optional().describe('Other medical devices'),
+          others: z
+            .array(z.string())
+            .optional()
+            .describe('Other medical devices'),
         })
         .optional()
         .describe('Medical devices used by patient'),
@@ -44,7 +53,10 @@ This tool should not be used to save the medications list to suspend.`,
           falseLashes: z.boolean().optional(),
           piercings: z.boolean().optional(),
           contactLenses: z.boolean().optional(),
-          others: z.string().optional().describe('Other aesthetic items'),
+          others: z
+            .array(z.string())
+            .optional()
+            .describe('Other aesthetic items'),
         })
         .optional()
         .describe('Aesthetic items used by patient'),
@@ -56,7 +68,7 @@ This tool should not be used to save the medications list to suspend.`,
           opioids: z.boolean().optional(),
           methamphetamine: z.boolean().optional(),
           others: z
-            .string()
+            .array(z.string())
             .optional()
             .describe('Other recreational drugs used'),
         })
