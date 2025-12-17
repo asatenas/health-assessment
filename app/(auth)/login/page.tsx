@@ -47,7 +47,7 @@ export default function Page() {
         router.push('/dashboard');
       })();
     }
-  }, [state.status]);
+  }, [router, state.status, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get('email') as string);
