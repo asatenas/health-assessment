@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
-import { postgres_url } from '@/lib/constants';
+import { postgres_url } from '@/lib/shared/constants';
 
 config({
   path: '.env.local',

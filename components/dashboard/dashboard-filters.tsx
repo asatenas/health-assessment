@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 
 interface DashboardFiltersProps {
   onFilterChange: (period: string, dateFrom?: Date, dateTo?: Date) => void;

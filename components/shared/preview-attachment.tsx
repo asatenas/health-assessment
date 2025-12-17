@@ -1,4 +1,4 @@
-import type { Attachment } from '@/lib/types';
+import type { Attachment } from '@/lib/shared/types';
 import { Loader } from '../elements/loader';
 import { CrossSmallIcon } from '../shared/icons';
 import { Button } from '../ui/button';

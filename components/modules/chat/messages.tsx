@@ -5,7 +5,7 @@ import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { motion } from 'framer-motion';
 import { useMessages } from '@/hooks/use-messages';
-import type { ChatMessage } from '@/lib/types';
+import type { ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../../providers/data-stream-provider';
 import {
   Conversation,

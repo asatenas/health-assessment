@@ -1,7 +1,7 @@
 import { auth } from '@/app/(auth)/auth';
-import { isDevelopmentEnvironment } from '@/lib/constants';
+import { isDevelopmentEnvironment } from '@/lib/shared/constants';
 import { createChatWithToken, getUserById } from '@/lib/db/queries';
-import { generateUUID } from '@/lib/utils';
+import { generateUUID } from '@/lib/shared/utils';
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
 

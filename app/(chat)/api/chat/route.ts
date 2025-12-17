@@ -20,11 +20,11 @@ import {
   getMessagesByChatId,
   saveMessages,
 } from '@/lib/db/queries';
-import { convertToUIMessages, generateUUID } from '@/lib/utils';
+import { convertToUIMessages, generateUUID } from '@/lib/shared/utils';
 import { saveForm } from '@/lib/ai/tools/save-form';
 import { saveMedications } from '@/lib/ai/tools/save-medications';
 import { finalizeInterview } from '@/lib/ai/tools/finalize-interview';
-import { isProductionEnvironment } from '@/lib/constants';
+import { isProductionEnvironment } from '@/lib/shared/constants';
 import { myProvider } from '@/lib/ai/providers';
 // import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
@@ -34,8 +34,8 @@ import {
   type ResumableStreamContext,
 } from 'resumable-stream';
 import { after } from 'next/server';
-import { ChatSDKError } from '@/lib/errors';
-import type { ChatMessage } from '@/lib/types';
+import { ChatSDKError } from '@/lib/shared/errors';
+import type { ChatMessage } from '@/lib/shared/types';
 import type { ChatModel } from '@/lib/ai/models';
 import type { VisibilityType } from '@/components/shared/visibility-selector';
 import { surgeryType } from '@/lib/ai/tools/surgery-type';

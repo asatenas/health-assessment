@@ -5,8 +5,8 @@ import {
   getStreamIdsByChatId,
 } from '@/lib/db/queries';
 import type { Chat } from '@/lib/db/schema';
-import { ChatSDKError } from '@/lib/errors';
-import type { ChatMessage } from '@/lib/types';
+import { ChatSDKError } from '@/lib/shared/errors';
+import type { ChatMessage } from '@/lib/shared/types';
 import { createUIMessageStream, JsonToSseTransformStream } from 'ai';
 import { getStreamContext } from '../../route';
 import { differenceInSeconds } from 'date-fns';

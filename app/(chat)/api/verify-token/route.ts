@@ -1,4 +1,4 @@
-import { isProductionEnvironment } from '@/lib/constants';
+import { isProductionEnvironment } from '@/lib/shared/constants';
 import {
   getChatByIdAndToken,
   updateChatStatusById,
@@ -6,7 +6,7 @@ import {
 } from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { UUID_REGEX, TOKEN_REGEX } from '@/lib/validation';
+import { UUID_REGEX, TOKEN_REGEX } from '@/lib/shared/validation';
 
 export async function POST(request: Request) {
   try {

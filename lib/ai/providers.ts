@@ -6,7 +6,7 @@ import {
 } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
 import { chatModel, reasoningModel } from './models.test';
-import { isTestEnvironment } from '../constants';
+import { isTestEnvironment } from '../shared/constants';
 
 export const myProvider = isTestEnvironment
   ? customProvider({

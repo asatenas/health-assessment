@@ -29,11 +29,11 @@ import {
   stream,
   checkpoint,
 } from './schema';
-import { generateUUID } from '../utils';
+import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
-import { ChatSDKError } from '../errors';
+import { ChatSDKError } from '../shared/errors';
 import type { ChatStatus, CheckpointNames } from './chat-status';
-import { postgres_url } from '@/lib/constants';
+import { postgres_url } from '@/lib/shared/constants';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth

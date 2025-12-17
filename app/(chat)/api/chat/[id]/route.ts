@@ -4,7 +4,7 @@ import {
   updateChatFormById,
   updateChatResultsById,
 } from '@/lib/db/queries';
-import { ChatSDKError } from '@/lib/errors';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function PATCH(
   request: Request,

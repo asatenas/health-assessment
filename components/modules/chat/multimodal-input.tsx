@@ -41,7 +41,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDown, X } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import type { VisibilityType } from '../../shared/visibility-selector';
-import type { Attachment, ChatMessage } from '@/lib/types';
+import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { chatModels } from '@/lib/ai/models';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
 import { startTransition } from 'react';

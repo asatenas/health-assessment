@@ -6,7 +6,11 @@ import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/modules/chat/chat-header';
 import type { Vote } from '@/lib/db/schema';
-import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
+import {
+  fetcher,
+  fetchWithErrorHandlers,
+  generateUUID,
+} from '@/lib/shared/utils';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from '../../shared/visibility-selector';
@@ -16,8 +20,8 @@ import { toast } from '../../shared/toast';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { useAutoResume } from '@/hooks/use-auto-resume';
-import { ChatSDKError } from '@/lib/errors';
-import type { Attachment, ChatMessage } from '@/lib/types';
+import { ChatSDKError } from '@/lib/shared/errors';
+import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../../providers/data-stream-provider';
 import { PreChatForm } from './pre-chat-form';
 import { NPSEvaluation } from '../../shared/nps-evaluation';

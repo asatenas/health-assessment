@@ -21,7 +21,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from '../../shared/toast';
 import { LoaderIcon } from '../../shared/icons';
-import { guestRegex } from '@/lib/constants';
+import { guestRegex } from '@/lib/shared/constants';
 
 export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { chatModels } from '@/lib/ai/models';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/shared/utils';
 
 import { CheckCircleFillIcon, ChevronDownIcon } from '../shared/icons';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
