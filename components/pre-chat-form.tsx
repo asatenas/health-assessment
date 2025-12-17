@@ -220,10 +220,16 @@ export function PreChatForm({
                   let value = e.target.value;
                   // Replace period with comma
                   value = value.replace('.', ',');
-                  // Allow max 1 digit before comma, then optional comma with max 2 decimal places
+
+                  // Auto-insert comma after first digit if typing 3+ digits without comma
+                  if (/^\d{3,}$/.test(value)) {
+                    value = `${value[0]},${value.slice(1)}`;
+                  }
+
+                  // Allow max 1-2 digits (intermediate) or 1 digit, comma, max 2 decimals
                   if (
                     value === '' ||
-                    /^\d{1}$/.test(value) ||
+                    /^\d{1,2}$/.test(value) ||
                     /^\d{1},\d{0,2}$/.test(value)
                   ) {
                     setFormData({ ...formData, altura: value });
