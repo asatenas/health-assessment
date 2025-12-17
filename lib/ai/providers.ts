@@ -1,16 +1,11 @@
 import {
   customProvider,
   defaultSettingsMiddleware,
-  extractReasoningMiddleware,
+  // extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
-import {
-  artifactModel,
-  chatModel,
-  reasoningModel,
-  titleModel,
-} from './models.test';
+import { chatModel, reasoningModel } from './models.test';
 import { isTestEnvironment } from '../constants';
 
 export const myProvider = isTestEnvironment
@@ -18,8 +13,6 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': chatModel,
         'chat-model-reasoning': reasoningModel,
-        'title-model': titleModel,
-        'artifact-model': artifactModel,
       },
     })
   : customProvider({
