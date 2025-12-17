@@ -810,7 +810,7 @@ export function ChatListView({
                             Altura
                           </div>
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                            {selectedChat.form.height} cm
+                            {selectedChat.form.height} m
                           </div>
                         </div>
                       </div>
