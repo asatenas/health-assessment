@@ -2,20 +2,20 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState, useEffect } from 'react';
 import type { Vote } from '@/lib/db/schema';
-import { PencilEditIcon } from '../../ui/icons';
-import { Response } from '../../elements/response';
-import { MessageContent } from '../../elements/message';
+import { PencilEditIcon } from '../ui/icons';
+import { Response } from '../elements/response';
+import { MessageContent } from '../elements/message';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import equal from 'fast-deep-equal';
 import { cn, sanitizeText } from '@/lib/shared/utils';
-import { Button } from '../../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import type { ChatMessage } from '@/lib/shared/types';
-import { useDataStream } from '../../providers/data-stream-provider';
+import { useDataStream } from '../providers/data-stream-provider';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 
 // Type narrowing is handled by TypeScript's control flow analysis

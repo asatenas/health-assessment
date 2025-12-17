@@ -1,5 +1,5 @@
-import { SpeakerIcon } from '../../ui/icons';
-import { Actions, Action } from '../../elements/actions';
+import { SpeakerIcon } from '../ui/icons';
+import { Actions, Action } from '../elements/actions';
 import { memo, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ChatMessage } from '@/lib/shared/types';

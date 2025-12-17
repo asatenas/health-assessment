@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 
-import { AuthForm } from '@/components/modules/auth/auth-form';
-import { SubmitButton } from '@/components/modules/auth/submit-button';
+import { AuthForm } from '@/components/auth/auth-form';
+import { SubmitButton } from '@/components/auth/submit-button';
 
 import { login, type LoginActionState } from '../actions';
 import { useSession } from 'next-auth/react';

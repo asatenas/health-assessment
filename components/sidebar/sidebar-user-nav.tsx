@@ -19,8 +19,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useRouter } from 'next/navigation';
-import { toast } from '../../ui/toast';
-import { LoaderIcon } from '../../ui/icons';
+import { toast } from '../ui/toast';
+import { LoaderIcon } from '../ui/icons';
 import { guestRegex } from '@/lib/shared/constants';
 
 export function SidebarUserNav({ user }: { user: User }) {

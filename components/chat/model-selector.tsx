@@ -13,7 +13,7 @@ import {
 import { chatModels } from '@/lib/ai/models';
 import { cn } from '@/lib/shared/utils';
 
-import { CheckCircleFillIcon, ChevronDownIcon } from '../../ui/icons';
+import { CheckCircleFillIcon, ChevronDownIcon } from '../ui/icons';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import type { Session } from 'next-auth';
 

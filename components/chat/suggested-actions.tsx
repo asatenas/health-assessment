@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { memo } from 'react';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import type { ChatMessage } from '@/lib/shared/types';
-import { Suggestion } from '../../elements/suggestion';
+import { Suggestion } from '../elements/suggestion';
 
 interface SuggestedActionsProps {
   chatId: string;

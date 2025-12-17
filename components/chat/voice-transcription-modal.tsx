@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '../../ui/button';
+import { Button } from '../ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -9,9 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../ui/alert-dialog';
-import { Textarea } from '../../ui/textarea';
-import { MicrophoneIcon } from '../../ui/icons';
+} from '../ui/alert-dialog';
+import { Textarea } from '../ui/textarea';
+import { MicrophoneIcon } from '../ui/icons';
 
 interface VoiceTranscriptionModalProps {
   isOpen: boolean;
