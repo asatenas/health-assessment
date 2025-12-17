@@ -2,7 +2,7 @@ import { expect, test } from '../fixtures';
 import { AuthPage } from '../pages/auth';
 import { generateRandomTestUser } from '../helpers';
 import { ChatPage } from '../pages/chat';
-import { getMessageByErrorCode } from '@/lib/errors';
+import { getMessageByErrorCode } from '@/lib/shared/errors';
 
 test.describe
   .serial('Guest Session', () => {
@@ -21,7 +21,8 @@ test.describe
 
       while (request) {
         chain.unshift(request.url());
-        request = request.redirectedFrom();
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        request = request.redirectedFrom()!;
       }
 
       expect(chain).toEqual([
@@ -63,7 +64,8 @@ test.describe
 
       while (request) {
         chain.unshift(request.url());
-        request = request.redirectedFrom();
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        request = request.redirectedFrom()!;
       }
 
       expect(chain).toEqual(['http://localhost:3000/']);

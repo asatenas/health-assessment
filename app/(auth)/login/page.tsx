@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
-import { toast } from '@/components/toast';
+import { toast } from '@/components/ui/toast';
 
-import { AuthForm } from '@/components/auth-form';
-import { SubmitButton } from '@/components/submit-button';
+import { AuthForm } from '@/components/auth/auth-form';
+import { SubmitButton } from '@/components/auth/submit-button';
 
 import { login, type LoginActionState } from '../actions';
 import { useSession } from 'next-auth/react';
@@ -47,7 +47,7 @@ export default function Page() {
         router.push('/dashboard');
       })();
     }
-  }, [state.status]);
+  }, [router, state.status, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get('email') as string);

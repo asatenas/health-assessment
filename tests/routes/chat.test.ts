@@ -1,7 +1,7 @@
-import { generateUUID } from '@/lib/utils';
+import { generateUUID } from '@/lib/shared/utils';
 import { expect, test } from '../fixtures';
 import { TEST_PROMPTS } from '../prompts/routes';
-import { getMessageByErrorCode } from '@/lib/errors';
+import { getMessageByErrorCode } from '@/lib/shared/errors';
 
 const chatIdsCreatedByAda: Array<string> = [];
 

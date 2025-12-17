@@ -4,11 +4,12 @@ import {
   deleteAssistantMessagesAfterLastUser,
   deleteSequentialAssistantMessages,
 } from '@/lib/db/queries';
-import { ChatSDKError } from '@/lib/errors';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function POST(request: Request) {
   try {
-    const { chatId, mode }: { chatId: string; mode?: 'all' | 'sequential' } = await request.json();
+    const { chatId, mode }: { chatId: string; mode?: 'all' | 'sequential' } =
+      await request.json();
 
     if (!chatId) {
       return new ChatSDKError(
