@@ -22,7 +22,6 @@ import {
   chat,
   type User,
   message,
-  vote,
   type DBMessage,
   type Chat,
   type ChatForm,
@@ -154,7 +153,6 @@ export async function getChatByIdAndToken({
 
 export async function deleteChatById({ id }: { id: string }) {
   try {
-    await db.delete(vote).where(eq(vote.chatId, id));
     await db.delete(message).where(eq(message.chatId, id));
     await db.delete(stream).where(eq(stream.chatId, id));
 
@@ -379,12 +377,6 @@ export async function deleteMessagesByChatIdAfterTimestamp({
     const messageIds = messagesToDelete.map((message) => message.id);
 
     if (messageIds.length > 0) {
-      await db
-        .delete(vote)
-        .where(
-          and(eq(vote.chatId, chatId), inArray(vote.messageId, messageIds)),
-        );
-
       return await db
         .delete(message)
         .where(
@@ -429,16 +421,6 @@ export async function deleteAssistantMessagesAfterLastUser({
       .map((msg) => msg.id);
 
     if (assistantMessageIds.length > 0) {
-      // Delete votes for these messages
-      await db
-        .delete(vote)
-        .where(
-          and(
-            eq(vote.chatId, chatId),
-            inArray(vote.messageId, assistantMessageIds),
-          ),
-        );
-
       // Delete the messages
       return await db
         .delete(message)
@@ -498,16 +480,6 @@ export async function deleteSequentialAssistantMessages({
       const assistantMessageIds = sequentialAssistantMessages.map(
         (msg) => msg.id,
       );
-
-      // Delete votes for these messages
-      await db
-        .delete(vote)
-        .where(
-          and(
-            eq(vote.chatId, chatId),
-            inArray(vote.messageId, assistantMessageIds),
-          ),
-        );
 
       // Delete the messages
       return await db
