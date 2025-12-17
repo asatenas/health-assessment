@@ -1,7 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
 import { memo, useState, useEffect } from 'react';
-import type { Vote } from '@/lib/db/schema';
 import { PencilEditIcon } from '../ui/icons';
 import { Response } from '../elements/response';
 import { MessageContent } from '../elements/message';
@@ -24,7 +23,6 @@ import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 const PurePreviewMessage = ({
   chatId,
   message,
-  vote,
   status,
   isLoading,
   setMessages,
@@ -34,7 +32,6 @@ const PurePreviewMessage = ({
 }: {
   chatId: string;
   message: ChatMessage;
-  vote: Vote | undefined;
   status: UseChatHelpers<ChatMessage>['status'];
   isLoading: boolean;
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
@@ -217,7 +214,6 @@ export const PreviewMessage = memo(
     if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding)
       return false;
     if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
-    if (!equal(prevProps.vote, nextProps.vote)) return false;
 
     return false;
   },

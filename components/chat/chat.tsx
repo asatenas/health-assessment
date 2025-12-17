@@ -3,7 +3,7 @@
 import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 import { ChatHeader } from '@/components/chat/chat-header';
 import type { Vote } from '@/lib/db/schema';
 import {
@@ -51,7 +51,6 @@ export function Chat({
     initialReadonly: isReadonly,
   });
 
-  const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
 
   const [input, setInput] = useState<string>('');
@@ -164,11 +163,7 @@ export function Chat({
     storedFormData,
   ]);
 
-  const { data: votes } = useSWR<Array<Vote>>(
-    // `/api/vote?chatId=${id}`,
-    null,
-    fetcher,
-  );
+  const { data: votes } = useSWR<Array<Vote>>(null, fetcher);
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
 
@@ -306,7 +301,6 @@ export function Chat({
           <Messages
             chatId={id}
             status={status}
-            votes={votes}
             messages={messages}
             setMessages={setMessages}
             regenerate={regenerate}
