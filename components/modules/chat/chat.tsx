@@ -14,8 +14,6 @@ import {
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from '../../shared/visibility-selector';
-import { unstable_serialize } from 'swr/infinite';
-import { getChatHistoryPaginationKey } from '../sidebar/sidebar-history';
 import { toast } from '../../shared/toast';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
@@ -92,9 +90,6 @@ export function Chat({
     }),
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
-    },
-    onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -357,7 +352,6 @@ export function Chat({
                 messages={messages}
                 setMessages={setMessages}
                 sendMessage={sendMessage}
-                selectedVisibilityType={visibilityType}
                 selectedModelId={initialChatModel}
               />
             )}

@@ -64,7 +64,6 @@ function PureMultimodalInput({
   setMessages,
   sendMessage,
   className,
-  selectedVisibilityType,
   selectedModelId,
 }: {
   chatId: string;
@@ -78,7 +77,6 @@ function PureMultimodalInput({
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
   className?: string;
-  selectedVisibilityType: VisibilityType;
   selectedModelId: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -498,7 +496,6 @@ function PureMultimodalInput({
       <SuggestedActions
         sendMessage={sendMessage}
         chatId={chatId}
-        selectedVisibilityType={selectedVisibilityType}
         disabled={status !== 'ready'}
       />
 
@@ -614,8 +611,6 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
-    if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
-      return false;
     if (prevProps.selectedModelId !== nextProps.selectedModelId) return false;
 
     return true;
