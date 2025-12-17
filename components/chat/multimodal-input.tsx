@@ -40,7 +40,6 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDown, X } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
-import type { VisibilityType } from '../shared/visibility-selector';
 import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { chatModels } from '@/lib/ai/models';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';
@@ -63,7 +62,6 @@ function PureMultimodalInput({
   messages,
   setMessages,
   sendMessage,
-  className,
   selectedModelId,
 }: {
   chatId: string;
@@ -76,7 +74,6 @@ function PureMultimodalInput({
   messages: Array<UIMessage>;
   setMessages: UseChatHelpers<ChatMessage>['setMessages'];
   sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
-  className?: string;
   selectedModelId: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
