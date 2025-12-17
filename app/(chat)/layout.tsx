@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
 
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from '@/components/modules/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { auth } from '../(auth)/auth';
 import Script from 'next/script';
-import { DataStreamProvider } from '@/components/data-stream-provider';
+import { DataStreamProvider } from '@/components/providers/data-stream-provider';
 
 export const experimental_ppr = false;
 

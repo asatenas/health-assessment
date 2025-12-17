@@ -37,7 +37,7 @@ import { after } from 'next/server';
 import { ChatSDKError } from '@/lib/errors';
 import type { ChatMessage } from '@/lib/types';
 import type { ChatModel } from '@/lib/ai/models';
-import type { VisibilityType } from '@/components/visibility-selector';
+import type { VisibilityType } from '@/components/shared/visibility-selector';
 import { surgeryType } from '@/lib/ai/tools/surgery-type';
 import { insulin } from '@/lib/ai/tools/insulin';
 import { creatinine } from '@/lib/ai/tools/creatinine';

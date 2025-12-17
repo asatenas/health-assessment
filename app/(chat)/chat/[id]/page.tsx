@@ -1,16 +1,16 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { Chat } from '@/components/chat';
+import { Chat } from '@/components/modules/chat/chat';
 import {
   getChatById,
   getChatFormById,
   getMessagesByChatId,
 } from '@/lib/db/queries';
-import { DataStreamHandler } from '@/components/data-stream-handler';
+import { DataStreamHandler } from '@/components/providers/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { initialMessage } from '@/lib/ai/prompts';
 import { convertToUIMessages, generateUUID } from '@/lib/utils';
-import { TokenGate } from '@/components/token-gate';
+import { TokenGate } from '@/components/modules/auth/token-gate';
 import { UUID_REGEX } from '@/lib/validation';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {

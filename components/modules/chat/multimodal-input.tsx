@@ -20,9 +20,9 @@ import {
   StopIcon,
   MicrophoneIcon,
   LoaderIcon,
-} from './icons';
-import { PreviewAttachment } from './preview-attachment';
-import { Button } from './ui/button';
+} from '../../shared/icons';
+import { PreviewAttachment } from '../../shared/preview-attachment';
+import { Button } from '../../ui/button';
 import { SuggestedActions } from './suggested-actions';
 import {
   PromptInput,
@@ -33,14 +33,14 @@ import {
   PromptInputModelSelect,
   PromptInputModelSelectTrigger,
   PromptInputModelSelectContent,
-} from './elements/prompt-input';
+} from '../../elements/prompt-input';
 import { SelectItem } from '@/components/ui/select';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDown, X } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
-import type { VisibilityType } from './visibility-selector';
+import type { VisibilityType } from '../../shared/visibility-selector';
 import type { Attachment, ChatMessage } from '@/lib/types';
 import { chatModels } from '@/lib/ai/models';
 import { saveChatModelAsCookie } from '@/app/(chat)/actions';

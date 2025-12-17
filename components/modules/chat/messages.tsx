@@ -6,12 +6,12 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import { motion } from 'framer-motion';
 import { useMessages } from '@/hooks/use-messages';
 import type { ChatMessage } from '@/lib/types';
-import { useDataStream } from './data-stream-provider';
+import { useDataStream } from '../../providers/data-stream-provider';
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from './elements/conversation';
+} from '../../elements/conversation';
 
 interface MessagesProps {
   chatId: string;

@@ -4,23 +4,23 @@ import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
-import { ChatHeader } from '@/components/chat-header';
+import { ChatHeader } from '@/components/modules/chat/chat-header';
 import type { Vote } from '@/lib/db/schema';
 import { fetcher, fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
-import type { VisibilityType } from './visibility-selector';
+import type { VisibilityType } from '../../shared/visibility-selector';
 import { unstable_serialize } from 'swr/infinite';
-import { getChatHistoryPaginationKey } from './sidebar-history';
-import { toast } from './toast';
+import { getChatHistoryPaginationKey } from '../sidebar/sidebar-history';
+import { toast } from '../../shared/toast';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useChatReadonly } from '@/hooks/use-chat-readonly';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import type { Attachment, ChatMessage } from '@/lib/types';
-import { useDataStream } from './data-stream-provider';
+import { useDataStream } from '../../providers/data-stream-provider';
 import { PreChatForm } from './pre-chat-form';
-import { NPSEvaluation } from './nps-evaluation';
+import { NPSEvaluation } from '../../shared/nps-evaluation';
 
 export function Chat({
   id,

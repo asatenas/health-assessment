@@ -4,8 +4,8 @@
 // import type { Vote } from '@/lib/db/schema';
 
 // import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
-import { SpeakerIcon } from './icons';
-import { Actions, Action } from './elements/actions';
+import { SpeakerIcon } from '../../shared/icons';
+import { Actions, Action } from '../../elements/actions';
 import { memo, useEffect, useState } from 'react';
 // import equal from 'fast-deep-equal';
 import { toast } from 'sonner';

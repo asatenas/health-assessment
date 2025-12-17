@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from './toast';
+import { toast } from '../shared/toast';
 
 interface NPSEvaluationProps {
   chatId: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../../ui/button';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -9,9 +9,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from './ui/alert-dialog';
-import { Textarea } from './ui/textarea';
-import { MicrophoneIcon } from './icons';
+} from '../../ui/alert-dialog';
+import { Textarea } from '../../ui/textarea';
+import { MicrophoneIcon } from '../../shared/icons';
 
 interface VoiceTranscriptionModalProps {
   isOpen: boolean;
@@ -108,7 +108,8 @@ export function VoiceTranscriptionModal({
             Transcrição de Voz
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Revise o texto transcrito abaixo. Você pode editá-lo antes de enviar ou descartar a gravação.
+            Revise o texto transcrito abaixo. Você pode editá-lo antes de enviar
+            ou descartar a gravação.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
