@@ -204,6 +204,13 @@
       "when": 1765570911588,
       "tag": "0028_add_checkpoint_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1766009604974,
+      "tag": "0029_late_enchantress",
+      "breakpoints": true
     }
   ]
 }

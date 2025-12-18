@@ -3,14 +3,8 @@
 import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import useSWR from 'swr';
 import { ChatHeader } from '@/components/chat/chat-header';
-import type { Vote } from '@/lib/db/schema';
-import {
-  fetcher,
-  fetchWithErrorHandlers,
-  generateUUID,
-} from '@/lib/shared/utils';
+import { fetchWithErrorHandlers, generateUUID } from '@/lib/shared/utils';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
 import type { VisibilityType } from '../shared/visibility-selector';
@@ -162,8 +156,6 @@ export function Chat({
     setReadonly,
     storedFormData,
   ]);
-
-  const { data: votes } = useSWR<Array<Vote>>(null, fetcher);
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
 
