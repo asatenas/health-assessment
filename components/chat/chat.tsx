@@ -15,7 +15,7 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/shared/errors';
 import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../providers/data-stream-provider';
-import { PreChatForm } from './pre-chat-form';
+import { PreChatForm, formatPacienteInfo } from './pre-chat-form';
 import { NPSEvaluation } from './nps-evaluation';
 
 export function Chat({
@@ -165,124 +165,6 @@ export function Chat({
     resumeStream,
     setMessages,
   });
-
-  function formatPacienteInfo(paciente: any) {
-    const {
-      idade,
-      peso,
-      altura,
-      alergiaLatex,
-      alergias,
-      marcaPasso,
-      cdi,
-      bombaMedicamentos,
-      dispositivosOutros,
-      itensUso,
-      itensUsoOutros,
-      drogasRecreativas,
-      drogasRecreativasOutros,
-      exames,
-    } = paciente;
-
-    const formatBool = (value: boolean) => (value ? 'Sim' : 'Não');
-
-    const infoBasica = [
-      `Idade: ${idade || '—'} anos`,
-      `Peso: ${peso || '—'} kg`,
-      `Altura: ${altura || '—'} m`,
-    ].join(' | ');
-
-    const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
-    if (alergias) {
-      alergiasTexts.push(`Outras: ${alergias}`);
-    }
-    const alergiasTxt = `Alergias: ${alergiasTexts.join(' | ')}`;
-
-    const dispositivos = [
-      `Dispositivos: Marca-passo: ${formatBool(marcaPasso)}`,
-      `CDI: ${formatBool(cdi)}`,
-      `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
-    ];
-    if (dispositivosOutros) {
-      dispositivos.push(`Outros: ${dispositivosOutros}`);
-    }
-    const dispositivosTxt = dispositivos.join(' | ');
-
-    const itensLabels: any = {
-      megaHair: 'Mega Hair',
-      apliques: 'Apliques',
-      unhaGel: 'Unha de Gel',
-      ciliosPosticos: 'Cílios Postiços',
-      piercings: 'Piercings',
-      lenteContato: 'Lente de contato',
-    };
-
-    const itensUsoParts = itensUso
-      ? Object.entries(itensUso).map(
-          ([key, value]) =>
-            `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
-        )
-      : [];
-
-    if (itensUsoOutros) {
-      itensUsoParts.push(`• Outros: ${itensUsoOutros}`);
-    }
-
-    const itensUsoTxt =
-      itensUsoParts.length > 0
-        ? `Itens de uso: ${itensUsoParts.join(' | ')}`
-        : '';
-
-    const drogasLabels: any = {
-      cocaina: 'Cocaína',
-      maconha: 'Maconha',
-      crack: 'Crack',
-      opiaceos: 'Opiáceos',
-      metanfetamina: 'Metanfetamina',
-    };
-
-    const drogasRecreativasParts = drogasRecreativas
-      ? Object.entries(drogasRecreativas).map(
-          ([key, value]) =>
-            `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
-        )
-      : [];
-
-    if (drogasRecreativasOutros) {
-      drogasRecreativasParts.push(`• Outros: ${drogasRecreativasOutros}`);
-    }
-
-    const drogasRecreativasTxt =
-      drogasRecreativasParts.length > 0
-        ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
-        : '';
-
-    const unidades: Record<string, string> = {
-      hemoglobina: 'g/dL',
-      creatinina: 'mg/dL',
-      ecocardiograma: '',
-    };
-
-    const examesTxt = `Exames: ${Object.entries(exames)
-      .map(([key, dados]) => {
-        const nome = key.charAt(0).toUpperCase() + key.slice(1);
-        const dadosTyped = dados as { valor?: string; tipo: string };
-        return `${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
-      })
-      .join(' | ')}`;
-
-    const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
-
-    if (itensUsoTxt) {
-      sections.splice(3, 0, itensUsoTxt);
-    }
-
-    if (drogasRecreativasTxt) {
-      sections.splice(itensUsoTxt ? 4 : 3, 0, drogasRecreativasTxt);
-    }
-
-    return sections.join(' | ');
-  }
 
   return (
     <>
