@@ -14,7 +14,7 @@ Para iniciar, pressione o botão abaixo e preencha o formulário. Depois, vou fa
 
 export const postFormMessage = `Obrigado por preencher o formulário. Vamos continuar com a avaliação.
 
-Você poderia me listar todos os medicamentos que está usando atualmente? Por favor inclua todos, includindo as que são ingeridas, injetadas, inaladas, aplicadas na pele, etc.
+Você poderia me listar todos os remédios que está usando atualmente? Por favor me diga todos, includindo as que são ingeridas, injetadas, inaladas, aplicadas na pele, etc.
 `;
 
 export const regularPrompt = `
