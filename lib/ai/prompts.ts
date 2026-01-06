@@ -12,9 +12,9 @@ Por favor leia as perguntas com atenção e responda de forma mais completa poss
 Para iniciar, pressione o botão abaixo e preencha o formulário. Depois, vou fazer algumas perguntas rápidas, mantendo uma conversa tranquila.
 `;
 
-export const postFormMessage = `Obrigado por preencher o formulário. Vamos continuar com a entrevista.
+export const postFormMessage = `Obrigado por preencher o formulário. Vamos continuar com a avaliação.
 
-Qual é a cirurgia que você vai fazer e em qual parte do corpo? Se souber, diga também o nome do procedimento.
+Você poderia me listar todos os medicamentos que está usando atualmente? Por favor inclua todos, includindo as que são ingeridas, injetadas, inaladas, aplicadas na pele, etc.
 `;
 
 export const regularPrompt = `
@@ -115,7 +115,7 @@ Here's the flow you need to strictly follow.
 
 ## Medications to suspend
 
-- Then ask the patient which medications are they using to analyze which ones should be suspended before the surgery. Do not mention doses, it is not required.
+- Then ask the patient which medications are they using to analyze which ones should be suspended before the surgery. Send this message: ${postFormMessage}.
 - With the patient's medications list, call the *saveMedications* tool to save the list of medications to suspend into the database.
 - DO NOT inform the patient which medications to suspend, only save it to the database.
 - Use this tool even if there are no medications to suspend.
