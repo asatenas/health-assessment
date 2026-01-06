@@ -16,6 +16,13 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
+  problemasSaude: {
+    cardiologicos: boolean;
+    respiratorios: boolean;
+    renais: boolean;
+    figado: boolean;
+    vasculares: boolean;
+  };
   alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
@@ -55,6 +62,7 @@ export function formatPacienteInfo(paciente: any) {
     idade,
     peso,
     altura,
+    problemasSaude,
     alergiaLatex,
     alergias,
     marcaPasso,
@@ -75,6 +83,26 @@ export function formatPacienteInfo(paciente: any) {
     `Peso: ${peso || '—'} kg`,
     `Altura: ${altura || '—'} m`,
   ].join(' | ');
+
+  const problemasSaudeLabels: any = {
+    cardiologicos: 'Problemas no coração',
+    respiratorios: 'Problemas respiratórios',
+    renais: 'Problemas renais',
+    figado: 'Problemas no fígado',
+    vasculares: 'Problemas vasculares',
+  };
+
+  const problemasSaudeParts = problemasSaude
+    ? Object.entries(problemasSaude).map(
+        ([key, value]) =>
+          `• ${problemasSaudeLabels[key]}: ${formatBool(value as boolean)}`,
+      )
+    : [];
+
+  const problemasSaudeTxt =
+    problemasSaudeParts.length > 0
+      ? `Problemas de saúde: ${problemasSaudeParts.join(' | ')}`
+      : '';
 
   const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
   if (alergias) {
@@ -158,12 +186,24 @@ export function formatPacienteInfo(paciente: any) {
 
   const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
 
+  if (problemasSaudeTxt) {
+    sections.splice(1, 0, problemasSaudeTxt);
+  }
+
   if (itensUsoTxt) {
-    sections.splice(3, 0, itensUsoTxt);
+    sections.splice(problemasSaudeTxt ? 4 : 3, 0, itensUsoTxt);
   }
 
   if (drogasRecreativasTxt) {
-    sections.splice(itensUsoTxt ? 4 : 3, 0, drogasRecreativasTxt);
+    sections.splice(
+      itensUsoTxt && problemasSaudeTxt
+        ? 5
+        : itensUsoTxt || problemasSaudeTxt
+          ? 4
+          : 3,
+      0,
+      drogasRecreativasTxt,
+    );
   }
 
   return sections.join(' | ');
@@ -186,6 +226,13 @@ export function PreChatForm({
     idade: '',
     peso: '',
     altura: '',
+    problemasSaude: {
+      cardiologicos: false,
+      respiratorios: false,
+      renais: false,
+      figado: false,
+      vasculares: false,
+    },
     alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
@@ -216,10 +263,11 @@ export function PreChatForm({
     },
   });
 
-  const totalSteps = 6;
+  const totalSteps = 7;
 
   const stepTitles = [
     'Informações Básicas',
+    'Problemas de Saúde',
     'Alergias',
     'Dispositivos Médicos',
     'Itens Estéticos',
@@ -371,6 +419,135 @@ export function PreChatForm({
       case 2:
         return (
           <div className="space-y-3">
+            <p className="text-xs text-gray-600">
+              Selecione todas as opções que se aplicam a você
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="problemas-cardiologicos"
+                checked={formData.problemasSaude.cardiologicos}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    problemasSaude: {
+                      ...formData.problemasSaude,
+                      cardiologicos: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="problemas-cardiologicos" className="font-normal">
+                Problemas no coração
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Doenças relacionadas ao coração e circulação sanguínea. Ex:
+              insuficiência cardíaca, arritmia, infarto prévio
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="problemas-respiratorios"
+                checked={formData.problemasSaude.respiratorios}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    problemasSaude: {
+                      ...formData.problemasSaude,
+                      respiratorios: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="problemas-respiratorios" className="font-normal">
+                Problemas respiratórios
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Dificuldades para respirar ou doenças nos pulmões. Ex: asma,
+              bronquite, enfisema
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="problemas-renais"
+                checked={formData.problemasSaude.renais}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    problemasSaude: {
+                      ...formData.problemasSaude,
+                      renais: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="problemas-renais" className="font-normal">
+                Problemas renais
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Doenças nos rins que afetam a filtragem do sangue. Ex:
+              insuficiência renal, pedras nos rins, diálise
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="problemas-figado"
+                checked={formData.problemasSaude.figado}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    problemasSaude: {
+                      ...formData.problemasSaude,
+                      figado: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="problemas-figado" className="font-normal">
+                Problemas no fígado
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Doenças que afetam o funcionamento do fígado. Ex: hepatite,
+              cirrose, esteatose hepática (gordura no fígado)
+            </p>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="problemas-vasculares"
+                checked={formData.problemasSaude.vasculares}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    problemasSaude: {
+                      ...formData.problemasSaude,
+                      vasculares: e.target.checked,
+                    },
+                  })
+                }
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="problemas-vasculares" className="font-normal">
+                Problemas vasculares
+              </Label>
+            </div>
+            <p className="text-xs text-gray-600 ml-6">
+              Problemas nas veias e artérias que transportam o sangue. Ex:
+              varizes, trombose, pressão alta
+            </p>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-3">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
                 <input
@@ -411,7 +588,7 @@ export function PreChatForm({
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
@@ -491,7 +668,7 @@ export function PreChatForm({
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
@@ -589,7 +766,7 @@ export function PreChatForm({
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
@@ -696,7 +873,7 @@ export function PreChatForm({
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-4">
             <div>
