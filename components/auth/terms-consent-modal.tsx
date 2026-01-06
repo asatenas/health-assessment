@@ -73,8 +73,8 @@ export function TermsConsentModal({
               Inteligência Artificial para Triagem Pré-Anestésica.
             </p>
             <p>
-              <strong>Responsável Técnico:</strong> PEDRO HENRIQUE HITOSHI UEDA,
-              inscrito no CREMESP sob nº 208246.
+              <strong>Responsável Técnico:</strong> Dr. Pedro Henrique Hitoshi
+              Ueda, inscrito no CREMESP sob nº 208246.
             </p>
             <p>
               <strong>Desenvolvedor da Tecnologia:</strong> ASATENAS SOLUÇÕES EM
