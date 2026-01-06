@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2 } from 'lucide-react';
 
 interface TermsConsentModalProps {
   open: boolean;
@@ -23,6 +24,7 @@ export function TermsConsentModal({
   onReject,
 }: TermsConsentModalProps) {
   const [accepted, setAccepted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getFormattedDate = () => {
     const date = new Date();
@@ -37,9 +39,21 @@ export function TermsConsentModal({
     return `São Paulo, ${formattedDate}.`;
   };
 
+  const handleAccept = () => {
+    setIsLoading(true);
+    onAccept();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onReject()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && !isLoading && onReject()}
+    >
+      <DialogContent
+        className="max-w-3xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => isLoading && e.preventDefault()}
+        onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl text-center font-bold">
             Termo de Consentimento Livre e Esclarecido
@@ -174,6 +188,7 @@ export function TermsConsentModal({
               id="terms-consent"
               checked={accepted}
               onCheckedChange={(checked) => setAccepted(checked === true)}
+              disabled={isLoading}
             />
             <label
               htmlFor="terms-consent"
@@ -189,17 +204,22 @@ export function TermsConsentModal({
             type="button"
             variant="outline"
             onClick={onReject}
+            disabled={isLoading}
             className="w-full sm:w-auto"
           >
             Rejeitar
           </Button>
           <Button
             type="button"
-            onClick={onAccept}
-            disabled={!accepted}
+            onClick={handleAccept}
+            disabled={!accepted || isLoading}
             className="w-full sm:w-auto"
           >
-            Aceitar
+            {isLoading ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              'Aceitar'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

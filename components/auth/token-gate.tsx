@@ -48,7 +48,6 @@ export function TokenGate({ chatId }: { chatId: string }) {
   };
 
   const handleAcceptTerms = () => {
-    setShowTermsModal(false);
     router.refresh();
   };
 
@@ -71,8 +70,8 @@ export function TokenGate({ chatId }: { chatId: string }) {
               </h3>
               <p className="text-sm text-gray-500 dark:text-zinc-400">
                 {/* English: 'Please enter the token provided by your clinic to access this chat' */}
-                Insira o token fornecido pela sua clínica para acessar a avaliação
-                pré-operatória
+                Insira o token fornecido pela sua clínica para acessar a
+                avaliação pré-operatória
               </p>
             </div>
             <form
