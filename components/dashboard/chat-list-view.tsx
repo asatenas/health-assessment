@@ -99,6 +99,12 @@ type MedicationDetail = {
   suspensionDays: string;
 };
 
+type ConversationMessage = {
+  role: string;
+  text: string;
+  createdAt?: string;
+};
+
 export function ChatListView({
   chats,
   isLoading,
@@ -119,6 +125,11 @@ export function ChatListView({
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<
+    ConversationMessage[]
+  >([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [hasLoadedMessages, setHasLoadedMessages] = useState(false);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -126,11 +137,38 @@ export function ChatListView({
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      // Reset conversation state when modal closes
+      setConversationMessages([]);
+      setHasLoadedMessages(false);
     }
     return () => {
       document.body.style.overflow = '';
     };
   }, [chatDetailsModalOpen]);
+
+  const loadConversation = async () => {
+    if (!selectedChat) return;
+
+    setIsLoadingMessages(true);
+    try {
+      const response = await fetch(
+        `/api/clinic/chats/${selectedChat.id}/messages`,
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+
+      const data = await response.json();
+      setConversationMessages(data.messages || []);
+      setHasLoadedMessages(true);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setConversationMessages([]);
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
 
   const hasActiveFilters = useMemo(() => {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
@@ -930,6 +968,68 @@ export function ChatListView({
                     </div>
                   </div>
                 )}
+
+                {/* Conversation Messages */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      Conversa
+                    </h3>
+                    {!hasLoadedMessages && !isLoadingMessages && (
+                      <Button
+                        onClick={loadConversation}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Carregar Conversa
+                      </Button>
+                    )}
+                  </div>
+                  {!hasLoadedMessages && !isLoadingMessages ? (
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-400 text-center">
+                      Clique em Carregar Conversa para ver as mensagens
+                    </div>
+                  ) : isLoadingMessages ? (
+                    <div className="space-y-3">
+                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                  ) : conversationMessages.length > 0 ? (
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {conversationMessages.map((msg, index) => (
+                        <div
+                          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                          key={index}
+                          className={`p-3 rounded-lg ${
+                            msg.role === 'user'
+                              ? 'bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900'
+                              : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span
+                              className={`text-xs font-semibold ${
+                                msg.role === 'user'
+                                  ? 'text-blue-700 dark:text-blue-300'
+                                  : 'text-gray-700 dark:text-gray-300'
+                              }`}
+                            >
+                              {msg.role === 'user' ? 'Paciente' : 'Assistente'}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-400 text-center">
+                      Nenhuma mensagem disponível
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
