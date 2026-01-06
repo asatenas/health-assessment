@@ -36,6 +36,7 @@ interface PreChatFormData {
     crack: boolean;
     opiaceos: boolean;
     metanfetamina: boolean;
+    alcool: boolean;
   };
   drogasRecreativasOutros: string;
   exames: {
@@ -122,6 +123,7 @@ export function formatPacienteInfo(paciente: any) {
     crack: 'Crack',
     opiaceos: 'Opiáceos',
     metanfetamina: 'Metanfetamina',
+    alcool: 'Bebidas Alcoólicas',
   };
 
   const drogasRecreativasParts = drogasRecreativas
@@ -137,7 +139,7 @@ export function formatPacienteInfo(paciente: any) {
 
   const drogasRecreativasTxt =
     drogasRecreativasParts.length > 0
-      ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
+      ? `Hábitos e vícios: ${drogasRecreativasParts.join(' | ')}`
       : '';
 
   const unidades: Record<string, string> = {
@@ -179,6 +181,7 @@ export function PreChatForm({
   isReadonly,
 }: PreChatFormProps) {
   const [showForm, setShowForm] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<PreChatFormData>({
     idade: '',
     peso: '',
@@ -203,6 +206,7 @@ export function PreChatForm({
       crack: false,
       opiaceos: false,
       metanfetamina: false,
+      alcool: false,
     },
     drogasRecreativasOutros: '',
     exames: {
@@ -212,9 +216,39 @@ export function PreChatForm({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const totalSteps = 6;
+
+  const stepTitles = [
+    'Informações Básicas',
+    'Alergias',
+    'Dispositivos Médicos',
+    'Itens Estéticos',
+    'Hábitos e Vícios',
+    'Exames',
+  ];
+
+  const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
-    onComplete(formData);
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      onComplete(formData);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const validateStep = () => {
+    if (currentStep === 1) {
+      return (
+        formData.idade !== '' && formData.peso !== '' && formData.altura !== ''
+      );
+    }
+    return true;
   };
 
   const handleExameChange = (
@@ -252,35 +286,10 @@ export function PreChatForm({
     });
   };
 
-  if (isReadonly) {
-    return;
-  }
-
-  if (!showForm) {
-    return (
-      <div className="justify-end py-4">
-        <div className="max-w-4xl mx-auto flex justify-end pr-6">
-          <Button
-            onClick={() => {
-              setShowForm(true);
-              onShowForm();
-            }}
-            size="lg"
-            className="min-w-[140px]"
-          >
-            Começar
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-1 overflow-y-auto p-4">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Informações do Paciente</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Dados Básicos */}
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="idade">Idade (anos) *</Label>
@@ -357,10 +366,11 @@ export function PreChatForm({
               />
             </div>
           </div>
+        );
 
-          {/* Alergias */}
+      case 2:
+        return (
           <div className="space-y-3">
-            <Label>Alergias</Label>
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
                 <input
@@ -399,10 +409,11 @@ export function PreChatForm({
               />
             </div>
           </div>
+        );
 
-          {/* Dispositivos Médicos */}
+      case 3:
+        return (
           <div className="space-y-3">
-            <Label>Dispositivos Médicos</Label>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -478,13 +489,14 @@ export function PreChatForm({
               />
             </div>
           </div>
+        );
 
-          {/* Itens de Uso */}
+      case 4:
+        return (
           <div className="space-y-3">
-            <Label>Itens estéticos</Label>
             <p className="text-xs text-gray-600">
               Selecione todos os itens abaixo que você utiliza no dia a dia.
-              Caso não utilize nenhum, deixe o campo em branco.
+              Caso não utilize nenhum, deixe os campos em branco.
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -575,14 +587,15 @@ export function PreChatForm({
               />
             </div>
           </div>
+        );
 
-          {/* Drogas Recreativas */}
+      case 5:
+        return (
           <div className="space-y-3">
-            <Label>Uso de drogas recreativas</Label>
             <p className="text-xs text-gray-600">
-              Selecione todas as drogas que você utiliza. Caso não utilize
-              nenhuma, deixe o campo em branco. Esta informação é confidencial e
-              essencial para sua segurança durante a cirurgia.
+              Selecione todas os hábitos e vícios que se aplicam a você. Caso
+              não tenha nenhum, deixe os campos em branco. Esta informação é
+              confidencial e essencial para sua segurança durante a cirurgia.
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -611,6 +624,7 @@ export function PreChatForm({
                             opiaceos:
                               'Opiáceos (fentanil, morfina, codeína...)',
                             metanfetamina: 'Metanfetamina',
+                            alcool: 'Bebidas alcoólicas',
                           };
                           return items[key as keyof typeof items];
                         });
@@ -636,6 +650,7 @@ export function PreChatForm({
                     label: 'Opiáceos (Fentanil, morfina, codeína...)',
                   },
                   { key: 'metanfetamina', label: 'Metanfetamina' },
+                  { key: 'alcool', label: 'Bebidas Alcoólicas' },
                 ].map(({ key, label }) => (
                   <DropdownMenuCheckboxItem
                     key={key}
@@ -679,8 +694,10 @@ export function PreChatForm({
               />
             </div>
           </div>
+        );
 
-          {/* Exames */}
+      case 6:
+        return (
           <div className="space-y-4">
             <div>
               <Label>Exame de hemograma</Label>
@@ -767,9 +784,66 @@ export function PreChatForm({
               </div>
             </div>
           </div>
+        );
 
-          <div className="flex justify-end">
-            <Button type="submit" className="min-w-[140px]" size="lg">
+      default:
+        return null;
+    }
+  };
+
+  if (isReadonly) {
+    return;
+  }
+
+  if (!showForm) {
+    return (
+      <div className="justify-end py-4">
+        <div className="max-w-4xl mx-auto flex justify-end pr-6">
+          <Button
+            onClick={() => {
+              setShowForm(true);
+              onShowForm();
+            }}
+            size="lg"
+            className="min-w-[140px]"
+          >
+            Começar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold">{stepTitles[currentStep - 1]}</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Passo {currentStep} de {totalSteps}
+          </p>
+        </div>
+        <form onSubmit={handleNext} className="space-y-6">
+          {renderStep()}
+
+          <div className="flex justify-between pt-4">
+            {currentStep > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                className="min-w-[140px]"
+                size="lg"
+              >
+                Voltar
+              </Button>
+            )}
+            <Button
+              type="submit"
+              className="min-w-[140px] ml-auto"
+              size="lg"
+              disabled={!validateStep()}
+            >
               Continuar
             </Button>
           </div>

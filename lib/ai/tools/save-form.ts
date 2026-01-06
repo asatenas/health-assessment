@@ -67,6 +67,7 @@ This tool should not be used to save the medications list to suspend.`,
           crack: z.boolean().optional(),
           opioids: z.boolean().optional(),
           methamphetamine: z.boolean().optional(),
+          alcohol: z.boolean().optional(),
           others: z
             .array(z.string())
             .optional()
