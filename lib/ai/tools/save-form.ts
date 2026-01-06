@@ -19,6 +19,22 @@ This tool should not be used to save the medications list to suspend.`,
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
       height: z.number().describe('Patient height in meters'),
+      healthProblems: z
+        .object({
+          cardiac: z
+            .boolean()
+            .optional()
+            .describe('Has heart/cardiac problems'),
+          respiratory: z
+            .boolean()
+            .optional()
+            .describe('Has respiratory problems'),
+          renal: z.boolean().optional().describe('Has kidney/renal problems'),
+          liver: z.boolean().optional().describe('Has liver problems'),
+          vascular: z.boolean().optional().describe('Has vascular problems'),
+        })
+        .optional()
+        .describe('Patient health problems'),
       latexAllergy: z
         .boolean()
         .optional()
