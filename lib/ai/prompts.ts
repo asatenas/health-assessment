@@ -122,6 +122,12 @@ Here's the flow you need to strictly follow.
 - Use this tool even if there are no medications to suspend.
 - Use the *saveMedications* tool, not the *saveForm* tool.
 
+## Health problems
+
+Check if the patient selected in the form any health problems such as cardiac, respiratory, renal, liver, or vascular problems.
+For each category, when applicable, ask which diseases they have.
+Ask one message at a time for each category.
+
 ## Questions from risk indexes
 
 - Proceed to ask questions to calculate the scores for the RCRI and (AUB)-HAS2 indexes.
