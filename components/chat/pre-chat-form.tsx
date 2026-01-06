@@ -137,7 +137,7 @@ export function formatPacienteInfo(paciente: any) {
 
   const drogasRecreativasTxt =
     drogasRecreativasParts.length > 0
-      ? `Drogas recreativas: ${drogasRecreativasParts.join(' | ')}`
+      ? `Hábitos e vícios: ${drogasRecreativasParts.join(' | ')}`
       : '';
 
   const unidades: Record<string, string> = {
@@ -484,7 +484,7 @@ export function PreChatForm({
             <Label>Itens estéticos</Label>
             <p className="text-xs text-gray-600">
               Selecione todos os itens abaixo que você utiliza no dia a dia.
-              Caso não utilize nenhum, deixe o campo em branco.
+              Caso não utilize nenhum, deixe os campos em branco.
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -580,9 +580,9 @@ export function PreChatForm({
           <div className="space-y-3">
             <Label>Uso de drogas recreativas</Label>
             <p className="text-xs text-gray-600">
-              Selecione todas as drogas que você utiliza. Caso não utilize
-              nenhuma, deixe o campo em branco. Esta informação é confidencial e
-              essencial para sua segurança durante a cirurgia.
+              Selecione todas os hábitos e vícios que se aplicam a você. Caso
+              não tenha nenhum, deixe os campos em branco. Esta informação é
+              confidencial e essencial para sua segurança durante a cirurgia.
             </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
