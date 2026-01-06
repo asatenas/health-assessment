@@ -36,6 +36,7 @@ interface PreChatFormData {
     crack: boolean;
     opiaceos: boolean;
     metanfetamina: boolean;
+    alcool: boolean;
   };
   drogasRecreativasOutros: string;
   exames: {
@@ -122,6 +123,7 @@ export function formatPacienteInfo(paciente: any) {
     crack: 'Crack',
     opiaceos: 'Opiáceos',
     metanfetamina: 'Metanfetamina',
+    alcool: 'Bebidas Alcoólicas',
   };
 
   const drogasRecreativasParts = drogasRecreativas
@@ -204,6 +206,7 @@ export function PreChatForm({
       crack: false,
       opiaceos: false,
       metanfetamina: false,
+      alcool: false,
     },
     drogasRecreativasOutros: '',
     exames: {
@@ -621,6 +624,7 @@ export function PreChatForm({
                             opiaceos:
                               'Opiáceos (fentanil, morfina, codeína...)',
                             metanfetamina: 'Metanfetamina',
+                            alcool: 'Bebidas alcoólicas',
                           };
                           return items[key as keyof typeof items];
                         });
@@ -646,6 +650,7 @@ export function PreChatForm({
                     label: 'Opiáceos (Fentanil, morfina, codeína...)',
                   },
                   { key: 'metanfetamina', label: 'Metanfetamina' },
+                  { key: 'alcool', label: 'Bebidas Alcoólicas' },
                 ].map(({ key, label }) => (
                   <DropdownMenuCheckboxItem
                     key={key}
