@@ -83,7 +83,7 @@ const getRiskLevel = (chat: Chat): { level: string; color: string } => {
       break;
     default:
       level = '-';
-      color = 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      color = '';
       break;
   }
 
