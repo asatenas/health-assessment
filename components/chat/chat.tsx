@@ -17,6 +17,7 @@ import type { Attachment, ChatMessage } from '@/lib/shared/types';
 import { useDataStream } from '../providers/data-stream-provider';
 import { PreChatForm, formatPacienteInfo } from './pre-chat-form';
 import { NPSEvaluation } from './nps-evaluation';
+import type { FormConfiguration } from '@/lib/types/clinic-config';
 
 export function Chat({
   id,
@@ -26,6 +27,7 @@ export function Chat({
   isReadonly,
   autoResume,
   initialFormData,
+  formConfig,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -34,6 +36,7 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
   initialFormData?: any;
+  formConfig: FormConfiguration;
 }) {
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -203,6 +206,7 @@ export function Chat({
             }}
             onShowForm={() => setIsFormVisible(true)}
             isReadonly={currentIsReadonly}
+            formConfig={formConfig}
           />
         )}
 
