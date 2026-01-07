@@ -146,6 +146,20 @@ export function ChatListView({
     };
   }, [chatDetailsModalOpen]);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && chatDetailsModalOpen) {
+        setChatDetailsModalOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [chatDetailsModalOpen]);
+
   const loadConversation = async () => {
     if (!selectedChat) return;
 
