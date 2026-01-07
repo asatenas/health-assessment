@@ -187,8 +187,7 @@ export function ConfigurationsSheet({
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Configurações da Clínica</SheetTitle>
           <SheetDescription>
-            Configure o nome da clínica e os campos do formulário de avaliação.
-            As alterações afetarão apenas novas avaliações.
+            Configure o nome da clínica e os campos do formulário de avaliação
           </SheetDescription>
         </SheetHeader>
 
@@ -235,6 +234,11 @@ export function ConfigurationsSheet({
                         <CardTitle className="text-base">
                           Configuração do Formulário
                         </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Marque as seções e campos que deseja habilitar no
+                          formulário de avaliação. Campos desmarcados não
+                          aparecerão para o paciente.
+                        </p>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2">
@@ -299,7 +303,10 @@ export function ConfigurationsSheet({
                                               checked={field.enabled}
                                               disabled={!section.enabled}
                                               onCheckedChange={() =>
-                                                toggleField(sectionKey, fieldKey)
+                                                toggleField(
+                                                  sectionKey,
+                                                  fieldKey,
+                                                )
                                               }
                                             />
                                           </div>
