@@ -19,6 +19,7 @@ This tool should not be used to save the medications list to suspend.`,
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
       height: z.number().describe('Patient height in meters'),
+      // <--- HEALTH_PROBLEMS CONFIGURATION --->
       healthProblems: z
         .object({
           cardiac: z
@@ -35,6 +36,7 @@ This tool should not be used to save the medications list to suspend.`,
         })
         .optional()
         .describe('Patient health problems'),
+      // <--- HEALTH_PROBLEMS CONFIGURATION --->
       latexAllergy: z
         .boolean()
         .optional()
