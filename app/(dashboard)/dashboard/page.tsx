@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
-import { BarChart3, List } from 'lucide-react';
+import { BarChart3, List, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Import new dashboard components
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
@@ -28,6 +29,7 @@ type CreateChatResponse = {
 type DashboardView = 'analytics' | 'list';
 
 export default function ClinicDashboard() {
+  const router = useRouter();
   const [view, setView] = useState<DashboardView>('analytics');
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +38,7 @@ export default function ClinicDashboard() {
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
+  const [clinicName, setClinicName] = useState<string>('Painel da Clínica');
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
@@ -58,6 +61,25 @@ export default function ClinicDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
+
+  // Fetch clinic config for clinic name
+  useEffect(() => {
+    const fetchClinicConfig = async () => {
+      try {
+        const response = await fetch('/api/clinic/config');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.clinicName) {
+            setClinicName(data.clinicName);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch clinic config:', error);
+      }
+    };
+
+    fetchClinicConfig();
+  }, []);
 
   // Fetch dashboard metrics
   const fetchDashboardMetrics = useCallback(async () => {
@@ -278,9 +300,7 @@ export default function ClinicDashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Painel da Clínica
-            </h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
             <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
               {view === 'analytics'
                 ? 'Visualize métricas e análises das avaliações pré-anestésicas'
@@ -288,6 +308,15 @@ export default function ClinicDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => router.push('/configurations')}
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
+              <Settings className="size-4 mr-2" />
+              Configurações
+            </Button>
             <Button
               onClick={createNewChat}
               disabled={isCreating}

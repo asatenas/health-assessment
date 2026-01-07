@@ -25,6 +25,19 @@ export const user = pgTable('Clinic', {
 
 export type User = InferSelectModel<typeof user>;
 
+export const clinicConfig = pgTable('ClinicConfig', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  clinicId: uuid('clinicId')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  clinicName: varchar('clinicName', { length: 255 }),
+  formConfig: json('formConfig').notNull(),
+  updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
+});
+
+export type ClinicConfig = InferSelectModel<typeof clinicConfig>;
+
 export const patient = pgTable(
   'Patient',
   {

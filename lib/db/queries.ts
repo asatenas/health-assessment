@@ -27,12 +27,15 @@ import {
   type ChatForm,
   stream,
   checkpoint,
+  clinicConfig,
+  type ClinicConfig,
 } from './schema';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../shared/errors';
 import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/shared/constants';
+import type { FormConfiguration } from '@/lib/types/clinic-config';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -1391,6 +1394,57 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     throw new ChatSDKError(
       'bad_request:database',
       "Failed to get this week's surgeries",
+    );
+  }
+}
+
+export async function getClinicConfigByClinicId({
+  clinicId,
+}: {
+  clinicId: string;
+}): Promise<ClinicConfig | undefined> {
+  try {
+    const [config] = await db
+      .select()
+      .from(clinicConfig)
+      .where(eq(clinicConfig.clinicId, clinicId));
+    return config;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic config',
+    );
+  }
+}
+
+export async function updateClinicConfig({
+  clinicId,
+  clinicName,
+  formConfig,
+}: {
+  clinicId: string;
+  clinicName?: string;
+  formConfig?: FormConfiguration;
+}) {
+  try {
+    const updateData: Partial<ClinicConfig> = {
+      updatedAt: new Date(),
+    };
+
+    if (clinicName !== undefined) updateData.clinicName = clinicName;
+    if (formConfig !== undefined) updateData.formConfig = formConfig as any;
+
+    const [updated] = await db
+      .update(clinicConfig)
+      .set(updateData)
+      .where(eq(clinicConfig.clinicId, clinicId))
+      .returning();
+
+    return updated;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update clinic config',
     );
   }
 }
