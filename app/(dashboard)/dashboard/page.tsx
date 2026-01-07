@@ -402,12 +402,12 @@ export default function ClinicDashboard() {
 
         {/* View Toggle */}
         <div className="mb-6">
-          <div className="inline-flex rounded-lg border bg-muted p-1">
+          <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
             <Button
               variant={view === 'analytics' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setView('analytics')}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <BarChart3 className="size-4" />
               Dashboard
@@ -416,7 +416,7 @@ export default function ClinicDashboard() {
               variant={view === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setView('list')}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <List className="size-4" />
               Lista de Avaliações
