@@ -13,21 +13,75 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
 
   const fieldMapping: Record<string, string[]> = {
     basicInfo: ['age', 'weight', 'height'],
-    healthProblems: ['healthProblems.cardiac', 'healthProblems.respiratory', 'healthProblems.renal', 'healthProblems.liver', 'healthProblems.vascular'],
+    healthProblems: [
+      'healthProblems.cardiac',
+      'healthProblems.respiratory',
+      'healthProblems.renal',
+      'healthProblems.liver',
+      'healthProblems.vascular',
+    ],
     allergies: ['latexAllergy', 'allergies'],
-    medicalDevices: ['medicalDevices.paceMaker', 'medicalDevices.cdi', 'medicalDevices.medicationPump', 'medicalDevices.others'],
-    aestheticItems: ['aestheticItems.megaHair', 'aestheticItems.hairExtensions', 'aestheticItems.gelNails', 'aestheticItems.falseLashes', 'aestheticItems.piercings', 'aestheticItems.contactLenses', 'aestheticItems.others'],
-    habitsAndVices: ['recreationalDrugs.cocaine', 'recreationalDrugs.marijuana', 'recreationalDrugs.crack', 'recreationalDrugs.opioids', 'recreationalDrugs.methamphetamine', 'recreationalDrugs.alcohol', 'recreationalDrugs.others'],
+    medicalDevices: [
+      'medicalDevices.paceMaker',
+      'medicalDevices.cdi',
+      'medicalDevices.medicationPump',
+      'medicalDevices.others',
+    ],
+    aestheticItems: [
+      'aestheticItems.megaHair',
+      'aestheticItems.hairExtensions',
+      'aestheticItems.gelNails',
+      'aestheticItems.falseLashes',
+      'aestheticItems.piercings',
+      'aestheticItems.contactLenses',
+      'aestheticItems.others',
+    ],
+    habitsAndVices: [
+      'recreationalDrugs.cocaine',
+      'recreationalDrugs.marijuana',
+      'recreationalDrugs.crack',
+      'recreationalDrugs.opioids',
+      'recreationalDrugs.methamphetamine',
+      'recreationalDrugs.alcohol',
+      'recreationalDrugs.others',
+    ],
     exams: ['hemoglobin', 'creatinine'],
   };
 
   const configKeyMapping: Record<string, Record<string, string>> = {
     basicInfo: { idade: 'age', peso: 'weight', altura: 'height' },
-    healthProblems: { cardiologicos: 'cardiac', respiratorios: 'respiratory', renais: 'renal', figado: 'liver', vasculares: 'vascular' },
+    healthProblems: {
+      cardiologicos: 'cardiac',
+      respiratorios: 'respiratory',
+      renais: 'renal',
+      figado: 'liver',
+      vasculares: 'vascular',
+    },
     allergies: { alergiaLatex: 'latexAllergy', alergias: 'allergies' },
-    medicalDevices: { marcaPasso: 'paceMaker', cdi: 'cdi', bombaMedicamentos: 'medicationPump', dispositivosOutros: 'others' },
-    aestheticItems: { megaHair: 'megaHair', apliques: 'hairExtensions', unhaGel: 'gelNails', ciliosPosticos: 'falseLashes', piercings: 'piercings', lenteContato: 'contactLenses', itensUsoOutros: 'others' },
-    habitsAndVices: { cocaina: 'cocaine', maconha: 'marijuana', crack: 'crack', opiaceos: 'opioids', metanfetamina: 'methamphetamine', alcool: 'alcohol', drogasRecreativasOutros: 'others' },
+    medicalDevices: {
+      marcaPasso: 'paceMaker',
+      cdi: 'cdi',
+      bombaMedicamentos: 'medicationPump',
+      dispositivosOutros: 'others',
+    },
+    aestheticItems: {
+      megaHair: 'megaHair',
+      apliques: 'hairExtensions',
+      unhaGel: 'gelNails',
+      ciliosPosticos: 'falseLashes',
+      piercings: 'piercings',
+      lenteContato: 'contactLenses',
+      itensUsoOutros: 'others',
+    },
+    habitsAndVices: {
+      cocaina: 'cocaine',
+      maconha: 'marijuana',
+      crack: 'crack',
+      opiaceos: 'opioids',
+      metanfetamina: 'methamphetamine',
+      alcool: 'alcohol',
+      drogasRecreativasOutros: 'others',
+    },
     exams: { hemoglobina: 'hemoglobin', creatinina: 'creatinine' },
   };
 
@@ -77,7 +131,6 @@ Do not provide values for fields not listed above - leave them undefined or null
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
       height: z.number().describe('Patient height in meters'),
-      // <--- HEALTH_PROBLEMS CONFIGURATION --->
       healthProblems: z
         .object({
           cardiac: z
@@ -94,7 +147,6 @@ Do not provide values for fields not listed above - leave them undefined or null
         })
         .optional()
         .describe('Patient health problems'),
-      // <--- HEALTH_PROBLEMS CONFIGURATION --->
       latexAllergy: z
         .boolean()
         .optional()

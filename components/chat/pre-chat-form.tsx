@@ -24,8 +24,6 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
-
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
   problemasSaude: {
     cardiologicos: boolean;
     respiratorios: boolean;
@@ -33,8 +31,6 @@ interface PreChatFormData {
     figado: boolean;
     vasculares: boolean;
   };
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
-
   alergiaLatex: boolean;
   alergias: string;
   marcaPasso: boolean;
@@ -74,7 +70,6 @@ export function formatPacienteInfo(paciente: any) {
     idade,
     peso,
     altura,
-    // <--- HEALTH_PROBLEMS CONFIGURATION --->
     problemasSaude,
     alergiaLatex,
     alergias,
@@ -97,7 +92,6 @@ export function formatPacienteInfo(paciente: any) {
     `Altura: ${altura || '—'} m`,
   ].join(' | ');
 
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
   const problemasSaudeLabels: any = {
     cardiologicos: 'Problemas no coração',
     respiratorios: 'Problemas respiratórios',
@@ -117,7 +111,6 @@ export function formatPacienteInfo(paciente: any) {
     problemasSaudeParts.length > 0
       ? `Problemas de saúde: ${problemasSaudeParts.join(' | ')}`
       : '';
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
 
   const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
   if (alergias) {
@@ -201,7 +194,6 @@ export function formatPacienteInfo(paciente: any) {
 
   const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
 
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
   if (problemasSaudeTxt) {
     sections.splice(1, 0, problemasSaudeTxt);
   }
@@ -221,7 +213,6 @@ export function formatPacienteInfo(paciente: any) {
       drogasRecreativasTxt,
     );
   }
-  // <--- HEALTH_PROBLEMS CONFIGURATION --->
 
   return sections.join(' | ');
 }
@@ -272,7 +263,6 @@ export function PreChatForm({
     idade: '',
     peso: '',
     altura: '',
-    // <--- HEALTH_PROBLEMS CONFIGURATION --->
     problemasSaude: {
       cardiologicos: false,
       respiratorios: false,
@@ -280,7 +270,6 @@ export function PreChatForm({
       figado: false,
       vasculares: false,
     },
-    // <--- HEALTH_PROBLEMS CONFIGURATION --->
     alergiaLatex: false,
     alergias: '',
     marcaPasso: false,
@@ -466,7 +455,6 @@ export function PreChatForm({
         );
       }
 
-      // <--- HEALTH_PROBLEMS CONFIGURATION --->
       case 2: {
         const healthProblemsConfig = formConfig.sections.healthProblems.fields;
         return (
@@ -623,7 +611,6 @@ export function PreChatForm({
           </div>
         );
       }
-      // <--- HEALTH_PROBLEMS CONFIGURATION --->
 
       case 3: {
         const allergiesConfig = formConfig.sections.allergies.fields;
