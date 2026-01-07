@@ -12,8 +12,6 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-
 // Import new dashboard components
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
 import { RiskDistributionChart } from '@/components/dashboard/risk-distribution-chart';
@@ -26,6 +24,7 @@ import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
 import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
 
 type CreateChatResponse = {
   chatId: string;
@@ -36,7 +35,6 @@ type CreateChatResponse = {
 type DashboardView = 'analytics' | 'list';
 
 export default function ClinicDashboard() {
-  const router = useRouter();
   const [view, setView] = useState<DashboardView>('analytics');
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +45,7 @@ export default function ClinicDashboard() {
   );
   const [clinicName, setClinicName] = useState<string>('Painel da Clínica');
   const [isLoadingClinicName, setIsLoadingClinicName] = useState(true);
+  const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
@@ -71,25 +70,25 @@ export default function ClinicDashboard() {
   const limit = 20;
 
   // Fetch clinic config for clinic name
-  useEffect(() => {
-    const fetchClinicConfig = async () => {
-      try {
-        const response = await fetch('/api/clinic/config');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.clinicName) {
-            setClinicName(data.clinicName);
-          }
+  const fetchClinicConfig = useCallback(async () => {
+    try {
+      const response = await fetch('/api/clinic/config');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.clinicName) {
+          setClinicName(data.clinicName);
         }
-      } catch (error) {
-        console.error('Failed to fetch clinic config:', error);
-      } finally {
-        setIsLoadingClinicName(false);
       }
-    };
-
-    fetchClinicConfig();
+    } catch (error) {
+      console.error('Failed to fetch clinic config:', error);
+    } finally {
+      setIsLoadingClinicName(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchClinicConfig();
+  }, [fetchClinicConfig]);
 
   // Fetch dashboard metrics
   const fetchDashboardMetrics = useCallback(async () => {
@@ -368,7 +367,7 @@ export default function ClinicDashboard() {
               {isRefreshing ? 'Atualizando...' : 'Atualizar'}
             </Button>
             <Button
-              onClick={() => router.push('/configurations')}
+              onClick={() => setIsConfigurationsOpen(true)}
               variant="outline"
               size="sm"
               className="flex-1 sm:flex-none"
@@ -578,6 +577,13 @@ export default function ClinicDashboard() {
           />
         )}
       </div>
+
+      {/* Configurations Sheet */}
+      <ConfigurationsSheet
+        open={isConfigurationsOpen}
+        onOpenChange={setIsConfigurationsOpen}
+        onSaved={fetchClinicConfig}
+      />
     </div>
   );
 }
