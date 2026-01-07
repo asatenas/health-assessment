@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
-import { BarChart3, List, Settings } from 'lucide-react';
+import {
+  BarChart3,
+  List,
+  ClipboardList,
+  RefreshCw,
+  Settings,
+  LogOut,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 // Import new dashboard components
@@ -309,20 +316,12 @@ export default function ClinicDashboard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
-              onClick={() => router.push('/configurations')}
-              variant="outline"
-              size="sm"
-              className="flex-1 sm:flex-none"
-            >
-              <Settings className="size-4 mr-2" />
-              Configurações
-            </Button>
-            <Button
               onClick={createNewChat}
               disabled={isCreating}
               size="sm"
               className="flex-1 sm:flex-none"
             >
+              <ClipboardList className="size-4" />
               {isCreating ? 'Criando...' : 'Criar nova avaliação'}
             </Button>
             <Button
@@ -331,13 +330,24 @@ export default function ClinicDashboard() {
               variant="outline"
               size="sm"
             >
+              <RefreshCw className="size-4" />
               {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+            </Button>
+            <Button
+              onClick={() => router.push('/configurations')}
+              variant="outline"
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
+              <Settings className="size-4" />
+              Configurações
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
               size="sm"
             >
+              <LogOut className="size-4" />
               Sair
             </Button>
           </div>
