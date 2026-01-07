@@ -84,6 +84,14 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
+// Required sections that must be enabled
+const REQUIRED_SECTIONS = new Set(['basicInfo']);
+
+// Required fields within sections that must be enabled
+const REQUIRED_FIELDS: Record<string, Set<string>> = {
+  basicInfo: new Set(['idade', 'peso', 'altura']),
+};
+
 // Validation helper
 function isValidFormConfig(config: any): config is FormConfiguration {
   if (!config.version || !config.sections) return false;
@@ -98,11 +106,37 @@ function isValidFormConfig(config: any): config is FormConfiguration {
     'exams',
   ];
 
-  return requiredSections.every(
+  // Check that all required sections exist and have proper structure
+  const hasValidStructure = requiredSections.every(
     (section) =>
       config.sections[section] &&
       typeof config.sections[section].enabled === 'boolean' &&
       config.sections[section].fields &&
       typeof config.sections[section].fields === 'object',
   );
+
+  if (!hasValidStructure) return false;
+
+  // Ensure required sections are enabled
+  for (const sectionKey of REQUIRED_SECTIONS) {
+    if (!config.sections[sectionKey]?.enabled) {
+      return false;
+    }
+  }
+
+  // Ensure required fields within sections are enabled
+  for (const [sectionKey, requiredFieldSet] of Object.entries(
+    REQUIRED_FIELDS,
+  )) {
+    const section = config.sections[sectionKey];
+    if (!section) continue;
+
+    for (const fieldKey of requiredFieldSet) {
+      if (!section.fields[fieldKey]?.enabled) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

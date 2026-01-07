@@ -72,6 +72,15 @@ const FIELD_LABELS: Record<string, string> = {
   creatinina: 'Creatinina',
 };
 
+// Required sections that cannot be disabled
+const REQUIRED_SECTIONS = new Set(['basicInfo']);
+
+// Required fields within sections that cannot be disabled
+// Format: { sectionKey: Set of fieldKeys }
+const REQUIRED_FIELDS: Record<string, Set<string>> = {
+  basicInfo: new Set(['idade', 'peso', 'altura']),
+};
+
 interface ConfigurationsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -259,12 +268,20 @@ export function ConfigurationsSheet({
                                     <div className="flex items-center gap-3">
                                       <Checkbox
                                         checked={section.enabled}
+                                        disabled={REQUIRED_SECTIONS.has(
+                                          sectionKey,
+                                        )}
                                         onCheckedChange={() =>
                                           toggleSection(sectionKey)
                                         }
                                       />
                                       <span className="font-medium text-sm">
                                         {SECTION_LABELS[sectionKey]}
+                                        {REQUIRED_SECTIONS.has(sectionKey) && (
+                                          <span className="ml-2 text-xs text-muted-foreground">
+                                            (Obrigatório)
+                                          </span>
+                                        )}
                                       </span>
                                     </div>
                                     <CollapsibleTrigger asChild>
@@ -301,7 +318,15 @@ export function ConfigurationsSheet({
                                             <Checkbox
                                               id={`${sectionKey}-${fieldKey}`}
                                               checked={field.enabled}
-                                              disabled={!section.enabled}
+                                              disabled={
+                                                !section.enabled ||
+                                                REQUIRED_SECTIONS.has(
+                                                  sectionKey,
+                                                ) ||
+                                                REQUIRED_FIELDS[
+                                                  sectionKey
+                                                ]?.has(fieldKey)
+                                              }
                                               onCheckedChange={() =>
                                                 toggleField(
                                                   sectionKey,
