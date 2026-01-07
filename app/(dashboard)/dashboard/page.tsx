@@ -347,41 +347,55 @@ export default function ClinicDashboard() {
                 : 'Gerencie todos as avaliações dos pacientes'}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <Button
               onClick={createNewChat}
               disabled={isCreating}
               size="sm"
-              className="flex-1 sm:flex-none"
+              className="sm:px-3 px-3"
+              aria-label={
+                isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
+              }
             >
               <ClipboardList className="size-4" />
-              {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+              <span className="hidden sm:inline sm:ml-2">
+                {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+              </span>
             </Button>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
               variant="outline"
               size="sm"
+              className="sm:px-3 px-3"
+              aria-label={
+                isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
+              }
             >
               <RefreshCw className="size-4" />
-              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+              <span className="hidden sm:inline sm:ml-2">
+                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+              </span>
             </Button>
             <Button
               onClick={() => setIsConfigurationsOpen(true)}
               variant="outline"
               size="sm"
-              className="flex-1 sm:flex-none"
+              className="sm:px-3 px-3"
+              aria-label="Configurações"
             >
               <Settings className="size-4" />
-              Configurações
+              <span className="hidden sm:inline sm:ml-2">Configurações</span>
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
               size="sm"
+              className="sm:px-3 px-3"
+              aria-label="Sair"
             >
               <LogOut className="size-4" />
-              Sair
+              <span className="hidden sm:inline sm:ml-2">Sair</span>
             </Button>
           </div>
         </div>
