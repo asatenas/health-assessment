@@ -85,133 +85,153 @@ export function formatPacienteInfo(paciente: any) {
   } = paciente;
 
   const formatBool = (value: boolean) => (value ? 'Sim' : 'Não');
+  const sections: string[] = [];
 
-  const infoBasica = [
-    `Idade: ${idade || '—'} anos`,
-    `Peso: ${peso || '—'} kg`,
-    `Altura: ${altura || '—'} m`,
-  ].join(' | ');
+  // Basic Info
+  const basicInfoParts: string[] = [];
+  if (idade !== undefined) basicInfoParts.push(`Idade: ${idade || '—'} anos`);
+  if (peso !== undefined) basicInfoParts.push(`Peso: ${peso || '—'} kg`);
+  if (altura !== undefined) basicInfoParts.push(`Altura: ${altura || '—'} m`);
+  if (basicInfoParts.length > 0) {
+    sections.push(basicInfoParts.join(' | '));
+  }
 
-  const problemasSaudeLabels: any = {
-    cardiologicos: 'Problemas no coração',
-    respiratorios: 'Problemas respiratórios',
-    renais: 'Problemas renais',
-    figado: 'Problemas no fígado',
-    vasculares: 'Problemas vasculares',
-  };
+  // Health Problems
+  if (problemasSaude) {
+    const problemasSaudeLabels: any = {
+      cardiologicos: 'Problemas no coração',
+      respiratorios: 'Problemas respiratórios',
+      renais: 'Problemas renais',
+      figado: 'Problemas no fígado',
+      vasculares: 'Problemas vasculares',
+    };
 
-  const problemasSaudeParts = problemasSaude
-    ? Object.entries(problemasSaude).map(
+    const problemasSaudeParts = Object.entries(problemasSaude)
+      .filter(([, value]) => value !== undefined)
+      .map(
         ([key, value]) =>
           `• ${problemasSaudeLabels[key]}: ${formatBool(value as boolean)}`,
-      )
-    : [];
+      );
 
-  const problemasSaudeTxt =
-    problemasSaudeParts.length > 0
-      ? `Problemas de saúde: ${problemasSaudeParts.join(' | ')}`
-      : '';
+    if (problemasSaudeParts.length > 0) {
+      sections.push(`Problemas de saúde: ${problemasSaudeParts.join(' | ')}`);
+    }
+  }
 
-  const alergiasTexts = [`Alergia a látex: ${formatBool(alergiaLatex)}`];
-  if (alergias) {
+  // Allergies
+  const alergiasTexts: string[] = [];
+  if (alergiaLatex !== undefined) {
+    alergiasTexts.push(`Alergia a látex: ${formatBool(alergiaLatex)}`);
+  }
+  if (alergias !== undefined && alergias) {
     alergiasTexts.push(`Outras: ${alergias}`);
   }
-  const alergiasTxt = `Alergias: ${alergiasTexts.join(' | ')}`;
+  if (alergiasTexts.length > 0) {
+    sections.push(`Alergias: ${alergiasTexts.join(' | ')}`);
+  }
 
-  const dispositivos = [
-    `Dispositivos: Marca-passo: ${formatBool(marcaPasso)}`,
-    `CDI: ${formatBool(cdi)}`,
-    `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
-  ];
-  if (dispositivosOutros) {
+  // Medical Devices
+  const dispositivos: string[] = [];
+  let firstDevice = true;
+  if (marcaPasso !== undefined) {
+    dispositivos.push(
+      `${firstDevice ? 'Dispositivos: ' : ''}Marca-passo: ${formatBool(marcaPasso)}`,
+    );
+    firstDevice = false;
+  }
+  if (cdi !== undefined) {
+    dispositivos.push(`CDI: ${formatBool(cdi)}`);
+    firstDevice = false;
+  }
+  if (bombaMedicamentos !== undefined) {
+    dispositivos.push(
+      `Bomba de medicamentos: ${formatBool(bombaMedicamentos)}`,
+    );
+    firstDevice = false;
+  }
+  if (dispositivosOutros !== undefined && dispositivosOutros) {
     dispositivos.push(`Outros: ${dispositivosOutros}`);
   }
-  const dispositivosTxt = dispositivos.join(' | ');
+  if (dispositivos.length > 0) {
+    if (firstDevice) {
+      dispositivos[0] = `Dispositivos: ${dispositivos[0]}`;
+    }
+    sections.push(dispositivos.join(' | '));
+  }
 
-  const itensLabels: any = {
-    megaHair: 'Mega Hair',
-    apliques: 'Apliques',
-    unhaGel: 'Unha de Gel',
-    ciliosPosticos: 'Cílios Postiços',
-    piercings: 'Piercings',
-    lenteContato: 'Lente de contato',
-  };
+  // Aesthetic Items
+  if (itensUso) {
+    const itensLabels: any = {
+      megaHair: 'Mega Hair',
+      apliques: 'Apliques',
+      unhaGel: 'Unha de Gel',
+      ciliosPosticos: 'Cílios Postiços',
+      piercings: 'Piercings',
+      lenteContato: 'Lente de contato',
+    };
 
-  const itensUsoParts = itensUso
-    ? Object.entries(itensUso).map(
+    const itensUsoParts = Object.entries(itensUso)
+      .filter(([, value]) => value !== undefined)
+      .map(
         ([key, value]) =>
           `• ${itensLabels[key]}: ${formatBool(value as boolean)}`,
-      )
-    : [];
+      );
 
-  if (itensUsoOutros) {
-    itensUsoParts.push(`• Outros: ${itensUsoOutros}`);
+    if (itensUsoOutros !== undefined && itensUsoOutros) {
+      itensUsoParts.push(`• Outros: ${itensUsoOutros}`);
+    }
+
+    if (itensUsoParts.length > 0) {
+      sections.push(`Itens de uso: ${itensUsoParts.join(' | ')}`);
+    }
   }
 
-  const itensUsoTxt =
-    itensUsoParts.length > 0
-      ? `Itens de uso: ${itensUsoParts.join(' | ')}`
-      : '';
+  // Habits and Vices
+  if (drogasRecreativas) {
+    const drogasLabels: any = {
+      cocaina: 'Cocaína',
+      maconha: 'Maconha',
+      crack: 'Crack',
+      opiaceos: 'Opiáceos',
+      metanfetamina: 'Metanfetamina',
+      alcool: 'Bebidas Alcoólicas',
+    };
 
-  const drogasLabels: any = {
-    cocaina: 'Cocaína',
-    maconha: 'Maconha',
-    crack: 'Crack',
-    opiaceos: 'Opiáceos',
-    metanfetamina: 'Metanfetamina',
-    alcool: 'Bebidas Alcoólicas',
-  };
-
-  const drogasRecreativasParts = drogasRecreativas
-    ? Object.entries(drogasRecreativas).map(
+    const drogasRecreativasParts = Object.entries(drogasRecreativas)
+      .filter(([, value]) => value !== undefined)
+      .map(
         ([key, value]) =>
           `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
-      )
-    : [];
+      );
 
-  if (drogasRecreativasOutros) {
-    drogasRecreativasParts.push(`• Outros: ${drogasRecreativasOutros}`);
+    if (drogasRecreativasOutros !== undefined && drogasRecreativasOutros) {
+      drogasRecreativasParts.push(`• Outros: ${drogasRecreativasOutros}`);
+    }
+
+    if (drogasRecreativasParts.length > 0) {
+      sections.push(`Hábitos e vícios: ${drogasRecreativasParts.join(' | ')}`);
+    }
   }
 
-  const drogasRecreativasTxt =
-    drogasRecreativasParts.length > 0
-      ? `Hábitos e vícios: ${drogasRecreativasParts.join(' | ')}`
-      : '';
+  // Exams
+  if (exames) {
+    const unidades: Record<string, string> = {
+      hemoglobina: 'g/dL',
+      creatinina: 'mg/dL',
+      ecocardiograma: '',
+    };
 
-  const unidades: Record<string, string> = {
-    hemoglobina: 'g/dL',
-    creatinina: 'mg/dL',
-    ecocardiograma: '',
-  };
+    const examesParts = Object.entries(exames)
+      .filter(([, dados]) => dados !== undefined)
+      .map(([key, dados]) => {
+        const nome = key.charAt(0).toUpperCase() + key.slice(1);
+        const dadosTyped = dados as { valor?: string; tipo: string };
+        return `${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
+      });
 
-  const examesTxt = `Exames: ${Object.entries(exames)
-    .map(([key, dados]) => {
-      const nome = key.charAt(0).toUpperCase() + key.slice(1);
-      const dadosTyped = dados as { valor?: string; tipo: string };
-      return `${nome}: ${dadosTyped.valor || '—'} ${unidades[key]}`;
-    })
-    .join(' | ')}`;
-
-  const sections = [infoBasica, alergiasTxt, dispositivosTxt, examesTxt];
-
-  if (problemasSaudeTxt) {
-    sections.splice(1, 0, problemasSaudeTxt);
-  }
-
-  if (itensUsoTxt) {
-    sections.splice(problemasSaudeTxt ? 4 : 3, 0, itensUsoTxt);
-  }
-
-  if (drogasRecreativasTxt) {
-    sections.splice(
-      itensUsoTxt && problemasSaudeTxt
-        ? 5
-        : itensUsoTxt || problemasSaudeTxt
-          ? 4
-          : 3,
-      0,
-      drogasRecreativasTxt,
-    );
+    if (examesParts.length > 0) {
+      sections.push(`Exames: ${examesParts.join(' | ')}`);
+    }
   }
 
   return sections.join(' | ');
@@ -222,6 +242,112 @@ interface PreChatFormProps {
   onShowForm: () => void;
   isReadonly: boolean;
   formConfig: FormConfiguration;
+}
+
+// Helper to build initial form data based on enabled fields
+function buildInitialFormData(config: FormConfiguration): any {
+  const data: any = {};
+
+  // Basic Info
+  if (config.sections.basicInfo?.enabled) {
+    if (config.sections.basicInfo.fields.idade?.enabled) data.idade = '';
+    if (config.sections.basicInfo.fields.peso?.enabled) data.peso = '';
+    if (config.sections.basicInfo.fields.altura?.enabled) data.altura = '';
+  }
+
+  // Health Problems
+  if (config.sections.healthProblems?.enabled) {
+    const problemasSaude: any = {};
+    if (config.sections.healthProblems.fields.cardiologicos?.enabled)
+      problemasSaude.cardiologicos = false;
+    if (config.sections.healthProblems.fields.respiratorios?.enabled)
+      problemasSaude.respiratorios = false;
+    if (config.sections.healthProblems.fields.renais?.enabled)
+      problemasSaude.renais = false;
+    if (config.sections.healthProblems.fields.figado?.enabled)
+      problemasSaude.figado = false;
+    if (config.sections.healthProblems.fields.vasculares?.enabled)
+      problemasSaude.vasculares = false;
+    if (Object.keys(problemasSaude).length > 0) {
+      data.problemasSaude = problemasSaude;
+    }
+  }
+
+  // Allergies
+  if (config.sections.allergies?.enabled) {
+    if (config.sections.allergies.fields.alergiaLatex?.enabled)
+      data.alergiaLatex = false;
+    if (config.sections.allergies.fields.alergias?.enabled) data.alergias = '';
+  }
+
+  // Medical Devices
+  if (config.sections.medicalDevices?.enabled) {
+    if (config.sections.medicalDevices.fields.marcaPasso?.enabled)
+      data.marcaPasso = false;
+    if (config.sections.medicalDevices.fields.cdi?.enabled) data.cdi = false;
+    if (config.sections.medicalDevices.fields.bombaMedicamentos?.enabled)
+      data.bombaMedicamentos = false;
+    if (config.sections.medicalDevices.fields.dispositivosOutros?.enabled)
+      data.dispositivosOutros = '';
+  }
+
+  // Aesthetic Items
+  if (config.sections.aestheticItems?.enabled) {
+    const itensUso: any = {};
+    if (config.sections.aestheticItems.fields.megaHair?.enabled)
+      itensUso.megaHair = false;
+    if (config.sections.aestheticItems.fields.apliques?.enabled)
+      itensUso.apliques = false;
+    if (config.sections.aestheticItems.fields.unhaGel?.enabled)
+      itensUso.unhaGel = false;
+    if (config.sections.aestheticItems.fields.ciliosPosticos?.enabled)
+      itensUso.ciliosPosticos = false;
+    if (config.sections.aestheticItems.fields.piercings?.enabled)
+      itensUso.piercings = false;
+    if (config.sections.aestheticItems.fields.lenteContato?.enabled)
+      itensUso.lenteContato = false;
+    if (Object.keys(itensUso).length > 0) {
+      data.itensUso = itensUso;
+    }
+    if (config.sections.aestheticItems.fields.itensUsoOutros?.enabled)
+      data.itensUsoOutros = '';
+  }
+
+  // Habits and Vices
+  if (config.sections.habitsAndVices?.enabled) {
+    const drogasRecreativas: any = {};
+    if (config.sections.habitsAndVices.fields.cocaina?.enabled)
+      drogasRecreativas.cocaina = false;
+    if (config.sections.habitsAndVices.fields.maconha?.enabled)
+      drogasRecreativas.maconha = false;
+    if (config.sections.habitsAndVices.fields.crack?.enabled)
+      drogasRecreativas.crack = false;
+    if (config.sections.habitsAndVices.fields.opiaceos?.enabled)
+      drogasRecreativas.opiaceos = false;
+    if (config.sections.habitsAndVices.fields.metanfetamina?.enabled)
+      drogasRecreativas.metanfetamina = false;
+    if (config.sections.habitsAndVices.fields.alcool?.enabled)
+      drogasRecreativas.alcool = false;
+    if (Object.keys(drogasRecreativas).length > 0) {
+      data.drogasRecreativas = drogasRecreativas;
+    }
+    if (config.sections.habitsAndVices.fields.drogasRecreativasOutros?.enabled)
+      data.drogasRecreativasOutros = '';
+  }
+
+  // Exams
+  if (config.sections.exams?.enabled) {
+    const exames: any = {};
+    if (config.sections.exams.fields.hemoglobina?.enabled)
+      exames.hemoglobina = { tipo: 'texto', valor: '' };
+    if (config.sections.exams.fields.creatinina?.enabled)
+      exames.creatinina = { tipo: 'texto', valor: '' };
+    if (Object.keys(exames).length > 0) {
+      data.exames = exames;
+    }
+  }
+
+  return data;
 }
 
 export function PreChatForm({
@@ -259,46 +385,11 @@ export function PreChatForm({
 
     return steps;
   }, [formConfig]);
-  const [formData, setFormData] = useState<PreChatFormData>({
-    idade: '',
-    peso: '',
-    altura: '',
-    problemasSaude: {
-      cardiologicos: false,
-      respiratorios: false,
-      renais: false,
-      figado: false,
-      vasculares: false,
-    },
-    alergiaLatex: false,
-    alergias: '',
-    marcaPasso: false,
-    cdi: false,
-    bombaMedicamentos: false,
-    dispositivosOutros: '',
-    itensUso: {
-      megaHair: false,
-      apliques: false,
-      unhaGel: false,
-      ciliosPosticos: false,
-      piercings: false,
-    },
-    itensUsoOutros: '',
-    drogasRecreativas: {
-      cocaina: false,
-      maconha: false,
-      crack: false,
-      opiaceos: false,
-      metanfetamina: false,
-      alcool: false,
-    },
-    drogasRecreativasOutros: '',
-    exames: {
-      hemoglobina: { tipo: 'texto', valor: '' },
-      creatinina: { tipo: 'texto', valor: '' },
-      // ecocardiograma: { tipo: 'texto', valor: '' },
-    },
-  });
+
+  // Build initial form data based on enabled fields
+  const [formData, setFormData] = useState<PreChatFormData>(() =>
+    buildInitialFormData(formConfig),
+  );
 
   const totalSteps = visibleSteps.length;
 
