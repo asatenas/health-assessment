@@ -10,7 +10,14 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { ChevronDown, Info } from 'lucide-react';
+import Image from 'next/image';
 
 interface PreChatFormData {
   idade: string;
@@ -222,6 +229,8 @@ export function PreChatForm({
 }: PreChatFormProps) {
   const [showForm, setShowForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [hemoglobinaTooltipOpen, setHemoglobinaTooltipOpen] = useState(false);
+  const [creatininaTooltipOpen, setCreatininaTooltipOpen] = useState(false);
   const [formData, setFormData] = useState<PreChatFormData>({
     idade: '',
     peso: '',
@@ -884,7 +893,41 @@ export function PreChatForm({
               </p>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-normal">Hemoglobina (g/dL)</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-normal">
+                  Hemoglobina (g/dL)
+                </Label>
+                <Tooltip open={hemoglobinaTooltipOpen}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setHemoglobinaTooltipOpen(!hemoglobinaTooltipOpen)
+                      }
+                      onPointerEnter={(e) => e.preventDefault()}
+                      onPointerLeave={(e) => e.preventDefault()}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <Info className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="p-0 max-w-xs sm:max-w-md"
+                    onPointerDownOutside={() =>
+                      setHemoglobinaTooltipOpen(false)
+                    }
+                    onEscapeKeyDown={() => setHemoglobinaTooltipOpen(false)}
+                  >
+                    <Image
+                      src="/images/exams/hemoglobina.jpeg"
+                      alt="Exemplo de exame de hemoglobina"
+                      width={400}
+                      height={300}
+                      className="rounded-md"
+                    />
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex gap-2">
                 {formData.exames.hemoglobina.tipo === 'texto' ? (
                   <Input
@@ -927,7 +970,39 @@ export function PreChatForm({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-normal">Creatinina (mg/dL)</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-normal">
+                  Creatinina (mg/dL)
+                </Label>
+                <Tooltip open={creatininaTooltipOpen}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCreatininaTooltipOpen(!creatininaTooltipOpen)
+                      }
+                      onPointerEnter={(e) => e.preventDefault()}
+                      onPointerLeave={(e) => e.preventDefault()}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <Info className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="p-0 max-w-xs sm:max-w-md"
+                    onPointerDownOutside={() => setCreatininaTooltipOpen(false)}
+                    onEscapeKeyDown={() => setCreatininaTooltipOpen(false)}
+                  >
+                    <Image
+                      src="/images/exams/creatinina.jpeg"
+                      alt="Exemplo de exame de creatinina"
+                      width={400}
+                      height={300}
+                      className="rounded-md"
+                    />
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex gap-2">
                 {formData.exames.creatinina.tipo === 'texto' ? (
                   <Input
@@ -992,40 +1067,44 @@ export function PreChatForm({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold">{stepTitles[currentStep - 1]}</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Passo {currentStep} de {totalSteps}
-          </p>
-        </div>
-        <form onSubmit={handleNext} className="space-y-6">
-          {renderStep()}
-
-          <div className="flex justify-between pt-4">
-            {currentStep > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                className="min-w-[140px]"
-                size="lg"
-              >
-                Voltar
-              </Button>
-            )}
-            <Button
-              type="submit"
-              className="min-w-[140px] ml-auto"
-              size="lg"
-              disabled={!validateStep()}
-            >
-              Continuar
-            </Button>
+    <TooltipProvider>
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">
+              {stepTitles[currentStep - 1]}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Passo {currentStep} de {totalSteps}
+            </p>
           </div>
-        </form>
+          <form onSubmit={handleNext} className="space-y-6">
+            {renderStep()}
+
+            <div className="flex justify-between pt-4">
+              {currentStep > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="min-w-[140px]"
+                  size="lg"
+                >
+                  Voltar
+                </Button>
+              )}
+              <Button
+                type="submit"
+                className="min-w-[140px] ml-auto"
+                size="lg"
+                disabled={!validateStep()}
+              >
+                Continuar
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
