@@ -1,6 +1,6 @@
 import type {
-  CoreAssistantMessage,
-  CoreToolMessage,
+  AssistantModelMessage,
+  UserModelMessage,
   UIMessage,
   UIMessagePart,
 } from 'ai';
@@ -63,7 +63,7 @@ export function generateUUID(): string {
   });
 }
 
-type ResponseMessageWithoutId = CoreToolMessage | CoreAssistantMessage;
+type ResponseMessageWithoutId = UserModelMessage | AssistantModelMessage;
 type ResponseMessage = ResponseMessageWithoutId & { id: string };
 
 export function getMostRecentUserMessage(messages: Array<UIMessage>) {

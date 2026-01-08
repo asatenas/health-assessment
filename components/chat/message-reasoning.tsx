@@ -8,12 +8,12 @@ import {
 
 interface MessageReasoningProps {
   isLoading: boolean;
-  reasoning: string;
+  reasoningText: string;
 }
 
 export function MessageReasoning({
   isLoading,
-  reasoning,
+  reasoningText,
 }: MessageReasoningProps) {
   return (
     <Reasoning
@@ -22,7 +22,7 @@ export function MessageReasoning({
       data-testid="message-reasoning"
     >
       <ReasoningTrigger />
-      <ReasoningContent>{reasoning}</ReasoningContent>
+      <ReasoningContent>{reasoningText}</ReasoningContent>
     </Reasoning>
   );
 }

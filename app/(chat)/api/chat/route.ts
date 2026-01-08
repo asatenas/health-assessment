@@ -202,7 +202,7 @@ export async function POST(request: Request) {
     await createStreamId({ streamId, chatId: id });
 
     const stream = createUIMessageStream({
-      execute: ({ writer: dataStream }) => {
+      execute: async ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({
@@ -210,7 +210,7 @@ export async function POST(request: Request) {
             useGeolocation: false,
             formConfig,
           }),
-          messages: convertToModelMessages(deduplicatedMessages),
+          messages: await convertToModelMessages(deduplicatedMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {

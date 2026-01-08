@@ -5,14 +5,14 @@ import {
   wrapLanguageModel,
 } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
-import { chatModel, reasoningModel } from './models.test';
+// import { chatModel, reasoningModel } from './models.test';
 import { isTestEnvironment } from '../shared/constants';
 
 export const myProvider = isTestEnvironment
   ? customProvider({
       languageModels: {
-        'chat-model': chatModel,
-        'chat-model-reasoning': reasoningModel,
+        // 'chat-model': chatModel,
+        // 'chat-model-reasoning': reasoningModel,
       },
     })
   : customProvider({
