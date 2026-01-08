@@ -4,8 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
 import { signOut } from 'next-auth/react';
-import { BarChart3, List } from 'lucide-react';
-
+import {
+  BarChart3,
+  List,
+  ClipboardList,
+  RefreshCw,
+  Settings,
+  LogOut,
+} from 'lucide-react';
 // Import new dashboard components
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
 import { RiskDistributionChart } from '@/components/dashboard/risk-distribution-chart';
@@ -18,6 +24,7 @@ import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
 import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
 
 type CreateChatResponse = {
   chatId: string;
@@ -36,6 +43,9 @@ export default function ClinicDashboard() {
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
+  const [clinicName, setClinicName] = useState<string>('Painel da Clínica');
+  const [isLoadingClinicName, setIsLoadingClinicName] = useState(true);
+  const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
@@ -58,6 +68,27 @@ export default function ClinicDashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
+
+  // Fetch clinic config for clinic name
+  const fetchClinicConfig = useCallback(async () => {
+    try {
+      const response = await fetch('/api/clinic/config');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.clinicName) {
+          setClinicName(data.clinicName);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch clinic config:', error);
+    } finally {
+      setIsLoadingClinicName(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClinicConfig();
+  }, [fetchClinicConfig]);
 
   // Fetch dashboard metrics
   const fetchDashboardMetrics = useCallback(async () => {
@@ -128,14 +159,16 @@ export default function ClinicDashboard() {
     setCurrentPage(1);
   }, [statusFilter, dateFromFilter, dateToFilter]);
 
-  // Fetch data based on current view
+  // Fetch data based on current view (only after clinic config is loaded)
   useEffect(() => {
-    if (view === 'analytics') {
-      fetchDashboardMetrics();
-    } else {
-      fetchChats();
+    if (!isLoadingClinicName) {
+      if (view === 'analytics') {
+        fetchDashboardMetrics();
+      } else {
+        fetchChats();
+      }
     }
-  }, [view, fetchDashboardMetrics, fetchChats]);
+  }, [view, fetchDashboardMetrics, fetchChats, isLoadingClinicName]);
 
   const createNewChat = async () => {
     setIsCreating(true);
@@ -272,56 +305,109 @@ export default function ClinicDashboard() {
     }
   };
 
+  // Show loading state until clinic config is loaded
+  if (isLoadingClinicName) {
+    return (
+      <div className="flex flex-col min-h-screen w-full bg-background">
+        <div className="flex-1 flex flex-col max-w-7xl w-full mx-auto p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+            <div>
+              <Skeleton className="h-9 w-64 mb-2" />
+              <Skeleton className="h-5 w-96 mt-2" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Skeleton className="h-9 w-40" />
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-32" />
+              <Skeleton className="h-9 w-20" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-64 mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
       <div className="flex-1 flex flex-col max-w-7xl w-full mx-auto p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Painel da Clínica
-            </h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
             <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
               {view === 'analytics'
                 ? 'Visualize métricas e análises das avaliações pré-anestésicas'
                 : 'Gerencie todos as avaliações dos pacientes'}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             <Button
               onClick={createNewChat}
               disabled={isCreating}
               size="sm"
-              className="flex-1 sm:flex-none"
+              className="sm:px-3 px-3"
+              aria-label={
+                isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
+              }
             >
-              {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+              <ClipboardList className="size-4" />
+              <span className="hidden sm:inline sm:ml-2">
+                {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+              </span>
             </Button>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
               variant="outline"
               size="sm"
+              className="sm:px-3 px-3"
+              aria-label={
+                isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
+              }
             >
-              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+              <RefreshCw className="size-4" />
+              <span className="hidden sm:inline sm:ml-2">
+                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+              </span>
+            </Button>
+            <Button
+              onClick={() => setIsConfigurationsOpen(true)}
+              variant="outline"
+              size="sm"
+              className="sm:px-3 px-3"
+              aria-label="Configurações"
+            >
+              <Settings className="size-4" />
+              <span className="hidden sm:inline sm:ml-2">Configurações</span>
             </Button>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
               size="sm"
+              className="sm:px-3 px-3"
+              aria-label="Sair"
             >
-              Sair
+              <LogOut className="size-4" />
+              <span className="hidden sm:inline sm:ml-2">Sair</span>
             </Button>
           </div>
         </div>
 
         {/* View Toggle */}
         <div className="mb-6">
-          <div className="inline-flex rounded-lg border bg-muted p-1">
+          <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
             <Button
               variant={view === 'analytics' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setView('analytics')}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <BarChart3 className="size-4" />
               Dashboard
@@ -330,7 +416,7 @@ export default function ClinicDashboard() {
               variant={view === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setView('list')}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
             >
               <List className="size-4" />
               Lista de Avaliações
@@ -505,6 +591,13 @@ export default function ClinicDashboard() {
           />
         )}
       </div>
+
+      {/* Configurations Sheet */}
+      <ConfigurationsSheet
+        open={isConfigurationsOpen}
+        onOpenChange={setIsConfigurationsOpen}
+        onSaved={fetchClinicConfig}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
+  getClinicConfigByClinicId,
   getMessagesByChatId,
   saveMessages,
 } from '@/lib/db/queries';
@@ -45,6 +46,8 @@ import { hemoglobin } from '@/lib/ai/tools/hemoglobin';
 import { cerebralIschemia } from '@/lib/ai/tools/cerebral-ischemia';
 import { coronaryDisease } from '@/lib/ai/tools/coronary-disease';
 import { cardiacStructure } from '@/lib/ai/tools/cardiac-structure';
+import type { FormConfiguration } from '@/lib/types/clinic-config';
+import { DEFAULT_FORM_CONFIG } from '@/lib/config/default-form-config';
 
 export const maxDuration = 60;
 
@@ -179,6 +182,22 @@ export async function POST(request: Request) {
       ],
     });
 
+    // Fetch clinic configuration
+    let formConfig: FormConfiguration = DEFAULT_FORM_CONFIG;
+    try {
+      const clinicConfig = await getClinicConfigByClinicId({
+        clinicId: chat.userId,
+      });
+      if (clinicConfig?.formConfig) {
+        formConfig = clinicConfig.formConfig as FormConfiguration;
+      }
+    } catch (error) {
+      console.error(
+        'Failed to fetch clinic config for AI, using default:',
+        error,
+      );
+    }
+
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
 
@@ -186,12 +205,16 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ requestHints, useGeolocation: false }),
+          system: systemPrompt({
+            requestHints,
+            useGeolocation: false,
+            formConfig,
+          }),
           messages: convertToModelMessages(deduplicatedMessages),
           stopWhen: stepCountIs(5),
           experimental_transform: smoothStream({ chunking: 'word' }),
           tools: {
-            saveForm: saveForm({ chatId: id }),
+            saveForm: saveForm({ chatId: id, formConfig }),
             saveMedications: saveMedications({ chatId: id }),
             surgeryType: surgeryType({ chatId: id }),
             insulin: insulin({ chatId: id }),

@@ -5,6 +5,7 @@ import {
   getChatById,
   getChatFormById,
   getMessagesByChatId,
+  getClinicConfigByClinicId,
 } from '@/lib/db/queries';
 import { DataStreamHandler } from '@/components/providers/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
@@ -12,6 +13,8 @@ import { initialMessage } from '@/lib/ai/prompts';
 import { convertToUIMessages, generateUUID } from '@/lib/shared/utils';
 import { TokenGate } from '@/components/auth/token-gate';
 import { UUID_REGEX } from '@/lib/shared/validation';
+import type { FormConfiguration } from '@/lib/types/clinic-config';
+import { DEFAULT_FORM_CONFIG } from '@/lib/config/default-form-config';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -73,6 +76,39 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const initialFormData = await getChatFormById({ id });
 
+  // Fetch clinic config
+  let formConfig: FormConfiguration = DEFAULT_FORM_CONFIG;
+  try {
+    const clinicConfig = await getClinicConfigByClinicId({
+      clinicId: chat.userId,
+    });
+    if (clinicConfig?.formConfig) {
+      formConfig = clinicConfig.formConfig as FormConfiguration;
+    }
+  } catch (error) {
+    console.error('Failed to fetch clinic config, using default:', error);
+  }
+
+  // Filter config to only include enabled sections and fields (security)
+  const enabledConfig: FormConfiguration = {
+    version: formConfig.version,
+    sections: Object.fromEntries(
+      Object.entries(formConfig.sections)
+        .filter(([_, section]) => section.enabled)
+        .map(([key, section]) => [
+          key,
+          {
+            enabled: true,
+            fields: Object.fromEntries(
+              Object.entries(section.fields).filter(
+                ([_, field]) => field.enabled,
+              ),
+            ),
+          },
+        ]),
+    ) as FormConfiguration['sections'],
+  };
+
   return (
     <>
       <Chat
@@ -83,6 +119,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         isReadonly={chat.readOnly}
         autoResume={false}
         initialFormData={initialFormData}
+        formConfig={enabledConfig}
       />
       <DataStreamHandler />
     </>
