@@ -18,7 +18,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
+import type {
+  FormConfiguration,
+  FormFieldConfig,
+} from '@/lib/types/clinic-config';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -169,6 +172,7 @@ export function ConfigurationsSheet({
 
     const section =
       formConfig.sections[sectionKey as keyof typeof formConfig.sections];
+    const fields = section.fields as Record<string, FormFieldConfig>;
     setFormConfig({
       ...formConfig,
       sections: {
@@ -176,10 +180,10 @@ export function ConfigurationsSheet({
         [sectionKey]: {
           ...section,
           fields: {
-            ...section.fields,
+            ...fields,
             [fieldKey]: {
-              ...section.fields[fieldKey],
-              enabled: !section.fields[fieldKey].enabled,
+              ...fields[fieldKey],
+              enabled: !fields[fieldKey].enabled,
             },
           },
         },
