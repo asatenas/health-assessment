@@ -1,6 +1,6 @@
 import { generateId, type ModelMessage } from 'ai';
 import { TEST_PROMPTS } from './basic';
-import type { LanguageModelV2StreamPart } from '@ai-sdk/provider';
+import type { LanguageModelV3StreamPart } from '@ai-sdk/provider';
 
 export function compareMessages(
   firstMessage: ModelMessage,
@@ -40,7 +40,7 @@ export function compareMessages(
   return true;
 }
 
-const textToDeltas = (text: string): LanguageModelV2StreamPart[] => {
+const textToDeltas = (text: string): LanguageModelV3StreamPart[] => {
   const id = generateId();
 
   const deltas = text.split(' ').map((char) => ({
@@ -52,7 +52,7 @@ const textToDeltas = (text: string): LanguageModelV2StreamPart[] => {
   return [{ id, type: 'text-start' }, ...deltas, { id, type: 'text-end' }];
 };
 
-const reasoningToDeltas = (text: string): LanguageModelV2StreamPart[] => {
+const reasoningToDeltas = (text: string): LanguageModelV3StreamPart[] => {
   const id = generateId();
 
   const deltas = text.split(' ').map((char) => ({
@@ -71,23 +71,41 @@ const reasoningToDeltas = (text: string): LanguageModelV2StreamPart[] => {
 export const getResponseChunksByPrompt = (
   prompt: ModelMessage[],
   isReasoningEnabled = false,
-): LanguageModelV2StreamPart[] => {
+): LanguageModelV3StreamPart[] => {
   const recentMessage = prompt.at(-1);
 
   if (!recentMessage) {
     throw new Error('No recent message found!');
   }
 
+  const stop = { unified: 'stop' as const, raw: undefined };
+
+  const usage0310 = {
+    inputTokens: {
+      total: 3,
+      noCache: 3,
+      cacheRead: undefined,
+      cacheWrite: undefined,
+    },
+    outputTokens: {
+      total: 10,
+      text: 10,
+      reasoning: undefined,
+    },
+  };
+
+  const finishStop = (): LanguageModelV3StreamPart => ({
+    type: 'finish',
+    finishReason: stop,
+    usage: usage0310,
+  });
+
   if (isReasoningEnabled) {
     if (compareMessages(recentMessage, TEST_PROMPTS.USER_SKY)) {
       return [
         ...reasoningToDeltas('The sky is blue because of rayleigh scattering!'),
         ...textToDeltas("It's just blue duh!"),
-        {
-          type: 'finish',
-          finishReason: 'stop',
-          usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-        },
+        finishStop(),
       ];
     } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_GRASS)) {
       return [
@@ -95,63 +113,23 @@ export const getResponseChunksByPrompt = (
           'Grass is green because of chlorophyll absorption!',
         ),
         ...textToDeltas("It's just green duh!"),
-        {
-          type: 'finish',
-          finishReason: 'stop',
-          usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-        },
+        finishStop(),
       ];
     }
   }
 
   if (compareMessages(recentMessage, TEST_PROMPTS.USER_THANKS)) {
-    return [
-      ...textToDeltas("You're welcome!"),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
-    ];
+    return [...textToDeltas("You're welcome!"), finishStop()];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_GRASS)) {
-    return [
-      ...textToDeltas("It's just green duh!"),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
-    ];
+    return [...textToDeltas("It's just green duh!"), finishStop()];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_SKY)) {
-    return [
-      ...textToDeltas("It's just blue duh!"),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
-    ];
+    return [...textToDeltas("It's just blue duh!"), finishStop()];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_NEXTJS)) {
-    return [
-      ...textToDeltas('With Next.js, you can ship fast!'),
-
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
-    ];
+    return [...textToDeltas('With Next.js, you can ship fast!'), finishStop()];
   } else if (
     compareMessages(recentMessage, TEST_PROMPTS.USER_IMAGE_ATTACHMENT)
   ) {
-    return [
-      ...textToDeltas('This painting is by Monet!'),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
-    ];
+    return [...textToDeltas('This painting is by Monet!'), finishStop()];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.USER_TEXT_ARTIFACT)) {
     const toolCallId = generateId();
 
@@ -174,7 +152,7 @@ export const getResponseChunksByPrompt = (
         type: 'tool-input-end',
       },
       {
-        toolCallId: toolCallId,
+        toolCallId,
         type: 'tool-result',
         toolName: 'createDocument',
         result: {
@@ -183,11 +161,7 @@ export const getResponseChunksByPrompt = (
           kind: 'text',
         },
       },
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
+      finishStop(),
     ];
   } else if (
     compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_CALL)
@@ -212,22 +186,14 @@ Despite its remarkable success, Silicon Valley faces significant challenges incl
 
 As we move forward, Silicon Valley continues to reinvent itself. While some predict its decline due to remote work trends and competition from other tech hubs, the region's adaptability and innovative spirit suggest it will remain influential in shaping our technological future for decades to come.
 `),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
+      finishStop(),
     ];
   } else if (
     compareMessages(recentMessage, TEST_PROMPTS.CREATE_DOCUMENT_TEXT_RESULT)
   ) {
     return [
       ...textToDeltas('A document was created and is now visible to the user.'),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
+      finishStop(),
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.GET_WEATHER_CALL)) {
     return [
@@ -237,22 +203,17 @@ As we move forward, Silicon Valley continues to reinvent itself. While some pred
         toolName: 'getWeather',
         input: JSON.stringify({ latitude: 37.7749, longitude: -122.4194 }),
       },
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
+      finishStop(),
     ];
   } else if (compareMessages(recentMessage, TEST_PROMPTS.GET_WEATHER_RESULT)) {
     return [
       ...textToDeltas('The current temperature in San Francisco is 17°C.'),
-      {
-        type: 'finish',
-        finishReason: 'stop',
-        usage: { inputTokens: 3, outputTokens: 10, totalTokens: 13 },
-      },
+      finishStop(),
     ];
   }
 
-  return [{ id: '6', type: 'text-delta', delta: 'Unknown test prompt!' }];
+  return [
+    { id: '6', type: 'text-delta', delta: 'Unknown test prompt!' },
+    finishStop(),
+  ];
 };

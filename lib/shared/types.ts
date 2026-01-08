@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import type { UIMessage } from 'ai';
 
 export type DataPart = { type: 'append-message'; message: string };
