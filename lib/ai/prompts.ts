@@ -1,5 +1,8 @@
 import type { Geo } from '@vercel/functions';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
+import type {
+  FormConfiguration,
+  HealthProblemsSectionConfig,
+} from '@/lib/types/clinic-config';
 
 export const initialMessage = `
 Olá! Eu sou o assistente de saúde da Asatenas e estou aqui para ajudar na sua avaliação pré-operatória.
@@ -17,6 +20,29 @@ export const postFormMessage = `Obrigado por preencher o formulário. Vamos cont
 
 Você poderia me listar todos os remédios que está usando atualmente? Por favor me diga todos, includindo as que são ingeridas, injetadas, inaladas, aplicadas na pele, etc.
 `;
+
+// Type-safe field labels for health problems
+type HealthProblemsFieldKey = keyof HealthProblemsSectionConfig['fields'];
+
+const healthProblemsLabels: Record<HealthProblemsFieldKey, string> = {
+  cardiologicos: 'cardiac problems',
+  respiratorios: 'respiratory problems',
+  renais: 'renal/kidney problems',
+  figado: 'liver problems',
+  vasculares: 'vascular problems',
+};
+
+function generateHealthProblemsPrompt(problems?: string[]): string {
+  const problemsList = problems
+    ? problems.join(', ')
+    : Object.values(healthProblemsLabels).join(', ');
+
+  return `## Health problems
+
+Check if the patient selected in the form any of these health problems: ${problemsList}.
+For each category, when applicable, ask which diseases they have.
+Ask one message at a time for each category.`;
+}
 
 export const regularPrompt = `
 You are a specialist in the Revised Cardiac Risk Index (RCRI of Lee) and in the HAS2 Cardiovascular Risk Index of the American University of Beirut (AUB).
@@ -123,11 +149,7 @@ Here's the flow you need to strictly follow.
 - Use this tool even if there are no medications to suspend.
 - Use the *saveMedications* tool, not the *saveForm* tool.
 
-## Health problems
-
-Check if the patient selected in the form any health problems such as cardiac, respiratory, renal, liver, or vascular problems.
-For each category, when applicable, ask which diseases they have.
-Ask one message at a time for each category.
+${generateHealthProblemsPrompt()}
 
 ## Questions from risk indexes
 
@@ -200,7 +222,16 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
-// Generate dynamic system prompt based on enabled form configuration
+// Helper to get enabled field labels from a section
+function getEnabledFieldLabels<K extends string>(
+  fields: Record<K, { enabled: boolean }>,
+  labels: Record<K, string>,
+): string[] {
+  return (Object.entries(fields) as Array<[K, { enabled: boolean }]>)
+    .filter(([_, field]) => field.enabled)
+    .map(([key]) => labels[key as K]);
+}
+
 export const generateDynamicSystemPrompt = (
   formConfig: FormConfiguration,
 ): string => {
@@ -312,23 +343,13 @@ Here's the flow you need to strictly follow.
 
   // Only add health problems section if enabled
   if (formConfig.sections.healthProblems?.enabled) {
-    const enabledProblems = Object.entries(
+    const enabledProblems = getEnabledFieldLabels(
       formConfig.sections.healthProblems.fields,
-    )
-      .filter(([_, field]) => field.enabled)
-      .map(([key]) => {
-        const labels: Record<string, string> = {
-          cardiologicos: 'cardiac problems',
-          respiratorios: 'respiratory problems',
-          renais: 'renal/kidney problems',
-          figado: 'liver problems',
-          vasculares: 'vascular problems',
-        };
-        return labels[key] || key;
-      });
+      healthProblemsLabels,
+    );
 
     if (enabledProblems.length > 0) {
-      prompt += `\n## Health problems\n\nCheck if the patient selected in the form any of these health problems: ${enabledProblems.join(', ')}.\nFor each category, when applicable, ask which diseases they have.\nAsk one message at a time for each category.\n`;
+      prompt += `\n${generateHealthProblemsPrompt(enabledProblems)}\n`;
     }
   }
 
