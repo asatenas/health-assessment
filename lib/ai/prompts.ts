@@ -11,7 +11,7 @@ Olá! Eu sou o assistente de saúde da Asatenas e estou aqui para ajudar na sua 
 
 Para entender como esta avaliação funciona e como nós garantimos sua segurança e privacidade, veja em **Como Usar** acima. Para conhecer os criadores e nossa missão, veja em **Quem Somos**.
 
-Por favor leia as perguntas com atenção e responda de forma mais completa possível.
+Por favor, leia cada pergunta com atenção e responda da forma mais completa possível. A avaliação leva cerca de 10 minutos e contém 10 categorias de perguntas objetivas e rápidas de responder.
 
 Para iniciar, pressione o botão abaixo e preencha o formulário. Depois, vou fazer algumas perguntas rápidas, mantendo uma conversa tranquila.
 `;
