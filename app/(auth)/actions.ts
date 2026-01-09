@@ -2,7 +2,7 @@
 
 import { z } from 'zod/v3';
 
-import { createUser, getUser } from '@/lib/db/queries';
+import { createUser, getUser, createClinicConfig } from '@/lib/db/queries';
 
 import { signIn } from './auth';
 
@@ -66,7 +66,12 @@ export const register = async (
     if (user) {
       return { status: 'user_exists' } as RegisterActionState;
     }
-    await createUser(validatedData.email, validatedData.password);
+    const [{ id: userId }] = await createUser(
+      validatedData.email,
+      validatedData.password,
+    );
+
+    await createClinicConfig(userId);
 
     if (process.env.NEW_SIGNUPS_WEBHOOK_URL) {
       await fetch(process.env.NEW_SIGNUPS_WEBHOOK_URL, {

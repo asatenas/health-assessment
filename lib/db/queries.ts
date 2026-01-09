@@ -36,6 +36,7 @@ import { ChatSDKError } from '../shared/errors';
 import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/shared/constants';
 import type { FormConfiguration } from '@/lib/types/clinic-config';
+import { DEFAULT_FORM_CONFIG } from '../config/default-form-config';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -71,7 +72,12 @@ export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 
   try {
-    return await db.insert(user).values({ email, password: hashedPassword });
+    return await db
+      .insert(user)
+      .values({ email, password: hashedPassword })
+      .returning({
+        id: user.id,
+      });
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to create user');
   }
@@ -90,6 +96,20 @@ export async function createGuestUser() {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to create guest user',
+    );
+  }
+}
+
+export async function createClinicConfig(userId: string) {
+  try {
+    return await db.insert(clinicConfig).values({
+      clinicId: userId,
+      formConfig: DEFAULT_FORM_CONFIG,
+    });
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create clinic config',
     );
   }
 }
