@@ -106,8 +106,8 @@ export async function createChatWithToken({
   try {
     const createdAt = new Date();
     const tokenExpiresAt = new Date(
-      createdAt.getTime() + 7 * 24 * 60 * 60 * 1000,
-    ); // 7 days from creation
+      createdAt.getTime() + 30 * 24 * 60 * 60 * 1000,
+    ); // 30 days from creation
 
     const result = await db
       .insert(chat)
