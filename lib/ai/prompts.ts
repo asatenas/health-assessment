@@ -30,6 +30,8 @@ const healthProblemsLabels: Record<HealthProblemsFieldKey, string> = {
   renais: 'renal/kidney problems',
   figado: 'liver problems',
   vasculares: 'vascular problems',
+  ortopedicos: 'orthopedic problems',
+  digestivos: 'digestive problems',
 };
 
 function generateHealthProblemsPrompt(problems?: string[]): string {

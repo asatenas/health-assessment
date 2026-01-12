@@ -30,6 +30,8 @@ interface PreChatFormData {
     renais: boolean;
     figado: boolean;
     vasculares: boolean;
+    ortopedicos: boolean;
+    digestivos: boolean;
   };
   alergiaLatex: boolean;
   alergias: string;
@@ -52,6 +54,7 @@ interface PreChatFormData {
     opiaceos: boolean;
     metanfetamina: boolean;
     alcool: boolean;
+    tabaco: boolean;
   };
   drogasRecreativasOutros: string;
   exames: {
@@ -104,6 +107,8 @@ export function formatPacienteInfo(paciente: any) {
       renais: 'Problemas renais',
       figado: 'Problemas no fígado',
       vasculares: 'Problemas vasculares',
+      ortopedicos: 'Problemas ortopédicos',
+      digestivos: 'Problemas digestivos',
     };
 
     const problemasSaudeParts = Object.entries(problemasSaude)
@@ -189,19 +194,34 @@ export function formatPacienteInfo(paciente: any) {
   // Habits and Vices
   if (drogasRecreativas) {
     const drogasLabels: any = {
+      alcool: 'Bebidas Alcoólicas',
+      tabaco: 'Tabaco',
       cocaina: 'Cocaína',
       maconha: 'Maconha',
       crack: 'Crack',
       opiaceos: 'Opiáceos',
       metanfetamina: 'Metanfetamina',
-      alcool: 'Bebidas Alcoólicas',
     };
 
-    const drogasRecreativasParts = Object.entries(drogasRecreativas)
-      .filter(([, value]) => value !== undefined)
+    const drogasOrder = [
+      'alcool',
+      'tabaco',
+      'cocaina',
+      'maconha',
+      'crack',
+      'opiaceos',
+      'metanfetamina',
+    ];
+
+    const drogasRecreativasParts = drogasOrder
+      .filter(
+        (key) =>
+          drogasRecreativas[key as keyof typeof drogasRecreativas] !==
+          undefined,
+      )
       .map(
-        ([key, value]) =>
-          `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
+        (key) =>
+          `• ${drogasLabels[key]}: ${formatBool(drogasRecreativas[key as keyof typeof drogasRecreativas] as boolean)}`,
       );
 
     if (drogasRecreativasOutros !== undefined && drogasRecreativasOutros) {
@@ -268,6 +288,10 @@ function buildInitialFormData(config: FormConfiguration): any {
       problemasSaude.figado = false;
     if (config.sections.healthProblems.fields.vasculares?.enabled)
       problemasSaude.vasculares = false;
+    if (config.sections.healthProblems.fields.ortopedicos?.enabled)
+      problemasSaude.ortopedicos = false;
+    if (config.sections.healthProblems.fields.digestivos?.enabled)
+      problemasSaude.digestivos = false;
     if (Object.keys(problemasSaude).length > 0) {
       data.problemasSaude = problemasSaude;
     }
@@ -328,6 +352,8 @@ function buildInitialFormData(config: FormConfiguration): any {
       drogasRecreativas.metanfetamina = false;
     if (config.sections.habitsAndVices.fields.alcool?.enabled)
       drogasRecreativas.alcool = false;
+    if (config.sections.habitsAndVices.fields.tabaco?.enabled)
+      drogasRecreativas.tabaco = false;
     if (Object.keys(drogasRecreativas).length > 0) {
       data.drogasRecreativas = drogasRecreativas;
     }
@@ -699,6 +725,66 @@ export function PreChatForm({
                 </p>
               </>
             )}
+            {healthProblemsConfig.ortopedicos?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="problemas-ortopedicos"
+                    checked={formData.problemasSaude.ortopedicos}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        problemasSaude: {
+                          ...formData.problemasSaude,
+                          ortopedicos: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label
+                    htmlFor="problemas-ortopedicos"
+                    className="font-normal"
+                  >
+                    Problemas ortopédicos
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Problemas nos ossos, articulações, músculos e ligamentos. Ex:
+                  artrose, osteoporose, hérnias de disco, problemas na coluna
+                </p>
+              </>
+            )}
+            {healthProblemsConfig.digestivos?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="problemas-digestivos"
+                    checked={formData.problemasSaude.digestivos}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        problemasSaude: {
+                          ...formData.problemasSaude,
+                          digestivos: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="problemas-digestivos" className="font-normal">
+                    Problemas digestivos
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Problemas no sistema digestivo que afetam a digestão. Ex:
+                  refluxo, gastrite, úlceras, doença de Crohn, síndrome do
+                  intestino irritável
+                </p>
+              </>
+            )}
           </div>
         );
       }
@@ -989,7 +1075,6 @@ export function PreChatForm({
             label: 'Opiáceos (Fentanil, morfina, codeína...)',
           },
           { key: 'metanfetamina', label: 'Metanfetamina' },
-          { key: 'alcool', label: 'Bebidas Alcoólicas' },
         ].filter(
           ({ key }) =>
             habitsAndVicesConfig[key as keyof typeof habitsAndVicesConfig]
@@ -1002,7 +1087,6 @@ export function PreChatForm({
           crack: 'Crack',
           opiaceos: 'Opiáceos (fentanil, morfina, codeína...)',
           metanfetamina: 'Metanfetamina',
-          alcool: 'Bebidas alcoólicas',
         };
 
         return (
@@ -1012,82 +1096,144 @@ export function PreChatForm({
               não tenha nenhum, deixe os campos em branco. Esta informação é
               confidencial e essencial para sua segurança durante a cirurgia.
             </p>
+            {habitsAndVicesConfig.alcool?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="bebidas-alcoolicas"
+                    checked={formData.drogasRecreativas.alcool}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
+                          alcool: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="bebidas-alcoolicas" className="font-normal">
+                    Bebidas Alcoólicas
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Consumo de bebidas alcoólicas (cerveja, vinho, destilados,
+                  etc.)
+                </p>
+              </>
+            )}
+            {habitsAndVicesConfig.tabaco?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="tabaco"
+                    checked={formData.drogasRecreativas.tabaco}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
+                          tabaco: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="tabaco" className="font-normal">
+                    Tabaco
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Uso de produtos de tabaco (cigarro, charuto, cachimbo, etc.)
+                </p>
+              </>
+            )}
             {habitsAndVicesOptions.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between font-normal"
-                    type="button"
-                  >
-                    <span
-                      className={`text-sm truncate ${
-                        Object.entries(formData.drogasRecreativas)
-                          .filter(
-                            ([key]) =>
-                              habitsAndVicesConfig[
-                                key as keyof typeof habitsAndVicesConfig
-                              ]?.enabled,
-                          )
-                          .some(([, value]) => value)
-                          ? ''
-                          : 'text-gray-500'
-                      }`}
+              <div>
+                <Label className="text-sm">Drogas Recreativas</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between font-normal mt-2"
+                      type="button"
                     >
-                      {(() => {
-                        const selected = Object.entries(
-                          formData.drogasRecreativas,
-                        )
-                          .filter(
-                            ([key]) =>
-                              habitsAndVicesConfig[
-                                key as keyof typeof habitsAndVicesConfig
-                              ]?.enabled,
+                      <span
+                        className={`text-sm truncate ${
+                          Object.entries(formData.drogasRecreativas)
+                            .filter(
+                              ([key]) =>
+                                key !== 'alcool' &&
+                                key !== 'tabaco' &&
+                                habitsAndVicesConfig[
+                                  key as keyof typeof habitsAndVicesConfig
+                                ]?.enabled,
+                            )
+                            .some(([, value]) => value)
+                            ? ''
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {(() => {
+                          const selected = Object.entries(
+                            formData.drogasRecreativas,
                           )
-                          .filter(([, value]) => value)
-                          .map(
-                            ([key]) =>
-                              habitsAndVicesLabels[
-                                key as keyof typeof habitsAndVicesLabels
-                              ],
-                          );
-                        if (selected.length === 0) {
-                          return 'Selecione os itens aqui...';
-                        } else if (selected.length === 1) {
-                          return `${selected.length} item selecionado`;
-                        } else {
-                          return `${selected.length} itens selecionados`;
+                            .filter(
+                              ([key]) =>
+                                key !== 'alcool' &&
+                                key !== 'tabaco' &&
+                                habitsAndVicesConfig[
+                                  key as keyof typeof habitsAndVicesConfig
+                                ]?.enabled,
+                            )
+                            .filter(([, value]) => value)
+                            .map(
+                              ([key]) =>
+                                habitsAndVicesLabels[
+                                  key as keyof typeof habitsAndVicesLabels
+                                ],
+                            );
+                          if (selected.length === 0) {
+                            return 'Selecione os itens aqui...';
+                          } else if (selected.length === 1) {
+                            return `${selected.length} item selecionado`;
+                          } else {
+                            return `${selected.length} itens selecionados`;
+                          }
+                        })()}
+                      </span>
+                      <ChevronDown className="size-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                    {habitsAndVicesOptions.map(({ key, label }) => (
+                      <DropdownMenuCheckboxItem
+                        key={key}
+                        checked={
+                          formData.drogasRecreativas[
+                            key as keyof typeof formData.drogasRecreativas
+                          ]
                         }
-                      })()}
-                    </span>
-                    <ChevronDown className="size-4 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                  {habitsAndVicesOptions.map(({ key, label }) => (
-                    <DropdownMenuCheckboxItem
-                      key={key}
-                      checked={
-                        formData.drogasRecreativas[
-                          key as keyof typeof formData.drogasRecreativas
-                        ]
-                      }
-                      onCheckedChange={(checked) =>
-                        setFormData({
-                          ...formData,
-                          drogasRecreativas: {
-                            ...formData.drogasRecreativas,
-                            [key]: checked,
-                          },
-                        })
-                      }
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      {label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                        onCheckedChange={(checked) =>
+                          setFormData({
+                            ...formData,
+                            drogasRecreativas: {
+                              ...formData.drogasRecreativas,
+                              [key]: checked,
+                            },
+                          })
+                        }
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        {label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
             {habitsAndVicesConfig.drogasRecreativasOutros?.enabled && (
               <div>

@@ -19,6 +19,8 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       'healthProblems.renal',
       'healthProblems.liver',
       'healthProblems.vascular',
+      'healthProblems.ortopedico',
+      'healthProblems.digestivo',
     ],
     allergies: ['latexAllergy', 'allergies'],
     medicalDevices: [
@@ -56,6 +58,8 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       renais: 'renal',
       figado: 'liver',
       vasculares: 'vascular',
+      ortopedicos: 'ortopedico',
+      digestivos: 'digestivo',
     },
     allergies: { alergiaLatex: 'latexAllergy', alergias: 'allergies' },
     medicalDevices: {
@@ -144,6 +148,11 @@ Do not provide values for fields not listed above - leave them undefined or null
           renal: z.boolean().optional().describe('Has kidney/renal problems'),
           liver: z.boolean().optional().describe('Has liver problems'),
           vascular: z.boolean().optional().describe('Has vascular problems'),
+          ortopedico: z
+            .boolean()
+            .optional()
+            .describe('Has orthopedic problems'),
+          digestivo: z.boolean().optional().describe('Has digestive problems'),
         })
         .optional()
         .describe('Patient health problems'),

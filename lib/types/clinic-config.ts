@@ -21,6 +21,8 @@ export type HealthProblemsSectionConfig = {
     renais: FormFieldConfig;
     figado: FormFieldConfig;
     vasculares: FormFieldConfig;
+    ortopedicos: FormFieldConfig;
+    digestivos: FormFieldConfig;
   };
 };
 
@@ -68,6 +70,7 @@ export type HabitsAndVicesSectionConfig = {
     opiaceos: FormFieldConfig;
     metanfetamina: FormFieldConfig;
     alcool: FormFieldConfig;
+    tabaco: FormFieldConfig;
     drogasRecreativasOutros: FormFieldConfig;
   };
 };

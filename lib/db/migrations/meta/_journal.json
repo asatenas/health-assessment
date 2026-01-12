@@ -218,6 +218,20 @@
       "when": 1767801503466,
       "tag": "0030_furry_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1768001000000,
+      "tag": "0031_add_health_problems",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1768002000000,
+      "tag": "0032_add_tabaco",
+      "breakpoints": true
     }
   ]
 }

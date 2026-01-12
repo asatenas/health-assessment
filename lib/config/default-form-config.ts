@@ -19,6 +19,8 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
         renais: { enabled: false },
         figado: { enabled: false },
         vasculares: { enabled: false },
+        ortopedicos: { enabled: false },
+        digestivos: { enabled: false },
       },
     },
     allergies: {
@@ -58,6 +60,7 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
         opiaceos: { enabled: true },
         metanfetamina: { enabled: true },
         alcool: { enabled: true },
+        tabaco: { enabled: true },
         drogasRecreativasOutros: { enabled: true },
       },
     },
