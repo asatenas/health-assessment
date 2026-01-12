@@ -19,6 +19,8 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
         renais: { enabled: false },
         figado: { enabled: false },
         vasculares: { enabled: false },
+        ortopedicos: { enabled: false },
+        digestivos: { enabled: false },
       },
     },
     allergies: {

@@ -46,6 +46,8 @@ const FIELD_LABELS: Record<string, string> = {
   renais: 'Problemas Renais',
   figado: 'Problemas no Fígado',
   vasculares: 'Problemas Vasculares',
+  ortopedicos: 'Problemas Ortopédicos',
+  digestivos: 'Problemas Digestivos',
   // Allergies
   alergiaLatex: 'Alergia ao Látex',
   alergias: 'Outras Alergias',

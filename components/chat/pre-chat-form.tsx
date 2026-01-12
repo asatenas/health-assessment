@@ -30,6 +30,8 @@ interface PreChatFormData {
     renais: boolean;
     figado: boolean;
     vasculares: boolean;
+    ortopedicos: boolean;
+    digestivos: boolean;
   };
   alergiaLatex: boolean;
   alergias: string;
@@ -104,6 +106,8 @@ export function formatPacienteInfo(paciente: any) {
       renais: 'Problemas renais',
       figado: 'Problemas no fígado',
       vasculares: 'Problemas vasculares',
+      ortopedicos: 'Problemas ortopédicos',
+      digestivos: 'Problemas digestivos',
     };
 
     const problemasSaudeParts = Object.entries(problemasSaude)
@@ -268,6 +272,10 @@ function buildInitialFormData(config: FormConfiguration): any {
       problemasSaude.figado = false;
     if (config.sections.healthProblems.fields.vasculares?.enabled)
       problemasSaude.vasculares = false;
+    if (config.sections.healthProblems.fields.ortopedicos?.enabled)
+      problemasSaude.ortopedicos = false;
+    if (config.sections.healthProblems.fields.digestivos?.enabled)
+      problemasSaude.digestivos = false;
     if (Object.keys(problemasSaude).length > 0) {
       data.problemasSaude = problemasSaude;
     }
@@ -696,6 +704,66 @@ export function PreChatForm({
                 <p className="text-xs text-gray-600 ml-6">
                   Problemas nas veias e artérias que transportam o sangue. Ex:
                   varizes, trombose, pressão alta
+                </p>
+              </>
+            )}
+            {healthProblemsConfig.ortopedicos?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="problemas-ortopedicos"
+                    checked={formData.problemasSaude.ortopedicos}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        problemasSaude: {
+                          ...formData.problemasSaude,
+                          ortopedicos: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label
+                    htmlFor="problemas-ortopedicos"
+                    className="font-normal"
+                  >
+                    Problemas ortopédicos
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Problemas nos ossos, articulações, músculos e ligamentos. Ex:
+                  artrose, osteoporose, hérnias de disco, problemas na coluna
+                </p>
+              </>
+            )}
+            {healthProblemsConfig.digestivos?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="problemas-digestivos"
+                    checked={formData.problemasSaude.digestivos}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        problemasSaude: {
+                          ...formData.problemasSaude,
+                          digestivos: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="problemas-digestivos" className="font-normal">
+                    Problemas digestivos
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Problemas no sistema digestivo que afetam a digestão. Ex:
+                  refluxo, gastrite, úlceras, doença de Crohn, síndrome do
+                  intestino irritável
                 </p>
               </>
             )}

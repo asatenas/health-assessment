@@ -21,6 +21,8 @@ export type HealthProblemsSectionConfig = {
     renais: FormFieldConfig;
     figado: FormFieldConfig;
     vasculares: FormFieldConfig;
+    ortopedicos: FormFieldConfig;
+    digestivos: FormFieldConfig;
   };
 };
 
