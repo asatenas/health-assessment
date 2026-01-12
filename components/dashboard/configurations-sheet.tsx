@@ -25,6 +25,16 @@ import type {
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+const SECTION_ORDER = [
+  'basicInfo',
+  'healthProblems',
+  'allergies',
+  'medicalDevices',
+  'aestheticItems',
+  'habitsAndVices',
+  'exams',
+] as const;
+
 const SECTION_LABELS: Record<string, string> = {
   basicInfo: 'Informações Básicas',
   healthProblems: 'Problemas de Saúde',
@@ -33,6 +43,45 @@ const SECTION_LABELS: Record<string, string> = {
   aestheticItems: 'Itens Estéticos',
   habitsAndVices: 'Hábitos e Vícios',
   exams: 'Exames',
+};
+
+const FIELD_ORDER: Record<string, readonly string[]> = {
+  basicInfo: ['idade', 'peso', 'altura'],
+  healthProblems: [
+    'cardiologicos',
+    'respiratorios',
+    'renais',
+    'figado',
+    'vasculares',
+    'ortopedicos',
+    'digestivos',
+  ],
+  allergies: ['alergiaLatex', 'alergias'],
+  medicalDevices: [
+    'marcaPasso',
+    'cdi',
+    'bombaMedicamentos',
+    'dispositivosOutros',
+  ],
+  aestheticItems: [
+    'megaHair',
+    'apliques',
+    'unhaGel',
+    'ciliosPosticos',
+    'piercings',
+    'lenteContato',
+    'itensUsoOutros',
+  ],
+  habitsAndVices: [
+    'cocaina',
+    'maconha',
+    'crack',
+    'opiaceos',
+    'metanfetamina',
+    'alcool',
+    'drogasRecreativasOutros',
+  ],
+  exams: ['hemoglobina', 'creatinina'],
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -257,8 +306,12 @@ export function ConfigurationsSheet({
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2">
-                          {Object.entries(formConfig.sections).map(
-                            ([sectionKey, section]) => (
+                          {SECTION_ORDER.map((sectionKey) => {
+                            const section =
+                              formConfig.sections[
+                                sectionKey as keyof typeof formConfig.sections
+                              ];
+                            return (
                               <Collapsible
                                 key={sectionKey}
                                 open={openSections[sectionKey]}
@@ -304,51 +357,59 @@ export function ConfigurationsSheet({
                                   </div>
                                   <CollapsibleContent>
                                     <div className="border-t p-3 space-y-2 bg-muted/50">
-                                      {Object.entries(section.fields).map(
-                                        ([fieldKey, field]) => (
-                                          <div
-                                            key={fieldKey}
-                                            className="flex items-center justify-between py-2"
-                                          >
-                                            <Label
-                                              htmlFor={`${sectionKey}-${fieldKey}`}
-                                              className={
-                                                !section.enabled
-                                                  ? 'text-muted-foreground text-sm'
-                                                  : 'text-sm'
-                                              }
+                                      {FIELD_ORDER[sectionKey].map(
+                                        (fieldKey) => {
+                                          const fields =
+                                            section.fields as Record<
+                                              string,
+                                              FormFieldConfig
+                                            >;
+                                          const field = fields[fieldKey];
+                                          return (
+                                            <div
+                                              key={fieldKey}
+                                              className="flex items-center justify-between py-2"
                                             >
-                                              {FIELD_LABELS[fieldKey] ||
-                                                fieldKey}
-                                            </Label>
-                                            <Checkbox
-                                              id={`${sectionKey}-${fieldKey}`}
-                                              checked={field.enabled}
-                                              disabled={
-                                                !section.enabled ||
-                                                REQUIRED_SECTIONS.has(
-                                                  sectionKey,
-                                                ) ||
-                                                REQUIRED_FIELDS[
-                                                  sectionKey
-                                                ]?.has(fieldKey)
-                                              }
-                                              onCheckedChange={() =>
-                                                toggleField(
-                                                  sectionKey,
-                                                  fieldKey,
-                                                )
-                                              }
-                                            />
-                                          </div>
-                                        ),
+                                              <Label
+                                                htmlFor={`${sectionKey}-${fieldKey}`}
+                                                className={
+                                                  !section.enabled
+                                                    ? 'text-muted-foreground text-sm'
+                                                    : 'text-sm'
+                                                }
+                                              >
+                                                {FIELD_LABELS[fieldKey] ||
+                                                  fieldKey}
+                                              </Label>
+                                              <Checkbox
+                                                id={`${sectionKey}-${fieldKey}`}
+                                                checked={field.enabled}
+                                                disabled={
+                                                  !section.enabled ||
+                                                  REQUIRED_SECTIONS.has(
+                                                    sectionKey,
+                                                  ) ||
+                                                  REQUIRED_FIELDS[
+                                                    sectionKey
+                                                  ]?.has(fieldKey)
+                                                }
+                                                onCheckedChange={() =>
+                                                  toggleField(
+                                                    sectionKey,
+                                                    fieldKey,
+                                                  )
+                                                }
+                                              />
+                                            </div>
+                                          );
+                                        },
                                       )}
                                     </div>
                                   </CollapsibleContent>
                                 </div>
                               </Collapsible>
-                            ),
-                          )}
+                            );
+                          })}
                         </div>
                       </CardContent>
                     </Card>
