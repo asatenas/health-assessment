@@ -70,6 +70,7 @@ export type HabitsAndVicesSectionConfig = {
     opiaceos: FormFieldConfig;
     metanfetamina: FormFieldConfig;
     alcool: FormFieldConfig;
+    tabaco: FormFieldConfig;
     drogasRecreativasOutros: FormFieldConfig;
   };
 };

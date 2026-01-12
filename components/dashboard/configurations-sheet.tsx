@@ -79,6 +79,7 @@ const FIELD_ORDER: Record<string, readonly string[]> = {
     'opiaceos',
     'metanfetamina',
     'alcool',
+    'tabaco',
     'drogasRecreativasOutros',
   ],
   exams: ['hemoglobina', 'creatinina'],
@@ -120,6 +121,7 @@ const FIELD_LABELS: Record<string, string> = {
   opiaceos: 'Opiáceos',
   metanfetamina: 'Metanfetamina',
   alcool: 'Álcool',
+  tabaco: 'Tabaco',
   drogasRecreativasOutros: 'Outras Drogas',
   // Exams
   hemoglobina: 'Hemoglobina',

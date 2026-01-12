@@ -54,6 +54,7 @@ interface PreChatFormData {
     opiaceos: boolean;
     metanfetamina: boolean;
     alcool: boolean;
+    tabaco: boolean;
   };
   drogasRecreativasOutros: string;
   exames: {
@@ -199,6 +200,7 @@ export function formatPacienteInfo(paciente: any) {
       opiaceos: 'Opiáceos',
       metanfetamina: 'Metanfetamina',
       alcool: 'Bebidas Alcoólicas',
+      tabaco: 'Tabaco',
     };
 
     const drogasRecreativasParts = Object.entries(drogasRecreativas)
@@ -336,6 +338,8 @@ function buildInitialFormData(config: FormConfiguration): any {
       drogasRecreativas.metanfetamina = false;
     if (config.sections.habitsAndVices.fields.alcool?.enabled)
       drogasRecreativas.alcool = false;
+    if (config.sections.habitsAndVices.fields.tabaco?.enabled)
+      drogasRecreativas.tabaco = false;
     if (Object.keys(drogasRecreativas).length > 0) {
       data.drogasRecreativas = drogasRecreativas;
     }
@@ -1057,7 +1061,6 @@ export function PreChatForm({
             label: 'Opiáceos (Fentanil, morfina, codeína...)',
           },
           { key: 'metanfetamina', label: 'Metanfetamina' },
-          { key: 'alcool', label: 'Bebidas Alcoólicas' },
         ].filter(
           ({ key }) =>
             habitsAndVicesConfig[key as keyof typeof habitsAndVicesConfig]
@@ -1070,7 +1073,6 @@ export function PreChatForm({
           crack: 'Crack',
           opiaceos: 'Opiáceos (fentanil, morfina, codeína...)',
           metanfetamina: 'Metanfetamina',
-          alcool: 'Bebidas alcoólicas',
         };
 
         return (
@@ -1080,6 +1082,61 @@ export function PreChatForm({
               não tenha nenhum, deixe os campos em branco. Esta informação é
               confidencial e essencial para sua segurança durante a cirurgia.
             </p>
+            {habitsAndVicesConfig.alcool?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="bebidas-alcoolicas"
+                    checked={formData.drogasRecreativas.alcool}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
+                          alcool: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="bebidas-alcoolicas" className="font-normal">
+                    Bebidas Alcoólicas
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Consumo de bebidas alcoólicas (cerveja, vinho, destilados,
+                  etc.)
+                </p>
+              </>
+            )}
+            {habitsAndVicesConfig.tabaco?.enabled && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="tabaco"
+                    checked={formData.drogasRecreativas.tabaco}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        drogasRecreativas: {
+                          ...formData.drogasRecreativas,
+                          tabaco: e.target.checked,
+                        },
+                      })
+                    }
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="tabaco" className="font-normal">
+                    Tabaco
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-600 ml-6">
+                  Uso de produtos de tabaco (cigarro, charuto, cachimbo, etc.)
+                </p>
+              </>
+            )}
             {habitsAndVicesOptions.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1093,6 +1150,8 @@ export function PreChatForm({
                         Object.entries(formData.drogasRecreativas)
                           .filter(
                             ([key]) =>
+                              key !== 'alcool' &&
+                              key !== 'tabaco' &&
                               habitsAndVicesConfig[
                                 key as keyof typeof habitsAndVicesConfig
                               ]?.enabled,
@@ -1108,6 +1167,8 @@ export function PreChatForm({
                         )
                           .filter(
                             ([key]) =>
+                              key !== 'alcool' &&
+                              key !== 'tabaco' &&
                               habitsAndVicesConfig[
                                 key as keyof typeof habitsAndVicesConfig
                               ]?.enabled,

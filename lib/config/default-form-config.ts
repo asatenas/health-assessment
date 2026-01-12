@@ -60,6 +60,7 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
         opiaceos: { enabled: true },
         metanfetamina: { enabled: true },
         alcool: { enabled: true },
+        tabaco: { enabled: true },
         drogasRecreativasOutros: { enabled: true },
       },
     },
