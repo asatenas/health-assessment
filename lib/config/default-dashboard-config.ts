@@ -5,7 +5,7 @@ export const DEFAULT_DASHBOARD_CONFIG: DashboardConfiguration = {
     metricsOverview: { enabled: true, position: 1 },
     riskDistribution: { enabled: true, position: 2 },
     timeline: { enabled: true, position: 3 },
-    cancellations: { enabled: true, position: 4 },
+    cancellations: { enabled: false, position: 4 },
     todaysSurgeries: { enabled: true, position: 5 },
     weeklySurgeries: { enabled: true, position: 6 },
     monthlySurgeries: { enabled: true, position: 7 },
