@@ -577,12 +577,6 @@ export default function ClinicDashboard() {
                 {dashboardConfig.widgets.timeline.enabled && (
                   <TimelineChart data={timeline} />
                 )}
-                {dashboardConfig.widgets.cancellations.enabled &&
-                  metrics?.cancellationsAndReschedulesByReason && (
-                    <CancellationsAndReschedulesChart
-                      data={metrics.cancellationsAndReschedulesByReason}
-                    />
-                  )}
                 {dashboardConfig.widgets.weeklySurgeries.enabled && (
                   <WeeklySurgeriesPanel
                     surgeries={weeklySurgeries}
@@ -601,6 +595,12 @@ export default function ClinicDashboard() {
                     onUpdateStatus={handleSurgeryStatusUpdate}
                   />
                 )}
+                {dashboardConfig.widgets.cancellations.enabled &&
+                  metrics?.cancellationsAndReschedulesByReason && (
+                    <CancellationsAndReschedulesChart
+                      data={metrics.cancellationsAndReschedulesByReason}
+                    />
+                  )}
                 {dashboardConfig.widgets.notifications.enabled && (
                   <NotificationsPanel notifications={notifications} />
                 )}
