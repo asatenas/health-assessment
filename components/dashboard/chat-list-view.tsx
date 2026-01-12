@@ -26,6 +26,7 @@ export type Chat = {
   medications?: string;
   score_rcri: number | null;
   score_aub_has2: number | null;
+  surgeryDate?: string | null;
 };
 
 interface ChatListViewProps {
@@ -92,6 +93,24 @@ const getRiskLevel = (chat: Chat): { level: string; color: string } => {
     level,
     color,
   };
+};
+
+const getDaysUntilSurgery = (surgeryDate?: string | null): string => {
+  if (!surgeryDate) return '-';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const surgery = new Date(surgeryDate);
+  surgery.setHours(0, 0, 0, 0);
+
+  const diffTime = surgery.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return `${Math.abs(diffDays)}d atrás`;
+  if (diffDays === 0) return 'Hoje';
+  if (diffDays === 1) return 'Amanhã';
+  return `${diffDays}d`;
 };
 
 type MedicationDetail = {
@@ -440,6 +459,10 @@ export function ChatListView({
                 style={{ width: '120px' }}
               />
               <col
+                className="hidden lg:table-column"
+                style={{ width: '130px' }}
+              />
+              <col
                 className="hidden xl:table-column"
                 style={{ width: '100px' }}
               />
@@ -464,6 +487,9 @@ export function ChatListView({
                 </th>
                 <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Risco
+                </th>
+                <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Dias até cirurgia
                 </th>
                 <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   RCRI
@@ -495,6 +521,9 @@ export function ChatListView({
                         <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
                         </td>
+                        <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
+                        </td>
                         <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
                         </td>
@@ -507,7 +536,7 @@ export function ChatListView({
                 </>
               ) : chats.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center">
+                  <td colSpan={8} className="px-6 py-8 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <div className="text-gray-400 dark:text-gray-500">
                         <svg
@@ -598,6 +627,9 @@ export function ChatListView({
                         >
                           {getRiskLevel(chat).level}
                         </span>
+                      </td>
+                      <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        {getDaysUntilSurgery(chat.surgeryDate)}
                       </td>
                       <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                         {chat.score_rcri !== null &&

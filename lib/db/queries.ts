@@ -837,10 +837,12 @@ export async function getChatsByClinicUserId({
         medications: chat.medications,
         score_rcri: chat.score_rcri,
         score_aub_has2: chat.score_aub_has2,
+        surgeryDate: surgery.date,
         // Project a computed status: preserve 'finalized', otherwise expired when tokenExpiresAt <= now()
         status: sql`CASE WHEN ${chat.status} = 'finished' THEN 'finished' WHEN ${chat.tokenExpiresAt} <= now() THEN 'expired' ELSE ${chat.status} END`,
       })
       .from(chat)
+      .leftJoin(surgery, eq(surgery.assessmentId, chat.id))
       .where(and(...conditions))
       .orderBy(desc(chat.createdAt))
       .limit(limit)
