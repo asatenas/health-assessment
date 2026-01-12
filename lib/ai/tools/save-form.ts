@@ -40,13 +40,13 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       'aestheticItems.others',
     ],
     habitsAndVices: [
+      'recreationalDrugs.alcohol',
+      'recreationalDrugs.tabaco',
       'recreationalDrugs.cocaine',
       'recreationalDrugs.marijuana',
       'recreationalDrugs.crack',
       'recreationalDrugs.opioids',
       'recreationalDrugs.methamphetamine',
-      'recreationalDrugs.alcohol',
-      'recreationalDrugs.tabaco',
       'recreationalDrugs.others',
     ],
     exams: ['hemoglobin', 'creatinine'],
@@ -85,13 +85,13 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       itensUsoOutros: 'others',
     },
     habitsAndVices: {
+      alcool: 'alcohol',
+      tabaco: 'tabaco',
       cocaina: 'cocaine',
       maconha: 'marijuana',
       crack: 'crack',
       opiaceos: 'opioids',
       metanfetamina: 'methamphetamine',
-      alcool: 'alcohol',
-      tabaco: 'tabaco',
       drogasRecreativasOutros: 'others',
     },
     exams: { hemoglobina: 'hemoglobin', creatinina: 'creatinine' },
@@ -213,13 +213,13 @@ Do not provide values for fields not listed above - leave them undefined or null
         .describe('Aesthetic items used by patient'),
       recreationalDrugs: z
         .object({
+          alcohol: z.boolean().optional(),
+          tabaco: z.boolean().optional().describe('Uses tobacco products'),
           cocaine: z.boolean().optional(),
           marijuana: z.boolean().optional(),
           crack: z.boolean().optional(),
           opioids: z.boolean().optional(),
           methamphetamine: z.boolean().optional(),
-          alcohol: z.boolean().optional(),
-          tabaco: z.boolean().optional().describe('Uses tobacco products'),
           others: z
             .array(z.string())
             .optional()
