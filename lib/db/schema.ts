@@ -33,6 +33,7 @@ export const clinicConfig = pgTable('ClinicConfig', {
     .references(() => user.id, { onDelete: 'cascade' }),
   clinicName: varchar('clinicName', { length: 255 }),
   formConfig: json('formConfig').notNull(),
+  dashboardConfig: json('dashboardConfig'), // nullable for backward compatibility
   updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
 });
 

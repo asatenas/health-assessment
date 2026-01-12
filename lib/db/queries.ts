@@ -36,7 +36,10 @@ import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../shared/errors';
 import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/shared/constants';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
+import type {
+  FormConfiguration,
+  DashboardConfiguration,
+} from '@/lib/types/clinic-config';
 import { DEFAULT_FORM_CONFIG } from '../config/default-form-config';
 
 // Optionally, if not using email/pass login, you can
@@ -287,6 +290,29 @@ export async function getChatWithStatusById({ id }: { id: string }) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get chat with computed status by id',
+    );
+  }
+}
+
+export async function getChatWithSurgeryById({ id }: { id: string }) {
+  try {
+    const chatData = await getChatById({ id });
+    if (!chatData) return null;
+
+    // Fetch surgery details if they exist
+    const [surgeryDetails] = await db
+      .select()
+      .from(surgery)
+      .where(eq(surgery.assessmentId, id));
+
+    return {
+      ...chatData,
+      surgery: surgeryDetails || null,
+    };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat with surgery by id',
     );
   }
 }
@@ -844,13 +870,45 @@ export function calculateRiskLevel(
   rcri: number | null,
   has2: number | null,
 ): 'low' | 'medium' | 'high' | 'unknown' {
-  if (rcri == null || has2 == null) return 'unknown';
-  if (rcri === -1 || has2 === -1) return 'unknown';
+  // If both are null or -1, return unknown
+  const validRcri = rcri != null && rcri !== -1 ? rcri : null;
+  const validHas2 = has2 != null && has2 !== -1 ? has2 : null;
 
-  const maxScore = Math.max(rcri, has2);
+  if (validRcri === null && validHas2 === null) return 'unknown';
+
+  // Use whichever score is available, or the max if both are available
+  const maxScore = Math.max(
+    validRcri ?? Number.NEGATIVE_INFINITY,
+    validHas2 ?? Number.NEGATIVE_INFINITY,
+  );
+
   if (maxScore <= 1) return 'low';
   if (maxScore <= 3) return 'medium';
   return 'high';
+}
+
+function mapRiskLevelToPortuguese(
+  riskLevel: 'low' | 'medium' | 'high' | 'unknown',
+): 'baixo' | 'moderado' | 'alto' | 'unknown' {
+  const map = {
+    low: 'baixo' as const,
+    medium: 'moderado' as const,
+    high: 'alto' as const,
+    unknown: 'unknown' as const,
+  };
+  return map[riskLevel];
+}
+
+function mapRiskLevelToPortugueseCapitalized(
+  riskLevel: 'low' | 'medium' | 'high' | 'unknown',
+): 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido' {
+  const map = {
+    low: 'Baixo' as const,
+    medium: 'Moderado' as const,
+    high: 'Alto' as const,
+    unknown: 'Desconhecido' as const,
+  };
+  return map[riskLevel];
 }
 
 /**
@@ -1379,13 +1437,20 @@ export async function getTodaysSurgeriesForSwipe({
     // Map surgeries to include chat data and risk level
     return todaysSurgeries.map((surgeryItem) => {
       const chatItem = chats.find((c) => c.id === surgeryItem.assessmentId);
+      const rcriScore = chatItem?.score_rcri ?? null;
+      const has2Score = chatItem?.score_aub_has2 ?? null;
+      const riskLevel = calculateRiskLevel(rcriScore, has2Score);
+      const formData = chatItem?.form as any;
+
       return {
-        ...chatItem,
-        ...surgeryItem,
-        riskLevel: calculateRiskLevel(
-          chatItem?.score_rcri || null,
-          chatItem?.score_aub_has2 || null,
-        ),
+        chatId: surgeryItem.assessmentId,
+        patientAge: formData?.age || 0,
+        riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
+        surgeryDate: surgeryItem.date?.toISOString() || '',
+        surgeryName: surgeryItem.name || formData?.surgeryName,
+        surgeryTime: formData?.surgeryTime,
+        rcriScore: rcriScore,
+        has2Score: has2Score,
       };
     });
   } catch (error) {
@@ -1413,11 +1478,16 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     endOfSaturday.setDate(now.getDate() + daysUntilSaturday);
     endOfSaturday.setHours(23, 59, 59, 999);
 
-    // Get all finished assessments for this user
+    // Get all finished or in-progress assessments for this user
     const chats = await db
       .select()
       .from(chat)
-      .where(and(eq(chat.userId, userId), eq(chat.status, 'finished')));
+      .where(
+        and(
+          eq(chat.userId, userId),
+          sql`${chat.status} IN ('finished', 'in_progress')`,
+        ),
+      );
 
     // Get surgeries scheduled this week
     const surgeries = await db
@@ -1460,19 +1530,22 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
 
       const chatItem = chatMap.get(surgeryItem.assessmentId);
       const formData = chatItem?.form as any;
+      const riskLevel = calculateRiskLevel(
+        chatItem?.score_rcri ?? null,
+        chatItem?.score_aub_has2 ?? null,
+      );
       groupedByDay[key].push({
         chatId: surgeryItem.assessmentId,
         patientAge: formData?.age || 0,
-        riskLevel: calculateRiskLevel(
-          chatItem?.score_rcri || null,
-          chatItem?.score_aub_has2 || null,
-        ),
+        riskLevel: mapRiskLevelToPortuguese(riskLevel),
         surgeryDate: surgeryItem.date.toISOString(),
+        surgeryName: surgeryItem.name || formData?.surgeryName,
+        surgeryTime: formData?.surgeryTime,
         surgeryCompleted: surgeryItem.completed,
         surgeryCancelled: surgeryItem.cancelled,
         surgeryRescheduled: surgeryItem.rescheduled,
-        rcriScore: chatItem?.score_rcri || null,
-        has2Score: chatItem?.score_aub_has2 || null,
+        rcriScore: chatItem?.score_rcri ?? null,
+        has2Score: chatItem?.score_aub_has2 ?? null,
       });
     });
 
@@ -1482,6 +1555,79 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     throw new ChatSDKError(
       'bad_request:database',
       "Failed to get this week's surgeries",
+    );
+  }
+}
+
+export async function getWeeklySurgeries({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId: string;
+  startDate: Date;
+  endDate: Date;
+}) {
+  try {
+    // Get all finished or in-progress assessments for this user
+    const chats = await db
+      .select()
+      .from(chat)
+      .where(
+        and(
+          eq(chat.userId, userId),
+          sql`${chat.status} IN ('finished', 'in_progress')`,
+        ),
+      );
+
+    // Get surgeries scheduled in the date range
+    const surgeries = await db
+      .select()
+      .from(surgery)
+      .where(
+        and(
+          inArray(
+            surgery.assessmentId,
+            chats.map((c) => c.id),
+          ),
+          gte(surgery.date, startDate),
+          lte(surgery.date, endDate),
+        ),
+      )
+      .orderBy(asc(surgery.date));
+
+    // Create a map of assessmentId to chat
+    const chatMap = new Map(chats.map((c) => [c.id, c]));
+
+    // Format surgeries with additional data
+    const formattedSurgeries = surgeries
+      .filter((surgeryItem) => surgeryItem.date)
+      .map((surgeryItem) => {
+        const chatItem = chatMap.get(surgeryItem.assessmentId);
+        const formData = chatItem?.form as any;
+        const riskLevel = calculateRiskLevel(
+          chatItem?.score_rcri ?? null,
+          chatItem?.score_aub_has2 ?? null,
+        );
+
+        return {
+          chatId: surgeryItem.assessmentId,
+          patientAge: formData?.age || 0,
+          riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
+          surgeryDate: surgeryItem?.date?.toISOString(),
+          surgeryName: surgeryItem.name || formData?.surgeryName || undefined,
+          surgeryTime: formData?.surgeryTime || undefined,
+          rcriScore: chatItem?.score_rcri ?? null,
+          has2Score: chatItem?.score_aub_has2 ?? null,
+        };
+      });
+
+    return formattedSurgeries;
+  } catch (error) {
+    console.log(error);
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get weekly surgeries',
     );
   }
 }
@@ -1509,10 +1655,12 @@ export async function updateClinicConfig({
   clinicId,
   clinicName,
   formConfig,
+  dashboardConfig,
 }: {
   clinicId: string;
   clinicName?: string;
   formConfig?: FormConfiguration;
+  dashboardConfig?: DashboardConfiguration;
 }) {
   try {
     const updateData: Partial<ClinicConfig> = {
@@ -1521,6 +1669,8 @@ export async function updateClinicConfig({
 
     if (clinicName !== undefined) updateData.clinicName = clinicName;
     if (formConfig !== undefined) updateData.formConfig = formConfig as any;
+    if (dashboardConfig !== undefined)
+      updateData.dashboardConfig = dashboardConfig as any;
 
     const [updated] = await db
       .update(clinicConfig)

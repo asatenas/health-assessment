@@ -1,0 +1,1 @@
+ALTER TABLE "ClinicConfig" ADD COLUMN "dashboardConfig" json;

@@ -18,8 +18,11 @@ import { RiskDistributionChart } from '@/components/dashboard/risk-distribution-
 import { TimelineChart } from '@/components/dashboard/timeline-chart';
 import { CancellationsAndReschedulesChart } from '@/components/dashboard/cancellations-reschedules-chart';
 import { TodaysSurgeriesPanel } from '@/components/dashboard/todays-surgeries-panel';
-import { ThisMonthsSurgeriesPanel } from '@/components/dashboard/this-months-surgeries-panel';
+import { WeeklySurgeriesPanel } from '@/components/dashboard/weekly-surgeries-panel';
+import { MonthlySurgeriesPanel } from '@/components/dashboard/monthly-surgeries-panel';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
+import type { DashboardConfiguration } from '@/lib/types/clinic-config';
+import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
 import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
@@ -46,12 +49,15 @@ export default function ClinicDashboard() {
   const [clinicName, setClinicName] = useState<string>('Painel da Clínica');
   const [isLoadingClinicName, setIsLoadingClinicName] = useState(true);
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
+  const [dashboardConfig, setDashboardConfig] =
+    useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [todaysSurgeries, setTodaysSurgeries] = useState<any[]>([]);
+  const [weeklySurgeries, setWeeklySurgeries] = useState<any[]>([]);
   const [thisMonthsSurgeries, setThisMonthsSurgeries] = useState<
     Record<string, any[]>
   >({});
@@ -69,7 +75,7 @@ export default function ClinicDashboard() {
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
 
-  // Fetch clinic config for clinic name
+  // Fetch clinic config for clinic name and dashboard config
   const fetchClinicConfig = useCallback(async () => {
     try {
       const response = await fetch('/api/clinic/config');
@@ -77,6 +83,9 @@ export default function ClinicDashboard() {
         const data = await response.json();
         if (data.clinicName) {
           setClinicName(data.clinicName);
+        }
+        if (data.dashboardConfig) {
+          setDashboardConfig(data.dashboardConfig);
         }
       }
     } catch (error) {
@@ -109,7 +118,17 @@ export default function ClinicDashboard() {
       setMetrics(data.metrics);
       setTimeline(data.timeline);
       setNotifications(data.notifications);
-      setThisMonthsSurgeries(data.thisMonthsSurgeries || {});
+      setTodaysSurgeries(data.todaysSurgeries || []);
+      setThisMonthsSurgeries(data.thisWeeksSurgeries || {});
+
+      // Fetch weekly surgeries separately
+      const weeklySurgeriesResponse = await fetch(
+        '/api/clinic/metrics/weekly-surgeries',
+      );
+      if (weeklySurgeriesResponse.ok) {
+        const weeklySurgeriesData = await weeklySurgeriesResponse.json();
+        setWeeklySurgeries(weeklySurgeriesData.surgeries || []);
+      }
     } catch (error) {
       toast({
         type: 'error',
@@ -526,13 +545,15 @@ export default function ClinicDashboard() {
             </div>
 
             {/* Metrics Overview */}
-            <MetricsOverview
-              totalAssessments={metrics?.totalAssessments || 0}
-              completionRate={metrics?.completionRate || 0}
-              highRiskPatients={metrics?.riskDistribution?.high || 0}
-              latexAllergies={metrics?.latexAllergies || 0}
-              isLoading={isLoadingMetrics}
-            />
+            {dashboardConfig.widgets.metricsOverview.enabled && (
+              <MetricsOverview
+                totalAssessments={metrics?.totalAssessments || 0}
+                completionRate={metrics?.completionRate || 0}
+                highRiskPatients={metrics?.riskDistribution?.high || 0}
+                latexAllergies={metrics?.latexAllergies || 0}
+                isLoading={isLoadingMetrics}
+              />
+            )}
 
             {/* Dynamic Charts Grid - Max 2 per row */}
             {isLoadingMetrics ? (
@@ -544,28 +565,45 @@ export default function ClinicDashboard() {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {metrics && (
-                  <RiskDistributionChart
-                    low={metrics.riskDistribution.low}
-                    medium={metrics.riskDistribution.medium}
-                    high={metrics.riskDistribution.high}
-                    unknown={metrics.riskDistribution.unknown}
+                {dashboardConfig.widgets.riskDistribution.enabled &&
+                  metrics && (
+                    <RiskDistributionChart
+                      low={metrics.riskDistribution.low}
+                      medium={metrics.riskDistribution.medium}
+                      high={metrics.riskDistribution.high}
+                      unknown={metrics.riskDistribution.unknown}
+                    />
+                  )}
+                {dashboardConfig.widgets.timeline.enabled && (
+                  <TimelineChart data={timeline} />
+                )}
+                {dashboardConfig.widgets.cancellations.enabled &&
+                  metrics?.cancellationsAndReschedulesByReason && (
+                    <CancellationsAndReschedulesChart
+                      data={metrics.cancellationsAndReschedulesByReason}
+                    />
+                  )}
+                {dashboardConfig.widgets.weeklySurgeries.enabled && (
+                  <WeeklySurgeriesPanel
+                    surgeries={weeklySurgeries}
+                    onUpdateStatus={handleSurgeryStatusUpdate}
                   />
                 )}
-                <TimelineChart data={timeline} />
-                {metrics?.cancellationsAndRescheduling && (
-                  <CancellationsAndReschedulesChart
-                    data={metrics.cancellationsAndRescheduling}
+                {dashboardConfig.widgets.todaysSurgeries.enabled && (
+                  <TodaysSurgeriesPanel
+                    surgeries={todaysSurgeries}
+                    onUpdateStatus={handleSurgeryStatusUpdate}
                   />
                 )}
-                <TodaysSurgeriesPanel
-                  surgeries={todaysSurgeries}
-                  onUpdateStatus={handleSurgeryStatusUpdate}
-                />
-                <ThisMonthsSurgeriesPanel
-                  surgeriesByDay={thisMonthsSurgeries}
-                />
-                <NotificationsPanel notifications={notifications} />
+                {dashboardConfig.widgets.monthlySurgeries.enabled && (
+                  <MonthlySurgeriesPanel
+                    surgeriesByDay={thisMonthsSurgeries}
+                    onUpdateStatus={handleSurgeryStatusUpdate}
+                  />
+                )}
+                {dashboardConfig.widgets.notifications.enabled && (
+                  <NotificationsPanel notifications={notifications} />
+                )}
               </div>
             )}
           </div>

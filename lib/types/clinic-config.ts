@@ -113,3 +113,22 @@ export type FormConfiguration = {
     exams: ExamsSectionConfig;
   };
 };
+
+// Dashboard Configuration
+export type DashboardWidgetConfig = {
+  enabled: boolean;
+  position?: number; // For custom ordering (future)
+};
+
+export type DashboardConfiguration = {
+  widgets: {
+    metricsOverview: DashboardWidgetConfig;
+    riskDistribution: DashboardWidgetConfig;
+    timeline: DashboardWidgetConfig;
+    cancellations: DashboardWidgetConfig;
+    todaysSurgeries: DashboardWidgetConfig;
+    weeklySurgeries: DashboardWidgetConfig; // NEW
+    monthlySurgeries: DashboardWidgetConfig;
+    notifications: DashboardWidgetConfig;
+  };
+};

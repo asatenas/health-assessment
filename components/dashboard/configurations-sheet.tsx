@@ -18,10 +18,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import type {
   FormConfiguration,
   FormFieldConfig,
+  DashboardConfiguration,
 } from '@/lib/types/clinic-config';
+import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -144,6 +148,50 @@ const REQUIRED_FIELDS: Record<string, Set<string>> = {
   basicInfo: new Set(['idade', 'peso', 'altura']),
 };
 
+// Dashboard widgets configuration
+const DASHBOARD_WIDGETS = [
+  {
+    key: 'metricsOverview',
+    label: 'Visão Geral de Métricas',
+    description: 'Cards com estatísticas principais',
+  },
+  {
+    key: 'riskDistribution',
+    label: 'Distribuição de Risco',
+    description: 'Gráfico de pizza de riscos',
+  },
+  {
+    key: 'timeline',
+    label: 'Linha do Tempo',
+    description: 'Histórico de avaliações',
+  },
+  {
+    key: 'cancellations',
+    label: 'Cancelamentos e Reagendamentos',
+    description: 'Gráfico de status de cirurgias',
+  },
+  {
+    key: 'todaysSurgeries',
+    label: 'Cirurgias de Hoje',
+    description: 'Cartões das cirurgias agendadas para hoje',
+  },
+  {
+    key: 'weeklySurgeries',
+    label: 'Cirurgias da Semana',
+    description: 'Calendário semanal de cirurgias',
+  },
+  {
+    key: 'monthlySurgeries',
+    label: 'Cirurgias do Mês',
+    description: 'Calendário mensal de cirurgias',
+  },
+  {
+    key: 'notifications',
+    label: 'Notificações',
+    description: 'Alertas e lembretes importantes',
+  },
+] as const;
+
 interface ConfigurationsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -159,6 +207,8 @@ export function ConfigurationsSheet({
   const [saving, setSaving] = useState(false);
   const [clinicName, setClinicName] = useState('');
   const [formConfig, setFormConfig] = useState<FormConfiguration | null>(null);
+  const [dashboardConfig, setDashboardConfig] =
+    useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -177,6 +227,7 @@ export function ConfigurationsSheet({
       const data = await response.json();
       setClinicName(data.clinicName || '');
       setFormConfig(data.formConfig);
+      setDashboardConfig(data.dashboardConfig || DEFAULT_DASHBOARD_CONFIG);
       setError(null);
     } catch (error) {
       console.error('Error loading config:', error);
@@ -193,7 +244,7 @@ export function ConfigurationsSheet({
       const response = await fetch('/api/clinic/config', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clinicName, formConfig }),
+        body: JSON.stringify({ clinicName, formConfig, dashboardConfig }),
       });
 
       if (!response.ok) throw new Error('Failed to save');
@@ -251,6 +302,24 @@ export function ConfigurationsSheet({
     });
   };
 
+  const toggleWidget = (widgetKey: string) => {
+    setDashboardConfig({
+      ...dashboardConfig,
+      widgets: {
+        ...dashboardConfig.widgets,
+        [widgetKey]: {
+          ...dashboardConfig.widgets[
+            widgetKey as keyof typeof dashboardConfig.widgets
+          ],
+          enabled:
+            !dashboardConfig.widgets[
+              widgetKey as keyof typeof dashboardConfig.widgets
+            ].enabled,
+        },
+      },
+    });
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -260,7 +329,8 @@ export function ConfigurationsSheet({
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Configurações da Clínica</SheetTitle>
           <SheetDescription>
-            Configure o nome da clínica e os campos do formulário de avaliação
+            Configure o nome da clínica, os campos do formulário e os widgets do
+            dashboard
           </SheetDescription>
         </SheetHeader>
 
@@ -302,126 +372,181 @@ export function ConfigurationsSheet({
                       </CardContent>
                     </Card>
 
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">
-                          Configuração do Formulário
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Marque as seções e campos que deseja habilitar no
-                          formulário de avaliação. Campos desmarcados não
-                          aparecerão para o paciente.
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {SECTION_ORDER.map((sectionKey) => {
-                            const section =
-                              formConfig.sections[
-                                sectionKey as keyof typeof formConfig.sections
-                              ];
-                            return (
-                              <Collapsible
-                                key={sectionKey}
-                                open={openSections[sectionKey]}
-                                onOpenChange={(open) =>
-                                  setOpenSections({
-                                    ...openSections,
-                                    [sectionKey]: open,
-                                  })
-                                }
-                              >
-                                <div className="border rounded-lg">
-                                  <div className="flex items-center justify-between p-3">
-                                    <div className="flex items-center gap-3">
-                                      <Checkbox
-                                        checked={section.enabled}
-                                        disabled={REQUIRED_SECTIONS.has(
-                                          sectionKey,
-                                        )}
-                                        onCheckedChange={() =>
-                                          toggleSection(sectionKey)
-                                        }
-                                      />
-                                      <span className="font-medium text-sm">
-                                        {SECTION_LABELS[sectionKey]}
-                                        {REQUIRED_SECTIONS.has(sectionKey) && (
-                                          <span className="ml-2 text-xs text-muted-foreground">
-                                            (Obrigatório)
+                    <Tabs defaultValue="form" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="form">Formulário</TabsTrigger>
+                        <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="form" className="mt-4">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">
+                              Configuração do Formulário
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Marque as seções e campos que deseja habilitar no
+                              formulário de avaliação. Campos desmarcados não
+                              aparecerão para o paciente.
+                            </p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {SECTION_ORDER.map((sectionKey) => {
+                                const section =
+                                  formConfig.sections[
+                                    sectionKey as keyof typeof formConfig.sections
+                                  ];
+                                return (
+                                  <Collapsible
+                                    key={sectionKey}
+                                    open={openSections[sectionKey]}
+                                    onOpenChange={(open) =>
+                                      setOpenSections({
+                                        ...openSections,
+                                        [sectionKey]: open,
+                                      })
+                                    }
+                                  >
+                                    <div className="border rounded-lg">
+                                      <div className="flex items-center justify-between p-3">
+                                        <div className="flex items-center gap-3">
+                                          <Checkbox
+                                            checked={section.enabled}
+                                            disabled={REQUIRED_SECTIONS.has(
+                                              sectionKey,
+                                            )}
+                                            onCheckedChange={() =>
+                                              toggleSection(sectionKey)
+                                            }
+                                          />
+                                          <span className="font-medium text-sm">
+                                            {SECTION_LABELS[sectionKey]}
+                                            {REQUIRED_SECTIONS.has(
+                                              sectionKey,
+                                            ) && (
+                                              <span className="ml-2 text-xs text-muted-foreground">
+                                                (Obrigatório)
+                                              </span>
+                                            )}
                                           </span>
-                                        )}
-                                      </span>
+                                        </div>
+                                        <CollapsibleTrigger asChild>
+                                          <Button variant="ghost" size="sm">
+                                            <ChevronDown
+                                              className={`size-4 transition-transform ${
+                                                openSections[sectionKey]
+                                                  ? 'rotate-180'
+                                                  : ''
+                                              }`}
+                                            />
+                                          </Button>
+                                        </CollapsibleTrigger>
+                                      </div>
+                                      <CollapsibleContent>
+                                        <div className="border-t p-3 space-y-2 bg-muted/50">
+                                          {FIELD_ORDER[sectionKey].map(
+                                            (fieldKey) => {
+                                              const fields =
+                                                section.fields as Record<
+                                                  string,
+                                                  FormFieldConfig
+                                                >;
+                                              const field = fields[fieldKey];
+                                              return (
+                                                <div
+                                                  key={fieldKey}
+                                                  className="flex items-center justify-between py-2"
+                                                >
+                                                  <Label
+                                                    htmlFor={`${sectionKey}-${fieldKey}`}
+                                                    className={
+                                                      !section.enabled
+                                                        ? 'text-muted-foreground text-sm'
+                                                        : 'text-sm'
+                                                    }
+                                                  >
+                                                    {FIELD_LABELS[fieldKey] ||
+                                                      fieldKey}
+                                                  </Label>
+                                                  <Checkbox
+                                                    id={`${sectionKey}-${fieldKey}`}
+                                                    checked={field.enabled}
+                                                    disabled={
+                                                      !section.enabled ||
+                                                      REQUIRED_SECTIONS.has(
+                                                        sectionKey,
+                                                      ) ||
+                                                      REQUIRED_FIELDS[
+                                                        sectionKey
+                                                      ]?.has(fieldKey)
+                                                    }
+                                                    onCheckedChange={() =>
+                                                      toggleField(
+                                                        sectionKey,
+                                                        fieldKey,
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              );
+                                            },
+                                          )}
+                                        </div>
+                                      </CollapsibleContent>
                                     </div>
-                                    <CollapsibleTrigger asChild>
-                                      <Button variant="ghost" size="sm">
-                                        <ChevronDown
-                                          className={`size-4 transition-transform ${
-                                            openSections[sectionKey]
-                                              ? 'rotate-180'
-                                              : ''
-                                          }`}
-                                        />
-                                      </Button>
-                                    </CollapsibleTrigger>
+                                  </Collapsible>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+
+                      <TabsContent value="dashboard" className="mt-4">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">
+                              Widgets do Dashboard
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Configure quais widgets serão exibidos no
+                              dashboard. Widgets desabilitados não aparecerão na
+                              visualização de análise.
+                            </p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {DASHBOARD_WIDGETS.map((widget) => (
+                                <div
+                                  key={widget.key}
+                                  className="flex items-start justify-between p-3 border rounded-lg"
+                                >
+                                  <div className="flex-1 space-y-1">
+                                    <div className="font-medium text-sm">
+                                      {widget.label}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {widget.description}
+                                    </p>
                                   </div>
-                                  <CollapsibleContent>
-                                    <div className="border-t p-3 space-y-2 bg-muted/50">
-                                      {FIELD_ORDER[sectionKey].map(
-                                        (fieldKey) => {
-                                          const fields =
-                                            section.fields as Record<
-                                              string,
-                                              FormFieldConfig
-                                            >;
-                                          const field = fields[fieldKey];
-                                          return (
-                                            <div
-                                              key={fieldKey}
-                                              className="flex items-center justify-between py-2"
-                                            >
-                                              <Label
-                                                htmlFor={`${sectionKey}-${fieldKey}`}
-                                                className={
-                                                  !section.enabled
-                                                    ? 'text-muted-foreground text-sm'
-                                                    : 'text-sm'
-                                                }
-                                              >
-                                                {FIELD_LABELS[fieldKey] ||
-                                                  fieldKey}
-                                              </Label>
-                                              <Checkbox
-                                                id={`${sectionKey}-${fieldKey}`}
-                                                checked={field.enabled}
-                                                disabled={
-                                                  !section.enabled ||
-                                                  REQUIRED_SECTIONS.has(
-                                                    sectionKey,
-                                                  ) ||
-                                                  REQUIRED_FIELDS[
-                                                    sectionKey
-                                                  ]?.has(fieldKey)
-                                                }
-                                                onCheckedChange={() =>
-                                                  toggleField(
-                                                    sectionKey,
-                                                    fieldKey,
-                                                  )
-                                                }
-                                              />
-                                            </div>
-                                          );
-                                        },
-                                      )}
-                                    </div>
-                                  </CollapsibleContent>
+                                  <Switch
+                                    checked={
+                                      dashboardConfig.widgets[
+                                        widget.key as keyof typeof dashboardConfig.widgets
+                                      ].enabled
+                                    }
+                                    onCheckedChange={() =>
+                                      toggleWidget(widget.key)
+                                    }
+                                  />
                                 </div>
-                              </Collapsible>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+                    </Tabs>
                   </>
                 ) : (
                   <div className="p-4 text-center text-red-500">

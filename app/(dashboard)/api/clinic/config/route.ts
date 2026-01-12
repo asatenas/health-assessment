@@ -5,7 +5,11 @@ import {
   updateClinicConfig,
 } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/shared/errors';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
+import type {
+  FormConfiguration,
+  DashboardConfiguration,
+} from '@/lib/types/clinic-config';
+import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
@@ -33,7 +37,11 @@ export async function GET() {
       ).toResponse();
     }
 
-    return NextResponse.json(config);
+    // Return config with default dashboard config if not set
+    return NextResponse.json({
+      ...config,
+      dashboardConfig: config.dashboardConfig || DEFAULT_DASHBOARD_CONFIG,
+    });
   } catch (error) {
     console.error('Error fetching clinic config:', error);
     return new ChatSDKError(
@@ -58,7 +66,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { clinicName, formConfig } = body;
+    const { clinicName, formConfig, dashboardConfig } = body;
 
     // Validate formConfig structure if provided
     if (formConfig && !isValidFormConfig(formConfig)) {
@@ -68,10 +76,19 @@ export async function PATCH(request: NextRequest) {
       ).toResponse();
     }
 
+    // Validate dashboardConfig structure if provided
+    if (dashboardConfig && !isValidDashboardConfig(dashboardConfig)) {
+      return new ChatSDKError(
+        'bad_request:api',
+        'Invalid dashboard configuration structure',
+      ).toResponse();
+    }
+
     const updated = await updateClinicConfig({
       clinicId: session.user.id,
       clinicName,
       formConfig,
+      dashboardConfig,
     });
 
     return NextResponse.json(updated);
@@ -139,4 +156,27 @@ function isValidFormConfig(config: any): config is FormConfiguration {
   }
 
   return true;
+}
+
+// Dashboard config validation helper
+function isValidDashboardConfig(config: any): config is DashboardConfiguration {
+  if (!config.widgets || typeof config.widgets !== 'object') return false;
+
+  const requiredWidgets = [
+    'metricsOverview',
+    'riskDistribution',
+    'timeline',
+    'cancellations',
+    'todaysSurgeries',
+    'weeklySurgeries',
+    'monthlySurgeries',
+    'notifications',
+  ];
+
+  // Check that all required widgets exist and have proper structure
+  return requiredWidgets.every(
+    (widget) =>
+      config.widgets[widget] &&
+      typeof config.widgets[widget].enabled === 'boolean',
+  );
 }

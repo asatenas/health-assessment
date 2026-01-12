@@ -4,6 +4,7 @@ import {
   getTimelineData,
   getHighPriorityNotifications,
   getThisWeeksSurgeries,
+  getTodaysSurgeriesForSwipe,
 } from '@/lib/db/queries';
 
 export async function GET(request: Request) {
@@ -95,11 +96,17 @@ export async function GET(request: Request) {
       userId: session.user.id,
     });
 
+    // Get today's surgeries
+    const todaysSurgeries = await getTodaysSurgeriesForSwipe({
+      userId: session.user.id,
+    });
+
     return Response.json({
       metrics,
       timeline,
       notifications,
       thisWeeksSurgeries,
+      todaysSurgeries,
     });
   } catch (error) {
     console.error('Error fetching dashboard metrics:', error);
