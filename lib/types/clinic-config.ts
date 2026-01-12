@@ -12,6 +12,16 @@ export type BasicInfoSectionConfig = {
   };
 };
 
+// Surgery Section
+export type SurgerySectionConfig = {
+  enabled: boolean;
+  fields: {
+    nomeCirurgia: FormFieldConfig;
+    dataCirurgia: FormFieldConfig;
+    horaCirurgia: FormFieldConfig;
+  };
+};
+
 // Health Problems Section
 export type HealthProblemsSectionConfig = {
   enabled: boolean;
@@ -94,6 +104,7 @@ export type FormConfiguration = {
   version: number;
   sections: {
     basicInfo: BasicInfoSectionConfig;
+    surgery: SurgerySectionConfig;
     healthProblems: HealthProblemsSectionConfig;
     allergies: AllergiesSectionConfig;
     medicalDevices: MedicalDevicesSectionConfig;

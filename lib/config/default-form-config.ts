@@ -11,6 +11,14 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
         altura: { enabled: true },
       },
     },
+    surgery: {
+      enabled: true,
+      fields: {
+        nomeCirurgia: { enabled: true },
+        dataCirurgia: { enabled: true },
+        horaCirurgia: { enabled: true },
+      },
+    },
     healthProblems: {
       enabled: false,
       fields: {

@@ -27,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const SECTION_ORDER = [
   'basicInfo',
+  'surgery',
   'healthProblems',
   'allergies',
   'medicalDevices',
@@ -37,6 +38,7 @@ const SECTION_ORDER = [
 
 const SECTION_LABELS: Record<string, string> = {
   basicInfo: 'Informações Básicas',
+  surgery: 'Cirurgia',
   healthProblems: 'Problemas de Saúde',
   allergies: 'Alergias',
   medicalDevices: 'Dispositivos Médicos',
@@ -47,6 +49,7 @@ const SECTION_LABELS: Record<string, string> = {
 
 const FIELD_ORDER: Record<string, readonly string[]> = {
   basicInfo: ['idade', 'peso', 'altura'],
+  surgery: ['nomeCirurgia', 'dataCirurgia', 'horaCirurgia'],
   healthProblems: [
     'cardiologicos',
     'respiratorios',
@@ -90,6 +93,10 @@ const FIELD_LABELS: Record<string, string> = {
   idade: 'Idade',
   peso: 'Peso',
   altura: 'Altura',
+  // Surgery
+  nomeCirurgia: 'Nome da Cirurgia',
+  dataCirurgia: 'Data',
+  horaCirurgia: 'Hora',
   // Health Problems
   cardiologicos: 'Problemas Cardiológicos',
   respiratorios: 'Problemas Respiratórios',
