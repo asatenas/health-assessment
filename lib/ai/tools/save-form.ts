@@ -13,6 +13,7 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
 
   const fieldMapping: Record<string, string[]> = {
     basicInfo: ['age', 'weight', 'height'],
+    surgery: ['surgeryName', 'surgeryDate', 'surgeryTime'],
     healthProblems: [
       'healthProblems.cardiac',
       'healthProblems.respiratory',
@@ -45,6 +46,7 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       'recreationalDrugs.opioids',
       'recreationalDrugs.methamphetamine',
       'recreationalDrugs.alcohol',
+      'recreationalDrugs.tabaco',
       'recreationalDrugs.others',
     ],
     exams: ['hemoglobin', 'creatinine'],
@@ -52,6 +54,11 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
 
   const configKeyMapping: Record<string, Record<string, string>> = {
     basicInfo: { idade: 'age', peso: 'weight', altura: 'height' },
+    surgery: {
+      nomeCirurgia: 'surgeryName',
+      dataCirurgia: 'surgeryDate',
+      horaCirurgia: 'surgeryTime',
+    },
     healthProblems: {
       cardiologicos: 'cardiac',
       respiratorios: 'respiratory',
@@ -84,6 +91,7 @@ function getEnabledFieldsList(formConfig: FormConfiguration): string[] {
       opiaceos: 'opioids',
       metanfetamina: 'methamphetamine',
       alcool: 'alcohol',
+      tabaco: 'tabaco',
       drogasRecreativasOutros: 'others',
     },
     exams: { hemoglobina: 'hemoglobin', creatinina: 'creatinine' },
@@ -135,6 +143,12 @@ Do not provide values for fields not listed above - leave them undefined or null
       age: z.number().describe('Patient age in years'),
       weight: z.number().describe('Patient weight in kg'),
       height: z.number().describe('Patient height in meters'),
+      surgeryName: z
+        .string()
+        .optional()
+        .describe('Name of the surgery to be performed'),
+      surgeryDate: z.string().optional().describe('Date of the surgery'),
+      surgeryTime: z.string().optional().describe('Time of the surgery'),
       healthProblems: z
         .object({
           cardiac: z
@@ -205,6 +219,7 @@ Do not provide values for fields not listed above - leave them undefined or null
           opioids: z.boolean().optional(),
           methamphetamine: z.boolean().optional(),
           alcohol: z.boolean().optional(),
+          tabaco: z.boolean().optional().describe('Uses tobacco products'),
           others: z
             .array(z.string())
             .optional()
