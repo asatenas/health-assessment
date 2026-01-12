@@ -29,6 +29,7 @@ import {
   checkpoint,
   clinicConfig,
   type ClinicConfig,
+  surgery,
 } from './schema';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
@@ -1466,5 +1467,47 @@ export async function updateClinicConfig({
       'bad_request:database',
       'Failed to update clinic config',
     );
+  }
+}
+
+export async function upsertSurgery({
+  assessmentId,
+  name,
+  date,
+  time,
+}: {
+  assessmentId: string;
+  name?: string;
+  date?: string;
+  time?: string;
+}) {
+  try {
+    // Combine date and time into a single timestamp if both provided
+    let surgeryDateTime: Date | undefined;
+    if (date && time) {
+      surgeryDateTime = new Date(`${date}T${time}`);
+    } else if (date) {
+      surgeryDateTime = new Date(date);
+    }
+
+    const surgeryData: any = {
+      assessmentId,
+    };
+
+    if (name !== undefined) surgeryData.name = name;
+    if (surgeryDateTime !== undefined) surgeryData.date = surgeryDateTime;
+
+    return await db
+      .insert(surgery)
+      .values(surgeryData)
+      .onConflictDoUpdate({
+        target: surgery.assessmentId,
+        set: {
+          ...(name !== undefined && { name }),
+          ...(surgeryDateTime !== undefined && { date: surgeryDateTime }),
+        },
+      });
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to upsert surgery');
   }
 }

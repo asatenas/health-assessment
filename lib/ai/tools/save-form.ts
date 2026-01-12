@@ -4,6 +4,7 @@ import {
   updateChatFormById,
   updateChatStatusById,
   updateCheckpointByChatId,
+  upsertSurgery,
 } from '@/lib/db/queries';
 import type { FormConfiguration } from '@/lib/types/clinic-config';
 
@@ -234,6 +235,16 @@ Do not provide values for fields not listed above - leave them undefined or null
       await updateChatFormById({ chatId, form: JSON.stringify(form) });
       await updateChatStatusById({ chatId, status: 'in_progress' });
       await updateCheckpointByChatId({ chatId, name: 'formSubmitted' });
+
+      // Update surgery table if surgery data is provided
+      if (form.surgeryName || form.surgeryDate || form.surgeryTime) {
+        await upsertSurgery({
+          assessmentId: chatId,
+          name: form.surgeryName,
+          date: form.surgeryDate,
+          time: form.surgeryTime,
+        });
+      }
     },
   });
 };
