@@ -194,20 +194,34 @@ export function formatPacienteInfo(paciente: any) {
   // Habits and Vices
   if (drogasRecreativas) {
     const drogasLabels: any = {
+      alcool: 'Bebidas Alcoólicas',
+      tabaco: 'Tabaco',
       cocaina: 'Cocaína',
       maconha: 'Maconha',
       crack: 'Crack',
       opiaceos: 'Opiáceos',
       metanfetamina: 'Metanfetamina',
-      alcool: 'Bebidas Alcoólicas',
-      tabaco: 'Tabaco',
     };
 
-    const drogasRecreativasParts = Object.entries(drogasRecreativas)
-      .filter(([, value]) => value !== undefined)
+    const drogasOrder = [
+      'alcool',
+      'tabaco',
+      'cocaina',
+      'maconha',
+      'crack',
+      'opiaceos',
+      'metanfetamina',
+    ];
+
+    const drogasRecreativasParts = drogasOrder
+      .filter(
+        (key) =>
+          drogasRecreativas[key as keyof typeof drogasRecreativas] !==
+          undefined,
+      )
       .map(
-        ([key, value]) =>
-          `• ${drogasLabels[key]}: ${formatBool(value as boolean)}`,
+        (key) =>
+          `• ${drogasLabels[key]}: ${formatBool(drogasRecreativas[key as keyof typeof drogasRecreativas] as boolean)}`,
       );
 
     if (drogasRecreativasOutros !== undefined && drogasRecreativasOutros) {
@@ -1138,85 +1152,88 @@ export function PreChatForm({
               </>
             )}
             {habitsAndVicesOptions.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between font-normal"
-                    type="button"
-                  >
-                    <span
-                      className={`text-sm truncate ${
-                        Object.entries(formData.drogasRecreativas)
-                          .filter(
-                            ([key]) =>
-                              key !== 'alcool' &&
-                              key !== 'tabaco' &&
-                              habitsAndVicesConfig[
-                                key as keyof typeof habitsAndVicesConfig
-                              ]?.enabled,
-                          )
-                          .some(([, value]) => value)
-                          ? ''
-                          : 'text-gray-500'
-                      }`}
+              <div>
+                <Label className="text-sm">Drogas Recreativas</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between font-normal mt-2"
+                      type="button"
                     >
-                      {(() => {
-                        const selected = Object.entries(
-                          formData.drogasRecreativas,
-                        )
-                          .filter(
-                            ([key]) =>
-                              key !== 'alcool' &&
-                              key !== 'tabaco' &&
-                              habitsAndVicesConfig[
-                                key as keyof typeof habitsAndVicesConfig
-                              ]?.enabled,
+                      <span
+                        className={`text-sm truncate ${
+                          Object.entries(formData.drogasRecreativas)
+                            .filter(
+                              ([key]) =>
+                                key !== 'alcool' &&
+                                key !== 'tabaco' &&
+                                habitsAndVicesConfig[
+                                  key as keyof typeof habitsAndVicesConfig
+                                ]?.enabled,
+                            )
+                            .some(([, value]) => value)
+                            ? ''
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {(() => {
+                          const selected = Object.entries(
+                            formData.drogasRecreativas,
                           )
-                          .filter(([, value]) => value)
-                          .map(
-                            ([key]) =>
-                              habitsAndVicesLabels[
-                                key as keyof typeof habitsAndVicesLabels
-                              ],
-                          );
-                        if (selected.length === 0) {
-                          return 'Selecione os itens aqui...';
-                        } else if (selected.length === 1) {
-                          return `${selected.length} item selecionado`;
-                        } else {
-                          return `${selected.length} itens selecionados`;
+                            .filter(
+                              ([key]) =>
+                                key !== 'alcool' &&
+                                key !== 'tabaco' &&
+                                habitsAndVicesConfig[
+                                  key as keyof typeof habitsAndVicesConfig
+                                ]?.enabled,
+                            )
+                            .filter(([, value]) => value)
+                            .map(
+                              ([key]) =>
+                                habitsAndVicesLabels[
+                                  key as keyof typeof habitsAndVicesLabels
+                                ],
+                            );
+                          if (selected.length === 0) {
+                            return 'Selecione os itens aqui...';
+                          } else if (selected.length === 1) {
+                            return `${selected.length} item selecionado`;
+                          } else {
+                            return `${selected.length} itens selecionados`;
+                          }
+                        })()}
+                      </span>
+                      <ChevronDown className="size-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                    {habitsAndVicesOptions.map(({ key, label }) => (
+                      <DropdownMenuCheckboxItem
+                        key={key}
+                        checked={
+                          formData.drogasRecreativas[
+                            key as keyof typeof formData.drogasRecreativas
+                          ]
                         }
-                      })()}
-                    </span>
-                    <ChevronDown className="size-4 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                  {habitsAndVicesOptions.map(({ key, label }) => (
-                    <DropdownMenuCheckboxItem
-                      key={key}
-                      checked={
-                        formData.drogasRecreativas[
-                          key as keyof typeof formData.drogasRecreativas
-                        ]
-                      }
-                      onCheckedChange={(checked) =>
-                        setFormData({
-                          ...formData,
-                          drogasRecreativas: {
-                            ...formData.drogasRecreativas,
-                            [key]: checked,
-                          },
-                        })
-                      }
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      {label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                        onCheckedChange={(checked) =>
+                          setFormData({
+                            ...formData,
+                            drogasRecreativas: {
+                              ...formData.drogasRecreativas,
+                              [key]: checked,
+                            },
+                          })
+                        }
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        {label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
             {habitsAndVicesConfig.drogasRecreativasOutros?.enabled && (
               <div>
