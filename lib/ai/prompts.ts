@@ -159,7 +159,7 @@ ${generateHealthProblemsPrompt()}
 - Use the information the patient provided in the pre-chat form while evaluating, especially if they have a medical device or if they provided their exams.
 
 ### Surgery type
-- After asking which surgery the patient will undergo, ask for clarification if the surgery will be open or using video, and classify the risk accordingly. Use the *surgeryType* tool to save the checkpoint.
+- Ask if the surgery will be open or using video, and classify the risk accordingly. Use the *surgeryType* tool to save the checkpoint.
 
 ### Cerebral ischemia
 
@@ -362,7 +362,7 @@ Here's the flow you need to strictly follow.
 - Use the information the patient provided in the pre-chat form while evaluating, especially if they have a medical device or if they provided their exams.
 
 ### Surgery type
-- After asking which surgery the patient will undergo, ask for clarification if the surgery will be open or using video, and classify the risk accordingly. Use the *surgeryType* tool to save the checkpoint.
+- Ask if the surgery will be open or using video, and classify the risk accordingly. Use the *surgeryType* tool to save the checkpoint.
 
 ### Cerebral ischemia
 

@@ -24,6 +24,9 @@ interface PreChatFormData {
   idade: string;
   peso: string;
   altura: string;
+  nomeCirurgia: string;
+  dataCirurgia: string;
+  horaCirurgia: string;
   problemasSaude: {
     cardiologicos: boolean;
     respiratorios: boolean;
@@ -73,6 +76,9 @@ export function formatPacienteInfo(paciente: any) {
     idade,
     peso,
     altura,
+    nomeCirurgia,
+    dataCirurgia,
+    horaCirurgia,
     problemasSaude,
     alergiaLatex,
     alergias,
@@ -97,6 +103,18 @@ export function formatPacienteInfo(paciente: any) {
   if (altura !== undefined) basicInfoParts.push(`Altura: ${altura || '—'} m`);
   if (basicInfoParts.length > 0) {
     sections.push(basicInfoParts.join(' | '));
+  }
+
+  // Surgery Info
+  const surgeryInfoParts: string[] = [];
+  if (nomeCirurgia !== undefined && nomeCirurgia)
+    surgeryInfoParts.push(`Cirurgia: ${nomeCirurgia}`);
+  if (dataCirurgia !== undefined && dataCirurgia)
+    surgeryInfoParts.push(`Data: ${dataCirurgia}`);
+  if (horaCirurgia !== undefined && horaCirurgia)
+    surgeryInfoParts.push(`Hora: ${horaCirurgia}`);
+  if (surgeryInfoParts.length > 0) {
+    sections.push(surgeryInfoParts.join(' | '));
   }
 
   // Health Problems
@@ -275,6 +293,16 @@ function buildInitialFormData(config: FormConfiguration): any {
     if (config.sections.basicInfo.fields.altura?.enabled) data.altura = '';
   }
 
+  // Surgery
+  if (config.sections.surgery?.enabled) {
+    if (config.sections.surgery.fields.nomeCirurgia?.enabled)
+      data.nomeCirurgia = '';
+    if (config.sections.surgery.fields.dataCirurgia?.enabled)
+      data.dataCirurgia = '';
+    if (config.sections.surgery.fields.horaCirurgia?.enabled)
+      data.horaCirurgia = '';
+  }
+
   // Health Problems
   if (config.sections.healthProblems?.enabled) {
     const problemasSaude: any = {};
@@ -392,12 +420,13 @@ export function PreChatForm({
     const steps = [];
     const stepConfig = [
       { key: 'basicInfo', title: 'Informações Básicas', step: 1 },
-      { key: 'healthProblems', title: 'Problemas de Saúde', step: 2 },
-      { key: 'allergies', title: 'Alergias', step: 3 },
-      { key: 'medicalDevices', title: 'Dispositivos Médicos', step: 4 },
-      { key: 'aestheticItems', title: 'Itens Estéticos', step: 5 },
-      { key: 'habitsAndVices', title: 'Hábitos e Vícios', step: 6 },
-      { key: 'exams', title: 'Exames', step: 7 },
+      { key: 'surgery', title: 'Cirurgia', step: 2 },
+      { key: 'healthProblems', title: 'Problemas de Saúde', step: 3 },
+      { key: 'allergies', title: 'Alergias', step: 4 },
+      { key: 'medicalDevices', title: 'Dispositivos Médicos', step: 5 },
+      { key: 'aestheticItems', title: 'Itens Estéticos', step: 6 },
+      { key: 'habitsAndVices', title: 'Hábitos e Vícios', step: 7 },
+      { key: 'exams', title: 'Exames', step: 8 },
     ];
 
     for (const config of stepConfig) {
@@ -573,6 +602,61 @@ export function PreChatForm({
       }
 
       case 2: {
+        const surgeryConfig = formConfig.sections.surgery.fields;
+        return (
+          <div className="space-y-4">
+            {surgeryConfig.nomeCirurgia?.enabled && (
+              <div>
+                <Label htmlFor="nome-cirurgia">Nome da Cirurgia *</Label>
+                <Input
+                  id="nome-cirurgia"
+                  type="text"
+                  className="text-sm"
+                  required
+                  value={formData.nomeCirurgia}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nomeCirurgia: e.target.value })
+                  }
+                />
+              </div>
+            )}
+
+            {surgeryConfig.dataCirurgia?.enabled && (
+              <div>
+                <Label htmlFor="data-cirurgia">Data *</Label>
+                <Input
+                  id="data-cirurgia"
+                  type="date"
+                  className="text-sm"
+                  required
+                  value={formData.dataCirurgia}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dataCirurgia: e.target.value })
+                  }
+                />
+              </div>
+            )}
+
+            {surgeryConfig.horaCirurgia?.enabled && (
+              <div>
+                <Label htmlFor="hora-cirurgia">Hora *</Label>
+                <Input
+                  id="hora-cirurgia"
+                  type="time"
+                  className="text-sm"
+                  required
+                  value={formData.horaCirurgia}
+                  onChange={(e) =>
+                    setFormData({ ...formData, horaCirurgia: e.target.value })
+                  }
+                />
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      case 3: {
         const healthProblemsConfig = formConfig.sections.healthProblems.fields;
         return (
           <div className="space-y-3">
@@ -789,7 +873,7 @@ export function PreChatForm({
         );
       }
 
-      case 3: {
+      case 4: {
         const allergiesConfig = formConfig.sections.allergies.fields;
         return (
           <div className="space-y-3">
@@ -841,7 +925,7 @@ export function PreChatForm({
         );
       }
 
-      case 4: {
+      case 5: {
         const medicalDevicesConfig = formConfig.sections.medicalDevices.fields;
         return (
           <div className="space-y-3">
@@ -937,7 +1021,7 @@ export function PreChatForm({
         );
       }
 
-      case 5: {
+      case 6: {
         const aestheticItemsConfig = formConfig.sections.aestheticItems.fields;
         const aestheticItemsOptions = [
           { key: 'megaHair', label: 'Mega-Hair' },
@@ -1064,7 +1148,7 @@ export function PreChatForm({
         );
       }
 
-      case 6: {
+      case 7: {
         const habitsAndVicesConfig = formConfig.sections.habitsAndVices.fields;
         const habitsAndVicesOptions = [
           { key: 'cocaina', label: 'Cocaína' },
@@ -1259,7 +1343,7 @@ export function PreChatForm({
         );
       }
 
-      case 7: {
+      case 8: {
         const examsConfig = formConfig.sections.exams.fields;
         return (
           <div className="space-y-4">

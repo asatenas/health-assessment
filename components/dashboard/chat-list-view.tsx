@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatStatus } from '@/lib/db/chat-status';
+import { SurgeryDetailModal } from './surgery-detail-modal';
 
 export type Chat = {
   id: string;
@@ -98,12 +99,6 @@ type MedicationDetail = {
   suspensionDays: string;
 };
 
-type ConversationMessage = {
-  role: string;
-  text: string;
-  createdAt?: string;
-};
-
 export function ChatListView({
   chats,
   isLoading,
@@ -123,65 +118,7 @@ export function ChatListView({
   const [legendExpanded, setLegendExpanded] = useState(true);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [conversationMessages, setConversationMessages] = useState<
-    ConversationMessage[]
-  >([]);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-  const [hasLoadedMessages, setHasLoadedMessages] = useState(false);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (chatDetailsModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-      // Reset conversation state when modal closes
-      setConversationMessages([]);
-      setHasLoadedMessages(false);
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [chatDetailsModalOpen]);
-
-  // Handle ESC key to close modal
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && chatDetailsModalOpen) {
-        setChatDetailsModalOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [chatDetailsModalOpen]);
-
-  const loadConversation = async () => {
-    if (!selectedChat) return;
-
-    setIsLoadingMessages(true);
-    try {
-      const response = await fetch(
-        `/api/clinic/chats/${selectedChat.id}/messages`,
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages');
-      }
-
-      const data = await response.json();
-      setConversationMessages(data.messages || []);
-      setHasLoadedMessages(true);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      setConversationMessages([]);
-    } finally {
-      setIsLoadingMessages(false);
-    }
-  };
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const hasActiveFilters = useMemo(() => {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
@@ -261,7 +198,7 @@ export function ChatListView({
     chat: Chat,
     event?: React.MouseEvent<HTMLButtonElement>,
   ) => {
-    setSelectedChat(chat);
+    setSelectedChatId(chat.id);
     setChatDetailsModalOpen(true);
     event?.currentTarget.blur();
   };
@@ -938,276 +875,16 @@ export function ChatListView({
       </div>
 
       {/* Chat Details Modal */}
-      {chatDetailsModalOpen && selectedChat && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <button
-            type="button"
-            className="absolute inset-0 cursor-default"
-            onClick={() => setChatDetailsModalOpen(false)}
-            aria-label="Close modal"
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col"
-          >
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b dark:border-gray-800">
-              <h2 className="text-xl font-semibold">Detalhes da Avaliação</h2>
-              <button
-                type="button"
-                onClick={() => setChatDetailsModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="size-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="overflow-y-auto p-4 sm:p-6">
-              <div className="space-y-6">
-                <div>
-                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    ID da Avaliação
-                  </div>
-                  <code className="block p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono text-gray-900 dark:text-gray-100">
-                    {selectedChat.id}
-                  </code>
-                </div>
-
-                {selectedChat.form && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                      Informações do Paciente
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Idade
-                          </div>
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                            {selectedChat.form.age} anos
-                          </div>
-                        </div>
-                        <div>
-                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Peso
-                          </div>
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                            {selectedChat.form.weight} kg
-                          </div>
-                        </div>
-                        <div>
-                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Altura
-                          </div>
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                            {selectedChat.form.height} m
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Alergias
-                        </div>
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                          {selectedChat.form.allergies &&
-                          selectedChat.form.allergies.length > 0
-                            ? selectedChat.form.allergies.join(', ')
-                            : 'Nenhuma'}
-                        </div>
-                      </div>
-
-                      {selectedChat.form.medicalDevices && (
-                        <div>
-                          <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Dispositivos Médicos
-                          </div>
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                            {(() => {
-                              const devices = [];
-                              if (selectedChat.form.medicalDevices?.paceMaker) {
-                                devices.push('Marcapasso');
-                              }
-                              if (
-                                selectedChat.form.medicalDevices?.medicationPump
-                              ) {
-                                devices.push('Bomba de medicação');
-                              }
-                              if (selectedChat.form.medicalDevices?.others) {
-                                devices.push(
-                                  selectedChat.form.medicalDevices.others,
-                                );
-                              }
-                              return devices.length > 0
-                                ? devices.join(', ')
-                                : 'Nenhum';
-                            })()}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {selectedChat.medications && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                      Medicamentos em uso
-                    </h3>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-line">
-                      {(() => {
-                        try {
-                          const meds = JSON.parse(selectedChat.medications);
-                          if (Array.isArray(meds) && meds.length > 0) {
-                            return meds
-                              .map(
-                                (med: MedicationDetail) =>
-                                  `${med.medicationName}: ${med.suspensionDays}`,
-                              )
-                              .join('\n');
-                          }
-                          return 'Nenhum medicamento';
-                        } catch {
-                          return 'Erro ao carregar medicamentos';
-                        }
-                      })()}
-                    </div>
-                  </div>
-                )}
-
-                {(selectedChat.score_rcri !== null &&
-                  selectedChat.score_rcri !== undefined) ||
-                (selectedChat.score_aub_has2 !== null &&
-                  selectedChat.score_aub_has2 !== undefined) ? (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                      Pontuações de Risco
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          RCRI
-                        </div>
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                          {selectedChat.score_rcri !== null &&
-                          selectedChat.score_rcri !== undefined
-                            ? selectedChat.score_rcri
-                            : '-'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          AUB-HAS2
-                        </div>
-                        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                          {selectedChat.score_aub_has2 !== null &&
-                          selectedChat.score_aub_has2 !== undefined
-                            ? selectedChat.score_aub_has2
-                            : '-'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
-                {selectedChat.results && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                      Resultados da Avaliação de Risco
-                    </h3>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                      {selectedChat.results}
-                    </div>
-                  </div>
-                )}
-
-                {/* Conversation Messages */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Conversa
-                    </h3>
-                    {!hasLoadedMessages && !isLoadingMessages && (
-                      <Button
-                        onClick={loadConversation}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Carregar Conversa
-                      </Button>
-                    )}
-                  </div>
-                  {!hasLoadedMessages && !isLoadingMessages ? (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-400 text-center">
-                      Clique em Carregar Conversa para ver as mensagens
-                    </div>
-                  ) : isLoadingMessages ? (
-                    <div className="space-y-3">
-                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                      <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                    </div>
-                  ) : conversationMessages.length > 0 ? (
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {conversationMessages.map((msg, index) => (
-                        <div
-                          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                          key={index}
-                          className={`p-3 rounded-lg ${
-                            msg.role === 'user'
-                              ? 'bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900'
-                              : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span
-                              className={`text-xs font-semibold ${
-                                msg.role === 'user'
-                                  ? 'text-blue-700 dark:text-blue-300'
-                                  : 'text-gray-700 dark:text-gray-300'
-                              }`}
-                            >
-                              {msg.role === 'user' ? 'Paciente' : 'Assistente'}
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">
-                            {msg.text}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-400 text-center">
-                      Nenhuma mensagem disponível
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
-              <Button
-                onClick={() => setChatDetailsModalOpen(false)}
-                variant="outline"
-              >
-                Fechar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SurgeryDetailModal
+        assessmentId={selectedChatId}
+        open={chatDetailsModalOpen}
+        onOpenChange={(open) => {
+          setChatDetailsModalOpen(open);
+          if (!open) {
+            setSelectedChatId(null);
+          }
+        }}
+      />
     </div>
   );
 }

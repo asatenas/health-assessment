@@ -33,6 +33,7 @@ export const clinicConfig = pgTable('ClinicConfig', {
     .references(() => user.id, { onDelete: 'cascade' }),
   clinicName: varchar('clinicName', { length: 255 }),
   formConfig: json('formConfig').notNull(),
+  dashboardConfig: json('dashboardConfig'), // nullable for backward compatibility
   updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
 });
 
@@ -184,3 +185,24 @@ export const checkpoint = pgTable('Checkpoint', {
 });
 
 export type Checkpoint = InferSelectModel<typeof checkpoint>;
+
+export const surgery = pgTable('Surgery', {
+  assessmentId: uuid('assessmentId')
+    .primaryKey()
+    .notNull()
+    .references(() => chat.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }),
+  date: timestamp('date'),
+  completed: boolean('completed').notNull().default(false),
+  rescheduled: boolean('rescheduled').notNull().default(false),
+  cancelled: boolean('cancelled').notNull().default(false),
+  statusReason: varchar('statusReason', { length: 200 }),
+  medicalInterventionRequired: boolean('medicalInterventionRequired')
+    .notNull()
+    .default(false),
+  interventionNotes: text('interventionNotes'),
+  adjustmentsRequired: boolean('adjustmentsRequired').notNull().default(false),
+  adjustmentNotes: text('adjustmentNotes'),
+});
+
+export type Surgery = InferSelectModel<typeof surgery>;

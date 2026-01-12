@@ -10,7 +10,7 @@ import {
   gte,
   inArray,
   lt,
-  // lte,
+  lte,
   sql,
   type SQL,
 } from 'drizzle-orm';
@@ -29,13 +29,17 @@ import {
   checkpoint,
   clinicConfig,
   type ClinicConfig,
+  surgery,
 } from './schema';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../shared/errors';
 import type { ChatStatus, CheckpointNames } from './chat-status';
 import { postgres_url } from '@/lib/shared/constants';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
+import type {
+  FormConfiguration,
+  DashboardConfiguration,
+} from '@/lib/types/clinic-config';
 import { DEFAULT_FORM_CONFIG } from '../config/default-form-config';
 
 // Optionally, if not using email/pass login, you can
@@ -286,6 +290,29 @@ export async function getChatWithStatusById({ id }: { id: string }) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get chat with computed status by id',
+    );
+  }
+}
+
+export async function getChatWithSurgeryById({ id }: { id: string }) {
+  try {
+    const chatData = await getChatById({ id });
+    if (!chatData) return null;
+
+    // Fetch surgery details if they exist
+    const [surgeryDetails] = await db
+      .select()
+      .from(surgery)
+      .where(eq(surgery.assessmentId, id));
+
+    return {
+      ...chatData,
+      surgery: surgeryDetails || null,
+    };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get chat with surgery by id',
     );
   }
 }
@@ -843,13 +870,45 @@ export function calculateRiskLevel(
   rcri: number | null,
   has2: number | null,
 ): 'low' | 'medium' | 'high' | 'unknown' {
-  if (rcri == null || has2 == null) return 'unknown';
-  if (rcri === -1 || has2 === -1) return 'unknown';
+  // If both are null or -1, return unknown
+  const validRcri = rcri != null && rcri !== -1 ? rcri : null;
+  const validHas2 = has2 != null && has2 !== -1 ? has2 : null;
 
-  const maxScore = Math.max(rcri, has2);
+  if (validRcri === null && validHas2 === null) return 'unknown';
+
+  // Use whichever score is available, or the max if both are available
+  const maxScore = Math.max(
+    validRcri ?? Number.NEGATIVE_INFINITY,
+    validHas2 ?? Number.NEGATIVE_INFINITY,
+  );
+
   if (maxScore <= 1) return 'low';
   if (maxScore <= 3) return 'medium';
   return 'high';
+}
+
+function mapRiskLevelToPortuguese(
+  riskLevel: 'low' | 'medium' | 'high' | 'unknown',
+): 'baixo' | 'moderado' | 'alto' | 'unknown' {
+  const map = {
+    low: 'baixo' as const,
+    medium: 'moderado' as const,
+    high: 'alto' as const,
+    unknown: 'unknown' as const,
+  };
+  return map[riskLevel];
+}
+
+function mapRiskLevelToPortugueseCapitalized(
+  riskLevel: 'low' | 'medium' | 'high' | 'unknown',
+): 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido' {
+  const map = {
+    low: 'Baixo' as const,
+    medium: 'Moderado' as const,
+    high: 'Alto' as const,
+    unknown: 'Desconhecido' as const,
+  };
+  return map[riskLevel];
 }
 
 /**
@@ -917,24 +976,30 @@ export async function getDashboardMetrics({
       }
     }
 
+    // Get all surgeries for these chats
+    const chatIds = allChats.map((c) => c.id);
+    const allSurgeries =
+      chatIds.length > 0
+        ? await db
+            .select()
+            .from(surgery)
+            .where(inArray(surgery.assessmentId, chatIds))
+        : [];
+
     // Surgery tracking
-    // const totalSurgeriesScheduled = allChats.filter(
-    //   (c) => c.surgeryDate !== null,
-    // ).length;
-    // const surgeriesCompleted = allChats.filter(
-    //   (c) => c.surgeryCompleted === true,
-    // ).length;
-    // const surgeriesCancelled = allChats.filter(
-    //   (c) => c.surgeryCancelled === true,
-    // ).length;
-    // const surgeriesRescheduled = allChats.filter(
-    //   (c) => c.surgeryRescheduled === true,
-    // ).length;
+    const totalSurgeriesScheduled = allSurgeries.filter(
+      (s) => s.date !== null,
+    ).length;
+    const surgeriesCompleted = allSurgeries.filter((s) => s.completed).length;
+    const surgeriesCancelled = allSurgeries.filter((s) => s.cancelled).length;
+    const surgeriesRescheduled = allSurgeries.filter(
+      (s) => s.rescheduled,
+    ).length;
 
     // Adjustments
-    // const adjustmentsRequired = allChats.filter(
-    //   (c) => c.adjustmentsRequired === true,
-    // ).length;
+    const adjustmentsRequired = allSurgeries.filter(
+      (s) => s.adjustmentsRequired,
+    ).length;
 
     // Daily metrics - surgeries for today
     const today = new Date();
@@ -942,28 +1007,28 @@ export async function getDashboardMetrics({
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const todaysSurgeries = allChats.filter((c) => {
-      // if (!c.surgeryDate) return false;
-      // const surgeryDate = new Date(c.surgeryDate);
-      // return surgeryDate >= today && surgeryDate < tomorrow;
+    const todaysSurgeries = allSurgeries.filter((s) => {
+      if (!s.date) return false;
+      const surgeryDate = new Date(s.date);
+      return surgeryDate >= today && surgeryDate < tomorrow;
     });
 
     // Tomorrow's surgeries
     const dayAfterTomorrow = new Date(tomorrow);
     dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
-    const tomorrowsSurgeries = allChats.filter((c) => {
-      // if (!c.surgeryDate) return false;
-      // const surgeryDate = new Date(c.surgeryDate);
-      // return surgeryDate >= tomorrow && surgeryDate < dayAfterTomorrow;
+    const tomorrowsSurgeries = allSurgeries.filter((s) => {
+      if (!s.date) return false;
+      const surgeryDate = new Date(s.date);
+      return surgeryDate >= tomorrow && surgeryDate < dayAfterTomorrow;
     });
 
     // This week's surgeries
     const endOfWeek = new Date(today);
     endOfWeek.setDate(endOfWeek.getDate() + 7);
-    const thisWeeksSurgeries = allChats.filter((c) => {
-      // if (!c.surgeryDate) return false;
-      // const surgeryDate = new Date(c.surgeryDate);
-      // return surgeryDate >= today && surgeryDate < endOfWeek;
+    const thisWeeksSurgeries = allSurgeries.filter((s) => {
+      if (!s.date) return false;
+      const surgeryDate = new Date(s.date);
+      return surgeryDate >= today && surgeryDate < endOfWeek;
     });
 
     // Cancellation and reschedule breakdown by reason
@@ -972,20 +1037,20 @@ export async function getDashboardMetrics({
       { cancelled: number; rescheduled: number }
     >();
 
-    // for (const chatItem of allChats) {
-    //   if (
-    //     (chatItem.surgeryCancelled || chatItem.surgeryRescheduled) &&
-    //     chatItem.surgeryStatusReason
-    //   ) {
-    //     const current = reasonMap.get(chatItem.surgeryStatusReason) || {
-    //       cancelled: 0,
-    //       rescheduled: 0,
-    //     };
-    //     if (chatItem.surgeryCancelled) current.cancelled++;
-    //     if (chatItem.surgeryRescheduled) current.rescheduled++;
-    //     reasonMap.set(chatItem.surgeryStatusReason, current);
-    //   }
-    // }
+    for (const surgeryItem of allSurgeries) {
+      if (
+        (surgeryItem.cancelled || surgeryItem.rescheduled) &&
+        surgeryItem.statusReason
+      ) {
+        const current = reasonMap.get(surgeryItem.statusReason) || {
+          cancelled: 0,
+          rescheduled: 0,
+        };
+        if (surgeryItem.cancelled) current.cancelled++;
+        if (surgeryItem.rescheduled) current.rescheduled++;
+        reasonMap.set(surgeryItem.statusReason, current);
+      }
+    }
 
     const cancellationsAndReschedulesByReason: Array<{
       reason: string;
@@ -1016,11 +1081,11 @@ export async function getDashboardMetrics({
       completionRate,
       riskDistribution,
       latexAllergies,
-      // totalSurgeriesScheduled,
-      // surgeriesCompleted,
-      // surgeriesCancelled,
-      // surgeriesRescheduled,
-      // adjustmentsRequired,
+      totalSurgeriesScheduled,
+      surgeriesCompleted,
+      surgeriesCancelled,
+      surgeriesRescheduled,
+      adjustmentsRequired,
       todaysSurgeries,
       tomorrowsSurgeries,
       thisWeeksSurgeries,
@@ -1060,6 +1125,19 @@ export async function getTimelineData({
       )
       .orderBy(asc(chat.createdAt));
 
+    // Get all surgeries for these chats
+    const chatIds = chats.map((c) => c.id);
+    const surgeries =
+      chatIds.length > 0
+        ? await db
+            .select()
+            .from(surgery)
+            .where(inArray(surgery.assessmentId, chatIds))
+        : [];
+
+    // Create a map of assessmentId to surgery
+    const surgeryMap = new Map(surgeries.map((s) => [s.assessmentId, s]));
+
     // Group by date
     const dateMap = new Map<
       string,
@@ -1084,9 +1162,11 @@ export async function getTimelineData({
 
       current.assessmentsCreated++;
       if (chatItem.status === 'finished') current.assessmentsCompleted++;
-      // if (chatItem.surgeryDate) current.surgeriesScheduled++;
-      // if (chatItem.surgeryCompleted) current.surgeriesPerformed++;
-      // if (chatItem.surgeryCancelled) current.cancellations++;
+
+      const surgeryItem = surgeryMap.get(chatItem.id);
+      if (surgeryItem?.date) current.surgeriesScheduled++;
+      if (surgeryItem?.completed) current.surgeriesPerformed++;
+      if (surgeryItem?.cancelled) current.cancellations++;
 
       dateMap.set(dateKey, current);
     }
@@ -1118,6 +1198,19 @@ export async function getHighPriorityNotifications({
 
     const chats = await db.select().from(chat).where(eq(chat.userId, userId));
 
+    // Get all surgeries for these chats
+    const chatIds = chats.map((c) => c.id);
+    const surgeries =
+      chatIds.length > 0
+        ? await db
+            .select()
+            .from(surgery)
+            .where(inArray(surgery.assessmentId, chatIds))
+        : [];
+
+    // Create a map of assessmentId to surgery
+    const surgeryMap = new Map(surgeries.map((s) => [s.assessmentId, s]));
+
     const notifications: Array<{
       id: string;
       priority: 'high' | 'medium';
@@ -1129,27 +1222,29 @@ export async function getHighPriorityNotifications({
     }> = [];
 
     for (const chatItem of chats) {
-      // const surgeryDate = chatItem.surgeryDate
-      //   ? new Date(chatItem.surgeryDate)
-      //   : null;
+      const surgeryItem = surgeryMap.get(chatItem.id);
+      const surgeryDate = surgeryItem?.date ? new Date(surgeryItem.date) : null;
       const formAge = chatItem.form as any;
       const patientAge = formAge?.age;
 
       // High priority: High-risk patients with surgery in next 24 hours
-      // if (surgeryDate && surgeryDate <= in24Hours && surgeryDate >= now) {
-      //   const riskLevel = calculateRiskLevel(chatItem.results);
-      //   if (riskLevel === 'high') {
-      //     notifications.push({
-      //       id: generateUUID(),
-      //       priority: 'high',
-      //       type: 'high_risk_soon',
-      //       message: `Paciente de alto risco com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
-      //       chatId: chatItem.id,
-      //       patientAge,
-      //       surgeryDate,
-      //     });
-      //   }
-      // }
+      if (surgeryDate && surgeryDate <= in24Hours && surgeryDate >= now) {
+        const riskLevel = calculateRiskLevel(
+          chatItem.score_rcri,
+          chatItem.score_aub_has2,
+        );
+        if (riskLevel === 'high') {
+          notifications.push({
+            id: generateUUID(),
+            priority: 'high',
+            type: 'high_risk_soon',
+            message: `Paciente de alto risco com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
+            chatId: chatItem.id,
+            patientAge,
+            surgeryDate,
+          });
+        }
+      }
 
       // High priority: Form not completed and deadline passed (> 2 days since creation)
       const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
@@ -1165,62 +1260,65 @@ export async function getHighPriorityNotifications({
       }
 
       // High priority: Medical intervention required
-      // if (chatItem.medicalInterventionRequired) {
-      //   notifications.push({
-      //     id: generateUUID(),
-      //     priority: 'high',
-      //     type: 'intervention_required',
-      //     message: 'Intervenção médica necessária',
-      //     chatId: chatItem.id,
-      //     patientAge,
-      //   });
-      // }
+      if (surgeryItem?.medicalInterventionRequired) {
+        notifications.push({
+          id: generateUUID(),
+          priority: 'high',
+          type: 'intervention_required',
+          message: 'Intervenção médica necessária',
+          chatId: chatItem.id,
+          patientAge,
+        });
+      }
 
       // High priority: Surgery in < 3 days without completed assessment
-      // if (
-      //   surgeryDate &&
-      //   surgeryDate <= in72Hours &&
-      //   surgeryDate >= now &&
-      //   chatItem.status !== 'finished'
-      // ) {
-      //   notifications.push({
-      //     id: generateUUID(),
-      //     priority: 'high',
-      //     type: 'surgery_soon_incomplete',
-      //     message: `Cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')} sem avaliação concluída`,
-      //     chatId: chatItem.id,
-      //     patientAge,
-      //     surgeryDate,
-      //   });
-      // }
+      if (
+        surgeryDate &&
+        surgeryDate <= in72Hours &&
+        surgeryDate >= now &&
+        chatItem.status !== 'finished'
+      ) {
+        notifications.push({
+          id: generateUUID(),
+          priority: 'high',
+          type: 'surgery_soon_incomplete',
+          message: `Cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')} sem avaliação concluída`,
+          chatId: chatItem.id,
+          patientAge,
+          surgeryDate,
+        });
+      }
 
       // Medium priority: Moderate-risk patients with surgery in next 48 hours
-      // if (surgeryDate && surgeryDate <= in48Hours && surgeryDate >= now) {
-      //   const riskLevel = calculateRiskLevel(chatItem.results);
-      //   if (riskLevel === 'medium') {
-      //     notifications.push({
-      //       id: generateUUID(),
-      //       priority: 'medium',
-      //       type: 'moderate_risk_soon',
-      //       message: `Paciente de risco moderado com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
-      //       chatId: chatItem.id,
-      //       patientAge,
-      //       surgeryDate,
-      //     });
-      //   }
-      // }
+      if (surgeryDate && surgeryDate <= in48Hours && surgeryDate >= now) {
+        const riskLevel = calculateRiskLevel(
+          chatItem.score_rcri,
+          chatItem.score_aub_has2,
+        );
+        if (riskLevel === 'medium') {
+          notifications.push({
+            id: generateUUID(),
+            priority: 'medium',
+            type: 'moderate_risk_soon',
+            message: `Paciente de risco moderado com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
+            chatId: chatItem.id,
+            patientAge,
+            surgeryDate,
+          });
+        }
+      }
 
       // Medium priority: Adjustments required
-      // if (chatItem.adjustmentsRequired) {
-      //   notifications.push({
-      //     id: generateUUID(),
-      //     priority: 'medium',
-      //     type: 'adjustments_required',
-      //     message: 'Ajustes necessários',
-      //     chatId: chatItem.id,
-      //     patientAge,
-      //   });
-      // }
+      if (surgeryItem?.adjustmentsRequired) {
+        notifications.push({
+          id: generateUUID(),
+          priority: 'medium',
+          type: 'adjustments_required',
+          message: 'Ajustes necessários',
+          chatId: chatItem.id,
+          patientAge,
+        });
+      }
     }
 
     // Sort by priority (high first) and then by surgery date
@@ -1243,7 +1341,7 @@ export async function getHighPriorityNotifications({
 }
 
 /**
- * Update surgery details for a chat
+ * Update surgery details for an assessment
  */
 export async function updateChatSurgeryDetails({
   chatId,
@@ -1271,15 +1369,13 @@ export async function updateChatSurgeryDetails({
   try {
     const updateData: any = {};
 
-    if (surgeryDate !== undefined) updateData.surgeryDate = surgeryDate;
-    if (surgeryCompleted !== undefined)
-      updateData.surgeryCompleted = surgeryCompleted;
+    if (surgeryDate !== undefined) updateData.date = surgeryDate;
+    if (surgeryCompleted !== undefined) updateData.completed = surgeryCompleted;
     if (surgeryRescheduled !== undefined)
-      updateData.surgeryRescheduled = surgeryRescheduled;
-    if (surgeryCancelled !== undefined)
-      updateData.surgeryCancelled = surgeryCancelled;
+      updateData.rescheduled = surgeryRescheduled;
+    if (surgeryCancelled !== undefined) updateData.cancelled = surgeryCancelled;
     if (surgeryStatusReason !== undefined)
-      updateData.surgeryStatusReason = surgeryStatusReason;
+      updateData.statusReason = surgeryStatusReason;
     if (medicalInterventionRequired !== undefined)
       updateData.medicalInterventionRequired = medicalInterventionRequired;
     if (interventionNotes !== undefined)
@@ -1289,13 +1385,13 @@ export async function updateChatSurgeryDetails({
     if (adjustmentNotes !== undefined)
       updateData.adjustmentNotes = adjustmentNotes;
 
-    const [updatedChat] = await db
-      .update(chat)
+    const [updatedSurgery] = await db
+      .update(surgery)
       .set(updateData)
-      .where(eq(chat.id, chatId))
+      .where(eq(surgery.assessmentId, chatId))
       .returning();
 
-    return updatedChat;
+    return updatedSurgery;
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -1316,27 +1412,47 @@ export async function getTodaysSurgeriesForSwipe({
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // Get all finished assessments for this user
     const chats = await db
       .select()
       .from(chat)
+      .where(and(eq(chat.userId, userId), eq(chat.status, 'finished')));
+
+    // Get surgeries scheduled for today
+    const todaysSurgeries = await db
+      .select()
+      .from(surgery)
       .where(
         and(
-          eq(chat.userId, userId),
-          eq(chat.status, 'finished'),
-          // gte(chat.surgeryDate, today),
-          // lt(chat.surgeryDate, tomorrow),
+          inArray(
+            surgery.assessmentId,
+            chats.map((c) => c.id),
+          ),
+          gte(surgery.date, today),
+          lt(surgery.date, tomorrow),
         ),
-      );
-    // .orderBy(asc(chat.surgeryDate));
+      )
+      .orderBy(asc(surgery.date));
 
-    // Add risk level to each chat
-    return chats.map((chatItem) => ({
-      ...chatItem,
-      riskLevel: calculateRiskLevel(
-        chatItem.score_rcri,
-        chatItem.score_aub_has2,
-      ),
-    }));
+    // Map surgeries to include chat data and risk level
+    return todaysSurgeries.map((surgeryItem) => {
+      const chatItem = chats.find((c) => c.id === surgeryItem.assessmentId);
+      const rcriScore = chatItem?.score_rcri ?? null;
+      const has2Score = chatItem?.score_aub_has2 ?? null;
+      const riskLevel = calculateRiskLevel(rcriScore, has2Score);
+      const formData = chatItem?.form as any;
+
+      return {
+        chatId: surgeryItem.assessmentId,
+        patientAge: formData?.age || 0,
+        riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
+        surgeryDate: surgeryItem.date?.toISOString() || '',
+        surgeryName: surgeryItem.name || formData?.surgeryName,
+        surgeryTime: formData?.surgeryTime,
+        rcriScore: rcriScore,
+        has2Score: has2Score,
+      };
+    });
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -1362,58 +1478,156 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     endOfSaturday.setDate(now.getDate() + daysUntilSaturday);
     endOfSaturday.setHours(23, 59, 59, 999);
 
-    const surgeries = await db
+    // Get all finished or in-progress assessments for this user
+    const chats = await db
       .select()
       .from(chat)
       .where(
         and(
           eq(chat.userId, userId),
-          eq(chat.status, 'finished'),
-          // gte(chat.surgeryDate, startOfToday),
-          // lte(chat.surgeryDate, endOfSaturday),
+          sql`${chat.status} IN ('finished', 'in_progress')`,
         ),
       );
-    // .orderBy(asc(chat.surgeryDate));
+
+    // Get surgeries scheduled this week
+    const surgeries = await db
+      .select()
+      .from(surgery)
+      .where(
+        and(
+          inArray(
+            surgery.assessmentId,
+            chats.map((c) => c.id),
+          ),
+          gte(surgery.date, startOfToday),
+          lte(surgery.date, endOfSaturday),
+        ),
+      )
+      .orderBy(asc(surgery.date));
+
+    // Create a map of assessmentId to chat
+    const chatMap = new Map(chats.map((c) => [c.id, c]));
 
     // Group by day of week
     const groupedByDay: Record<string, any[]> = {};
 
-    // surgeries.forEach((surgery) => {
-    //   if (!surgery.surgeryDate) return;
+    surgeries.forEach((surgeryItem) => {
+      if (!surgeryItem.date) return;
 
-    //   const surgeryDate = new Date(surgery.surgeryDate);
-    //   const dayOfWeek = surgeryDate.toLocaleDateString('pt-BR', {
-    //     weekday: 'long',
-    //   });
-    //   const dateStr = surgeryDate.toLocaleDateString('pt-BR', {
-    //     day: '2-digit',
-    //     month: '2-digit',
-    //   });
-    //   const key = `${dayOfWeek}, ${dateStr}`;
+      const surgeryDate = new Date(surgeryItem.date);
+      const dayOfWeek = surgeryDate.toLocaleDateString('pt-BR', {
+        weekday: 'long',
+      });
+      const dateStr = surgeryDate.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+      });
+      const key = `${dayOfWeek}, ${dateStr}`;
 
-    //   if (!groupedByDay[key]) {
-    //     groupedByDay[key] = [];
-    //   }
+      if (!groupedByDay[key]) {
+        groupedByDay[key] = [];
+      }
 
-    //   const formData = surgery.form as any;
-    //   groupedByDay[key].push({
-    //     chatId: surgery.id,
-    //     patientAge: formData?.age || 0,
-    //     riskLevel: calculateRiskLevel(surgery.results),
-    //     surgeryDate: surgery.surgeryDate.toISOString(),
-    //     surgeryCompleted: surgery.surgeryCompleted || false,
-    //     surgeryCancelled: surgery.surgeryCancelled || false,
-    //     surgeryRescheduled: surgery.surgeryRescheduled || false,
-    //     rcriScore: extractRCRIScore(surgery.results),
-    //     has2Score: extractHAS2Score(surgery.results),
-    //   });
-    // });
+      const chatItem = chatMap.get(surgeryItem.assessmentId);
+      const formData = chatItem?.form as any;
+      const riskLevel = calculateRiskLevel(
+        chatItem?.score_rcri ?? null,
+        chatItem?.score_aub_has2 ?? null,
+      );
+      groupedByDay[key].push({
+        chatId: surgeryItem.assessmentId,
+        patientAge: formData?.age || 0,
+        riskLevel: mapRiskLevelToPortuguese(riskLevel),
+        surgeryDate: surgeryItem.date.toISOString(),
+        surgeryName: surgeryItem.name || formData?.surgeryName,
+        surgeryTime: formData?.surgeryTime,
+        surgeryCompleted: surgeryItem.completed,
+        surgeryCancelled: surgeryItem.cancelled,
+        surgeryRescheduled: surgeryItem.rescheduled,
+        rcriScore: chatItem?.score_rcri ?? null,
+        has2Score: chatItem?.score_aub_has2 ?? null,
+      });
+    });
 
     return groupedByDay;
   } catch (error) {
+    console.log(error);
     throw new ChatSDKError(
       'bad_request:database',
       "Failed to get this week's surgeries",
+    );
+  }
+}
+
+export async function getWeeklySurgeries({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId: string;
+  startDate: Date;
+  endDate: Date;
+}) {
+  try {
+    // Get all finished or in-progress assessments for this user
+    const chats = await db
+      .select()
+      .from(chat)
+      .where(
+        and(
+          eq(chat.userId, userId),
+          sql`${chat.status} IN ('finished', 'in_progress')`,
+        ),
+      );
+
+    // Get surgeries scheduled in the date range
+    const surgeries = await db
+      .select()
+      .from(surgery)
+      .where(
+        and(
+          inArray(
+            surgery.assessmentId,
+            chats.map((c) => c.id),
+          ),
+          gte(surgery.date, startDate),
+          lte(surgery.date, endDate),
+        ),
+      )
+      .orderBy(asc(surgery.date));
+
+    // Create a map of assessmentId to chat
+    const chatMap = new Map(chats.map((c) => [c.id, c]));
+
+    // Format surgeries with additional data
+    const formattedSurgeries = surgeries
+      .filter((surgeryItem) => surgeryItem.date)
+      .map((surgeryItem) => {
+        const chatItem = chatMap.get(surgeryItem.assessmentId);
+        const formData = chatItem?.form as any;
+        const riskLevel = calculateRiskLevel(
+          chatItem?.score_rcri ?? null,
+          chatItem?.score_aub_has2 ?? null,
+        );
+
+        return {
+          chatId: surgeryItem.assessmentId,
+          patientAge: formData?.age || 0,
+          riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
+          surgeryDate: surgeryItem?.date?.toISOString(),
+          surgeryName: surgeryItem.name || formData?.surgeryName || undefined,
+          surgeryTime: formData?.surgeryTime || undefined,
+          rcriScore: chatItem?.score_rcri ?? null,
+          has2Score: chatItem?.score_aub_has2 ?? null,
+        };
+      });
+
+    return formattedSurgeries;
+  } catch (error) {
+    console.log(error);
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get weekly surgeries',
     );
   }
 }
@@ -1441,10 +1655,12 @@ export async function updateClinicConfig({
   clinicId,
   clinicName,
   formConfig,
+  dashboardConfig,
 }: {
   clinicId: string;
   clinicName?: string;
   formConfig?: FormConfiguration;
+  dashboardConfig?: DashboardConfiguration;
 }) {
   try {
     const updateData: Partial<ClinicConfig> = {
@@ -1453,6 +1669,8 @@ export async function updateClinicConfig({
 
     if (clinicName !== undefined) updateData.clinicName = clinicName;
     if (formConfig !== undefined) updateData.formConfig = formConfig as any;
+    if (dashboardConfig !== undefined)
+      updateData.dashboardConfig = dashboardConfig as any;
 
     const [updated] = await db
       .update(clinicConfig)
@@ -1466,5 +1684,47 @@ export async function updateClinicConfig({
       'bad_request:database',
       'Failed to update clinic config',
     );
+  }
+}
+
+export async function upsertSurgery({
+  assessmentId,
+  name,
+  date,
+  time,
+}: {
+  assessmentId: string;
+  name?: string;
+  date?: string;
+  time?: string;
+}) {
+  try {
+    // Combine date and time into a single timestamp if both provided
+    let surgeryDateTime: Date | undefined;
+    if (date && time) {
+      surgeryDateTime = new Date(`${date}T${time}`);
+    } else if (date) {
+      surgeryDateTime = new Date(date);
+    }
+
+    const surgeryData: any = {
+      assessmentId,
+    };
+
+    if (name !== undefined) surgeryData.name = name;
+    if (surgeryDateTime !== undefined) surgeryData.date = surgeryDateTime;
+
+    return await db
+      .insert(surgery)
+      .values(surgeryData)
+      .onConflictDoUpdate({
+        target: surgery.assessmentId,
+        set: {
+          ...(name !== undefined && { name }),
+          ...(surgeryDateTime !== undefined && { date: surgeryDateTime }),
+        },
+      });
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to upsert surgery');
   }
 }
