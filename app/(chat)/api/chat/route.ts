@@ -7,7 +7,6 @@ import {
   streamText,
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
-import { cookies } from 'next/headers';
 import {
   initialMessage,
   type RequestHints,
@@ -21,6 +20,7 @@ import {
   getMessagesByChatId,
   saveMessages,
 } from '@/lib/db/queries';
+import { validateChatAccess } from '@/lib/api/chat-guard';
 import { convertToUIMessages, generateUUID } from '@/lib/shared/utils';
 import { saveForm } from '@/lib/ai/tools/save-form';
 import { saveMedications } from '@/lib/ai/tools/save-medications';
@@ -96,27 +96,7 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const cookieStore = await cookies();
-    const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
-
-    if (!chatTokenCookie) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
-    }
-
-    const chat = await getChatById({ id });
-
-    if (!chat) {
-      return new ChatSDKError('not_found:chat').toResponse();
-    }
-
-    if (chat.token !== chatTokenCookie.value) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
-    }
-
-    const isExpired = new Date(chat.tokenExpiresAt) < new Date();
-    if (chat.status === 'finished' || isExpired) {
-      return new ChatSDKError('not_found:chat').toResponse();
-    }
+    const chat = await validateChatAccess(id);
 
     const messagesFromDb = await getMessagesByChatId({ id });
     const uiMessages = messages
