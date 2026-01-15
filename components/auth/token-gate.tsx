@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/toast';
-import { ChatHeader } from '@/components/chat/chat-header';
 import { TermsConsentModal } from '@/components/auth/terms-consent-modal';
 
 export function TokenGate({ chatId }: { chatId: string }) {
@@ -59,9 +58,6 @@ export function TokenGate({ chatId }: { chatId: string }) {
   return (
     <>
       <div className="relative h-dvh w-screen bg-background">
-        <div className="absolute top-0 inset-x-0 z-10">
-          <ChatHeader />
-        </div>
         <div className="flex h-full items-center justify-center">
           <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-12">
             <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">

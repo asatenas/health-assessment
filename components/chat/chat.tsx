@@ -3,7 +3,6 @@
 import { DefaultChatTransport } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import { ChatHeader } from '@/components/chat/chat-header';
 import { fetchWithErrorHandlers, generateUUID } from '@/lib/shared/utils';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -171,68 +170,64 @@ export function Chat({
 
   return (
     <>
-      <div className="flex flex-col min-w-0 h-dvh bg-background">
-        <ChatHeader />
+      {!isFormVisible && (
+        <Messages
+          chatId={id}
+          status={status}
+          messages={messages}
+          setMessages={setMessages}
+          regenerate={regenerate}
+          isReadonly={currentIsReadonly}
+        />
+      )}
 
-        {!isFormVisible && (
-          <Messages
-            chatId={id}
-            status={status}
-            messages={messages}
-            setMessages={setMessages}
-            regenerate={regenerate}
-            isReadonly={currentIsReadonly}
-          />
-        )}
+      {!hasCompletedForm && (
+        <PreChatForm
+          onComplete={async (formData) => {
+            // Store form data for later saving
+            setStoredFormData(formData);
 
-        {!hasCompletedForm && (
-          <PreChatForm
-            onComplete={async (formData) => {
-              // Store form data for later saving
-              setStoredFormData(formData);
+            setHasCompletedForm(true);
+            setIsFormVisible(false);
 
-              setHasCompletedForm(true);
-              setIsFormVisible(false);
+            sendMessage({
+              role: 'user',
+              parts: [
+                {
+                  type: 'text',
+                  text: formatPacienteInfo(formData),
+                },
+              ],
+            });
+          }}
+          onShowForm={() => setIsFormVisible(true)}
+          isReadonly={currentIsReadonly}
+          formConfig={formConfig}
+        />
+      )}
 
-              sendMessage({
-                role: 'user',
-                parts: [
-                  {
-                    type: 'text',
-                    text: formatPacienteInfo(formData),
-                  },
-                ],
-              });
-            }}
-            onShowForm={() => setIsFormVisible(true)}
-            isReadonly={currentIsReadonly}
-            formConfig={formConfig}
-          />
-        )}
-
-        {hasCompletedForm && (
-          <div className="sticky bottom-0 flex gap-2 px-4 pb-2 mx-auto w-full bg-background md:max-w-3xl z-[1] border-t-0">
-            {!currentIsReadonly && (
-              <MultimodalInput
-                chatId={id}
-                input={input}
-                setInput={setInput}
-                status={status}
-                stop={stop}
-                attachments={attachments}
-                setAttachments={setAttachments}
-                messages={messages}
-                setMessages={setMessages}
-                sendMessage={sendMessage}
-                selectedModelId={initialChatModel}
-              />
-            )}
-            {currentIsReadonly &&
-              hasFinalizeInterviewCalled &&
-              status === 'ready' && <NPSEvaluation chatId={id} />}
-          </div>
-        )}
-      </div>
+      {hasCompletedForm && (
+        <div className="sticky bottom-0 flex gap-2 px-4 pb-2 mx-auto w-full bg-background md:max-w-3xl z-[1] border-t-0">
+          {!currentIsReadonly && (
+            <MultimodalInput
+              chatId={id}
+              input={input}
+              setInput={setInput}
+              status={status}
+              stop={stop}
+              attachments={attachments}
+              setAttachments={setAttachments}
+              messages={messages}
+              setMessages={setMessages}
+              sendMessage={sendMessage}
+              selectedModelId={initialChatModel}
+            />
+          )}
+          {currentIsReadonly &&
+            hasFinalizeInterviewCalled &&
+            status === 'ready' && <NPSEvaluation chatId={id} />}
+        </div>
+      )}
     </>
   );
 }
