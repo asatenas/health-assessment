@@ -1653,6 +1653,18 @@ export async function getClinicConfigByClinicId({
   }
 }
 
+export async function getClinicFormConfigByClinicId({
+  clinicId,
+}: {
+  clinicId: string;
+}): Promise<FormConfiguration> {
+  const config = await getClinicConfigByClinicId({ clinicId });
+  if (config?.formConfig) {
+    return config.formConfig as FormConfiguration;
+  }
+  return DEFAULT_FORM_CONFIG;
+}
+
 export async function updateClinicConfig({
   clinicId,
   clinicName,

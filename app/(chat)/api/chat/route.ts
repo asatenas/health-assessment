@@ -17,7 +17,7 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getClinicConfigByClinicId,
+  getClinicFormConfigByClinicId,
   getMessagesByChatId,
   saveMessages,
 } from '@/lib/db/queries';
@@ -46,8 +46,6 @@ import { hemoglobin } from '@/lib/ai/tools/hemoglobin';
 import { cerebralIschemia } from '@/lib/ai/tools/cerebral-ischemia';
 import { coronaryDisease } from '@/lib/ai/tools/coronary-disease';
 import { cardiacStructure } from '@/lib/ai/tools/cardiac-structure';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
-import { DEFAULT_FORM_CONFIG } from '@/lib/config/default-form-config';
 
 export const maxDuration = 60;
 
@@ -122,8 +120,8 @@ export async function POST(request: Request) {
 
     const messagesFromDb = await getMessagesByChatId({ id });
     const uiMessages = messages
-      ? messages // Use provided messages for first user message (includes initial assistant message)
-      : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
+      ? messages
+      : [...convertToUIMessages(messagesFromDb), message];
 
     if (!messages) {
       uiMessages.unshift({
@@ -182,21 +180,9 @@ export async function POST(request: Request) {
       ],
     });
 
-    // Fetch clinic configuration
-    let formConfig: FormConfiguration = DEFAULT_FORM_CONFIG;
-    try {
-      const clinicConfig = await getClinicConfigByClinicId({
-        clinicId: chat.userId,
-      });
-      if (clinicConfig?.formConfig) {
-        formConfig = clinicConfig.formConfig as FormConfiguration;
-      }
-    } catch (error) {
-      console.error(
-        'Failed to fetch clinic config for AI, using default:',
-        error,
-      );
-    }
+    const formConfig = await getClinicFormConfigByClinicId({
+      clinicId: chat.userId,
+    });
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });

@@ -5,7 +5,7 @@ import {
   getChatById,
   getChatFormById,
   getMessagesByChatId,
-  getClinicConfigByClinicId,
+  getClinicFormConfigByClinicId,
 } from '@/lib/db/queries';
 import { DataStreamHandler } from '@/components/providers/data-stream-handler';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
@@ -14,7 +14,6 @@ import { convertToUIMessages, generateUUID } from '@/lib/shared/utils';
 import { TokenGate } from '@/components/auth/token-gate';
 import { UUID_REGEX } from '@/lib/shared/validation';
 import type { FormConfiguration } from '@/lib/types/clinic-config';
-import { DEFAULT_FORM_CONFIG } from '@/lib/config/default-form-config';
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -76,18 +75,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const initialFormData = await getChatFormById({ id });
 
-  // Fetch clinic config
-  let formConfig: FormConfiguration = DEFAULT_FORM_CONFIG;
-  try {
-    const clinicConfig = await getClinicConfigByClinicId({
-      clinicId: chat.userId,
-    });
-    if (clinicConfig?.formConfig) {
-      formConfig = clinicConfig.formConfig as FormConfiguration;
-    }
-  } catch (error) {
-    console.error('Failed to fetch clinic config, using default:', error);
-  }
+  const formConfig = await getClinicFormConfigByClinicId({
+    clinicId: chat.userId,
+  });
 
   // Filter config to only include enabled sections and fields (security)
   const enabledConfig: FormConfiguration = {
