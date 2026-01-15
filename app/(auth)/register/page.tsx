@@ -75,7 +75,7 @@ export default function Page() {
         <AuthForm action={handleSubmit} defaultEmail={email}>
           <SubmitButton isSuccessful={isSuccessful}>
             {/* English: 'Sign Up' */}
-            Cadastre-se
+            Cadastrar
           </SubmitButton>
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
             {/* English: 'Already have an account? ' */} Já tem uma conta?{' '}
