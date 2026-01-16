@@ -32,7 +32,7 @@ export default function Page() {
       toast({
         type: 'error',
         description:
-          'Credenciais inválidas ou e-mail não verificado. Contate o suporte se precisar de verificação.',
+          'Credenciais inválidas ou e-mail não verificado. Contate suporte@asatenas.com.br se precisar de verificação.',
       });
     } else if (state.status === 'invalid_data') {
       // English: 'Failed validating your submission!'

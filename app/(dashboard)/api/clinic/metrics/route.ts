@@ -1,4 +1,4 @@
-import { auth } from '@/app/(auth)/auth';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import {
   getDashboardMetrics,
   getTimelineData,
@@ -6,15 +6,12 @@ import {
   getThisWeeksSurgeries,
   getTodaysSurgeriesForSwipe,
 } from '@/lib/db/queries';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const user = await validateClinicAccess();
+
     const { searchParams } = new URL(request.url);
     const dateFromParam = searchParams.get('dateFrom');
     const dateToParam = searchParams.get('dateTo');
@@ -70,7 +67,7 @@ export async function GET(request: Request) {
 
     // Get metrics
     const metrics = await getDashboardMetrics({
-      userId: session.user.id,
+      userId: user.id,
       dateFrom,
       dateTo,
     });
@@ -81,24 +78,24 @@ export async function GET(request: Request) {
     const timelineTo = dateTo || new Date();
 
     const timeline = await getTimelineData({
-      userId: session.user.id,
+      userId: user.id,
       dateFrom: timelineFrom,
       dateTo: timelineTo,
     });
 
     // Get notifications
     const notifications = await getHighPriorityNotifications({
-      userId: session.user.id,
+      userId: user.id,
     });
 
     // Get this week's surgeries
     const thisWeeksSurgeries = await getThisWeeksSurgeries({
-      userId: session.user.id,
+      userId: user.id,
     });
 
     // Get today's surgeries
     const todaysSurgeries = await getTodaysSurgeriesForSwipe({
-      userId: session.user.id,
+      userId: user.id,
     });
 
     return Response.json({
@@ -109,6 +106,9 @@ export async function GET(request: Request) {
       todaysSurgeries,
     });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error fetching dashboard metrics:', error);
     return Response.json(
       { error: 'Failed to fetch dashboard metrics' },

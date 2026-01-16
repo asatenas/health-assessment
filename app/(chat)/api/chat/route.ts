@@ -6,8 +6,6 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
-import { auth } from '@/app/(auth)/auth';
-import { cookies } from 'next/headers';
 import {
   initialMessage,
   type RequestHints,
@@ -16,11 +14,11 @@ import {
 import {
   createStreamId,
   deleteChatById,
-  getChatById,
-  getClinicConfigByClinicId,
+  getClinicFormConfigByClinicId,
   getMessagesByChatId,
   saveMessages,
 } from '@/lib/db/queries';
+import { validateChatAccess } from '@/lib/api/chat-guard';
 import { convertToUIMessages, generateUUID } from '@/lib/shared/utils';
 import { saveForm } from '@/lib/ai/tools/save-form';
 import { saveMedications } from '@/lib/ai/tools/save-medications';
@@ -46,8 +44,6 @@ import { hemoglobin } from '@/lib/ai/tools/hemoglobin';
 import { cerebralIschemia } from '@/lib/ai/tools/cerebral-ischemia';
 import { coronaryDisease } from '@/lib/ai/tools/coronary-disease';
 import { cardiacStructure } from '@/lib/ai/tools/cardiac-structure';
-import type { FormConfiguration } from '@/lib/types/clinic-config';
-import { DEFAULT_FORM_CONFIG } from '@/lib/config/default-form-config';
 
 export const maxDuration = 60;
 
@@ -98,32 +94,12 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
-    const cookieStore = await cookies();
-    const chatTokenCookie = cookieStore.get(`chat_token_${id}`);
-
-    if (!chatTokenCookie) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
-    }
-
-    const chat = await getChatById({ id });
-
-    if (!chat) {
-      return new ChatSDKError('not_found:chat').toResponse();
-    }
-
-    if (chat.token !== chatTokenCookie.value) {
-      return new ChatSDKError('unauthorized:chat').toResponse();
-    }
-
-    const isExpired = new Date(chat.tokenExpiresAt) < new Date();
-    if (chat.status === 'finished' || isExpired) {
-      return new ChatSDKError('not_found:chat').toResponse();
-    }
+    const chat = await validateChatAccess(id);
 
     const messagesFromDb = await getMessagesByChatId({ id });
     const uiMessages = messages
-      ? messages // Use provided messages for first user message (includes initial assistant message)
-      : [...convertToUIMessages(messagesFromDb), message]; // Use DB messages for subsequent messages
+      ? messages
+      : [...convertToUIMessages(messagesFromDb), message];
 
     if (!messages) {
       uiMessages.unshift({
@@ -182,21 +158,9 @@ export async function POST(request: Request) {
       ],
     });
 
-    // Fetch clinic configuration
-    let formConfig: FormConfiguration = DEFAULT_FORM_CONFIG;
-    try {
-      const clinicConfig = await getClinicConfigByClinicId({
-        clinicId: chat.userId,
-      });
-      if (clinicConfig?.formConfig) {
-        formConfig = clinicConfig.formConfig as FormConfiguration;
-      }
-    } catch (error) {
-      console.error(
-        'Failed to fetch clinic config for AI, using default:',
-        error,
-      );
-    }
+    const formConfig = await getClinicFormConfigByClinicId({
+      clinicId: chat.userId,
+    });
 
     const streamId = generateUUID();
     await createStreamId({ streamId, chatId: id });
@@ -280,25 +244,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  const chatId = searchParams.get('id') ?? '';
 
-  if (!id) {
-    return new ChatSDKError('bad_request:api').toResponse();
-  }
+  await validateChatAccess(chatId);
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('unauthorized:chat').toResponse();
-  }
-
-  const chat = await getChatById({ id });
-
-  if (chat.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:chat').toResponse();
-  }
-
-  const deletedChat = await deleteChatById({ id });
+  const deletedChat = await deleteChatById({ id: chatId });
 
   return Response.json(deletedChat, { status: 200 });
 }

@@ -1,5 +1,5 @@
-import { auth } from '@/app/(auth)/auth';
-import { getChatById, getMessagesByChatId } from '@/lib/db/queries';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { getMessagesByChatId } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/shared/errors';
 import { convertToUIMessages } from '@/lib/shared/utils';
 
@@ -7,24 +7,10 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ chatId: string }> },
 ) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return new ChatSDKError('unauthorized:chat').toResponse();
-  }
-
   try {
     const { chatId } = await params;
 
-    const chat = await getChatById({ id: chatId });
-
-    if (!chat) {
-      return new ChatSDKError('not_found:chat').toResponse();
-    }
-
-    if (chat.userId !== session.user.id) {
-      return new ChatSDKError('forbidden:chat').toResponse();
-    }
+    await validateClinicAccess(chatId);
 
     const messagesFromDb = await getMessagesByChatId({ id: chatId });
 
@@ -41,6 +27,9 @@ export async function GET(
 
     return Response.json({ messages: conversationMessages });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error fetching messages:', error);
     return Response.json(
       { error: 'Failed to fetch messages' },

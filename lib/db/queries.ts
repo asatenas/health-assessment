@@ -297,9 +297,6 @@ export async function getChatWithStatusById({ id }: { id: string }) {
 export async function getChatWithSurgeryById({ id }: { id: string }) {
   try {
     const chatData = await getChatById({ id });
-    if (!chatData) return null;
-
-    // Fetch surgery details if they exist
     const [surgeryDetails] = await db
       .select()
       .from(surgery)
@@ -1651,6 +1648,18 @@ export async function getClinicConfigByClinicId({
       'Failed to get clinic config',
     );
   }
+}
+
+export async function getClinicFormConfigByClinicId({
+  clinicId,
+}: {
+  clinicId: string;
+}): Promise<FormConfiguration> {
+  const config = await getClinicConfigByClinicId({ clinicId });
+  if (config?.formConfig) {
+    return config.formConfig as FormConfiguration;
+  }
+  return DEFAULT_FORM_CONFIG;
 }
 
 export async function updateClinicConfig({

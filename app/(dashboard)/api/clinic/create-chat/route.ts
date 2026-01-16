@@ -1,9 +1,44 @@
-import { auth } from '@/app/(auth)/auth';
 import { isDevelopmentEnvironment } from '@/lib/shared/constants';
-import { createChatWithToken, getUserById } from '@/lib/db/queries';
+import { createChatWithToken } from '@/lib/db/queries';
 import { generateUUID } from '@/lib/shared/utils';
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { ChatSDKError } from '@/lib/shared/errors';
+
+export async function POST() {
+  const chatId = generateUUID();
+  const token = `${generateAlphanumeric(4)}-${generateAlphanumeric(4)}`;
+
+  try {
+    const user = await validateClinicAccess();
+
+    await createChatWithToken({
+      id: chatId,
+      userId: user.id,
+      token,
+    });
+
+    const APP_URL = isDevelopmentEnvironment
+      ? `http://${process.env.APP_URL}`
+      : `https://${process.env.APP_URL}`;
+
+    return NextResponse.json({
+      chatId,
+      token,
+      url: `${APP_URL}/chat/${chatId}`,
+    });
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
+    console.error('Error creating chat:', error);
+    return NextResponse.json(
+      { error: 'Failed to create chat' },
+      { status: 500 },
+    );
+  }
+}
 
 /**
  * Generate a cryptographically secure random alphanumeric string
@@ -34,44 +69,4 @@ function generateAlphanumeric(length: number): string {
   }
 
   return result;
-}
-
-export async function POST() {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const user = await getUserById({ id: session.user.id });
-
-  if (!user?.emailVerified) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const chatId = generateUUID();
-  const token = `${generateAlphanumeric(4)}-${generateAlphanumeric(4)}`;
-
-  try {
-    await createChatWithToken({
-      id: chatId,
-      userId: session.user.id,
-      token,
-    });
-
-    const APP_URL = isDevelopmentEnvironment
-      ? `http://${process.env.APP_URL}`
-      : `https://${process.env.APP_URL}`;
-
-    return NextResponse.json({
-      chatId,
-      token,
-      url: `${APP_URL}/chat/${chatId}`,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to create chat' },
-      { status: 500 },
-    );
-  }
 }

@@ -1,14 +1,11 @@
-import { auth } from '@/app/(auth)/auth';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { getWeeklySurgeries } from '@/lib/db/queries';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const user = await validateClinicAccess();
+
     // Get current week's date range (Sunday to Saturday)
     const today = new Date();
     const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
@@ -24,13 +21,16 @@ export async function GET(request: Request) {
     endOfWeek.setHours(23, 59, 59, 999);
 
     const surgeries = await getWeeklySurgeries({
-      userId: session.user.id,
+      userId: user.id,
       startDate: startOfWeek,
       endDate: endOfWeek,
     });
 
     return Response.json({ surgeries });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error fetching weekly surgeries:', error);
     return Response.json(
       { error: 'Failed to fetch weekly surgeries' },

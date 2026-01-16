@@ -44,7 +44,10 @@ function PureChatHeader() {
       </header>
 
       <Dialog open={isComoUsarOpen} onOpenChange={setIsComoUsarOpen}>
-        <DialogContent className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <DialogContent
+          className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
             <DialogTitle className="sr-only">Como Usar</DialogTitle>
           </DialogHeader>
@@ -131,7 +134,10 @@ function PureChatHeader() {
       </Dialog>
 
       <Dialog open={isQuemSomosOpen} onOpenChange={setIsQuemSomosOpen}>
-        <DialogContent className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <DialogContent
+          className="max-w-xl w-[95vw] max-h-[80vh] overflow-y-auto rounded-2xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
             <DialogTitle className="sr-only">Quem Somos</DialogTitle>
           </DialogHeader>

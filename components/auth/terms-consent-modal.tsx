@@ -51,6 +51,7 @@ export function TermsConsentModal({
     >
       <DialogContent
         className="max-w-3xl max-h-[90vh] overflow-y-auto"
+        aria-describedby={undefined}
         onInteractOutside={(e) => isLoading && e.preventDefault()}
         onEscapeKeyDown={(e) => isLoading && e.preventDefault()}
       >

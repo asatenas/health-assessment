@@ -22,13 +22,13 @@ export const DEFAULT_FORM_CONFIG: FormConfiguration = {
     healthProblems: {
       enabled: false,
       fields: {
-        cardiologicos: { enabled: false },
-        respiratorios: { enabled: false },
-        renais: { enabled: false },
-        figado: { enabled: false },
-        vasculares: { enabled: false },
-        ortopedicos: { enabled: false },
-        digestivos: { enabled: false },
+        cardiologicos: { enabled: true },
+        respiratorios: { enabled: true },
+        renais: { enabled: true },
+        figado: { enabled: true },
+        vasculares: { enabled: true },
+        ortopedicos: { enabled: true },
+        digestivos: { enabled: true },
       },
     },
     allergies: {

@@ -1,35 +1,18 @@
-import { auth } from '@/app/(auth)/auth';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { getChatWithSurgeryById } from '@/lib/db/queries';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ chatId: string }> },
 ) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const { chatId } = await params;
 
-    // Fetch the chat with surgery details
+    await validateClinicAccess(chatId);
+
     const chat = await getChatWithSurgeryById({ id: chatId });
 
-    if (!chat) {
-      return Response.json({ error: 'Chat not found' }, { status: 404 });
-    }
-
-    // Verify the chat belongs to the user
-    if (chat.userId !== session.user.id) {
-      return Response.json(
-        { error: 'Forbidden - You do not own this chat' },
-        { status: 403 },
-      );
-    }
-
-    // Return the chat details
     return Response.json({
       id: chat.id,
       createdAt: chat.createdAt,
@@ -42,6 +25,9 @@ export async function GET(
       surgery: chat.surgery,
     });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error fetching chat details:', error);
     return Response.json(
       { error: 'Failed to fetch chat details' },
