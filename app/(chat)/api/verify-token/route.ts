@@ -1,47 +1,17 @@
 import { isProductionEnvironment } from '@/lib/shared/constants';
 import {
-  getChatByIdAndToken,
   updateChatStatusById,
   updateCheckpointByChatId,
 } from '@/lib/db/queries';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { UUID_REGEX, TOKEN_REGEX } from '@/lib/shared/validation';
+import { validateChatAccess } from '@/lib/api/chat-guard';
 
 export async function POST(request: Request) {
   try {
     const { chatId, token } = await request.json();
 
-    if (!chatId || !token) {
-      return NextResponse.json(
-        { error: 'Missing chatId or token' },
-        { status: 400 },
-      );
-    }
-
-    if (!UUID_REGEX.test(chatId)) {
-      return NextResponse.json(
-        { error: 'Invalid chatId format' },
-        { status: 400 },
-      );
-    }
-
-    if (!TOKEN_REGEX.test(token)) {
-      return NextResponse.json(
-        { error: 'Invalid token format' },
-        { status: 400 },
-      );
-    }
-    const chat = await getChatByIdAndToken({ id: chatId, token });
-
-    if (!chat) {
-      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
-    }
-
-    const isExpired = new Date(chat.tokenExpiresAt) < new Date();
-    if (chat.status === 'finished' || isExpired) {
-      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
-    }
+    const chat = await validateChatAccess(chatId, token);
 
     // Set a secure cookie with the token for this specific chat
     const cookieStore = await cookies();
