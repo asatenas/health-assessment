@@ -6,7 +6,6 @@ import {
   stepCountIs,
   streamText,
 } from 'ai';
-import { auth } from '@/app/(auth)/auth';
 import {
   initialMessage,
   type RequestHints,
@@ -15,7 +14,6 @@ import {
 import {
   createStreamId,
   deleteChatById,
-  getChatById,
   getClinicFormConfigByClinicId,
   getMessagesByChatId,
   saveMessages,
@@ -246,25 +244,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+  const chatId = searchParams.get('id') ?? '';
 
-  if (!id) {
-    return new ChatSDKError('bad_request:api').toResponse();
-  }
+  await validateChatAccess(chatId);
 
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError('unauthorized:chat').toResponse();
-  }
-
-  const chat = await getChatById({ id });
-
-  if (chat.userId !== session.user.id) {
-    return new ChatSDKError('forbidden:chat').toResponse();
-  }
-
-  const deletedChat = await deleteChatById({ id });
+  const deletedChat = await deleteChatById({ id: chatId });
 
   return Response.json(deletedChat, { status: 200 });
 }
