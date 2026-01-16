@@ -607,12 +607,11 @@ export function PreChatForm({
           <div className="space-y-4">
             {surgeryConfig.nomeCirurgia?.enabled && (
               <div>
-                <Label htmlFor="nome-cirurgia">Nome da Cirurgia *</Label>
+                <Label htmlFor="nome-cirurgia">Nome da Cirurgia</Label>
                 <Input
                   id="nome-cirurgia"
                   type="text"
                   className="text-sm"
-                  required
                   value={formData.nomeCirurgia}
                   onChange={(e) =>
                     setFormData({ ...formData, nomeCirurgia: e.target.value })
@@ -623,12 +622,11 @@ export function PreChatForm({
 
             {surgeryConfig.dataCirurgia?.enabled && (
               <div>
-                <Label htmlFor="data-cirurgia">Data *</Label>
+                <Label htmlFor="data-cirurgia">Data</Label>
                 <Input
                   id="data-cirurgia"
                   type="date"
                   className="text-sm"
-                  required
                   value={formData.dataCirurgia}
                   onChange={(e) =>
                     setFormData({ ...formData, dataCirurgia: e.target.value })
@@ -639,12 +637,11 @@ export function PreChatForm({
 
             {surgeryConfig.horaCirurgia?.enabled && (
               <div>
-                <Label htmlFor="hora-cirurgia">Hora *</Label>
+                <Label htmlFor="hora-cirurgia">Hora</Label>
                 <Input
                   id="hora-cirurgia"
                   type="time"
                   className="text-sm"
-                  required
                   value={formData.horaCirurgia}
                   onChange={(e) =>
                     setFormData({ ...formData, horaCirurgia: e.target.value })
