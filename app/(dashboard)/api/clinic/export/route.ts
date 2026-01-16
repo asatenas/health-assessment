@@ -1,52 +1,12 @@
-import { auth } from '@/app/(auth)/auth';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import type { ChatStatus } from '@/lib/db/chat-status';
 import { calculateRiskLevel, getChatsByClinicUserId } from '@/lib/db/queries';
-
-// Get Portuguese status label
-function getStatusLabel(status: string): string {
-  switch (status) {
-    case 'active':
-      return 'Ativo';
-    case 'initialized':
-      return 'Iniciado';
-    case 'in_progress':
-      return 'Em progresso';
-    case 'finished':
-      return 'Finalizado';
-    case 'expired':
-      return 'Expirado';
-    default:
-      return status;
-  }
-}
-
-// Get Portuguese reason label
-function getReasonLabel(reason?: string | null): string {
-  if (!reason) return 'N/A';
-
-  const labels: Record<string, string> = {
-    paciente_nao_liberado: 'Paciente não liberado clinicamente',
-    exames_pendentes: 'Exames laboratoriais pendentes',
-    pedido_paciente: 'Solicitação do paciente',
-    risco_alto: 'Risco cirúrgico muito alto',
-    intervencao_necessaria: 'Intervenção médica necessária',
-    indisponibilidade_sala: 'Indisponibilidade de sala cirúrgica',
-    indisponibilidade_equipe: 'Indisponibilidade da equipe médica',
-    conflito_agenda: 'Conflito de agenda',
-    outros: 'Outros motivos',
-  };
-
-  return labels[reason] || reason;
-}
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const user = await validateClinicAccess();
+
     const { searchParams } = new URL(request.url);
     const format = searchParams.get('format') || 'csv';
     const dateFrom = searchParams.get('dateFrom');
@@ -55,7 +15,7 @@ export async function GET(request: Request) {
 
     // Get all chats for the user with filters
     const { chats } = await getChatsByClinicUserId({
-      userId: session.user.id,
+      userId: user.id,
       status: statusParam as ChatStatus,
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
@@ -142,7 +102,47 @@ export async function GET(request: Request) {
 
     return Response.json({ error: 'Invalid format' }, { status: 400 });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error exporting data:', error);
     return Response.json({ error: 'Failed to export data' }, { status: 500 });
   }
+}
+
+// Get Portuguese status label
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case 'active':
+      return 'Ativo';
+    case 'initialized':
+      return 'Iniciado';
+    case 'in_progress':
+      return 'Em progresso';
+    case 'finished':
+      return 'Finalizado';
+    case 'expired':
+      return 'Expirado';
+    default:
+      return status;
+  }
+}
+
+// Get Portuguese reason label
+function getReasonLabel(reason?: string | null): string {
+  if (!reason) return 'N/A';
+
+  const labels: Record<string, string> = {
+    paciente_nao_liberado: 'Paciente não liberado clinicamente',
+    exames_pendentes: 'Exames laboratoriais pendentes',
+    pedido_paciente: 'Solicitação do paciente',
+    risco_alto: 'Risco cirúrgico muito alto',
+    intervencao_necessaria: 'Intervenção médica necessária',
+    indisponibilidade_sala: 'Indisponibilidade de sala cirúrgica',
+    indisponibilidade_equipe: 'Indisponibilidade da equipe médica',
+    conflito_agenda: 'Conflito de agenda',
+    outros: 'Outros motivos',
+  };
+
+  return labels[reason] || reason;
 }

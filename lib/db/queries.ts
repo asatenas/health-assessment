@@ -297,9 +297,6 @@ export async function getChatWithStatusById({ id }: { id: string }) {
 export async function getChatWithSurgeryById({ id }: { id: string }) {
   try {
     const chatData = await getChatById({ id });
-    if (!chatData) return null;
-
-    // Fetch surgery details if they exist
     const [surgeryDetails] = await db
       .select()
       .from(surgery)

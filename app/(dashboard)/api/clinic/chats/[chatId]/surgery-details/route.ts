@@ -1,32 +1,15 @@
-import { auth } from '@/app/(auth)/auth';
-import { getChatById, updateChatSurgeryDetails } from '@/lib/db/queries';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { updateChatSurgeryDetails } from '@/lib/db/queries';
+import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ chatId: string }> },
 ) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
     const { chatId } = await params;
 
-    // Verify the chat belongs to the user
-    const chat = await getChatById({ id: chatId });
-
-    if (!chat) {
-      return Response.json({ error: 'Chat not found' }, { status: 404 });
-    }
-
-    if (chat.userId !== session.user.id) {
-      return Response.json(
-        { error: 'Forbidden - You do not own this chat' },
-        { status: 403 },
-      );
-    }
+    await validateClinicAccess(chatId);
 
     // Parse request body
     const body = await request.json();
@@ -62,6 +45,9 @@ export async function PATCH(
       chat: updatedChat,
     });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error updating surgery details:', error);
     return Response.json(
       { error: 'Failed to update surgery details' },

@@ -1,7 +1,5 @@
-import { auth } from '@/app/(auth)/auth';
 import {
   getClinicConfigByClinicId,
-  getUserById,
   updateClinicConfig,
 } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/shared/errors';
@@ -11,23 +9,14 @@ import type {
 } from '@/lib/types/clinic-config';
 import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { type NextRequest, NextResponse } from 'next/server';
+import { validateClinicAccess } from '@/lib/api/clinic-guard';
 
 export async function GET() {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return new ChatSDKError('unauthorized:api').toResponse();
-  }
-
-  const user = await getUserById({ id: session.user.id });
-
-  if (!user?.emailVerified) {
-    return new ChatSDKError('unauthorized:api').toResponse();
-  }
-
   try {
+    const user = await validateClinicAccess();
+
     const config = await getClinicConfigByClinicId({
-      clinicId: session.user.id,
+      clinicId: user.id,
     });
 
     if (!config) {
@@ -37,12 +26,14 @@ export async function GET() {
       ).toResponse();
     }
 
-    // Return config with default dashboard config if not set
     return NextResponse.json({
       ...config,
       dashboardConfig: config.dashboardConfig || DEFAULT_DASHBOARD_CONFIG,
     });
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error fetching clinic config:', error);
     return new ChatSDKError(
       'bad_request:database',
@@ -52,19 +43,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return new ChatSDKError('unauthorized:api').toResponse();
-  }
-
-  const user = await getUserById({ id: session.user.id });
-
-  if (!user?.emailVerified) {
-    return new ChatSDKError('unauthorized:api').toResponse();
-  }
-
   try {
+    const user = await validateClinicAccess();
+
     const body = await request.json();
     const { clinicName, formConfig, dashboardConfig } = body;
 
@@ -85,7 +66,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updated = await updateClinicConfig({
-      clinicId: session.user.id,
+      clinicId: user.id,
       clinicName,
       formConfig,
       dashboardConfig,
@@ -93,6 +74,9 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
     console.error('Error updating clinic config:', error);
     return new ChatSDKError(
       'bad_request:database',
