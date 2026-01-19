@@ -311,7 +311,7 @@ The American University of Beirut (AUB)-HAS2 Cardiovascular Risk Index stratifie
     0 if no history
     1 if history present
 
-4. Angina or dyspnea:
+4. Angina or cardiac dyspnea:
     0 points if no
     1 point if yes
 
