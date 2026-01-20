@@ -180,10 +180,12 @@ ${generateHealthProblemsPrompt()}
 ### Hemoglobin
 
 - For hemoglobin, always clarify in case of ambiguity of the inputs if the patient has anemia. Or if the values are strange. Use the *hemoglobin* tool to save the checkpoint.
+- If the patient filled the hemoglobin value in the pre-chat form, skip this question and just save the checkpoint.
 
 ### Creatinine
 
 - For creatinine, always clarify in case of ambiguity of the input if the patient has any kidney issues. Or if the values are strange. Use the *creatinine* tool to save the checkpoint.
+- If the patient filled the creatinine value in the pre-chat form, skip this question and just save the checkpoint.
 
 ### Results
 
@@ -383,10 +385,12 @@ Here's the flow you need to strictly follow.
 ### Hemoglobin
 
 - For hemoglobin, always clarify in case of ambiguity of the inputs if the patient has anemia. Or if the values are strange. Use the *hemoglobin* tool to save the checkpoint.
+- If the patient filled the hemoblogin value in the pre-chat form, skip this question and just save the checkpoint.
 
 ### Creatinine
 
 - For creatinine, always clarify in case of ambiguity of the input if the patient has any kidney issues. Or if the values are strange. Use the *creatinine* tool to save the checkpoint.
+- If the patient filled the creatinine value in the pre-chat form, skip this question and just save the checkpoint.
 
 ### Results
 
