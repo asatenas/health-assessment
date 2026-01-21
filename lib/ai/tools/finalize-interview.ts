@@ -1,11 +1,13 @@
 import { tool } from 'ai';
 import { z } from 'zod/v3';
 import {
-  getChatById,
+  // getChatById,
   makeChatReadOnlyById,
   updateChatResultsById,
   updateCheckpointByChatId,
 } from '@/lib/db/queries';
+import type { CheckpointNames } from '@/lib/db/chat-status';
+import { sendWebhook } from '@/lib/shared/utils';
 
 interface finalizeInterviewProps {
   chatId: string;
@@ -26,37 +28,31 @@ export const finalizeInterview = ({ chatId }: finalizeInterviewProps) =>
       { results, score_rcri, score_aub_has2, incomplete = false },
       messages,
     ) => {
+      const checkpoint: CheckpointNames = incomplete
+        ? 'interrupted'
+        : 'completed';
+
       await makeChatReadOnlyById({ chatId, incomplete });
 
-      if (incomplete) {
-        await updateCheckpointByChatId({ chatId, name: 'interrupted' });
-      } else {
+      if (!incomplete) {
         await updateChatResultsById({
           chatId,
           results,
           score_rcri,
           score_aub_has2,
         });
-        await updateCheckpointByChatId({ chatId, name: 'completed' });
       }
 
-      // send to external service
-      const chat = await getChatById({ id: chatId });
+      await updateCheckpointByChatId({ chatId, name: checkpoint });
 
-      const webhookUrl = process.env.FINALIZE_INTERVIEW_WEBHOOK_URL;
-
-      if (webhookUrl) {
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(chat),
-        });
-
-        if (!response.ok) {
-          console.error(`HTTP error! status: ${response.status}`);
-        }
-      }
+      await sendWebhook(
+        'chat_finalized',
+        process.env.FINALIZE_INTERVIEW_WEBHOOK_URL,
+        {
+          chatId,
+          checkpoint,
+          // chat: await getChatById({ id: chatId }),
+        },
+      );
     },
   });

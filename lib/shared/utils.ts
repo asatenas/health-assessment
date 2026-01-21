@@ -10,6 +10,7 @@ import type { DBMessage } from '@/lib/db/schema';
 import { ChatSDKError, type ErrorCode } from './errors';
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from './types';
 import { formatISO } from 'date-fns';
+import { isDevelopmentEnvironment } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,6 +25,29 @@ export const fetcher = async (url: string) => {
   }
 
   return response.json();
+};
+
+export const sendWebhook = async (
+  event: string,
+  url?: string,
+  body?: object,
+) => {
+  if (!url || isDevelopmentEnvironment) {
+    return;
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({ event, ...body }),
+  });
+
+  if (!response.ok) {
+    const { code, cause } = await response.json();
+    console.error(`Webhook error: ${code}. ${cause}`);
+  }
 };
 
 export async function fetchWithErrorHandlers(
