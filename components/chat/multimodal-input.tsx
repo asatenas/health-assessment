@@ -1,28 +1,11 @@
 'use client';
 
-import type { UIMessage } from 'ai';
-import {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  type Dispatch,
-  type SetStateAction,
-  type ChangeEvent,
-  memo,
-} from 'react';
-import { toast } from 'sonner';
-import { useLocalStorage, useWindowSize } from 'usehooks-ts';
+import { useRef, useEffect, useState, memo } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
+import equal from 'fast-deep-equal';
 
-import {
-  ArrowUpIcon,
-  PaperclipIcon,
-  StopIcon,
-  MicrophoneIcon,
-  LoaderIcon,
-} from '../ui/icons';
+import { ArrowUpIcon } from '../ui/icons';
 import { PreviewAttachment } from './preview-attachment';
-import { Button } from '../ui/button';
 import { SuggestedActions } from './suggested-actions';
 import {
   PromptInput,
@@ -30,26 +13,18 @@ import {
   PromptInputToolbar,
   PromptInputTools,
   PromptInputSubmit,
-  PromptInputModelSelect,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectContent,
 } from '../elements/prompt-input';
-import { SelectItem } from '@/components/ui/select';
-import equal from 'fast-deep-equal';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown, X } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
-import type { Attachment, ChatMessage } from '@/lib/shared/types';
-import { chatModels } from '@/lib/ai/models';
-import { saveChatModelAsCookie } from '@/app/(chat)/actions';
-import { startTransition } from 'react';
-import {
-  VoiceRecorder,
-  requestMicrophonePermission,
-} from '@/lib/chat/voice-recording';
 import { VoiceTranscriptionModal } from './voice-transcription-modal';
-import { stopSpeaking } from '@/lib/chat/tts';
+
+import type { MultimodalInputProps } from './multimodal-input/types';
+import { useFileUpload } from './multimodal-input/hooks/use-file-upload';
+import { useVoiceRecording } from './multimodal-input/hooks/use-voice-recording';
+import { useFormSubmission } from './multimodal-input/hooks/use-form-submission';
+import { ScrollToBottomButton } from './multimodal-input/scroll-to-bottom-button';
+import { VoiceTipTooltip } from './multimodal-input/voice-tip-tooltip';
+import { StopButton } from './multimodal-input/stop-button';
+import { VoiceRecordButton } from './multimodal-input/voice-record-button';
 
 function PureMultimodalInput({
   chatId,
@@ -63,26 +38,16 @@ function PureMultimodalInput({
   setMessages,
   sendMessage,
   selectedModelId,
-}: {
-  chatId: string;
-  input: string;
-  setInput: Dispatch<SetStateAction<string>>;
-  status: UseChatHelpers<ChatMessage>['status'];
-  stop: () => void;
-  attachments: Array<Attachment>;
-  setAttachments: Dispatch<SetStateAction<Array<Attachment>>>;
-  messages: Array<UIMessage>;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-  sendMessage: UseChatHelpers<ChatMessage>['sendMessage'];
-  selectedModelId: string;
-}) {
+}: MultimodalInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { width } = useWindowSize();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [localStorageInput, setLocalStorageInput] = useLocalStorage(
     'input',
     '',
   );
+
+  const [wasAutoStopped, setWasAutoStopped] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -107,12 +72,6 @@ function PureMultimodalInput({
       setWasAutoStopped(true);
     }
   };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
-
-  // Track if AI was auto-stopped by user typing
-  const [wasAutoStopped, setWasAutoStopped] = useState(false);
 
   // Cleanup sequential assistant messages when response completes
   useEffect(() => {
@@ -143,123 +102,35 @@ function PureMultimodalInput({
     }
   }, [status, messages, chatId]);
 
-  // Voice recording state
-  const [isRecording, setIsRecording] = useState(false);
-  const [voiceRecorder] = useState(() => new VoiceRecorder());
-  const [isTranscribing, setIsTranscribing] = useState(false);
+  // File upload hook
+  const { uploadQueue, handleFileChange } = useFileUpload(setAttachments);
 
-  // Transcription modal state
-  const [showTranscriptionModal, setShowTranscriptionModal] = useState(false);
-  const [pendingTranscription, setPendingTranscription] = useState('');
+  // Voice recording hook
+  const {
+    isRecording,
+    isTranscribing,
+    hasSeenVoiceTip,
+    setHasSeenVoiceTip,
+    showTranscriptionModal,
+    pendingTranscription,
+    handleVoiceRecording,
+    handleCloseTranscriptionModal,
+    handleDiscardTranscription,
+    setPendingTranscription,
+  } = useVoiceRecording(chatId, setInput);
 
-  // Voice tip state
-  const [hasSeenVoiceTip, setHasSeenVoiceTip] = useState(false);
-
-  const submitForm = useCallback(async () => {
-    window.history.replaceState({}, '', `/chat/${chatId}`);
-
-    // If user interrupted AI, cleanup partial messages in background (don't await)
-    if (wasAutoStopped) {
-      fetch('/api/chat/cleanup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId }),
-      }).catch((error) => {
-        console.error('Failed to cleanup partial messages:', error);
-      });
-    }
-
-    sendMessage({
-      role: 'user',
-      parts: [
-        ...attachments.map((attachment) => ({
-          type: 'file' as const,
-          url: attachment.url,
-          name: attachment.name,
-          mediaType: attachment.contentType,
-        })),
-        {
-          type: 'text',
-          text: input
-            ? input
-            : attachments.map((attachment) => attachment.name).join(' '),
-        },
-      ],
-    });
-
-    setAttachments([]);
-    setLocalStorageInput('');
-    setInput('');
-    setWasAutoStopped(false);
-
-    if (width && width > 768) {
-      textareaRef.current?.focus();
-    }
-  }, [
+  // Form submission hook
+  const { submitForm, handleConfirmTranscription } = useFormSubmission(
+    chatId,
     input,
     setInput,
     attachments,
-    sendMessage,
     setAttachments,
+    sendMessage,
     setLocalStorageInput,
-    width,
-    chatId,
+    textareaRef,
     wasAutoStopped,
     setWasAutoStopped,
-  ]);
-
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
-
-        return {
-          url,
-          name: pathname,
-          contentType: contentType,
-        };
-      }
-      const { error } = await response.json();
-      toast.error(error);
-    } catch (error) {
-      // English: 'Failed to upload file, please try again!'
-      toast.error('Falha ao enviar o arquivo, por favor tente novamente!');
-    }
-  };
-
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
-
-      setUploadQueue(files.map((file) => file.name));
-
-      try {
-        const uploadPromises = files.map((file) => uploadFile(file));
-        const uploadedAttachments = await Promise.all(uploadPromises);
-        const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined,
-        );
-
-        setAttachments((currentAttachments) => [
-          ...currentAttachments,
-          ...successfullyUploadedAttachments,
-        ]);
-      } catch (error) {
-        console.error('Error uploading files!', error);
-      } finally {
-        setUploadQueue([]);
-      }
-    },
-    [setAttachments],
   );
 
   const { isAtBottom, scrollToBottom } = useScrollToBottom();
@@ -270,225 +141,23 @@ function PureMultimodalInput({
     }
   }, [status, scrollToBottom]);
 
-  // Voice recording handlers
-  const handleVoiceRecording = useCallback(async () => {
-    // Dismiss the voice tip when user clicks the microphone
-    if (!hasSeenVoiceTip) {
-      setHasSeenVoiceTip(true);
-    }
-
-    if (isRecording) {
-      // Stop recording
-      voiceRecorder.stopRecording();
-      return;
-    }
-
-    // Stop any ongoing text-to-speech before recording
-    stopSpeaking();
-
-    // Request microphone permission (this will show the browser permission dialog)
-    const hasPermission = await requestMicrophonePermission();
-    if (!hasPermission) {
-      toast.error(
-        'Acesso ao microfone negado. Por favor, permita o acesso ao microfone nas configurações do navegador.',
-      );
-      return;
-    }
-
-    // Start recording
-    voiceRecorder.startRecording();
-  }, [isRecording, voiceRecorder, hasSeenVoiceTip, setHasSeenVoiceTip]);
-
-  // Set up voice recorder callbacks
-  useEffect(() => {
-    voiceRecorder.options = {
-      onRecordingStart: () => {
-        setIsRecording(true);
-        toast.success('Gravação iniciada!');
-      },
-      onRecordingStop: () => {
-        setIsRecording(false);
-      },
-      onDataAvailable: async (audioBlob) => {
-        setIsTranscribing(true);
-        try {
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'voice-message.webm');
-          formData.append('chatId', chatId);
-
-          const response = await fetch('/api/voice-message', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error('Falha na transcrição');
-          }
-
-          const { transcription } = await response.json();
-
-          // Show transcription in modal instead of directly setting input
-          setPendingTranscription(transcription);
-          setShowTranscriptionModal(true);
-        } catch (error) {
-          console.error('Voice transcription error:', error);
-          toast.error('Erro ao transcrever o áudio. Tente novamente.');
-        } finally {
-          setIsTranscribing(false);
-        }
-      },
-      onError: (error) => {
-        console.error('Voice recording error:', error);
-        toast.error('Erro na gravação. Tente novamente.');
-        setIsRecording(false);
-        setIsTranscribing(false);
-      },
-    };
-  }, [chatId, voiceRecorder, setInput]);
-
-  // Cleanup voice recorder on unmount
-  useEffect(() => {
-    return () => {
-      if (isRecording) {
-        voiceRecorder.cancelRecording();
-      }
-    };
-  }, [voiceRecorder, isRecording]);
-
-  // Transcription modal handlers
-  const handleConfirmTranscription = useCallback(
-    (confirmedText: string) => {
-      setInput(confirmedText);
-      setPendingTranscription('');
-
-      // Auto-send the confirmed transcription
-      setTimeout(async () => {
-        window.history.replaceState({}, '', `/chat/${chatId}`);
-
-        // If user interrupted AI, cleanup partial messages in background (don't await)
-        if (wasAutoStopped) {
-          fetch('/api/chat/cleanup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chatId }),
-          }).catch((error) => {
-            console.error('Failed to cleanup partial messages:', error);
-          });
-        }
-
-        sendMessage({
-          role: 'user',
-          parts: [
-            ...attachments.map((attachment) => ({
-              type: 'file' as const,
-              url: attachment.url,
-              name: attachment.name,
-              mediaType: attachment.contentType,
-            })),
-            {
-              type: 'text',
-              text: confirmedText,
-            },
-          ],
-        });
-
-        setAttachments([]);
-        setLocalStorageInput('');
-        setInput('');
-        setWasAutoStopped(false);
-
-        if (width && width > 768) {
-          textareaRef.current?.focus();
-        }
-      }, 100); // Small delay to ensure state updates
-    },
-    [
-      setInput,
-      chatId,
-      sendMessage,
-      attachments,
-      setAttachments,
-      setLocalStorageInput,
-      width,
-      textareaRef,
-      wasAutoStopped,
-      setWasAutoStopped,
-    ],
-  );
-
-  const handleDiscardTranscription = useCallback(() => {
-    setPendingTranscription('');
-  }, []);
-
-  const handleCloseTranscriptionModal = useCallback(() => {
-    setShowTranscriptionModal(false);
-  }, []);
-
   return (
     <div className="flex relative flex-col gap-4 w-full">
-      <AnimatePresence>
-        {!isAtBottom && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="absolute bottom-28 left-1/2 z-50 -translate-x-1/2"
-          >
-            <Button
-              data-testid="scroll-to-bottom-button"
-              className="rounded-full hover:bg-accent hover:text-accent-foreground"
-              size="icon"
-              variant="outline"
-              onClick={(event) => {
-                event.preventDefault();
-                scrollToBottom();
-              }}
-            >
-              <ArrowDown />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ScrollToBottomButton
+        isAtBottom={isAtBottom}
+        scrollToBottom={scrollToBottom}
+      />
 
-      {/* Voice tip tooltip */}
-      <AnimatePresence>
-        {!hasSeenVoiceTip &&
-          !isRecording &&
-          !isTranscribing &&
-          (!input.trim() || uploadQueue.length > 0) &&
-          attachments.length === 0 &&
-          status === 'ready' && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 20,
-              }}
-              className="absolute bottom-[72px] right-0 z-50"
-            >
-              <div className="relative bg-primary text-primary-foreground px-4 py-3 rounded-lg shadow-lg max-w-[280px] text-sm">
-                <button
-                  type="button"
-                  onClick={() => setHasSeenVoiceTip(true)}
-                  className="absolute top-2 right-2 p-0.5 rounded-full hover:bg-primary-foreground/20 transition-colors"
-                  aria-label="Fechar dica"
-                >
-                  <X size={14} />
-                </button>
-                <p className="pr-4">
-                  Prefere falar? Clique aqui e transforme sua voz em texto, no
-                  idioma que você quiser!
-                </p>
-                {/* Arrow pointing down to the button */}
-                <div className="absolute top-full right-6 size-0 border-x-8 border-t-8 border-x-transparent border-t-primary" />
-              </div>
-            </motion.div>
-          )}
-      </AnimatePresence>
+      <VoiceTipTooltip
+        hasSeenVoiceTip={hasSeenVoiceTip}
+        setHasSeenVoiceTip={setHasSeenVoiceTip}
+        isRecording={isRecording}
+        isTranscribing={isTranscribing}
+        input={input}
+        uploadQueue={uploadQueue}
+        attachmentsLength={attachments.length}
+        status={status}
+      />
 
       <SuggestedActions
         sendMessage={sendMessage}
@@ -594,7 +263,10 @@ function PureMultimodalInput({
       <VoiceTranscriptionModal
         isOpen={showTranscriptionModal}
         onClose={handleCloseTranscriptionModal}
-        onConfirm={handleConfirmTranscription}
+        onConfirm={(text) => {
+          handleConfirmTranscription(text);
+          setPendingTranscription('');
+        }}
         onDiscard={handleDiscardTranscription}
         transcription={pendingTranscription}
       />
@@ -613,147 +285,3 @@ export const MultimodalInput = memo(
     return true;
   },
 );
-
-function PureAttachmentsButton({
-  fileInputRef,
-  status,
-}: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers<ChatMessage>['status'];
-}) {
-  return (
-    <Button
-      data-testid="attachments-button"
-      className="rounded-md rounded-bl-lg p-[7px] h-fit dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200"
-      onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
-      }}
-      disabled={status !== 'ready'}
-      variant="ghost"
-    >
-      <PaperclipIcon size={14} />
-    </Button>
-  );
-}
-
-const AttachmentsButton = memo(PureAttachmentsButton);
-
-function PureModelSelectorCompact({
-  selectedModelId,
-}: {
-  selectedModelId: string;
-}) {
-  const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
-
-  const selectedModel = chatModels.find(
-    (model) => model.id === optimisticModelId,
-  );
-
-  return (
-    <PromptInputModelSelect
-      value={selectedModel?.name}
-      onValueChange={(modelName) => {
-        const model = chatModels.find((m) => m.name === modelName);
-        if (model) {
-          setOptimisticModelId(model.id);
-          startTransition(() => {
-            saveChatModelAsCookie(model.id);
-          });
-        }
-      }}
-    >
-      <PromptInputModelSelectTrigger
-        type="button"
-        className="text-xs focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=closed]:ring-0"
-      >
-        {selectedModel?.name ||
-          /* English: 'Select model' */ 'Selecionar modelo'}
-      </PromptInputModelSelectTrigger>
-      <PromptInputModelSelectContent>
-        {chatModels.map((model) => (
-          <SelectItem key={model.id} value={model.name}>
-            <div className="flex flex-col gap-1 items-start py-1">
-              <div className="font-medium">{model.name}</div>
-              <div className="text-xs text-muted-foreground">
-                {model.description}
-              </div>
-            </div>
-          </SelectItem>
-        ))}
-      </PromptInputModelSelectContent>
-    </PromptInputModelSelect>
-  );
-}
-
-const ModelSelectorCompact = memo(PureModelSelectorCompact);
-
-function PureStopButton({
-  stop,
-  setMessages,
-}: {
-  stop: () => void;
-  setMessages: UseChatHelpers<ChatMessage>['setMessages'];
-}) {
-  return (
-    <Button
-      data-testid="stop-button"
-      className="p-3 text-foreground bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
-      onClick={(event) => {
-        event.preventDefault();
-        stop();
-        setMessages((messages) => messages);
-      }}
-    >
-      <StopIcon size={20} />
-    </Button>
-  );
-}
-
-const StopButton = memo(PureStopButton);
-
-function PureVoiceRecordButton({
-  isRecording,
-  isTranscribing,
-  onToggleRecording,
-  status,
-}: {
-  isRecording: boolean;
-  isTranscribing: boolean;
-  onToggleRecording: () => void;
-  status: UseChatHelpers<ChatMessage>['status'];
-}) {
-  const getButtonState = () => {
-    if (isTranscribing)
-      return { icon: <LoaderIcon size={20} />, tooltip: 'Transcrevendo...' };
-    if (isRecording)
-      return { icon: <MicrophoneIcon size={20} />, tooltip: 'Parar gravação' };
-    return {
-      icon: <MicrophoneIcon size={20} />,
-      tooltip: 'Gravar mensagem de voz',
-    };
-  };
-
-  const buttonState = getButtonState();
-
-  return (
-    <Button
-      data-testid="voice-record-button"
-      className={`p-3 rounded-full transition-colors ${
-        isRecording
-          ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-          : 'text-foreground bg-secondary hover:bg-accent hover:text-accent-foreground'
-      }`}
-      onClick={(event) => {
-        event.preventDefault();
-        onToggleRecording();
-      }}
-      disabled={status !== 'ready' || isTranscribing}
-      title={buttonState.tooltip}
-    >
-      {buttonState.icon}
-    </Button>
-  );
-}
-
-const VoiceRecordButton = memo(PureVoiceRecordButton);
