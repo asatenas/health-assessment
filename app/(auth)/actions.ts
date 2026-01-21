@@ -5,6 +5,7 @@ import { z } from 'zod/v3';
 import { createUser, getUser, createClinicConfig } from '@/lib/db/queries';
 
 import { signIn } from './auth';
+import { sendWebhook } from '@/lib/shared/utils';
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -74,14 +75,9 @@ export const register = async (
 
     await createClinicConfig(userId);
 
-    if (process.env.NEW_SIGNUPS_WEBHOOK_URL) {
-      await fetch(process.env.NEW_SIGNUPS_WEBHOOK_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          email: validatedData.email,
-        }),
-      });
-    }
+    await sendWebhook('user_signup', process.env.NEW_SIGNUPS_WEBHOOK_URL, {
+      email: validatedData.email,
+    });
 
     try {
       await signIn('credentials', {

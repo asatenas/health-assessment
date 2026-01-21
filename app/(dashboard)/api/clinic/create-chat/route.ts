@@ -1,6 +1,6 @@
 import { isDevelopmentEnvironment } from '@/lib/shared/constants';
 import { createChatWithToken } from '@/lib/db/queries';
-import { generateUUID } from '@/lib/shared/utils';
+import { generateUUID, sendWebhook } from '@/lib/shared/utils';
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
 import { validateClinicAccess } from '@/lib/api/clinic-guard';
@@ -18,6 +18,15 @@ export async function POST() {
       userId: user.id,
       token,
     });
+
+    await sendWebhook(
+      'chat_created',
+      process.env.INTERVIEW_CREATED_WEBHOOK_URL,
+      {
+        chatId,
+        user: user.email,
+      },
+    );
 
     const APP_URL = isDevelopmentEnvironment
       ? `http://${process.env.APP_URL}`
