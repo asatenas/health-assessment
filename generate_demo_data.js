@@ -2,38 +2,38 @@
 /**
  * Generate SQL INSERTs for:
  *  - public."Assessment" (1860 rows)
- *  - public."Surgery" (one row per Assessment with status === FINISHED_STATUS)
+ *  - public."Surgery" (one row per Assessment with status === "finished")
  *
  * Rules:
  * - createdAt: evenly distributed over the last 30 days from now
  * - tokenExpiresAt: createdAt + 30 days
  * - clinicId constant, patientId NULL
  * - token format: XXXX-XXXX (A-Z0-9)
- * - last 8 Assessment rows include JSONB "form" with latexAllergy: true; others NULL
+ * - form:
+ *    - for assessments WITH a surgery (status === "finished"):
+ *        includes surgeryName/surgeryDate/surgeryTime
+ *        latexAllergy is TRUE for only 8 forms total, otherwise FALSE
+ *    - for all other assessments: form = NULL
  *
  * Surgery:
- * - For each assessment with status FINISHED_STATUS, create a Surgery row:
+ * - For each assessment with status "finished", create a Surgery row:
  *   - assessmentId = Assessment.id
  *   - date = tokenExpiresAt
  *   - name evenly distributed across SURGERY_NAMES (round-robin)
- *   - all other columns omitted (defaults apply; nullable fields remain NULL)
+ *   - the rest can be null (omitted columns)
  *
- * Usage:
- *   node generate_demo.js
- *   node generate_demo.js --out demo_seed.sql --seed 1337
+ * Timestamp format in SQL: YYYY-MM-DD HH:MM:SS.mmm (local time)
  */
 
-const fs = require('protocol:fs');
-const crypto = require('protocol:crypto');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
 
 // ---- Config ----
 const OUT_DEFAULT = 'demo_seed.sql';
 const CLINIC_ID = '166fd99b-59d3-415f-88d3-ffc3010c49ff';
 const TOTAL_ROWS = 1860;
-const WINDOW_DAYS = 30;
+const WINDOW_DAYS = 40;
 
-// IMPORTANT: set this to whatever your app expects ("finished" vs "finished").
-// The script will generate scored rows with this status and create Surgery rows for it.
 const FINISHED_STATUS = 'finished';
 
 // Exact integer counts (sum to 1860)
@@ -58,12 +58,13 @@ const SURGERY_NAMES = [
   'Vasectomia',
 ];
 
-// ChatForm JSON for the last 8 rows only
-const CHAT_FORM = {
+// Base ChatForm fields (same for all surgery-linked forms)
+// latexAllergy should be FALSE by default; we'll set TRUE for only 8 forms.
+const BASE_CHAT_FORM = {
   age: 45,
   weight: 75,
   height: 170,
-  latexAllergy: true,
+  latexAllergy: false,
   allergies: [],
   medicalDevices: {},
   aestheticItems: {},
@@ -71,6 +72,8 @@ const CHAT_FORM = {
   hemoglobin: 13.5,
   creatinine: 1.0,
 };
+
+const LATEX_TRUE_FORMS = 8;
 
 function assertCounts() {
   const sum =
@@ -119,20 +122,30 @@ function makeToken(rand) {
 function pad2(n) {
   return String(n).padStart(2, '0');
 }
+function pad3(n) {
+  return String(n).padStart(3, '0');
+}
 
 function formatTimestampLocal(dt) {
-  // "YYYY-MM-DD HH:MM:SS" (no timezone) for Postgres TIMESTAMP
   const y = dt.getFullYear();
   const m = pad2(dt.getMonth() + 1);
   const d = pad2(dt.getDate());
   const hh = pad2(dt.getHours());
   const mm = pad2(dt.getMinutes());
   const ss = pad2(dt.getSeconds());
-  return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  const ms = pad3(dt.getMilliseconds());
+  return `${y}-${m}-${d} ${hh}:${mm}:${ss}.${ms}`;
+}
+
+function formatDateOnly(dt) {
+  return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+}
+
+function formatTimeOnly(dt) {
+  return `${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
 }
 
 function sqlEscapeString(s) {
-  // Escape single quotes for SQL string literals: ' -> ''
   return String(s).replace(/'/g, "''");
 }
 
@@ -191,17 +204,17 @@ function main() {
   const { outPath, seed } = parseArgs(process.argv);
   const rand = mulberry32(seed);
 
-  const now = new Date(); // local time
+  const now = new Date();
   const specs = buildSpecs();
   shuffleInPlace(specs, rand);
 
   const createdAts = buildEvenlySpacedTimestamps(TOTAL_ROWS, WINDOW_DAYS, now);
 
-  // We generate explicit IDs so we can reference them in Surgery rows.
   const assessmentRows = [];
   const surgeryRows = [];
 
   let surgeryNameIdx = 0;
+  let latexTrueUsed = 0;
 
   for (let i = 0; i < TOTAL_ROWS; i++) {
     const spec = specs[i];
@@ -220,10 +233,31 @@ function main() {
     const aubSql =
       spec.score_aub_has2 == null ? 'NULL' : String(spec.score_aub_has2);
 
-    const isLastEight = i >= TOTAL_ROWS - 8;
-    const formSql = isLastEight
-      ? `'${sqlEscapeString(JSON.stringify(CHAT_FORM))}'::jsonb`
-      : 'NULL';
+    let formSql = 'NULL';
+
+    if (spec.status === FINISHED_STATUS) {
+      const surgeryName = SURGERY_NAMES[surgeryNameIdx % SURGERY_NAMES.length];
+      surgeryNameIdx++;
+
+      surgeryRows.push({
+        assessmentId: id,
+        name: surgeryName,
+        dateSql: expiresSql,
+      });
+
+      const latexAllergy = i > 1000 && latexTrueUsed < LATEX_TRUE_FORMS;
+      if (latexAllergy) latexTrueUsed++;
+
+      const form = {
+        ...BASE_CHAT_FORM,
+        latexAllergy, // true for only 8 finished forms; otherwise false
+        surgeryName,
+        surgeryDate: formatDateOnly(tokenExpiresAt),
+        surgeryTime: formatTimeOnly(tokenExpiresAt),
+      };
+
+      formSql = `'${sqlEscapeString(JSON.stringify(form))}'::jsonb`;
+    }
 
     assessmentRows.push({
       id,
@@ -235,31 +269,23 @@ function main() {
       aubSql,
       formSql,
     });
-
-    // Surgery row for "finished" (or whatever FINISHED_STATUS is set to)
-    if (spec.status === FINISHED_STATUS) {
-      const surgeryName = SURGERY_NAMES[surgeryNameIdx % SURGERY_NAMES.length];
-      surgeryNameIdx++;
-
-      surgeryRows.push({
-        assessmentId: id,
-        name: surgeryName,
-        dateSql: expiresSql, // same as tokenExpiresAt
-      });
-    }
   }
 
   const lines = [];
 
-  // -------- Assessments --------
   lines.push(
     `-- Generated demo data for public."Assessment" + public."Surgery"`,
   );
   lines.push(
-    `-- rows=${TOTAL_ROWS}, window_days=${WINDOW_DAYS}, finished_status=${FINISHED_STATUS}`,
+    `-- rows=${TOTAL_ROWS}, window_days=${WINDOW_DAYS}, surgery_for_status=${FINISHED_STATUS}`,
   );
   lines.push(`-- surgeries_generated=${surgeryRows.length}`);
+  lines.push(`-- latexAllergy_true_forms=${latexTrueUsed}`);
   lines.push(`-- generated_at_local=${now.toString()}`);
+  lines.push('');
+
+  lines.push(`DELETE FROM "Assessment" WHERE "clinicId" = '${CLINIC_ID}';`);
+
   lines.push('');
 
   lines.push(
@@ -274,14 +300,11 @@ function main() {
   lines.push(`${assessmentValues.join(',\n')};`);
   lines.push('');
 
-  // -------- Surgeries --------
-  // Only insert if we have any (we should)
   if (surgeryRows.length > 0) {
     lines.push(`INSERT INTO public."Surgery" ("assessmentId","name","date")`);
     lines.push('VALUES');
 
     const surgeryValues = surgeryRows.map((s) => {
-      // Note: leave booleans/notes out so defaults apply; nullable fields stay NULL
       return `  ('${s.assessmentId}'::uuid, '${sqlEscapeString(s.name)}', TIMESTAMP '${s.dateSql}')`;
     });
 
