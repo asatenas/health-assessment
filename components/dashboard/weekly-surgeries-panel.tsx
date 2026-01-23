@@ -127,7 +127,7 @@ export function WeeklySurgeriesPanel({
                 // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                 key={index}
                 className={cn(
-                  'border rounded-lg flex flex-col min-h-[400px]',
+                  'border rounded-lg flex flex-col h-[400px]',
                   day.isToday && 'border-blue-500 border-2',
                   day.isPast && 'bg-gray-50 dark:bg-gray-900',
                 )}

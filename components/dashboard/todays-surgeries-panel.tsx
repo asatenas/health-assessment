@@ -91,57 +91,61 @@ export function TodaysSurgeriesPanel({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {surgeries.map((surgery) => (
-              <Card
-                key={surgery.chatId}
-                className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                onClick={() => handleCardClick(surgery.chatId)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start gap-2">
-                    <Badge className={getRiskColor(surgery.riskLevel)}>
-                      {surgery.riskLevel}
-                    </Badge>
-                    {surgery.surgeryTime && (
-                      <span className="text-sm text-muted-foreground">
-                        {formatTime(surgery.surgeryTime)}
-                      </span>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {/* <div className="text-sm">
+          <div className="h-[400px] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {surgeries.map((surgery) => (
+                <Card
+                  key={surgery.chatId}
+                  className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                  onClick={() => handleCardClick(surgery.chatId)}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <Badge className={getRiskColor(surgery.riskLevel)}>
+                        {surgery.riskLevel}
+                      </Badge>
+                      {surgery.surgeryTime && (
+                        <span className="text-sm text-muted-foreground">
+                          {formatTime(surgery.surgeryTime)}
+                        </span>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {/* <div className="text-sm">
                     <span className="text-muted-foreground">Idade:</span>{' '}
                     <span className="font-medium">
                       {surgery.patientAge} anos
                     </span>
                   </div> */}
 
-                  {surgery.surgeryName && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Cirurgia:</span>{' '}
-                      <span className="font-medium">{surgery.surgeryName}</span>
-                    </div>
-                  )}
+                    {surgery.surgeryName && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Cirurgia:</span>{' '}
+                        <span className="font-medium">
+                          {surgery.surgeryName}
+                        </span>
+                      </div>
+                    )}
 
-                  <div className="flex gap-2 flex-wrap pt-2">
-                    {surgery.rcriScore !== undefined &&
-                      surgery.rcriScore !== null && (
-                        <Badge variant="secondary" className="text-xs">
-                          RCRI: {surgery.rcriScore}
-                        </Badge>
-                      )}
-                    {surgery.has2Score !== undefined &&
-                      surgery.has2Score !== null && (
-                        <Badge variant="secondary" className="text-xs">
-                          HAS2: {surgery.has2Score}
-                        </Badge>
-                      )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <div className="flex gap-2 flex-wrap pt-2">
+                      {surgery.rcriScore !== undefined &&
+                        surgery.rcriScore !== null && (
+                          <Badge variant="secondary" className="text-xs">
+                            RCRI: {surgery.rcriScore}
+                          </Badge>
+                        )}
+                      {surgery.has2Score !== undefined &&
+                        surgery.has2Score !== null && (
+                          <Badge variant="secondary" className="text-xs">
+                            HAS2: {surgery.has2Score}
+                          </Badge>
+                        )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
