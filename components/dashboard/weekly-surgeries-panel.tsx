@@ -176,12 +176,12 @@ export function WeeklySurgeriesPanel({
                             {surgery.surgeryTime}
                           </div>
                         )}
-                        <div className="text-xs">
+                        {/* <div className="text-xs">
                           <span className="text-muted-foreground">Idade:</span>{' '}
                           <span className="font-medium">
                             {surgery.patientAge}
                           </span>
-                        </div>
+                        </div> */}
                         {surgery.surgeryName && (
                           <div className="text-xs truncate text-muted-foreground">
                             {surgery.surgeryName}

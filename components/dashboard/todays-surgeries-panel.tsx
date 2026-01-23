@@ -111,12 +111,12 @@ export function TodaysSurgeriesPanel({
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <div className="text-sm">
+                  {/* <div className="text-sm">
                     <span className="text-muted-foreground">Idade:</span>{' '}
                     <span className="font-medium">
                       {surgery.patientAge} anos
                     </span>
-                  </div>
+                  </div> */}
 
                   {surgery.surgeryName && (
                     <div className="text-sm">
