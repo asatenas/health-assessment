@@ -13,9 +13,9 @@ export async function GET(request: Request) {
     const dateTo = searchParams.get('dateTo');
     const statusParam = searchParams.get('status');
 
-    // Get all chats for the user with filters
+    // Get all chats for the clinic with filters
     const { chats } = await getChatsByClinicUserId({
-      userId: user.id,
+      clinicId: user.clinicId,
       status: statusParam as ChatStatus,
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,

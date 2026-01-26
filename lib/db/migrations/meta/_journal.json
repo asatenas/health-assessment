@@ -253,6 +253,34 @@
       "when": 1768249700251,
       "tag": "0035_flimsy_sumo",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1768250000000,
+      "tag": "0036_migrate_clinic_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1768251000000,
+      "tag": "0037_create_user_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1768252000000,
+      "tag": "0038_add_clinic_email",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1768254000000,
+      "tag": "0039_add_user_admin",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,7 @@ import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
 import { Analytics } from '@vercel/analytics/next';
+import { ImpersonationBannerWrapper } from '@/components/admin/impersonation-banner-wrapper';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
@@ -80,7 +81,10 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            <ImpersonationBannerWrapper />
+            {children}
+          </SessionProvider>
           <Analytics />
         </ThemeProvider>
       </body>

@@ -1,32 +1,43 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { createGuestUser, getUser } from '@/lib/db/queries';
+import { getUser, getUserById } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/shared/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
-
-export type UserType = 'guest' | 'regular';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      type: UserType;
+      platformAdmin?: boolean;
     } & DefaultSession['user'];
+    impersonation?: {
+      originalUserId: string;
+      targetUserId: string;
+      targetEmail: string;
+      targetClinicName: string | null;
+      startedAt: Date;
+    };
   }
 
   interface User {
     id?: string;
     email?: string | null;
-    type: UserType;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     id: string;
-    type: UserType;
+    platformAdmin?: boolean;
+    impersonation?: {
+      originalUserId: string;
+      targetUserId: string;
+      targetEmail: string;
+      targetClinicName: string | null;
+      startedAt: string;
+    };
   }
 }
 
@@ -64,23 +75,32 @@ export const {
           return null;
         }
 
-        return { ...user, type: 'regular' };
-      },
-    }),
-    Credentials({
-      id: 'guest',
-      credentials: {},
-      async authorize() {
-        const [guestUser] = await createGuestUser();
-        return { ...guestUser, type: 'guest' };
+        return {
+          id: user.id,
+          email: user.email,
+        };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id as string;
-        token.type = user.type;
+
+        // Fetch user from database to check platformAdmin status
+        if (user.id) {
+          const dbUser = await getUserById({ userId: user.id });
+          if (dbUser?.platformAdmin) {
+            token.platformAdmin = true;
+          }
+        }
+      }
+
+      // Handle session updates (used for starting/stopping impersonation)
+      if (trigger === 'update' && session) {
+        if (session.impersonation !== undefined) {
+          token.impersonation = session.impersonation;
+        }
       }
 
       return token;
@@ -88,7 +108,19 @@ export const {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.type = token.type;
+
+        // Only include platformAdmin if true (omit for regular users)
+        if (token.platformAdmin) {
+          session.user.platformAdmin = true;
+        }
+
+        // Include impersonation data if present
+        if (token.impersonation) {
+          session.impersonation = {
+            ...token.impersonation,
+            startedAt: new Date(token.impersonation.startedAt),
+          };
+        }
       }
 
       return session;

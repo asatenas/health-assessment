@@ -26,8 +26,10 @@ import type {
   DashboardConfiguration,
 } from '@/lib/types/clinic-config';
 import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2, Users } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
+import { useSession } from 'next-auth/react';
 
 const SECTION_ORDER = [
   'basicInfo',
@@ -211,6 +213,8 @@ export function ConfigurationsSheet({
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
+  const [showImpersonationDialog, setShowImpersonationDialog] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (open) {
@@ -371,6 +375,33 @@ export function ConfigurationsSheet({
                         </div>
                       </CardContent>
                     </Card>
+
+                    {session?.user?.platformAdmin &&
+                      !session?.impersonation && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">
+                              Administração de Plataforma
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start"
+                                onClick={() => setShowImpersonationDialog(true)}
+                              >
+                                <Users className="size-4 mr-2" />
+                                Personificar Usuário
+                              </Button>
+                              <p className="text-xs text-muted-foreground">
+                                Visualize o sistema como qualquer usuário ativo
+                                para fins de suporte e teste
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
 
                     <Tabs defaultValue="form" className="w-full">
                       <TabsList className="grid w-full grid-cols-2">
@@ -578,6 +609,10 @@ export function ConfigurationsSheet({
           </>
         )}
       </SheetContent>
+      <UserSelectionDialog
+        open={showImpersonationDialog}
+        onOpenChange={setShowImpersonationDialog}
+      />
     </Sheet>
   );
 }

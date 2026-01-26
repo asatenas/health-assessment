@@ -15,7 +15,7 @@ export async function POST() {
 
     await createChatWithToken({
       id: chatId,
-      userId: user.id,
+      clinicId: user.clinicId,
       token,
     });
 

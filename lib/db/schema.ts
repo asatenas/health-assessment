@@ -16,28 +16,42 @@ import {
 import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
 
-export const user = pgTable('Clinic', {
+export const clinic = pgTable('Clinic', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  email: varchar('email', { length: 64 }).notNull(),
-  password: varchar('password', { length: 64 }),
-  emailVerified: boolean('emailVerified').notNull().default(false),
+  clinicName: varchar('clinicName', { length: 255 }),
+  email: varchar('email', { length: 64 }).notNull().unique(),
+  formConfig: json('formConfig'),
+  dashboardConfig: json('dashboardConfig'),
+  updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
+  authorized: boolean('authorized').notNull().default(false),
 });
+
+export type Clinic = InferSelectModel<typeof clinic>;
+
+export const user = pgTable(
+  'User',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    clinicId: uuid('clinicId')
+      .notNull()
+      .references(() => clinic.id, { onDelete: 'cascade' }),
+    email: varchar('email', { length: 64 }).notNull(),
+    password: varchar('password', { length: 64 }),
+    emailVerified: boolean('emailVerified').notNull().default(false),
+    role: varchar('role', {
+      enum: ['secretary', 'clinician', 'admin', 'owner'],
+    }).notNull(),
+    status: varchar('status', { enum: ['active', 'invited', 'disabled'] })
+      .notNull()
+      .default('active'),
+    platformAdmin: boolean('platformAdmin').notNull().default(false),
+  },
+  (table) => ({
+    clinicEmailUnique: unique().on(table.clinicId, table.email),
+  }),
+);
 
 export type User = InferSelectModel<typeof user>;
-
-export const clinicConfig = pgTable('ClinicConfig', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  clinicId: uuid('clinicId')
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  clinicName: varchar('clinicName', { length: 255 }),
-  formConfig: json('formConfig').notNull(),
-  dashboardConfig: json('dashboardConfig'), // nullable for backward compatibility
-  updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
-});
-
-export type ClinicConfig = InferSelectModel<typeof clinicConfig>;
 
 export const patient = pgTable(
   'Patient',
@@ -45,7 +59,7 @@ export const patient = pgTable(
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     clinicId: uuid('clinicId')
       .notNull()
-      .references(() => user.id),
+      .references(() => clinic.id),
     cpf: varchar('cpf', { length: 14 }).notNull(),
     phoneNumber: varchar('phoneNumber', { length: 20 }),
     email: varchar('email', { length: 255 }),
@@ -95,9 +109,9 @@ export const chat = pgTable(
   {
     id: uuid('id').primaryKey().notNull().defaultRandom(),
     createdAt: timestamp('createdAt').notNull(),
-    userId: uuid('clinicId')
+    clinicId: uuid('clinicId')
       .notNull()
-      .references(() => user.id),
+      .references(() => clinic.id),
     patientId: uuid('patientId').references(() => patient.id),
     visibility: varchar('visibility', { enum: ['public', 'private'] })
       .notNull()

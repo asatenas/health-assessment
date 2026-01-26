@@ -69,7 +69,7 @@ export async function GET(request: Request) {
 
     // Get metrics
     const metrics = await getDashboardMetrics({
-      userId: user.id,
+      clinicId: user.clinicId,
       dateFrom,
       dateTo,
     });
@@ -80,28 +80,28 @@ export async function GET(request: Request) {
     const timelineTo = dateTo || new Date();
 
     const timeline = await getTimelineData({
-      userId: user.id,
+      clinicId: user.clinicId,
       dateFrom: timelineFrom,
       dateTo: timelineTo,
     });
 
     // Get notifications
     const notifications = await getHighPriorityNotifications({
-      userId: user.id,
+      clinicId: user.clinicId,
     });
 
     // Get monthly surgeries (defaults to current month)
     const month = monthParam ? Number.parseInt(monthParam, 10) : undefined;
     const year = yearParam ? Number.parseInt(yearParam, 10) : undefined;
     const monthlySurgeries = await getMonthlySurgeries({
-      userId: user.id,
+      clinicId: user.clinicId,
       month,
       year,
     });
 
     // Get today's surgeries
     const todaysSurgeries = await getTodaysSurgeriesForSwipe({
-      userId: user.id,
+      clinicId: user.clinicId,
     });
 
     return Response.json({
