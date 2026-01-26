@@ -19,6 +19,7 @@ import { CHAT_STATUSES } from './chat-status';
 export const clinic = pgTable('Clinic', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   clinicName: varchar('clinicName', { length: 255 }),
+  email: varchar('email', { length: 64 }).notNull().unique(),
   formConfig: json('formConfig'),
   dashboardConfig: json('dashboardConfig'),
   updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),

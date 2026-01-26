@@ -86,6 +86,7 @@ export async function getClinicByUserId({
       .select({
         id: clinic.id,
         clinicName: clinic.clinicName,
+        email: clinic.email,
         formConfig: clinic.formConfig,
         dashboardConfig: clinic.dashboardConfig,
         updatedAt: clinic.updatedAt,
@@ -111,6 +112,7 @@ export async function createUser(email: string, password: string) {
     const [newClinic] = await db
       .insert(clinic)
       .values({
+        email,
         formConfig: DEFAULT_FORM_CONFIG,
         updatedAt: new Date(),
       })
