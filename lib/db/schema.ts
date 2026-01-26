@@ -44,6 +44,7 @@ export const user = pgTable(
     status: varchar('status', { enum: ['active', 'invited', 'disabled'] })
       .notNull()
       .default('active'),
+    platformAdmin: boolean('platformAdmin').notNull().default(false),
   },
   (table) => ({
     clinicEmailUnique: unique().on(table.clinicId, table.email),
