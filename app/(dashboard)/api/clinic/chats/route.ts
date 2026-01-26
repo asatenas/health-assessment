@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await getChatsByClinicUserId({
-      userId: user.id,
+      clinicId: user.clinicId,
       status,
       dateFrom,
       dateTo,

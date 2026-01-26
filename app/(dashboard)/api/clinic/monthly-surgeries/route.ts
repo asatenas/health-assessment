@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     const year = yearParam ? Number.parseInt(yearParam, 10) : undefined;
 
     const monthlySurgeries = await getMonthlySurgeries({
-      userId: user.id,
+      clinicId: user.clinicId,
       month,
       year,
     });

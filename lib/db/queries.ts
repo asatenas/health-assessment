@@ -18,8 +18,10 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
 import {
+  clinic,
   user,
   chat,
+  type Clinic,
   type User,
   message,
   type DBMessage,
@@ -48,8 +50,11 @@ import { DEFAULT_FORM_CONFIG } from '../config/default-form-config';
 const client = postgres(postgres_url!);
 const db = drizzle(client);
 
-export async function getUser(email: string): Promise<Array<User>> {
+export async function getUser(
+  email: string,
+): Promise<Array<User & { clinicId: string }>> {
   try {
+    // Returns user with clinicId for authentication
     return await db.select().from(user).where(eq(user.email, email));
   } catch (error) {
     throw new ChatSDKError(
@@ -60,13 +65,41 @@ export async function getUser(email: string): Promise<Array<User>> {
 }
 
 export async function getUserById({
-  id,
-}: { id: string }): Promise<User | undefined> {
+  userId,
+}: { userId: string }): Promise<User | undefined> {
   try {
-    const [selectedUser] = await db.select().from(user).where(eq(user.id, id));
+    const [selectedUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId));
     return selectedUser;
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to get user by id');
+  }
+}
+
+export async function getClinicByUserId({
+  userId,
+}: { userId: string }): Promise<Clinic | undefined> {
+  try {
+    const [result] = await db
+      .select({
+        id: clinic.id,
+        clinicName: clinic.clinicName,
+        formConfig: clinic.formConfig,
+        dashboardConfig: clinic.dashboardConfig,
+        updatedAt: clinic.updatedAt,
+        authorized: clinic.authorized,
+      })
+      .from(user)
+      .innerJoin(clinic, eq(user.clinicId, clinic.id))
+      .where(eq(user.id, userId));
+    return result;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic by user id',
+    );
   }
 }
 
@@ -74,43 +107,42 @@ export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 
   try {
-    return await db
-      .insert(user)
-      .values({ email, password: hashedPassword })
+    // First create the clinic
+    const [newClinic] = await db
+      .insert(clinic)
+      .values({
+        formConfig: DEFAULT_FORM_CONFIG,
+        updatedAt: new Date(),
+      })
       .returning({
-        id: user.id,
+        id: clinic.id,
       });
+
+    // Then create the user (owner) for that clinic
+    await db.insert(user).values({
+      clinicId: newClinic.id,
+      email,
+      password: hashedPassword,
+      role: 'owner',
+      status: 'active',
+    });
+
+    // Return the clinic ID for backward compatibility (session uses this)
+    return [{ id: newClinic.id }];
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to create user');
   }
 }
 
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
-
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (error) {
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to create guest user',
-    );
-  }
-}
-
-export async function createClinicConfig(userId: string) {
+export async function createClinicConfig(clinicId: string) {
   try {
     return await db
-      .update(user)
+      .update(clinic)
       .set({
         formConfig: DEFAULT_FORM_CONFIG,
         updatedAt: new Date(),
       })
-      .where(eq(user.id, userId));
+      .where(eq(clinic.id, clinicId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -121,11 +153,11 @@ export async function createClinicConfig(userId: string) {
 
 export async function createChatWithToken({
   id,
-  userId,
+  clinicId,
   token,
 }: {
   id: string;
-  userId: string;
+  clinicId: string;
   token: string;
 }) {
   try {
@@ -139,7 +171,7 @@ export async function createChatWithToken({
       .values({
         id,
         createdAt,
-        userId,
+        clinicId,
         visibility: 'private',
         token,
         tokenExpiresAt,
@@ -217,8 +249,8 @@ export async function getChatsByUserId({
         .from(chat)
         .where(
           whereCondition
-            ? and(whereCondition, eq(chat.userId, id))
-            : eq(chat.userId, id),
+            ? and(whereCondition, eq(chat.clinicId, id))
+            : eq(chat.clinicId, id),
         )
         .orderBy(desc(chat.createdAt))
         .limit(extendedLimit);
@@ -597,7 +629,7 @@ export async function getMessageCountByUserId({
       .innerJoin(chat, eq(message.chatId, chat.id))
       .where(
         and(
-          eq(chat.userId, id),
+          eq(chat.clinicId, id),
           gte(message.createdAt, twentyFourHoursAgo),
           eq(message.role, 'user'),
         ),
@@ -766,14 +798,14 @@ export async function updateCheckpointByChatId({
 }
 
 export async function getChatsByClinicUserId({
-  userId,
+  clinicId,
   status,
   dateFrom,
   dateTo,
   page = 1,
   limit = 20,
 }: {
-  userId: string;
+  clinicId: string;
   status?: ChatStatus | 'expired';
   dateFrom?: string;
   dateTo?: string;
@@ -781,7 +813,7 @@ export async function getChatsByClinicUserId({
   limit?: number;
 }) {
   try {
-    const conditions: SQL<any>[] = [eq(chat.userId, userId)];
+    const conditions: SQL<any>[] = [eq(chat.clinicId, clinicId)];
 
     // Add status filter if provided. Use compute-on-read semantics:
     // - If requested status is 'expired' consider rows where tokenExpiresAt <= now() OR status = 'expired'
@@ -915,16 +947,16 @@ function mapRiskLevelToPortugueseCapitalized(
  * Get aggregated dashboard metrics for a coordinator
  */
 export async function getDashboardMetrics({
-  userId,
+  clinicId,
   dateFrom,
   dateTo,
 }: {
-  userId: string;
+  clinicId: string;
   dateFrom?: Date;
   dateTo?: Date;
 }) {
   try {
-    const conditions: SQL<any>[] = [eq(chat.userId, userId)];
+    const conditions: SQL<any>[] = [eq(chat.clinicId, clinicId)];
 
     if (dateFrom) {
       conditions.push(gte(chat.createdAt, dateFrom));
@@ -1104,11 +1136,11 @@ export async function getDashboardMetrics({
  * Get timeline data for charts (daily/weekly trends)
  */
 export async function getTimelineData({
-  userId,
+  clinicId,
   dateFrom,
   dateTo,
 }: {
-  userId: string;
+  clinicId: string;
   dateFrom: Date;
   dateTo: Date;
 }) {
@@ -1118,7 +1150,7 @@ export async function getTimelineData({
       .from(chat)
       .where(
         and(
-          eq(chat.userId, userId),
+          eq(chat.clinicId, clinicId),
           gte(chat.createdAt, dateFrom),
           lt(chat.createdAt, dateTo),
         ),
@@ -1188,15 +1220,18 @@ export async function getTimelineData({
  * Get high and medium priority notifications
  */
 export async function getHighPriorityNotifications({
-  userId,
-}: { userId: string }) {
+  clinicId,
+}: { clinicId: string }) {
   try {
     const now = new Date();
     const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     const in72Hours = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 
-    const chats = await db.select().from(chat).where(eq(chat.userId, userId));
+    const chats = await db
+      .select()
+      .from(chat)
+      .where(eq(chat.clinicId, clinicId));
 
     // Get all surgeries for these chats
     const chatIds = chats.map((c) => c.id);
@@ -1404,19 +1439,19 @@ export async function updateChatSurgeryDetails({
  * Get today's surgeries for swipe UI
  */
 export async function getTodaysSurgeriesForSwipe({
-  userId,
-}: { userId: string }) {
+  clinicId,
+}: { clinicId: string }) {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Get all finished assessments for this user
+    // Get all finished assessments for this clinic
     const chats = await db
       .select()
       .from(chat)
-      .where(and(eq(chat.userId, userId), eq(chat.status, 'finished')));
+      .where(and(eq(chat.clinicId, clinicId), eq(chat.status, 'finished')));
 
     // Get surgeries scheduled for today
     const todaysSurgeries = await db
@@ -1468,11 +1503,11 @@ export async function getTodaysSurgeriesForSwipe({
  * @param year - Year (e.g., 2024), defaults to current year
  */
 export async function getMonthlySurgeries({
-  userId,
+  clinicId,
   month,
   year,
 }: {
-  userId: string;
+  clinicId: string;
   month?: number;
   year?: number;
 }) {
@@ -1488,13 +1523,13 @@ export async function getMonthlySurgeries({
     const endOfMonth = new Date(targetYear, targetMonth, 0); // Day 0 of next month = last day of current month
     endOfMonth.setHours(23, 59, 59, 999);
 
-    // Get all finished or in-progress assessments for this user
+    // Get all finished or in-progress assessments for this clinic
     const chats = await db
       .select()
       .from(chat)
       .where(
         and(
-          eq(chat.userId, userId),
+          eq(chat.clinicId, clinicId),
           sql`${chat.status} IN ('finished', 'in_progress')`,
         ),
       );
@@ -1570,22 +1605,22 @@ export async function getMonthlySurgeries({
 }
 
 export async function getWeeklySurgeries({
-  userId,
+  clinicId,
   startDate,
   endDate,
 }: {
-  userId: string;
+  clinicId: string;
   startDate: Date;
   endDate: Date;
 }) {
   try {
-    // Get all finished or in-progress assessments for this user
+    // Get all finished or in-progress assessments for this clinic
     const chats = await db
       .select()
       .from(chat)
       .where(
         and(
-          eq(chat.userId, userId),
+          eq(chat.clinicId, clinicId),
           sql`${chat.status} IN ('finished', 'in_progress')`,
         ),
       );
@@ -1647,19 +1682,19 @@ export async function getClinicConfigByClinicId({
 }: {
   clinicId: string;
 }): Promise<
-  | Pick<User, 'clinicName' | 'formConfig' | 'dashboardConfig' | 'updatedAt'>
+  | Pick<Clinic, 'clinicName' | 'formConfig' | 'dashboardConfig' | 'updatedAt'>
   | undefined
 > {
   try {
     const [config] = await db
       .select({
-        clinicName: user.clinicName,
-        formConfig: user.formConfig,
-        dashboardConfig: user.dashboardConfig,
-        updatedAt: user.updatedAt,
+        clinicName: clinic.clinicName,
+        formConfig: clinic.formConfig,
+        dashboardConfig: clinic.dashboardConfig,
+        updatedAt: clinic.updatedAt,
       })
-      .from(user)
-      .where(eq(user.id, clinicId));
+      .from(clinic)
+      .where(eq(clinic.id, clinicId));
     return config;
   } catch (error) {
     throw new ChatSDKError(
@@ -1693,7 +1728,7 @@ export async function updateClinicConfig({
   dashboardConfig?: DashboardConfiguration;
 }) {
   try {
-    const updateData: Partial<User> = {
+    const updateData: Partial<Clinic> = {
       updatedAt: new Date(),
     };
 
@@ -1703,9 +1738,9 @@ export async function updateClinicConfig({
       updateData.dashboardConfig = dashboardConfig as any;
 
     const [updated] = await db
-      .update(user)
+      .update(clinic)
       .set(updateData)
-      .where(eq(user.id, clinicId))
+      .where(eq(clinic.id, clinicId))
       .returning();
 
     return updated;

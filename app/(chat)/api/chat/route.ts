@@ -159,7 +159,7 @@ export async function POST(request: Request) {
     });
 
     const formConfig = await getClinicFormConfigByClinicId({
-      clinicId: chat.userId,
+      clinicId: chat.clinicId,
     });
 
     const streamId = generateUUID();

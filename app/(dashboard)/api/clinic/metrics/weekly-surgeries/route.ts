@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     endOfWeek.setHours(23, 59, 59, 999);
 
     const surgeries = await getWeeklySurgeries({
-      userId: user.id,
+      clinicId: user.clinicId,
       startDate: startOfWeek,
       endDate: endOfWeek,
     });

@@ -76,7 +76,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const initialFormData = await getChatFormById({ id });
 
   const formConfig = await getClinicFormConfigByClinicId({
-    clinicId: chat.userId,
+    clinicId: chat.clinicId,
   });
 
   // Filter config to only include enabled sections and fields (security)

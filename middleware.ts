@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { guestRegex, isDevelopmentEnvironment } from './lib/shared/constants';
+import { isDevelopmentEnvironment } from './lib/shared/constants';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,8 +23,7 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  const isGuest = guestRegex.test(token?.email ?? '');
-  const isLoggedIn = token && !isGuest;
+  const isLoggedIn = !!token;
 
   if (pathname.startsWith('/chat/')) {
     return NextResponse.next();

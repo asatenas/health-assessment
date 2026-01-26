@@ -16,7 +16,7 @@ export async function GET() {
     const user = await validateClinicAccess();
 
     const config = await getClinicConfigByClinicId({
-      clinicId: user.id,
+      clinicId: user.clinicId,
     });
 
     if (!config) {
@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updated = await updateClinicConfig({
-      clinicId: user.id,
+      clinicId: user.clinicId,
       clinicName,
       formConfig,
       dashboardConfig,
