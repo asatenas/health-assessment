@@ -1795,3 +1795,101 @@ export async function upsertSurgery({
     throw new ChatSDKError('bad_request:database', 'Failed to upsert surgery');
   }
 }
+
+/**
+ * Get all active users across clinics with pagination and search.
+ * Used by platform admins to select users for impersonation.
+ */
+export async function getAllActiveUsers({
+  page = 1,
+  limit = 50,
+  searchQuery,
+}: {
+  page?: number;
+  limit?: number;
+  searchQuery?: string;
+}): Promise<{
+  users: Array<User & { clinicName: string | null }>;
+  total: number;
+}> {
+  try {
+    const offset = (page - 1) * limit;
+
+    // Build where conditions
+    const conditions: SQL<any>[] = [eq(user.status, 'active')];
+
+    if (searchQuery) {
+      conditions.push(sql`${user.email} ILIKE ${`%${searchQuery}%`}`);
+    }
+
+    // Get total count
+    const [totalResult] = await db
+      .select({ count: count() })
+      .from(user)
+      .where(and(...conditions));
+
+    const total = totalResult?.count || 0;
+
+    // Get users with clinic names
+    const users = await db
+      .select({
+        id: user.id,
+        clinicId: user.clinicId,
+        email: user.email,
+        password: user.password,
+        emailVerified: user.emailVerified,
+        role: user.role,
+        status: user.status,
+        platformAdmin: user.platformAdmin,
+        clinicName: clinic.clinicName,
+      })
+      .from(user)
+      .innerJoin(clinic, eq(user.clinicId, clinic.id))
+      .where(and(...conditions))
+      .orderBy(desc(user.email))
+      .limit(limit)
+      .offset(offset);
+
+    return { users, total };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get all active users',
+    );
+  }
+}
+
+/**
+ * Get user with clinic info for impersonation.
+ * Validates that the user is active and returns user with clinic details.
+ */
+export async function getUserForImpersonation({
+  userId,
+}: { userId: string }): Promise<
+  (User & { clinicName: string | null }) | undefined
+> {
+  try {
+    const [result] = await db
+      .select({
+        id: user.id,
+        clinicId: user.clinicId,
+        email: user.email,
+        password: user.password,
+        emailVerified: user.emailVerified,
+        role: user.role,
+        status: user.status,
+        platformAdmin: user.platformAdmin,
+        clinicName: clinic.clinicName,
+      })
+      .from(user)
+      .innerJoin(clinic, eq(user.clinicId, clinic.id))
+      .where(and(eq(user.id, userId), eq(user.status, 'active')));
+
+    return result;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get user for impersonation',
+    );
+  }
+}

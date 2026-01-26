@@ -1,7 +1,7 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { getUser } from '@/lib/db/queries';
+import { getUser, getUserById } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/shared/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
@@ -10,7 +10,15 @@ declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      platformAdmin?: boolean;
     } & DefaultSession['user'];
+    impersonation?: {
+      originalUserId: string;
+      targetUserId: string;
+      targetEmail: string;
+      targetClinicName: string | null;
+      startedAt: Date;
+    };
   }
 
   interface User {
@@ -22,6 +30,14 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     id: string;
+    platformAdmin?: boolean;
+    impersonation?: {
+      originalUserId: string;
+      targetUserId: string;
+      targetEmail: string;
+      targetClinicName: string | null;
+      startedAt: string;
+    };
   }
 }
 
@@ -67,9 +83,24 @@ export const {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id as string;
+
+        // Fetch user from database to check platformAdmin status
+        if (user.id) {
+          const dbUser = await getUserById({ userId: user.id });
+          if (dbUser?.platformAdmin) {
+            token.platformAdmin = true;
+          }
+        }
+      }
+
+      // Handle session updates (used for starting/stopping impersonation)
+      if (trigger === 'update' && session) {
+        if (session.impersonation !== undefined) {
+          token.impersonation = session.impersonation;
+        }
       }
 
       return token;
@@ -77,6 +108,19 @@ export const {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
+
+        // Only include platformAdmin if true (omit for regular users)
+        if (token.platformAdmin) {
+          session.user.platformAdmin = true;
+        }
+
+        // Include impersonation data if present
+        if (token.impersonation) {
+          session.impersonation = {
+            ...token.impersonation,
+            startedAt: new Date(token.impersonation.startedAt),
+          };
+        }
       }
 
       return session;

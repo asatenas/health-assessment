@@ -9,7 +9,27 @@ export async function validateClinicAccess(chatId?: string) {
     throw new ChatSDKError('unauthorized:api');
   }
 
-  const user = await getUserById({ userId: session.user.id });
+  // Determine which user to validate (target user if impersonating, otherwise session user)
+  let effectiveUserId = session.user.id;
+
+  // If impersonating, verify admin status and use target user
+  if (session.impersonation) {
+    // Verify original user is still a platform admin
+    const adminUser = await getUserById({
+      userId: session.impersonation.originalUserId,
+    });
+    if (!adminUser?.platformAdmin) {
+      throw new ChatSDKError(
+        'unauthorized:api',
+        'Original admin user no longer has platform admin privileges',
+      );
+    }
+
+    // Use target user for all subsequent checks
+    effectiveUserId = session.impersonation.targetUserId;
+  }
+
+  const user = await getUserById({ userId: effectiveUserId });
 
   if (!user) {
     throw new ChatSDKError('unauthorized:api');
@@ -23,7 +43,7 @@ export async function validateClinicAccess(chatId?: string) {
     throw new ChatSDKError('unauthorized:api', 'User account is not active');
   }
 
-  const userClinic = await getClinicByUserId({ userId: session.user.id });
+  const userClinic = await getClinicByUserId({ userId: effectiveUserId });
   if (!userClinic?.authorized) {
     throw new ChatSDKError('unauthorized:api', 'Clinic not authorized');
   }
