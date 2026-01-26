@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SurgeryDetailModal } from './surgery-detail-modal';
 import { cn } from '@/lib/shared/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Surgery {
   chatId: string;
@@ -50,11 +51,65 @@ export function MonthlySurgeriesPanel({
     string | null
   >(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [monthlySurgeries, setMonthlySurgeries] =
+    useState<Record<string, Surgery[]>>(surgeriesByDay);
+  const [isLoading, setIsLoading] = useState(false);
+  // Cache to store fetched months (key: "YYYY-MM")
+  const [surgeriesCache, setSurgeriesCache] = useState<
+    Record<string, Record<string, Surgery[]>>
+  >(() => {
+    // Initialize cache with the initial month's data
+    const now = new Date();
+    const initialKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return { [initialKey]: surgeriesByDay };
+  });
+
+  // Fetch monthly surgeries function
+  const fetchMonthlySurgeries = useCallback(async () => {
+    const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
+    const year = currentMonth.getFullYear();
+    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
+
+    // Check if data is already cached
+    if (surgeriesCache[cacheKey]) {
+      setMonthlySurgeries(surgeriesCache[cacheKey]);
+      return;
+    }
+
+    // Fetch if not cached
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/clinic/monthly-surgeries?month=${month}&year=${year}`,
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch monthly surgeries');
+      }
+
+      const data = await response.json();
+      setMonthlySurgeries(data);
+      // Store in cache
+      setSurgeriesCache((prev) => ({
+        ...prev,
+        [cacheKey]: data,
+      }));
+    } catch (error) {
+      console.error('Error fetching monthly surgeries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentMonth, surgeriesCache]);
+
+  // Fetch monthly surgeries when month changes
+  useEffect(() => {
+    fetchMonthlySurgeries();
+  }, [fetchMonthlySurgeries]);
 
   // Convert surgeriesByDay to an array of surgeries
   const surgeries = useMemo(() => {
-    return Object.values(surgeriesByDay).flat();
-  }, [surgeriesByDay]);
+    return Object.values(monthlySurgeries).flat();
+  }, [monthlySurgeries]);
 
   // Generate calendar days
   const calendarDays = useMemo(() => {
@@ -180,6 +235,20 @@ export function MonthlySurgeriesPanel({
     await onUpdateStatus(selectedAssessmentId, status);
     setDetailModalOpen(false);
     setSelectedAssessmentId(null);
+
+    // Invalidate cache for current month and refetch
+    const month = currentMonth.getMonth() + 1;
+    const year = currentMonth.getFullYear();
+    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
+
+    setSurgeriesCache((prev) => {
+      const updated = { ...prev };
+      delete updated[cacheKey];
+      return updated;
+    });
+
+    // Refetch monthly surgeries to reflect the updated status
+    await fetchMonthlySurgeries();
   };
 
   const getRiskColor = (risk: string) => {
@@ -243,46 +312,76 @@ export function MonthlySurgeriesPanel({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Calendar Grid */}
-          <div className="space-y-2">
-            {/* Day names header */}
-            <div className="grid grid-cols-7 gap-1">
-              {dayNames.map((dayName) => (
-                <div
-                  key={dayName}
-                  className="text-center font-semibold text-sm p-2 text-muted-foreground"
-                >
-                  {dayName}
-                </div>
-              ))}
-            </div>
+          {isLoading ? (
+            <div className="space-y-2">
+              {/* Day names header skeleton */}
+              <div className="grid grid-cols-7 gap-1">
+                {dayNames.map((dayName) => (
+                  <div
+                    key={dayName}
+                    className="text-center font-semibold text-sm p-2 text-muted-foreground"
+                  >
+                    {dayName}
+                  </div>
+                ))}
+              </div>
 
-            {/* Calendar days */}
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((day, index) => (
-                <div
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  key={index}
-                  className={cn(
-                    'border p-2 min-h-[80px] transition-all duration-200 rounded-md',
-                    !day.isCurrentMonth &&
-                      'text-gray-400 bg-gray-50 dark:bg-gray-800',
-                    day.isToday && 'border-blue-500 border-2',
-                    day.surgeryCount > 0 &&
-                      'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800',
-                  )}
-                  onClick={() => handleDayClick(day)}
-                >
-                  <div className="text-sm font-medium mb-1">{day.date}</div>
-                  {day.surgeryCount > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {day.surgeryCount}
-                    </Badge>
-                  )}
-                </div>
-              ))}
+              {/* Calendar days skeleton */}
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 42 }).map((_, index) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items
+                    key={index}
+                    className="border p-2 min-h-[80px] rounded-md"
+                  >
+                    <Skeleton className="h-4 w-6 mb-2" />
+                    {/* Randomly show badge skeleton for some days */}
+                    {index % 5 === 0 && <Skeleton className="h-5 w-8" />}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              {/* Day names header */}
+              <div className="grid grid-cols-7 gap-1">
+                {dayNames.map((dayName) => (
+                  <div
+                    key={dayName}
+                    className="text-center font-semibold text-sm p-2 text-muted-foreground"
+                  >
+                    {dayName}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar days */}
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((day, index) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    key={index}
+                    className={cn(
+                      'border p-2 min-h-[80px] transition-all duration-200 rounded-md',
+                      !day.isCurrentMonth &&
+                        'text-gray-400 bg-gray-50 dark:bg-gray-800',
+                      day.isToday && 'border-blue-500 border-2',
+                      day.surgeryCount > 0 &&
+                        'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800',
+                    )}
+                    onClick={() => handleDayClick(day)}
+                  >
+                    <div className="text-sm font-medium mb-1">{day.date}</div>
+                    {day.surgeryCount > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {day.surgeryCount}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -3,7 +3,7 @@ import {
   getDashboardMetrics,
   getTimelineData,
   getHighPriorityNotifications,
-  getThisWeeksSurgeries,
+  getMonthlySurgeries,
   getTodaysSurgeriesForSwipe,
 } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/shared/errors';
@@ -16,6 +16,8 @@ export async function GET(request: Request) {
     const dateFromParam = searchParams.get('dateFrom');
     const dateToParam = searchParams.get('dateTo');
     const period = searchParams.get('period');
+    const monthParam = searchParams.get('month');
+    const yearParam = searchParams.get('year');
 
     let dateFrom: Date | undefined;
     let dateTo: Date | undefined;
@@ -88,9 +90,13 @@ export async function GET(request: Request) {
       userId: user.id,
     });
 
-    // Get this week's surgeries
-    const thisWeeksSurgeries = await getThisWeeksSurgeries({
+    // Get monthly surgeries (defaults to current month)
+    const month = monthParam ? Number.parseInt(monthParam, 10) : undefined;
+    const year = yearParam ? Number.parseInt(yearParam, 10) : undefined;
+    const monthlySurgeries = await getMonthlySurgeries({
       userId: user.id,
+      month,
+      year,
     });
 
     // Get today's surgeries
@@ -102,7 +108,7 @@ export async function GET(request: Request) {
       metrics,
       timeline,
       notifications,
-      thisWeeksSurgeries,
+      monthlySurgeries,
       todaysSurgeries,
     });
   } catch (error) {

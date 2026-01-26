@@ -119,7 +119,7 @@ export default function ClinicDashboard() {
       setTimeline(data.timeline);
       setNotifications(data.notifications);
       setTodaysSurgeries(data.todaysSurgeries || []);
-      setThisMonthsSurgeries(data.thisWeeksSurgeries || {});
+      setThisMonthsSurgeries(data.monthlySurgeries || {});
 
       // Fetch weekly surgeries separately
       const weeklySurgeriesResponse = await fetch(
