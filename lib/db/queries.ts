@@ -1461,21 +1461,31 @@ export async function getTodaysSurgeriesForSwipe({
 }
 
 /**
- * Get this week's surgeries (from today until Saturday)
+ * Get monthly surgeries (defaults to current month)
+ * @param userId - The user ID
+ * @param month - Month (1-12), defaults to current month
+ * @param year - Year (e.g., 2024), defaults to current year
  */
-export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
+export async function getMonthlySurgeries({
+  userId,
+  month,
+  year,
+}: {
+  userId: string;
+  month?: number;
+  year?: number;
+}) {
   try {
     const now = new Date();
-    const startOfToday = new Date(now);
-    startOfToday.setHours(0, 0, 0, 0);
+    const targetMonth = month ?? now.getMonth() + 1; // getMonth() is 0-indexed
+    const targetYear = year ?? now.getFullYear();
 
-    // Calculate days until Saturday (6 = Saturday, 0 = Sunday)
-    const currentDay = now.getDay(); // 0 = Sunday, 6 = Saturday
-    const daysUntilSaturday = currentDay === 6 ? 0 : 6 - currentDay;
+    // Calculate start and end of the month
+    const startOfMonth = new Date(targetYear, targetMonth - 1, 1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-    const endOfSaturday = new Date(now);
-    endOfSaturday.setDate(now.getDate() + daysUntilSaturday);
-    endOfSaturday.setHours(23, 59, 59, 999);
+    const endOfMonth = new Date(targetYear, targetMonth, 0); // Day 0 of next month = last day of current month
+    endOfMonth.setHours(23, 59, 59, 999);
 
     // Get all finished or in-progress assessments for this user
     const chats = await db
@@ -1488,7 +1498,7 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
         ),
       );
 
-    // Get surgeries scheduled this week
+    // Get surgeries scheduled in the target month
     const surgeries = await db
       .select()
       .from(surgery)
@@ -1498,8 +1508,8 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
             surgery.assessmentId,
             chats.map((c) => c.id),
           ),
-          gte(surgery.date, startOfToday),
-          lte(surgery.date, endOfSaturday),
+          gte(surgery.date, startOfMonth),
+          lte(surgery.date, endOfMonth),
         ),
       )
       .orderBy(asc(surgery.date));
@@ -1507,7 +1517,7 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     // Create a map of assessmentId to chat
     const chatMap = new Map(chats.map((c) => [c.id, c]));
 
-    // Group by day of week
+    // Group by day
     const groupedByDay: Record<string, any[]> = {};
 
     surgeries.forEach((surgeryItem) => {
@@ -1553,7 +1563,7 @@ export async function getThisWeeksSurgeries({ userId }: { userId: string }) {
     console.log(error);
     throw new ChatSDKError(
       'bad_request:database',
-      "Failed to get this week's surgeries",
+      'Failed to get monthly surgeries',
     );
   }
 }
