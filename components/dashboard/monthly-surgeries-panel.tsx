@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { SurgeryDetailModal } from './surgery-detail-modal';
 import { cn } from '@/lib/shared/utils';
 
@@ -50,11 +50,43 @@ export function MonthlySurgeriesPanel({
     string | null
   >(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [monthlySurgeries, setMonthlySurgeries] =
+    useState<Record<string, Surgery[]>>(surgeriesByDay);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch monthly surgeries function
+  const fetchMonthlySurgeries = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
+      const year = currentMonth.getFullYear();
+
+      const response = await fetch(
+        `/api/clinic/monthly-surgeries?month=${month}&year=${year}`,
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch monthly surgeries');
+      }
+
+      const data = await response.json();
+      setMonthlySurgeries(data);
+    } catch (error) {
+      console.error('Error fetching monthly surgeries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentMonth]);
+
+  // Fetch monthly surgeries when month changes
+  useEffect(() => {
+    fetchMonthlySurgeries();
+  }, [fetchMonthlySurgeries]);
 
   // Convert surgeriesByDay to an array of surgeries
   const surgeries = useMemo(() => {
-    return Object.values(surgeriesByDay).flat();
-  }, [surgeriesByDay]);
+    return Object.values(monthlySurgeries).flat();
+  }, [monthlySurgeries]);
 
   // Generate calendar days
   const calendarDays = useMemo(() => {
@@ -180,6 +212,8 @@ export function MonthlySurgeriesPanel({
     await onUpdateStatus(selectedAssessmentId, status);
     setDetailModalOpen(false);
     setSelectedAssessmentId(null);
+    // Refetch monthly surgeries to reflect the updated status
+    await fetchMonthlySurgeries();
   };
 
   const getRiskColor = (risk: string) => {
@@ -243,46 +277,51 @@ export function MonthlySurgeriesPanel({
           </div>
         </CardHeader>
         <CardContent>
-          {/* Calendar Grid */}
-          <div className="space-y-2">
-            {/* Day names header */}
-            <div className="grid grid-cols-7 gap-1">
-              {dayNames.map((dayName) => (
-                <div
-                  key={dayName}
-                  className="text-center font-semibold text-sm p-2 text-muted-foreground"
-                >
-                  {dayName}
-                </div>
-              ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="size-8 animate-spin text-muted-foreground" />
             </div>
+          ) : (
+            <div className="space-y-2">
+              {/* Day names header */}
+              <div className="grid grid-cols-7 gap-1">
+                {dayNames.map((dayName) => (
+                  <div
+                    key={dayName}
+                    className="text-center font-semibold text-sm p-2 text-muted-foreground"
+                  >
+                    {dayName}
+                  </div>
+                ))}
+              </div>
 
-            {/* Calendar days */}
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((day, index) => (
-                <div
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  key={index}
-                  className={cn(
-                    'border p-2 min-h-[80px] transition-all duration-200 rounded-md',
-                    !day.isCurrentMonth &&
-                      'text-gray-400 bg-gray-50 dark:bg-gray-800',
-                    day.isToday && 'border-blue-500 border-2',
-                    day.surgeryCount > 0 &&
-                      'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800',
-                  )}
-                  onClick={() => handleDayClick(day)}
-                >
-                  <div className="text-sm font-medium mb-1">{day.date}</div>
-                  {day.surgeryCount > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      {day.surgeryCount}
-                    </Badge>
-                  )}
-                </div>
-              ))}
+              {/* Calendar days */}
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((day, index) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    key={index}
+                    className={cn(
+                      'border p-2 min-h-[80px] transition-all duration-200 rounded-md',
+                      !day.isCurrentMonth &&
+                        'text-gray-400 bg-gray-50 dark:bg-gray-800',
+                      day.isToday && 'border-blue-500 border-2',
+                      day.surgeryCount > 0 &&
+                        'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800',
+                    )}
+                    onClick={() => handleDayClick(day)}
+                  >
+                    <div className="text-sm font-medium mb-1">{day.date}</div>
+                    {day.surgeryCount > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {day.surgeryCount}
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
