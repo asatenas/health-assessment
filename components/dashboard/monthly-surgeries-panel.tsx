@@ -54,14 +54,31 @@ export function MonthlySurgeriesPanel({
   const [monthlySurgeries, setMonthlySurgeries] =
     useState<Record<string, Surgery[]>>(surgeriesByDay);
   const [isLoading, setIsLoading] = useState(false);
+  // Cache to store fetched months (key: "YYYY-MM")
+  const [surgeriesCache, setSurgeriesCache] = useState<
+    Record<string, Record<string, Surgery[]>>
+  >(() => {
+    // Initialize cache with the initial month's data
+    const now = new Date();
+    const initialKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return { [initialKey]: surgeriesByDay };
+  });
 
   // Fetch monthly surgeries function
   const fetchMonthlySurgeries = useCallback(async () => {
+    const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
+    const year = currentMonth.getFullYear();
+    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
+
+    // Check if data is already cached
+    if (surgeriesCache[cacheKey]) {
+      setMonthlySurgeries(surgeriesCache[cacheKey]);
+      return;
+    }
+
+    // Fetch if not cached
     setIsLoading(true);
     try {
-      const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
-      const year = currentMonth.getFullYear();
-
       const response = await fetch(
         `/api/clinic/monthly-surgeries?month=${month}&year=${year}`,
       );
@@ -72,12 +89,17 @@ export function MonthlySurgeriesPanel({
 
       const data = await response.json();
       setMonthlySurgeries(data);
+      // Store in cache
+      setSurgeriesCache((prev) => ({
+        ...prev,
+        [cacheKey]: data,
+      }));
     } catch (error) {
       console.error('Error fetching monthly surgeries:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentMonth]);
+  }, [currentMonth, surgeriesCache]);
 
   // Fetch monthly surgeries when month changes
   useEffect(() => {
@@ -213,6 +235,18 @@ export function MonthlySurgeriesPanel({
     await onUpdateStatus(selectedAssessmentId, status);
     setDetailModalOpen(false);
     setSelectedAssessmentId(null);
+
+    // Invalidate cache for current month and refetch
+    const month = currentMonth.getMonth() + 1;
+    const year = currentMonth.getFullYear();
+    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
+
+    setSurgeriesCache((prev) => {
+      const updated = { ...prev };
+      delete updated[cacheKey];
+      return updated;
+    });
+
     // Refetch monthly surgeries to reflect the updated status
     await fetchMonthlySurgeries();
   };
