@@ -4,9 +4,10 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SurgeryDetailModal } from './surgery-detail-modal';
 import { cn } from '@/lib/shared/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Surgery {
   chatId: string;
@@ -278,8 +279,33 @@ export function MonthlySurgeriesPanel({
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            <div className="space-y-2">
+              {/* Day names header skeleton */}
+              <div className="grid grid-cols-7 gap-1">
+                {dayNames.map((dayName) => (
+                  <div
+                    key={dayName}
+                    className="text-center font-semibold text-sm p-2 text-muted-foreground"
+                  >
+                    {dayName}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar days skeleton */}
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 42 }).map((_, index) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items
+                    key={index}
+                    className="border p-2 min-h-[80px] rounded-md"
+                  >
+                    <Skeleton className="h-4 w-6 mb-2" />
+                    {/* Randomly show badge skeleton for some days */}
+                    {index % 5 === 0 && <Skeleton className="h-5 w-8" />}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="space-y-2">
