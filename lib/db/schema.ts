@@ -21,23 +21,13 @@ export const user = pgTable('Clinic', {
   email: varchar('email', { length: 64 }).notNull(),
   password: varchar('password', { length: 64 }),
   emailVerified: boolean('emailVerified').notNull().default(false),
-});
-
-export type User = InferSelectModel<typeof user>;
-
-export const clinicConfig = pgTable('ClinicConfig', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  clinicId: uuid('clinicId')
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: 'cascade' }),
   clinicName: varchar('clinicName', { length: 255 }),
-  formConfig: json('formConfig').notNull(),
-  dashboardConfig: json('dashboardConfig'), // nullable for backward compatibility
+  formConfig: json('formConfig'),
+  dashboardConfig: json('dashboardConfig'),
   updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
 });
 
-export type ClinicConfig = InferSelectModel<typeof clinicConfig>;
+export type User = InferSelectModel<typeof user>;
 
 export const patient = pgTable(
   'Patient',

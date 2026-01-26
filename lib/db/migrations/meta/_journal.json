@@ -253,6 +253,13 @@
       "when": 1768249700251,
       "tag": "0035_flimsy_sumo",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1768250000000,
+      "tag": "0036_migrate_clinic_config",
+      "breakpoints": true
     }
   ]
 }

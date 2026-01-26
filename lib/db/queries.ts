@@ -27,8 +27,6 @@ import {
   type ChatForm,
   stream,
   checkpoint,
-  clinicConfig,
-  type ClinicConfig,
   surgery,
 } from './schema';
 import { generateUUID } from '../shared/utils';
@@ -106,10 +104,13 @@ export async function createGuestUser() {
 
 export async function createClinicConfig(userId: string) {
   try {
-    return await db.insert(clinicConfig).values({
-      clinicId: userId,
-      formConfig: DEFAULT_FORM_CONFIG,
-    });
+    return await db
+      .update(user)
+      .set({
+        formConfig: DEFAULT_FORM_CONFIG,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, userId));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -1645,12 +1646,20 @@ export async function getClinicConfigByClinicId({
   clinicId,
 }: {
   clinicId: string;
-}): Promise<ClinicConfig | undefined> {
+}): Promise<
+  | Pick<User, 'clinicName' | 'formConfig' | 'dashboardConfig' | 'updatedAt'>
+  | undefined
+> {
   try {
     const [config] = await db
-      .select()
-      .from(clinicConfig)
-      .where(eq(clinicConfig.clinicId, clinicId));
+      .select({
+        clinicName: user.clinicName,
+        formConfig: user.formConfig,
+        dashboardConfig: user.dashboardConfig,
+        updatedAt: user.updatedAt,
+      })
+      .from(user)
+      .where(eq(user.id, clinicId));
     return config;
   } catch (error) {
     throw new ChatSDKError(
@@ -1684,7 +1693,7 @@ export async function updateClinicConfig({
   dashboardConfig?: DashboardConfiguration;
 }) {
   try {
-    const updateData: Partial<ClinicConfig> = {
+    const updateData: Partial<User> = {
       updatedAt: new Date(),
     };
 
@@ -1694,9 +1703,9 @@ export async function updateClinicConfig({
       updateData.dashboardConfig = dashboardConfig as any;
 
     const [updated] = await db
-      .update(clinicConfig)
+      .update(user)
       .set(updateData)
-      .where(eq(clinicConfig.clinicId, clinicId))
+      .where(eq(user.id, clinicId))
       .returning();
 
     return updated;
