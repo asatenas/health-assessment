@@ -9,6 +9,7 @@ import { Filters } from './chat-list-view/filters';
 import { DesktopTable } from './chat-list-view/desktop-table';
 import { MobileCards } from './chat-list-view/mobile-cards';
 import { Pagination } from './chat-list-view/pagination';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 // Re-export types and utils for backward compatibility
 export type { Chat };
@@ -29,6 +30,7 @@ export function ChatListView({
   onDateFromFilterChange,
   onDateToFilterChange,
   onClearFilters,
+  canReadFull,
 }: ChatListViewProps) {
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -48,7 +50,9 @@ export function ChatListView({
 
   return (
     <div className="space-y-6">
-      <RiskLegend />
+      <PermissionGate permission="assessments.read">
+        <RiskLegend />
+      </PermissionGate>
 
       <Filters
         isLoading={isLoading}
@@ -69,6 +73,7 @@ export function ChatListView({
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
         onChatClick={openChatDetailsModal}
+        canReadFull={canReadFull}
       />
 
       <MobileCards
@@ -79,6 +84,7 @@ export function ChatListView({
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
         onChatClick={openChatDetailsModal}
+        canReadFull={canReadFull}
       />
 
       <Pagination

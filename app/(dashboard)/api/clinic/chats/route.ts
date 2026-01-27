@@ -6,7 +6,10 @@ import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['assessments.read', 'assessments.read.summary'],
+      requireAll: false, // Accept any of these permissions
+    });
 
     const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get('status');

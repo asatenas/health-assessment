@@ -10,7 +10,11 @@ import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      // TODO: separate API routes so that this permission can be org.manage
+      // while the others can be assessments.read
+      permissions: ['assessments.read'],
+    });
 
     const { searchParams } = new URL(request.url);
     const dateFromParam = searchParams.get('dateFrom');

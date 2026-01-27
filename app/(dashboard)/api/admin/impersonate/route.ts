@@ -33,25 +33,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update session with impersonation data
-    const impersonationData = {
-      originalUserId: adminUser.id,
-      targetUserId: targetUser.id,
-      targetEmail: targetUser.email,
-      targetClinicName: targetUser.clinicName,
-      startedAt: new Date().toISOString(),
-    };
-
     // Trigger session update
     // Note: The actual session update will be handled by the client calling update()
     // We return the impersonation data so the client can update the session
-
+    // The JWT callback will construct the full impersonation object with original user data
     return NextResponse.json({
       success: true,
-      impersonation: impersonationData,
+      impersonation: {
+        user: {
+          id: targetUser.id,
+          email: targetUser.email,
+          role: targetUser.role,
+        },
+        clinic: {
+          id: targetUser.clinicId,
+          name: targetUser.clinicName || '',
+        },
+        startedAt: new Date().toISOString(),
+      },
       targetUser: {
         id: targetUser.id,
         email: targetUser.email,
+        clinicId: targetUser.clinicId,
         clinicName: targetUser.clinicName,
         role: targetUser.role,
       },

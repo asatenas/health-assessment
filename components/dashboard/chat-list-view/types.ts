@@ -39,6 +39,7 @@ export interface ChatListViewProps {
   onDateFromFilterChange: (date: string) => void;
   onDateToFilterChange: (date: string) => void;
   onClearFilters: () => void;
+  canReadFull: boolean;
 }
 
 export type MedicationDetail = {

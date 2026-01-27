@@ -4,7 +4,9 @@ import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['surgeries.read'],
+    });
 
     // Get current week's date range (Sunday to Saturday)
     const today = new Date();

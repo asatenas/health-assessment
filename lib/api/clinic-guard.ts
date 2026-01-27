@@ -1,22 +1,31 @@
 import { auth } from '@/app/(auth)/auth';
 import { getChatById, getUserById, getClinicByUserId } from '@/lib/db/queries';
 import { ChatSDKError } from '../shared/errors';
+import {
+  hasAnyPermission,
+  hasAllPermissions,
+  type Permission,
+} from '../permissions';
 
-export async function validateClinicAccess(chatId?: string) {
+export interface PermissionCheckOptions {
+  permissions: Permission[];
+  requireAll?: boolean; // Default: false (require any)
+}
+
+export async function validateClinicAccess(
+  chatId?: string,
+  permissionOptions?: PermissionCheckOptions,
+) {
   const session = await auth();
 
   if (!session?.user?.id) {
     throw new ChatSDKError('unauthorized:api');
   }
 
-  // Determine which user to validate (target user if impersonating, otherwise session user)
-  let effectiveUserId = session.user.id;
-
-  // If impersonating, verify admin status and use target user
+  // If impersonating, verify original admin is still a platform admin
   if (session.impersonation) {
-    // Verify original user is still a platform admin
     const adminUser = await getUserById({
-      userId: session.impersonation.originalUserId,
+      userId: session.impersonation.user.id,
     });
     if (!adminUser?.platformAdmin) {
       throw new ChatSDKError(
@@ -24,12 +33,9 @@ export async function validateClinicAccess(chatId?: string) {
         'Original admin user no longer has platform admin privileges',
       );
     }
-
-    // Use target user for all subsequent checks
-    effectiveUserId = session.impersonation.targetUserId;
   }
 
-  const user = await getUserById({ userId: effectiveUserId });
+  const user = await getUserById({ userId: session.user.id });
 
   if (!user) {
     throw new ChatSDKError('unauthorized:api');
@@ -43,7 +49,18 @@ export async function validateClinicAccess(chatId?: string) {
     throw new ChatSDKError('unauthorized:api', 'User account is not active');
   }
 
-  const userClinic = await getClinicByUserId({ userId: effectiveUserId });
+  // Permission check if provided
+  if (permissionOptions) {
+    const hasPermission = permissionOptions.requireAll
+      ? hasAllPermissions(user.role, permissionOptions.permissions)
+      : hasAnyPermission(user.role, permissionOptions.permissions);
+
+    if (!hasPermission) {
+      throw new ChatSDKError('forbidden:api');
+    }
+  }
+
+  const userClinic = await getClinicByUserId({ userId: session.user.id });
   if (!userClinic?.authorized) {
     throw new ChatSDKError('unauthorized:api', 'Clinic not authorized');
   }

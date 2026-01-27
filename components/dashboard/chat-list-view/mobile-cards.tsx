@@ -12,6 +12,7 @@ interface MobileCardsProps {
     chat: Chat,
     event?: React.MouseEvent<HTMLButtonElement>,
   ) => void;
+  canReadFull: boolean;
 }
 
 export function MobileCards({
@@ -22,6 +23,7 @@ export function MobileCards({
   hasActiveFilters,
   onClearFilters,
   onChatClick,
+  canReadFull,
 }: MobileCardsProps) {
   return (
     <div className="sm:hidden space-y-3">
@@ -101,7 +103,7 @@ export function MobileCards({
                     {getStatusLabel(chat.status)}
                   </span>
                 </div>
-                {riskLevel.level !== '-' && (
+                {canReadFull && riskLevel.level !== '-' && (
                   <span
                     className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${riskLevel.color}`}
                   >
@@ -115,7 +117,7 @@ export function MobileCards({
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     ID da avaliação
                   </div>
-                  {chat.status !== 'expired' ? (
+                  {chat.status !== 'expired' && canReadFull ? (
                     <button
                       type="button"
                       onClick={(e) => onChatClick(chat, e)}
@@ -141,32 +143,34 @@ export function MobileCards({
                   </div>
                 </div>
 
-                {(chat.score_rcri !== null || chat.score_aub_has2 !== null) && (
-                  <div className="flex gap-4 pt-2">
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        RCRI
+                {canReadFull &&
+                  (chat.score_rcri !== null ||
+                    chat.score_aub_has2 !== null) && (
+                    <div className="flex gap-4 pt-2">
+                      <div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          RCRI
+                        </div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_rcri !== null &&
+                          chat.score_rcri !== undefined
+                            ? chat.score_rcri
+                            : '-'}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">
-                        {chat.score_rcri !== null &&
-                        chat.score_rcri !== undefined
-                          ? chat.score_rcri
-                          : '-'}
+                      <div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          AUB-HAS2
+                        </div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_aub_has2 !== null &&
+                          chat.score_aub_has2 !== undefined
+                            ? chat.score_aub_has2
+                            : '-'}
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        AUB-HAS2
-                      </div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">
-                        {chat.score_aub_has2 !== null &&
-                        chat.score_aub_has2 !== undefined
-                          ? chat.score_aub_has2
-                          : '-'}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           );

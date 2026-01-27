@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 import { Button } from '@/components/ui/button';
-import { signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import {
   BarChart3,
   List,
@@ -28,6 +28,8 @@ import { ExportButton } from '@/components/dashboard/export-button';
 import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
+import { PermissionGate } from '@/components/auth/permission-gate';
+import { usePermissions } from '@/hooks/use-permissions';
 
 type CreateChatResponse = {
   chatId: string;
@@ -38,6 +40,14 @@ type CreateChatResponse = {
 type DashboardView = 'analytics' | 'list';
 
 export default function ClinicDashboard() {
+  const { status: sessionStatus } = useSession();
+  const { hasPermission, hasAnyPermission, clinic, role } = usePermissions();
+  const canReadAssessments = hasAnyPermission([
+    'assessments.read',
+    'assessments.read.summary',
+  ]);
+  const canReadFull = hasPermission('assessments.read');
+  const canManageOrg = hasPermission('org.manage');
   const [view, setView] = useState<DashboardView>('analytics');
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,8 +56,7 @@ export default function ClinicDashboard() {
   const [newChatData, setNewChatData] = useState<CreateChatResponse | null>(
     null,
   );
-  const [clinicName, setClinicName] = useState<string>('Painel da Clínica');
-  const [isLoadingClinicName, setIsLoadingClinicName] = useState(true);
+  const [clinicName, setClinicName] = useState<string>('');
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
   const [dashboardConfig, setDashboardConfig] =
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
@@ -75,25 +84,28 @@ export default function ClinicDashboard() {
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
 
-  // Fetch clinic config for clinic name and dashboard config
+  // Set clinic name from session and fetch dashboard config for admins/owners
   const fetchClinicConfig = useCallback(async () => {
+    // Set clinic name from session
+    setClinicName(clinic?.name || 'Painel da Clínica');
+
+    // Only fetch config if user has org.manage permission (for dashboard config)
+    if (!canManageOrg) {
+      return;
+    }
+
     try {
       const response = await fetch('/api/clinic/config');
       if (response.ok) {
-        const data = await response.json();
-        if (data.clinicName) {
-          setClinicName(data.clinicName);
-        }
-        if (data.dashboardConfig) {
-          setDashboardConfig(data.dashboardConfig);
+        const { dashboardConfig } = await response.json();
+        if (dashboardConfig) {
+          setDashboardConfig(dashboardConfig);
         }
       }
     } catch (error) {
       console.error('Failed to fetch clinic config:', error);
-    } finally {
-      setIsLoadingClinicName(false);
     }
-  }, []);
+  }, [clinic, canManageOrg]);
 
   useEffect(() => {
     fetchClinicConfig();
@@ -178,16 +190,27 @@ export default function ClinicDashboard() {
     setCurrentPage(1);
   }, [statusFilter, dateFromFilter, dateToFilter]);
 
-  // Fetch data based on current view (only after clinic config is loaded)
+  // Fetch data based on current view (only after clinic config is loaded and if user has read permissions)
   useEffect(() => {
-    if (!isLoadingClinicName) {
-      if (view === 'analytics') {
+    if (canReadAssessments) {
+      // Secretaries only have summary permission, so they should go straight to list view
+      if (!canReadFull && view === 'analytics') {
+        setView('list'); // Force list view for summary-only users
+      }
+
+      if (view === 'analytics' && canReadFull) {
         fetchDashboardMetrics();
-      } else {
+      } else if (view === 'list') {
         fetchChats();
       }
     }
-  }, [view, fetchDashboardMetrics, fetchChats, isLoadingClinicName]);
+  }, [
+    view,
+    fetchDashboardMetrics,
+    fetchChats,
+    canReadAssessments,
+    canReadFull,
+  ]);
 
   const createNewChat = async () => {
     setIsCreating(true);
@@ -208,11 +231,13 @@ export default function ClinicDashboard() {
         description: 'Avaliação criada com sucesso!',
       });
 
-      // Refresh data
-      if (view === 'analytics') {
-        fetchDashboardMetrics();
-      } else {
-        fetchChats();
+      // Refresh data only if user has read permissions
+      if (canReadAssessments) {
+        if (view === 'analytics') {
+          fetchDashboardMetrics();
+        } else {
+          fetchChats();
+        }
       }
     } catch (error) {
       toast({
@@ -225,6 +250,11 @@ export default function ClinicDashboard() {
   };
 
   const handleRefresh = async () => {
+    // Only refresh if user has read permissions
+    if (!canReadAssessments) {
+      return;
+    }
+
     setIsRefreshing(true);
     setNewChatData(null);
     try {
@@ -324,8 +354,8 @@ export default function ClinicDashboard() {
     }
   };
 
-  // Show loading state until clinic config is loaded
-  if (isLoadingClinicName) {
+  // Show loading state until session is loaded
+  if (sessionStatus === 'loading') {
     return (
       <div className="flex flex-col min-h-screen w-full bg-background">
         <div className="flex-1 flex flex-col max-w-7xl w-full mx-auto p-4 sm:p-6">
@@ -359,53 +389,72 @@ export default function ClinicDashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
-            <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
-              {view === 'analytics'
-                ? 'Visualize métricas e análises das avaliações pré-anestésicas'
-                : 'Gerencie todos as avaliações dos pacientes'}
-            </p>
+            {clinicName === '' ? (
+              <>
+                <Skeleton className="h-9 w-64 mb-2" />
+                <Skeleton className="h-5 w-96 mt-2" />
+              </>
+            ) : (
+              <>
+                <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
+                <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
+                  {canReadAssessments
+                    ? view === 'analytics'
+                      ? 'Visualize métricas e análises das avaliações pré-anestésicas'
+                      : 'Gerencie todos as avaliações dos pacientes'
+                    : 'Crie uma nova avaliação usando o botão à direita'}
+                </p>
+              </>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 justify-end">
-            <Button
-              onClick={createNewChat}
-              disabled={isCreating}
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label={
-                isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
-              }
+            <PermissionGate permission="assessments.create">
+              <Button
+                onClick={createNewChat}
+                disabled={isCreating}
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label={
+                  isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
+                }
+              >
+                <ClipboardList className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">
+                  {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+                </span>
+              </Button>
+            </PermissionGate>
+            <PermissionGate
+              permissions={['assessments.read', 'assessments.read.summary']}
             >
-              <ClipboardList className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">
-                {isCreating ? 'Criando...' : 'Criar nova avaliação'}
-              </span>
-            </Button>
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              variant="outline"
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label={
-                isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
-              }
-            >
-              <RefreshCw className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">
-                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-              </span>
-            </Button>
-            <Button
-              onClick={() => setIsConfigurationsOpen(true)}
-              variant="outline"
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label="Configurações"
-            >
-              <Settings className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">Configurações</span>
-            </Button>
+              <Button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label={
+                  isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
+                }
+              >
+                <RefreshCw className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">
+                  {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+                </span>
+              </Button>
+            </PermissionGate>
+            <PermissionGate permission="org.manage">
+              <Button
+                onClick={() => setIsConfigurationsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label="Configurações"
+              >
+                <Settings className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Configurações</span>
+              </Button>
+            </PermissionGate>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
@@ -419,29 +468,31 @@ export default function ClinicDashboard() {
           </div>
         </div>
 
-        {/* View Toggle */}
-        <div className="mb-6">
-          <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
-            <Button
-              variant={view === 'analytics' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('analytics')}
-              className="gap-2 flex-1 sm:flex-none"
-            >
-              <BarChart3 className="size-4" />
-              Dashboard
-            </Button>
-            <Button
-              variant={view === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('list')}
-              className="gap-2 flex-1 sm:flex-none"
-            >
-              <List className="size-4" />
-              Lista de Avaliações
-            </Button>
+        {/* View Toggle - Only show for users with read permissions */}
+        <PermissionGate permission="assessments.read">
+          <div className="mb-6">
+            <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
+              <Button
+                variant={view === 'analytics' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setView('analytics')}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <BarChart3 className="size-4" />
+                Dashboard
+              </Button>
+              <Button
+                variant={view === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setView('list')}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <List className="size-4" />
+                Lista de Avaliações
+              </Button>
+            </div>
           </div>
-        </div>
+        </PermissionGate>
 
         {/* New Chat Data Display */}
         {newChatData && (
@@ -530,104 +581,123 @@ export default function ClinicDashboard() {
         )}
 
         {/* Analytics View */}
-        {view === 'analytics' && (
-          <div className="space-y-6">
-            {/* Filters and Export */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div className="flex-1 w-full">
-                <DashboardFilters onFilterChange={handleFilterChange} />
-              </div>
-              <ExportButton
-                dateFrom={dateFromFilter ? new Date(dateFromFilter) : undefined}
-                dateTo={dateToFilter ? new Date(dateToFilter) : undefined}
-                status={statusFilter}
-              />
+        <PermissionGate permission="assessments.read">
+          {view === 'analytics' && (
+            <div className="space-y-6">
+              {/* Filters and Export - Admin/Owner only */}
+              <PermissionGate permission="org.manage">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                  <div className="flex-1 w-full">
+                    <DashboardFilters onFilterChange={handleFilterChange} />
+                  </div>
+                  <ExportButton
+                    dateFrom={
+                      dateFromFilter ? new Date(dateFromFilter) : undefined
+                    }
+                    dateTo={dateToFilter ? new Date(dateToFilter) : undefined}
+                    status={statusFilter}
+                  />
+                </div>
+              </PermissionGate>
+
+              {/* Metrics Overview - Admin/Owner only */}
+              <PermissionGate permission="org.manage">
+                {dashboardConfig.widgets.metricsOverview.enabled && (
+                  <MetricsOverview
+                    totalAssessments={metrics?.totalAssessments || 0}
+                    completionRate={metrics?.completionRate || 0}
+                    highRiskPatients={metrics?.riskDistribution?.high || 0}
+                    latexAllergies={metrics?.latexAllergies || 0}
+                    isLoading={isLoadingMetrics}
+                  />
+                )}
+              </PermissionGate>
+
+              {/* Dynamic Charts Grid - Max 2 per row */}
+              {isLoadingMetrics ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                  <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
+                  <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Risk Distribution - Admin/Owner only */}
+                  <PermissionGate permission="org.manage">
+                    {dashboardConfig.widgets.riskDistribution.enabled &&
+                      metrics && (
+                        <RiskDistributionChart
+                          low={metrics.riskDistribution.low}
+                          medium={metrics.riskDistribution.medium}
+                          high={metrics.riskDistribution.high}
+                          unknown={metrics.riskDistribution.unknown}
+                        />
+                      )}
+                  </PermissionGate>
+                  {/* Timeline - Admin/Owner only */}
+                  <PermissionGate permission="org.manage">
+                    {dashboardConfig.widgets.timeline.enabled && (
+                      <TimelineChart data={timeline} />
+                    )}
+                  </PermissionGate>
+                  {dashboardConfig.widgets.weeklySurgeries.enabled && (
+                    <WeeklySurgeriesPanel
+                      surgeries={weeklySurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.todaysSurgeries.enabled && (
+                    <TodaysSurgeriesPanel
+                      surgeries={todaysSurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.monthlySurgeries.enabled && (
+                    <MonthlySurgeriesPanel
+                      surgeriesByDay={thisMonthsSurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.cancellations.enabled &&
+                    metrics?.cancellationsAndReschedulesByReason && (
+                      <CancellationsAndReschedulesChart
+                        data={metrics.cancellationsAndReschedulesByReason}
+                      />
+                    )}
+                  {dashboardConfig.widgets.notifications.enabled && (
+                    <NotificationsPanel notifications={notifications} />
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Metrics Overview */}
-            {dashboardConfig.widgets.metricsOverview.enabled && (
-              <MetricsOverview
-                totalAssessments={metrics?.totalAssessments || 0}
-                completionRate={metrics?.completionRate || 0}
-                highRiskPatients={metrics?.riskDistribution?.high || 0}
-                latexAllergies={metrics?.latexAllergies || 0}
-                isLoading={isLoadingMetrics}
-              />
-            )}
-
-            {/* Dynamic Charts Grid - Max 2 per row */}
-            {isLoadingMetrics ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-                <Skeleton className="h-[400px] w-full rounded-lg" />
-                <Skeleton className="h-[400px] w-full rounded-lg" />
-                <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
-                <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {dashboardConfig.widgets.riskDistribution.enabled &&
-                  metrics && (
-                    <RiskDistributionChart
-                      low={metrics.riskDistribution.low}
-                      medium={metrics.riskDistribution.medium}
-                      high={metrics.riskDistribution.high}
-                      unknown={metrics.riskDistribution.unknown}
-                    />
-                  )}
-                {dashboardConfig.widgets.timeline.enabled && (
-                  <TimelineChart data={timeline} />
-                )}
-                {dashboardConfig.widgets.weeklySurgeries.enabled && (
-                  <WeeklySurgeriesPanel
-                    surgeries={weeklySurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.todaysSurgeries.enabled && (
-                  <TodaysSurgeriesPanel
-                    surgeries={todaysSurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.monthlySurgeries.enabled && (
-                  <MonthlySurgeriesPanel
-                    surgeriesByDay={thisMonthsSurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.cancellations.enabled &&
-                  metrics?.cancellationsAndReschedulesByReason && (
-                    <CancellationsAndReschedulesChart
-                      data={metrics.cancellationsAndReschedulesByReason}
-                    />
-                  )}
-                {dashboardConfig.widgets.notifications.enabled && (
-                  <NotificationsPanel notifications={notifications} />
-                )}
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </PermissionGate>
 
         {/* List View */}
-        {view === 'list' && (
-          <ChatListView
-            chats={chats}
-            isLoading={isLoading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalChats={totalChats}
-            limit={limit}
-            statusFilter={statusFilter}
-            dateFromFilter={dateFromFilter}
-            dateToFilter={dateToFilter}
-            onPageChange={setCurrentPage}
-            onStatusFilterChange={setStatusFilter}
-            onDateFromFilterChange={setDateFromFilter}
-            onDateToFilterChange={setDateToFilter}
-            onClearFilters={clearFilters}
-          />
-        )}
+        <PermissionGate
+          permissions={['assessments.read', 'assessments.read.summary']}
+        >
+          {view === 'list' && (
+            <ChatListView
+              chats={chats}
+              isLoading={isLoading}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalChats={totalChats}
+              limit={limit}
+              statusFilter={statusFilter}
+              dateFromFilter={dateFromFilter}
+              dateToFilter={dateToFilter}
+              onPageChange={setCurrentPage}
+              onStatusFilterChange={setStatusFilter}
+              onDateFromFilterChange={setDateFromFilter}
+              onDateToFilterChange={setDateToFilter}
+              onClearFilters={clearFilters}
+              canReadFull={canReadFull}
+            />
+          )}
+        </PermissionGate>
       </div>
 
       {/* Configurations Sheet */}

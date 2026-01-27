@@ -83,6 +83,9 @@ export function getMessageByErrorCode(errorCode: ErrorCode): string {
     case 'bad_request:api':
       // English: "The request couldn't be processed. Please check your input and try again."
       return 'A solicitação não pôde ser processada. Verifique seus dados e tente novamente.';
+    case 'forbidden:api':
+      // English: "You don't have permission to perform this action."
+      return 'Você não tem permissão para realizar esta ação.';
 
     case 'unauthorized:auth':
       // English: 'You need to sign in before continuing.'

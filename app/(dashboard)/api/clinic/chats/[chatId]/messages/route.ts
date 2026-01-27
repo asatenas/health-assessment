@@ -10,7 +10,9 @@ export async function GET(
   try {
     const { chatId } = await params;
 
-    await validateClinicAccess(chatId);
+    await validateClinicAccess(chatId, {
+      permissions: ['assessments.read'],
+    });
 
     const messagesFromDb = await getMessagesByChatId({ id: chatId });
 
