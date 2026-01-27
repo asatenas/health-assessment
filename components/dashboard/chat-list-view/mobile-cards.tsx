@@ -12,7 +12,7 @@ interface MobileCardsProps {
     chat: Chat,
     event?: React.MouseEvent<HTMLButtonElement>,
   ) => void;
-  userRole?: string;
+  canReadFull: boolean;
 }
 
 export function MobileCards({
@@ -23,9 +23,8 @@ export function MobileCards({
   hasActiveFilters,
   onClearFilters,
   onChatClick,
-  userRole,
+  canReadFull,
 }: MobileCardsProps) {
-  const isSecretary = userRole === 'secretary';
   return (
     <div className="sm:hidden space-y-3">
       {isLoading ? (
@@ -104,7 +103,7 @@ export function MobileCards({
                     {getStatusLabel(chat.status)}
                   </span>
                 </div>
-                {!isSecretary && riskLevel.level !== '-' && (
+                {canReadFull && riskLevel.level !== '-' && (
                   <span
                     className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${riskLevel.color}`}
                   >
@@ -118,7 +117,7 @@ export function MobileCards({
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     ID da avaliação
                   </div>
-                  {chat.status !== 'expired' && !isSecretary ? (
+                  {chat.status !== 'expired' && canReadFull ? (
                     <button
                       type="button"
                       onClick={(e) => onChatClick(chat, e)}
@@ -144,7 +143,7 @@ export function MobileCards({
                   </div>
                 </div>
 
-                {!isSecretary &&
+                {canReadFull &&
                   (chat.score_rcri !== null ||
                     chat.score_aub_has2 !== null) && (
                     <div className="flex gap-4 pt-2">

@@ -30,7 +30,7 @@ export function ChatListView({
   onDateFromFilterChange,
   onDateToFilterChange,
   onClearFilters,
-  userRole,
+  canReadFull,
 }: ChatListViewProps) {
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export function ChatListView({
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
         onChatClick={openChatDetailsModal}
-        userRole={userRole}
+        canReadFull={canReadFull}
       />
 
       <MobileCards
@@ -84,7 +84,7 @@ export function ChatListView({
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
         onChatClick={openChatDetailsModal}
-        userRole={userRole}
+        canReadFull={canReadFull}
       />
 
       <Pagination

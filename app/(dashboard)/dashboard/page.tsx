@@ -694,7 +694,7 @@ export default function ClinicDashboard() {
               onDateFromFilterChange={setDateFromFilter}
               onDateToFilterChange={setDateToFilter}
               onClearFilters={clearFilters}
-              userRole={role}
+              canReadFull={canReadFull}
             />
           )}
         </PermissionGate>

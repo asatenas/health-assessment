@@ -17,7 +17,7 @@ interface DesktopTableProps {
     chat: Chat,
     event?: React.MouseEvent<HTMLButtonElement>,
   ) => void;
-  userRole?: string;
+  canReadFull: boolean;
 }
 
 export function DesktopTable({
@@ -28,9 +28,8 @@ export function DesktopTable({
   hasActiveFilters,
   onClearFilters,
   onChatClick,
-  userRole,
+  canReadFull,
 }: DesktopTableProps) {
-  const isSecretary = userRole === 'secretary';
   return (
     <div className="hidden sm:block border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -43,7 +42,7 @@ export function DesktopTable({
               style={{ width: '200px' }}
             />
             <col style={{ width: '140px' }} />
-            {!isSecretary && (
+            {canReadFull && (
               <>
                 <col
                   className="hidden lg:table-column"
@@ -78,7 +77,7 @@ export function DesktopTable({
               <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
               </th>
-              {!isSecretary && (
+              {canReadFull && (
                 <>
                   <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Risco
@@ -114,7 +113,7 @@ export function DesktopTable({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20" />
                     </td>
-                    {!isSecretary && (
+                    {canReadFull && (
                       <>
                         <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
@@ -136,7 +135,7 @@ export function DesktopTable({
             ) : chats.length === 0 ? (
               <tr>
                 <td
-                  colSpan={isSecretary ? 4 : 8}
+                  colSpan={canReadFull ? 8 : 4}
                   className="px-6 py-8 text-center"
                 >
                   <div className="flex flex-col items-center gap-3">
@@ -192,7 +191,7 @@ export function DesktopTable({
                       {rowNumber}
                     </td>
                     <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                      {chat.status !== 'expired' && !isSecretary ? (
+                      {chat.status !== 'expired' && canReadFull ? (
                         <button
                           type="button"
                           onClick={(e) => onChatClick(chat, e)}
@@ -223,7 +222,7 @@ export function DesktopTable({
                         {getStatusLabel(chat.status)}
                       </span>
                     </td>
-                    {!isSecretary && (
+                    {canReadFull && (
                       <>
                         <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
                           <span
