@@ -11,19 +11,26 @@ declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      role?: 'secretary' | 'clinician' | 'admin' | 'owner';
+      role: 'secretary' | 'clinician' | 'admin' | 'owner';
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
     } & DefaultSession['user'];
-    clinic?: {
+    clinic: {
       id: string;
       name: string;
     };
     impersonation?: {
-      originalUserId: string;
-      targetUserId: string;
-      targetEmail: string;
-      targetClinicName: string | null;
+      user: {
+        id: string;
+        email: string;
+        role: 'secretary' | 'clinician' | 'admin' | 'owner';
+        permissions?: readonly Permission[];
+        platformAdmin?: boolean;
+      };
+      clinic: {
+        id: string;
+        name: string;
+      };
       startedAt: Date;
     };
   }
@@ -37,16 +44,24 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     id: string;
-    role?: 'secretary' | 'clinician' | 'admin' | 'owner';
+    email: string;
+    role: 'secretary' | 'clinician' | 'admin' | 'owner';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
-    clinicId?: string;
-    clinicName?: string;
+    clinicId: string;
+    clinicName: string;
     impersonation?: {
-      originalUserId: string;
-      targetUserId: string;
-      targetEmail: string;
-      targetClinicName: string | null;
+      user: {
+        id: string;
+        email: string;
+        role: 'secretary' | 'clinician' | 'admin' | 'owner';
+        permissions?: readonly Permission[];
+        platformAdmin?: boolean;
+      };
+      clinic: {
+        id: string;
+        name: string;
+      };
       startedAt: string;
     };
   }
@@ -125,24 +140,50 @@ export const {
       // Handle session updates (used for starting/stopping impersonation)
       if (trigger === 'update' && session) {
         if (session.impersonation !== undefined) {
-          token.impersonation = session.impersonation;
-
-          // If starting impersonation, reload target user's role, permissions, and clinic
+          // If starting impersonation, save original user data and swap to target user
           if (session.impersonation) {
-            const targetUser = await getUserById({
-              userId: session.impersonation.targetUserId,
-            });
-            if (targetUser?.role) {
-              token.role = targetUser.role;
-              token.permissions = getPermissionsForRole(targetUser.role);
-              token.clinicId = targetUser.clinicId;
+            const targetUserId = session.impersonation.user.id;
+            const targetEmail = session.impersonation.user.email;
+
+            // Save original admin's data
+            token.impersonation = {
+              user: {
+                id: token.id,
+                email: token.email || '',
+                role: token.role,
+                permissions: token.permissions,
+                platformAdmin: token.platformAdmin,
+              },
+              clinic: {
+                id: token.clinicId,
+                name: token.clinicName || '',
+              },
+              startedAt: session.impersonation.startedAt,
+            };
+
+            // Swap token to target user's identity
+            token.id = targetUserId;
+            token.email = targetEmail;
+            token.platformAdmin = undefined; // Don't pass platformAdmin when impersonating
+            token.role = session.impersonation.user.role;
+            token.permissions = getPermissionsForRole(session.impersonation.user.role);
+
+            // Use clinic from impersonation data (already complete from API)
+            token.clinicId = session.impersonation.clinic.id;
+            token.clinicName = session.impersonation.clinic.name;
+          } else {
+            // Exiting impersonation - restore original user's data
+            if (token.impersonation) {
+              token.id = token.impersonation.user.id;
+              token.email = token.impersonation.user.email;
+              token.platformAdmin = token.impersonation.user.platformAdmin;
+              token.role = token.impersonation.user.role;
+              token.permissions = token.impersonation.user.permissions;
+              token.clinicId = token.impersonation.clinic.id;
+              token.clinicName = token.impersonation.clinic.name;
             }
-            const targetClinic = await getClinicByUserId({
-              userId: session.impersonation.targetUserId,
-            });
-            if (targetClinic?.clinicName) {
-              token.clinicName = targetClinic.clinicName;
-            }
+            // Clear impersonation
+            token.impersonation = undefined;
           }
         }
       }
@@ -152,6 +193,7 @@ export const {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
+        session.user.email = token.email || '';
 
         // Only include platformAdmin if true (omit for regular users)
         if (token.platformAdmin) {

@@ -40,8 +40,8 @@ export function ImpersonationBannerWrapper() {
   return (
     <>
       <ImpersonationBanner
-        targetEmail={session.impersonation.targetEmail}
-        clinicName={session.impersonation.targetClinicName}
+        email={session.user.email || ''}
+        clinicName={session.clinic?.name || ''}
         onExit={handleExitImpersonation}
         exiting={exiting}
       />

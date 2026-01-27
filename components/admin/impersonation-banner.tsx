@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, LogOut } from 'lucide-react';
 
 interface ImpersonationBannerProps {
-  targetEmail: string;
+  email: string;
   clinicName: string | null;
   onExit: () => void;
   exiting: boolean;
 }
 
 export function ImpersonationBanner({
-  targetEmail,
+  email,
   clinicName,
   onExit,
   exiting,
@@ -24,7 +24,7 @@ export function ImpersonationBanner({
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
             <span className="font-semibold">Modo de Personificação:</span>
             <span>
-              {targetEmail}
+              {email}
               {clinicName && ` (${clinicName})`}
             </span>
           </div>

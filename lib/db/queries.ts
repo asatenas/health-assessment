@@ -1872,13 +1872,13 @@ export async function getUserForImpersonation({
     const [result] = await db
       .select({
         id: user.id,
-        clinicId: user.clinicId,
         email: user.email,
         password: user.password,
         emailVerified: user.emailVerified,
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        clinicId: user.clinicId,
         clinicName: clinic.clinicName,
       })
       .from(user)

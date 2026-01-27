@@ -30,6 +30,7 @@ export async function validatePlatformAdmin() {
   }
 
   // Double-check with database
+  // When not impersonating, session.user.id is the actual admin's ID
   const user = await getUserById({ userId: session.user.id });
 
   if (!user?.platformAdmin) {
