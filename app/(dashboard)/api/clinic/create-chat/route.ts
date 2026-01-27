@@ -11,7 +11,9 @@ export async function POST() {
   const token = `${generateAlphanumeric(4)}-${generateAlphanumeric(4)}`;
 
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['assessments.create'],
+    });
 
     await createChatWithToken({
       id: chatId,

@@ -4,7 +4,9 @@ import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['surgeries.read'],
+    });
 
     const { searchParams } = new URL(request.url);
     const monthParam = searchParams.get('month');

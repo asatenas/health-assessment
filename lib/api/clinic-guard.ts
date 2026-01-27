@@ -1,8 +1,21 @@
 import { auth } from '@/app/(auth)/auth';
 import { getChatById, getUserById, getClinicByUserId } from '@/lib/db/queries';
 import { ChatSDKError } from '../shared/errors';
+import {
+  hasAnyPermission,
+  hasAllPermissions,
+  type Permission,
+} from '../permissions';
 
-export async function validateClinicAccess(chatId?: string) {
+export interface PermissionCheckOptions {
+  permissions: Permission[];
+  requireAll?: boolean; // Default: false (require any)
+}
+
+export async function validateClinicAccess(
+  chatId?: string,
+  permissionOptions?: PermissionCheckOptions,
+) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -41,6 +54,17 @@ export async function validateClinicAccess(chatId?: string) {
 
   if (user.status !== 'active') {
     throw new ChatSDKError('unauthorized:api', 'User account is not active');
+  }
+
+  // Permission check if provided
+  if (permissionOptions) {
+    const hasPermission = permissionOptions.requireAll
+      ? hasAllPermissions(user.role, permissionOptions.permissions)
+      : hasAnyPermission(user.role, permissionOptions.permissions);
+
+    if (!hasPermission) {
+      throw new ChatSDKError('forbidden:api');
+    }
   }
 
   const userClinic = await getClinicByUserId({ userId: effectiveUserId });

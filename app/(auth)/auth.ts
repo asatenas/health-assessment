@@ -1,17 +1,24 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { getUser, getUserById } from '@/lib/db/queries';
+import { getUser, getUserById, getClinicByUserId } from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/shared/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
+import { getPermissionsForRole, type Permission } from '@/lib/permissions';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role?: 'secretary' | 'clinician' | 'admin' | 'owner';
+      permissions?: readonly Permission[];
       platformAdmin?: boolean;
     } & DefaultSession['user'];
+    clinic?: {
+      id: string;
+      name: string;
+    };
     impersonation?: {
       originalUserId: string;
       targetUserId: string;
@@ -30,7 +37,11 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     id: string;
+    role?: 'secretary' | 'clinician' | 'admin' | 'owner';
+    permissions?: readonly Permission[];
     platformAdmin?: boolean;
+    clinicId?: string;
+    clinicName?: string;
     impersonation?: {
       originalUserId: string;
       targetUserId: string;
@@ -87,11 +98,26 @@ export const {
       if (user) {
         token.id = user.id as string;
 
-        // Fetch user from database to check platformAdmin status
+        // Fetch user from database to check platformAdmin status, role, and clinic
         if (user.id) {
           const dbUser = await getUserById({ userId: user.id });
           if (dbUser?.platformAdmin) {
             token.platformAdmin = true;
+          }
+
+          // Set role and permissions
+          if (dbUser?.role) {
+            token.role = dbUser.role;
+            token.permissions = getPermissionsForRole(dbUser.role);
+            token.clinicId = dbUser.clinicId;
+          }
+
+          // Fetch clinic name
+          if (dbUser?.clinicId) {
+            const clinic = await getClinicByUserId({ userId: dbUser.id });
+            if (clinic?.clinicName) {
+              token.clinicName = clinic.clinicName;
+            }
           }
         }
       }
@@ -100,6 +126,24 @@ export const {
       if (trigger === 'update' && session) {
         if (session.impersonation !== undefined) {
           token.impersonation = session.impersonation;
+
+          // If starting impersonation, reload target user's role, permissions, and clinic
+          if (session.impersonation) {
+            const targetUser = await getUserById({
+              userId: session.impersonation.targetUserId,
+            });
+            if (targetUser?.role) {
+              token.role = targetUser.role;
+              token.permissions = getPermissionsForRole(targetUser.role);
+              token.clinicId = targetUser.clinicId;
+            }
+            const targetClinic = await getClinicByUserId({
+              userId: session.impersonation.targetUserId,
+            });
+            if (targetClinic?.clinicName) {
+              token.clinicName = targetClinic.clinicName;
+            }
+          }
         }
       }
 
@@ -112,6 +156,22 @@ export const {
         // Only include platformAdmin if true (omit for regular users)
         if (token.platformAdmin) {
           session.user.platformAdmin = true;
+        }
+
+        // Add role and permissions
+        if (token.role) {
+          session.user.role = token.role;
+        }
+        if (token.permissions) {
+          session.user.permissions = token.permissions;
+        }
+
+        // Add clinic info
+        if (token.clinicId) {
+          session.clinic = {
+            id: token.clinicId,
+            name: token.clinicName || '',
+          };
         }
 
         // Include impersonation data if present

@@ -9,7 +9,9 @@ export async function PATCH(
   try {
     const { chatId } = await params;
 
-    await validateClinicAccess(chatId);
+    await validateClinicAccess(chatId, {
+      permissions: ['surgeries.write'],
+    });
 
     // Parse request body
     const body = await request.json();

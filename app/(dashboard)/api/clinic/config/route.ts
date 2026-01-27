@@ -13,7 +13,9 @@ import { validateClinicAccess } from '@/lib/api/clinic-guard';
 
 export async function GET() {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['org.manage'],
+    });
 
     const config = await getClinicConfigByClinicId({
       clinicId: user.clinicId,
@@ -44,7 +46,9 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const user = await validateClinicAccess();
+    const user = await validateClinicAccess(undefined, {
+      permissions: ['org.manage'],
+    });
 
     const body = await request.json();
     const { clinicName, formConfig, dashboardConfig } = body;

@@ -28,6 +28,7 @@ import { ExportButton } from '@/components/dashboard/export-button';
 import { type Chat, ChatListView } from '@/components/dashboard/chat-list-view';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
+import { PermissionGate } from '@/components/auth/permission-gate';
 
 type CreateChatResponse = {
   chatId: string;
@@ -367,20 +368,22 @@ export default function ClinicDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 justify-end">
-            <Button
-              onClick={createNewChat}
-              disabled={isCreating}
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label={
-                isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
-              }
-            >
-              <ClipboardList className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">
-                {isCreating ? 'Criando...' : 'Criar nova avaliação'}
-              </span>
-            </Button>
+            <PermissionGate permission="assessments.create">
+              <Button
+                onClick={createNewChat}
+                disabled={isCreating}
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label={
+                  isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
+                }
+              >
+                <ClipboardList className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">
+                  {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+                </span>
+              </Button>
+            </PermissionGate>
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}
@@ -396,16 +399,18 @@ export default function ClinicDashboard() {
                 {isRefreshing ? 'Atualizando...' : 'Atualizar'}
               </span>
             </Button>
-            <Button
-              onClick={() => setIsConfigurationsOpen(true)}
-              variant="outline"
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label="Configurações"
-            >
-              <Settings className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">Configurações</span>
-            </Button>
+            <PermissionGate permission="org.manage">
+              <Button
+                onClick={() => setIsConfigurationsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label="Configurações"
+              >
+                <Settings className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Configurações</span>
+              </Button>
+            </PermissionGate>
             <Button
               onClick={() => signOut({ redirectTo: '/login' })}
               variant="secondary"
@@ -419,29 +424,31 @@ export default function ClinicDashboard() {
           </div>
         </div>
 
-        {/* View Toggle */}
-        <div className="mb-6">
-          <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
-            <Button
-              variant={view === 'analytics' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('analytics')}
-              className="gap-2 flex-1 sm:flex-none"
-            >
-              <BarChart3 className="size-4" />
-              Dashboard
-            </Button>
-            <Button
-              variant={view === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setView('list')}
-              className="gap-2 flex-1 sm:flex-none"
-            >
-              <List className="size-4" />
-              Lista de Avaliações
-            </Button>
+        {/* View Toggle - Only show for users with read permissions */}
+        <PermissionGate permission="assessments.read">
+          <div className="mb-6">
+            <div className="flex sm:inline-flex w-full sm:w-auto rounded-lg border bg-muted p-1">
+              <Button
+                variant={view === 'analytics' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setView('analytics')}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <BarChart3 className="size-4" />
+                Dashboard
+              </Button>
+              <Button
+                variant={view === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setView('list')}
+                className="gap-2 flex-1 sm:flex-none"
+              >
+                <List className="size-4" />
+                Lista de Avaliações
+              </Button>
+            </div>
           </div>
-        </div>
+        </PermissionGate>
 
         {/* New Chat Data Display */}
         {newChatData && (
@@ -530,104 +537,112 @@ export default function ClinicDashboard() {
         )}
 
         {/* Analytics View */}
-        {view === 'analytics' && (
-          <div className="space-y-6">
-            {/* Filters and Export */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-              <div className="flex-1 w-full">
-                <DashboardFilters onFilterChange={handleFilterChange} />
+        <PermissionGate permission="assessments.read">
+          {view === 'analytics' && (
+            <div className="space-y-6">
+              {/* Filters and Export */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                <div className="flex-1 w-full">
+                  <DashboardFilters onFilterChange={handleFilterChange} />
+                </div>
+                <PermissionGate permission="org.manage">
+                  <ExportButton
+                    dateFrom={
+                      dateFromFilter ? new Date(dateFromFilter) : undefined
+                    }
+                    dateTo={dateToFilter ? new Date(dateToFilter) : undefined}
+                    status={statusFilter}
+                  />
+                </PermissionGate>
               </div>
-              <ExportButton
-                dateFrom={dateFromFilter ? new Date(dateFromFilter) : undefined}
-                dateTo={dateToFilter ? new Date(dateToFilter) : undefined}
-                status={statusFilter}
-              />
+
+              {/* Metrics Overview */}
+              {dashboardConfig.widgets.metricsOverview.enabled && (
+                <MetricsOverview
+                  totalAssessments={metrics?.totalAssessments || 0}
+                  completionRate={metrics?.completionRate || 0}
+                  highRiskPatients={metrics?.riskDistribution?.high || 0}
+                  latexAllergies={metrics?.latexAllergies || 0}
+                  isLoading={isLoadingMetrics}
+                />
+              )}
+
+              {/* Dynamic Charts Grid - Max 2 per row */}
+              {isLoadingMetrics ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                  <Skeleton className="h-[400px] w-full rounded-lg" />
+                  <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
+                  <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {dashboardConfig.widgets.riskDistribution.enabled &&
+                    metrics && (
+                      <RiskDistributionChart
+                        low={metrics.riskDistribution.low}
+                        medium={metrics.riskDistribution.medium}
+                        high={metrics.riskDistribution.high}
+                        unknown={metrics.riskDistribution.unknown}
+                      />
+                    )}
+                  {dashboardConfig.widgets.timeline.enabled && (
+                    <TimelineChart data={timeline} />
+                  )}
+                  {dashboardConfig.widgets.weeklySurgeries.enabled && (
+                    <WeeklySurgeriesPanel
+                      surgeries={weeklySurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.todaysSurgeries.enabled && (
+                    <TodaysSurgeriesPanel
+                      surgeries={todaysSurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.monthlySurgeries.enabled && (
+                    <MonthlySurgeriesPanel
+                      surgeriesByDay={thisMonthsSurgeries}
+                      onUpdateStatus={handleSurgeryStatusUpdate}
+                    />
+                  )}
+                  {dashboardConfig.widgets.cancellations.enabled &&
+                    metrics?.cancellationsAndReschedulesByReason && (
+                      <CancellationsAndReschedulesChart
+                        data={metrics.cancellationsAndReschedulesByReason}
+                      />
+                    )}
+                  {dashboardConfig.widgets.notifications.enabled && (
+                    <NotificationsPanel notifications={notifications} />
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Metrics Overview */}
-            {dashboardConfig.widgets.metricsOverview.enabled && (
-              <MetricsOverview
-                totalAssessments={metrics?.totalAssessments || 0}
-                completionRate={metrics?.completionRate || 0}
-                highRiskPatients={metrics?.riskDistribution?.high || 0}
-                latexAllergies={metrics?.latexAllergies || 0}
-                isLoading={isLoadingMetrics}
-              />
-            )}
-
-            {/* Dynamic Charts Grid - Max 2 per row */}
-            {isLoadingMetrics ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-                <Skeleton className="h-[400px] w-full rounded-lg" />
-                <Skeleton className="h-[400px] w-full rounded-lg" />
-                <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
-                <Skeleton className="h-[400px] w-full rounded-lg hidden sm:block" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {dashboardConfig.widgets.riskDistribution.enabled &&
-                  metrics && (
-                    <RiskDistributionChart
-                      low={metrics.riskDistribution.low}
-                      medium={metrics.riskDistribution.medium}
-                      high={metrics.riskDistribution.high}
-                      unknown={metrics.riskDistribution.unknown}
-                    />
-                  )}
-                {dashboardConfig.widgets.timeline.enabled && (
-                  <TimelineChart data={timeline} />
-                )}
-                {dashboardConfig.widgets.weeklySurgeries.enabled && (
-                  <WeeklySurgeriesPanel
-                    surgeries={weeklySurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.todaysSurgeries.enabled && (
-                  <TodaysSurgeriesPanel
-                    surgeries={todaysSurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.monthlySurgeries.enabled && (
-                  <MonthlySurgeriesPanel
-                    surgeriesByDay={thisMonthsSurgeries}
-                    onUpdateStatus={handleSurgeryStatusUpdate}
-                  />
-                )}
-                {dashboardConfig.widgets.cancellations.enabled &&
-                  metrics?.cancellationsAndReschedulesByReason && (
-                    <CancellationsAndReschedulesChart
-                      data={metrics.cancellationsAndReschedulesByReason}
-                    />
-                  )}
-                {dashboardConfig.widgets.notifications.enabled && (
-                  <NotificationsPanel notifications={notifications} />
-                )}
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </PermissionGate>
 
         {/* List View */}
-        {view === 'list' && (
-          <ChatListView
-            chats={chats}
-            isLoading={isLoading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalChats={totalChats}
-            limit={limit}
-            statusFilter={statusFilter}
-            dateFromFilter={dateFromFilter}
-            dateToFilter={dateToFilter}
-            onPageChange={setCurrentPage}
-            onStatusFilterChange={setStatusFilter}
-            onDateFromFilterChange={setDateFromFilter}
-            onDateToFilterChange={setDateToFilter}
-            onClearFilters={clearFilters}
-          />
-        )}
+        <PermissionGate permission="assessments.read">
+          {view === 'list' && (
+            <ChatListView
+              chats={chats}
+              isLoading={isLoading}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalChats={totalChats}
+              limit={limit}
+              statusFilter={statusFilter}
+              dateFromFilter={dateFromFilter}
+              dateToFilter={dateToFilter}
+              onPageChange={setCurrentPage}
+              onStatusFilterChange={setStatusFilter}
+              onDateFromFilterChange={setDateFromFilter}
+              onDateToFilterChange={setDateToFilter}
+              onClearFilters={clearFilters}
+            />
+          )}
+        </PermissionGate>
       </div>
 
       {/* Configurations Sheet */}
