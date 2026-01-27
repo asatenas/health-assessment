@@ -11,7 +11,9 @@ import { ChatSDKError } from '@/lib/shared/errors';
 export async function GET(request: Request) {
   try {
     const user = await validateClinicAccess(undefined, {
-      permissions: ['org.manage'],
+      // TODO: separate API routes so that this permission can be org.manage
+      // while the others can be assessments.read
+      permissions: ['assessments.read'],
     });
 
     const { searchParams } = new URL(request.url);
