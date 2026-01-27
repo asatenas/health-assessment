@@ -17,6 +17,7 @@ interface DesktopTableProps {
     chat: Chat,
     event?: React.MouseEvent<HTMLButtonElement>,
   ) => void;
+  userRole?: string;
 }
 
 export function DesktopTable({
@@ -27,7 +28,9 @@ export function DesktopTable({
   hasActiveFilters,
   onClearFilters,
   onChatClick,
+  userRole,
 }: DesktopTableProps) {
+  const isSecretary = userRole === 'secretary';
   return (
     <div className="hidden sm:block border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -40,22 +43,26 @@ export function DesktopTable({
               style={{ width: '200px' }}
             />
             <col style={{ width: '140px' }} />
-            <col
-              className="hidden lg:table-column"
-              style={{ width: '120px' }}
-            />
-            <col
-              className="hidden lg:table-column"
-              style={{ width: '130px' }}
-            />
-            <col
-              className="hidden xl:table-column"
-              style={{ width: '100px' }}
-            />
-            <col
-              className="hidden xl:table-column"
-              style={{ width: '130px' }}
-            />
+            {!isSecretary && (
+              <>
+                <col
+                  className="hidden lg:table-column"
+                  style={{ width: '120px' }}
+                />
+                <col
+                  className="hidden lg:table-column"
+                  style={{ width: '130px' }}
+                />
+                <col
+                  className="hidden xl:table-column"
+                  style={{ width: '100px' }}
+                />
+                <col
+                  className="hidden xl:table-column"
+                  style={{ width: '130px' }}
+                />
+              </>
+            )}
           </colgroup>
           <thead className="bg-gray-50 dark:bg-gray-900 border-b">
             <tr>
@@ -71,18 +78,22 @@ export function DesktopTable({
               <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
               </th>
-              <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Risco
-              </th>
-              <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Dias até cirurgia
-              </th>
-              <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                RCRI
-              </th>
-              <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                AUB-HAS2
-              </th>
+              {!isSecretary && (
+                <>
+                  <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Risco
+                  </th>
+                  <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Dias até cirurgia
+                  </th>
+                  <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    RCRI
+                  </th>
+                  <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    AUB-HAS2
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-background divide-y divide-gray-200 dark:divide-gray-800">
@@ -103,24 +114,31 @@ export function DesktopTable({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20" />
                     </td>
-                    <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
-                    </td>
-                    <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
-                    </td>
-                    <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
-                    </td>
-                    <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
-                    </td>
+                    {!isSecretary && (
+                      <>
+                        <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
+                        </td>
+                        <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
+                        </td>
+                        <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                        </td>
+                        <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </>
             ) : chats.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center">
+                <td
+                  colSpan={isSecretary ? 4 : 8}
+                  className="px-6 py-8 text-center"
+                >
                   <div className="flex flex-col items-center gap-3">
                     <div className="text-gray-400 dark:text-gray-500">
                       <svg
@@ -174,7 +192,7 @@ export function DesktopTable({
                       {rowNumber}
                     </td>
                     <td className="p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                      {chat.status !== 'expired' ? (
+                      {chat.status !== 'expired' && !isSecretary ? (
                         <button
                           type="button"
                           onClick={(e) => onChatClick(chat, e)}
@@ -205,27 +223,32 @@ export function DesktopTable({
                         {getStatusLabel(chat.status)}
                       </span>
                     </td>
-                    <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRiskLevel(chat).color}`}
-                      >
-                        {getRiskLevel(chat).level}
-                      </span>
-                    </td>
-                    <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {getDaysUntilSurgery(chat.surgeryDate)}
-                    </td>
-                    <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {chat.score_rcri !== null && chat.score_rcri !== undefined
-                        ? chat.score_rcri
-                        : '-'}
-                    </td>
-                    <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {chat.score_aub_has2 !== null &&
-                      chat.score_aub_has2 !== undefined
-                        ? chat.score_aub_has2
-                        : '-'}
-                    </td>
+                    {!isSecretary && (
+                      <>
+                        <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRiskLevel(chat).color}`}
+                          >
+                            {getRiskLevel(chat).level}
+                          </span>
+                        </td>
+                        <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {getDaysUntilSurgery(chat.surgeryDate)}
+                        </td>
+                        <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_rcri !== null &&
+                          chat.score_rcri !== undefined
+                            ? chat.score_rcri
+                            : '-'}
+                        </td>
+                        <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {chat.score_aub_has2 !== null &&
+                          chat.score_aub_has2 !== undefined
+                            ? chat.score_aub_has2
+                            : '-'}
+                        </td>
+                      </>
+                    )}
                   </tr>
                 );
               })

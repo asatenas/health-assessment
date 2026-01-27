@@ -17,6 +17,7 @@ export const PERMISSIONS = [
   // assessments
   'assessments.create',
   'assessments.read',
+  'assessments.read.summary', // Limited read access for secretaries
   'assessments.update',
   'assessments.delete',
 ] as const;
@@ -29,13 +30,13 @@ export const ROLE_PERMISSIONS: Record<string, readonly Permission[]> = {
   clinician: [
     'surgeries.read',
     'surgeries.write',
+    'assessments.create',
     'assessments.read',
     'assessments.update',
-    // NOTE: Clinicians CANNOT create assessments
   ],
   secretary: [
     'assessments.create',
-    // IMPORTANT: NO READ permissions (intentional)
+    'assessments.read.summary', // Limited read access - list view with basic columns only
   ],
 };
 

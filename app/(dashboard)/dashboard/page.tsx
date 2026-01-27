@@ -41,8 +41,12 @@ type DashboardView = 'analytics' | 'list';
 
 export default function ClinicDashboard() {
   const { status: sessionStatus } = useSession();
-  const { hasPermission, clinic } = usePermissions();
-  const canReadAssessments = hasPermission('assessments.read');
+  const { hasPermission, hasAnyPermission, clinic, role } = usePermissions();
+  const canReadAssessments = hasAnyPermission([
+    'assessments.read',
+    'assessments.read.summary',
+  ]);
+  const canReadFull = hasPermission('assessments.read');
   const canManageOrg = hasPermission('org.manage');
   const [view, setView] = useState<DashboardView>('analytics');
   const [chats, setChats] = useState<Chat[]>([]);
@@ -189,13 +193,24 @@ export default function ClinicDashboard() {
   // Fetch data based on current view (only after clinic config is loaded and if user has read permissions)
   useEffect(() => {
     if (canReadAssessments) {
-      if (view === 'analytics') {
+      // Secretaries only have summary permission, so they should go straight to list view
+      if (!canReadFull && view === 'analytics') {
+        setView('list'); // Force list view for summary-only users
+      }
+
+      if (view === 'analytics' && canReadFull) {
         fetchDashboardMetrics();
-      } else {
+      } else if (view === 'list') {
         fetchChats();
       }
     }
-  }, [view, fetchDashboardMetrics, fetchChats, canReadAssessments]);
+  }, [
+    view,
+    fetchDashboardMetrics,
+    fetchChats,
+    canReadAssessments,
+    canReadFull,
+  ]);
 
   const createNewChat = async () => {
     setIsCreating(true);
@@ -409,7 +424,9 @@ export default function ClinicDashboard() {
                 </span>
               </Button>
             </PermissionGate>
-            <PermissionGate permission="assessments.read">
+            <PermissionGate
+              permissions={['assessments.read', 'assessments.read.summary']}
+            >
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
@@ -658,7 +675,9 @@ export default function ClinicDashboard() {
         </PermissionGate>
 
         {/* List View */}
-        <PermissionGate permission="assessments.read">
+        <PermissionGate
+          permissions={['assessments.read', 'assessments.read.summary']}
+        >
           {view === 'list' && (
             <ChatListView
               chats={chats}
@@ -675,6 +694,7 @@ export default function ClinicDashboard() {
               onDateFromFilterChange={setDateFromFilter}
               onDateToFilterChange={setDateToFilter}
               onClearFilters={clearFilters}
+              userRole={role}
             />
           )}
         </PermissionGate>

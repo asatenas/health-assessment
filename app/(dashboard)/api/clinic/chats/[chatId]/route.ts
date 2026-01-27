@@ -9,8 +9,8 @@ export async function GET(
   try {
     const { chatId } = await params;
 
-    await validateClinicAccess(chatId, {
-      permissions: ['assessments.read'],
+    const user = await validateClinicAccess(chatId, {
+      permissions: ['assessments.read'], // Only full read access
     });
 
     const chat = await getChatWithSurgeryById({ id: chatId });
