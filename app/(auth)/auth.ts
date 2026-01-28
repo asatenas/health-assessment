@@ -166,7 +166,9 @@ export const {
             token.email = targetEmail;
             token.platformAdmin = undefined; // Don't pass platformAdmin when impersonating
             token.role = session.impersonation.user.role;
-            token.permissions = getPermissionsForRole(session.impersonation.user.role);
+            token.permissions = getPermissionsForRole(
+              session.impersonation.user.role,
+            );
 
             // Use clinic from impersonation data (already complete from API)
             token.clinicId = session.impersonation.clinic.id;
