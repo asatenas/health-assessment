@@ -30,6 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { usePermissions } from '@/hooks/use-permissions';
+import { ClinicInvitationDialog } from '@/components/dashboard/clinic-invitation-dialog';
 
 type CreateChatResponse = {
   chatId: string;
@@ -60,6 +61,7 @@ export default function ClinicDashboard() {
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
   const [dashboardConfig, setDashboardConfig] =
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
+  const [clinicInvitations, setClinicInvitations] = useState<any[]>([]);
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
@@ -109,7 +111,54 @@ export default function ClinicDashboard() {
 
   useEffect(() => {
     fetchClinicConfig();
+    fetchClinicInvitations();
   }, [fetchClinicConfig]);
+
+  // Fetch clinic invitations on mount
+  const fetchClinicInvitations = async () => {
+    try {
+      const response = await fetch('/api/user/clinic-invitations');
+      if (response.ok) {
+        const data = await response.json();
+        setClinicInvitations(data.invitations || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch clinic invitations:', error);
+    }
+  };
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    const response = await fetch(
+      `/api/user/clinic-invitations/${invitationId}/accept`,
+      {
+        method: 'POST',
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to accept invitation');
+    }
+  };
+
+  const handleRejectInvitation = async (invitationId: string) => {
+    const response = await fetch(
+      `/api/user/clinic-invitations/${invitationId}/reject`,
+      {
+        method: 'POST',
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to reject invitation');
+    }
+
+    // Remove from list after rejecting
+    setClinicInvitations((prev) =>
+      prev.filter((inv) => inv.id !== invitationId),
+    );
+  };
 
   // Fetch dashboard metrics
   const fetchDashboardMetrics = useCallback(async () => {
@@ -727,6 +776,16 @@ export default function ClinicDashboard() {
         onOpenChange={setIsConfigurationsOpen}
         onSaved={fetchClinicConfig}
       />
+
+      {/* Clinic Invitation Dialog */}
+      {clinicInvitations.length > 0 && (
+        <ClinicInvitationDialog
+          invitations={clinicInvitations}
+          currentClinicName={clinicName}
+          onAccept={handleAcceptInvitation}
+          onReject={handleRejectInvitation}
+        />
+      )}
     </div>
   );
 }
