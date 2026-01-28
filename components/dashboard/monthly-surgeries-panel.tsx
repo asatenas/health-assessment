@@ -106,6 +106,19 @@ export function MonthlySurgeriesPanel({
     fetchMonthlySurgeries();
   }, [fetchMonthlySurgeries]);
 
+  // Prevent body scroll when day modal is open
+  useEffect(() => {
+    if (dayModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [dayModalOpen]);
+
   // Convert surgeriesByDay to an array of surgeries
   const surgeries = useMemo(() => {
     return Object.values(monthlySurgeries).flat();
