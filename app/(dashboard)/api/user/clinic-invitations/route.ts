@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { validateBasicAuth } from '@/lib/api/basic-auth-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 import { getClinicInvitationsByEmail } from '@/lib/db/queries';
 
@@ -9,10 +9,10 @@ import { getClinicInvitationsByEmail } from '@/lib/db/queries';
  */
 export async function GET() {
   try {
-    const user = await validateClinicAccess();
+    const { email } = await validateBasicAuth();
 
     const invitations = await getClinicInvitationsByEmail({
-      email: user.email,
+      email,
     });
 
     return NextResponse.json({

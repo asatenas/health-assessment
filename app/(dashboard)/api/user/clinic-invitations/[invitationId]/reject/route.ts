@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { validateBasicAuth } from '@/lib/api/basic-auth-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 import { rejectClinicInvitation } from '@/lib/db/queries';
 
@@ -13,7 +13,7 @@ export async function POST(
 ) {
   try {
     const { invitationId } = await params;
-    await validateClinicAccess();
+    await validateBasicAuth();
 
     // Reject invitation
     await rejectClinicInvitation({ invitationId });

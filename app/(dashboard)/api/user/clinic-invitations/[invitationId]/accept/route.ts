@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { validateBasicAuth } from '@/lib/api/basic-auth-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 import { acceptClinicInvitation, getClinicByUserId } from '@/lib/db/queries';
 
@@ -13,16 +13,16 @@ export async function POST(
 ) {
   try {
     const { invitationId } = await params;
-    const user = await validateClinicAccess();
+    const { userId, email } = await validateBasicAuth();
 
     // Accept invitation
     const { user: updatedUser, invitation } = await acceptClinicInvitation({
       invitationId,
-      userId: user.id,
+      userId,
     });
 
     // Verify invitation belongs to current user
-    if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
+    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
       return new ChatSDKError(
         'forbidden:api',
         'Este convite não pertence a você',
@@ -30,9 +30,9 @@ export async function POST(
     }
 
     // Get new clinic details
-    const newClinic = await getClinicByUserId({ userId: user.id });
+    const newClinic = await getClinicByUserId({ userId });
 
-    // Update session will happen on next request via validateClinicAccess
+    // Update session will happen on next request
     return NextResponse.json({
       success: true,
       newClinicId: updatedUser.clinicId,

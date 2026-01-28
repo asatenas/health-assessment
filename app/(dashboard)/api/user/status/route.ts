@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { validateBasicAuth } from '@/lib/api/basic-auth-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 import { getUserById } from '@/lib/db/queries';
 
@@ -9,10 +9,10 @@ import { getUserById } from '@/lib/db/queries';
  */
 export async function GET() {
   try {
-    const currentUser = await validateClinicAccess();
+    const { userId } = await validateBasicAuth();
 
     // Fetch fresh user data from database
-    const user = await getUserById({ userId: currentUser.id });
+    const user = await getUserById({ userId });
 
     if (!user) {
       return new ChatSDKError(
