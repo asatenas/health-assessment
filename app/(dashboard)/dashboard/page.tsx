@@ -500,23 +500,19 @@ export default function ClinicDashboard() {
                 </Button>
               </div>
             </PermissionGate>
-            <PermissionGate permission="org.manage">
-              <div className="flex items-center gap-2">
-                <span className="text-sm sm:hidden">Configurações</span>
-                <Button
-                  onClick={() => setIsConfigurationsOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="sm:px-3 px-3"
-                  aria-label="Configurações"
-                >
-                  <Settings className="size-4" />
-                  <span className="hidden sm:inline sm:ml-2">
-                    Configurações
-                  </span>
-                </Button>
-              </div>
-            </PermissionGate>
+            <div className="flex items-center gap-2">
+              <span className="text-sm sm:hidden">Configurações</span>
+              <Button
+                onClick={() => setIsConfigurationsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label="Configurações"
+              >
+                <Settings className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Configurações</span>
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm sm:hidden">Sair</span>
               <Button
