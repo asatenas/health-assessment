@@ -188,7 +188,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {isCurrentUser || member.status === 'invited' ? (
+                    {isCurrentUser ? (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -221,7 +221,8 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {member.status === 'active' && (
+                          {(member.status === 'active' ||
+                            member.status === 'invited') && (
                             <>
                               {canChangeRole && (
                                 <DropdownMenuItem
@@ -294,7 +295,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                     </Badge>
                   </div>
                 </div>
-                {isCurrentUser || member.status === 'invited' ? (
+                {isCurrentUser ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -327,7 +328,8 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {member.status === 'active' && (
+                      {(member.status === 'active' ||
+                        member.status === 'invited') && (
                         <>
                           {canChangeRole && (
                             <DropdownMenuItem
