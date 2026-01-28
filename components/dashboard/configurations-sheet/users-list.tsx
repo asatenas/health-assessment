@@ -151,7 +151,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Email</TableHead>
-              <TableHead>Papel</TableHead>
+              <TableHead>Perfil</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -228,7 +228,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                                   onClick={() => handleChangeRole(member)}
                                 >
                                   <UserCog className="size-4 mr-2" />
-                                  Alterar Papel
+                                  Alterar Perfil
                                 </DropdownMenuItem>
                               )}
                               {canRemoveUser && (
@@ -334,7 +334,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                               onClick={() => handleChangeRole(member)}
                             >
                               <UserCog className="size-4 mr-2" />
-                              Alterar Papel
+                              Alterar Perfil
                             </DropdownMenuItem>
                           )}
                           {canRemoveUser && (

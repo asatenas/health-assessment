@@ -84,7 +84,7 @@ export function ChangeRoleDialog({
     } catch (error) {
       console.error('Error changing role:', error);
       setError(
-        error instanceof Error ? error.message : 'Erro ao alterar papel',
+        error instanceof Error ? error.message : 'Erro ao alterar perfil',
       );
     } finally {
       setLoading(false);
@@ -101,9 +101,9 @@ export function ChangeRoleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Alterar Papel do Usuário</DialogTitle>
+          <DialogTitle>Alterar Perfil do Usuário</DialogTitle>
           <DialogDescription>
-            Altere o papel de {user.email}. Esta ação entrará em vigor
+            Altere o perfil de {user.email}. Esta ação entrará em vigor
             imediatamente.
           </DialogDescription>
         </DialogHeader>
@@ -117,14 +117,14 @@ export function ChangeRoleDialog({
             )}
 
             <div className="space-y-2">
-              <Label>Papel Atual</Label>
+              <Label>Perfil Atual</Label>
               <div className="text-sm font-medium text-muted-foreground">
                 {ROLE_LABELS[user.role]}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newRole">Novo Papel *</Label>
+              <Label htmlFor="newRole">Novo Perfil *</Label>
               <Select
                 value={newRole}
                 onValueChange={(value) =>
@@ -203,7 +203,7 @@ export function ChangeRoleDialog({
                   Alterando...
                 </>
               ) : (
-                'Alterar Papel'
+                'Alterar Perfil'
               )}
             </Button>
           </DialogFooter>

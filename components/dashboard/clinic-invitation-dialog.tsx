@@ -165,7 +165,7 @@ export function ClinicInvitationDialog({
                     anterior
                   </li>
                   <li>
-                    Seu novo papel será:{' '}
+                    Seu novo perfil será:{' '}
                     <span className="font-medium">
                       {ROLE_LABELS[currentInvitation.role]}
                     </span>

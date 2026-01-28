@@ -41,7 +41,7 @@ export async function PATCH(
     if (userId === currentUser.id) {
       return new ChatSDKError(
         'forbidden:api',
-        'Você não pode alterar seu próprio papel',
+        'Você não pode alterar seu próprio perfil',
       ).toResponse();
     }
 

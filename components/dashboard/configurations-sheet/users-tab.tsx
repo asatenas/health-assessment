@@ -130,10 +130,10 @@ export function UsersTab() {
               }}
             >
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Papel" />
+                <SelectValue placeholder="Perfil" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os Papéis</SelectItem>
+                <SelectItem value="all">Todos os Perfis</SelectItem>
                 <SelectItem value="owner">Proprietário</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="clinician">Clínico</SelectItem>

@@ -266,10 +266,10 @@ export function InviteUserDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">Papel *</Label>
+                <Label htmlFor="role">Perfil *</Label>
                 <Select value={role} onValueChange={setRole} disabled={loading}>
                   <SelectTrigger id="role">
-                    <SelectValue placeholder="Selecione um papel" />
+                    <SelectValue placeholder="Selecione um perfil" />
                   </SelectTrigger>
                   <SelectContent>
                     {!isAdmin && (
