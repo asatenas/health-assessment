@@ -15,19 +15,12 @@ export async function POST(
     const { invitationId } = await params;
     const { userId, email } = await validateBasicAuth();
 
-    // Accept invitation
-    const { user: updatedUser, invitation } = await acceptClinicInvitation({
+    // Accept invitation (with ownership check)
+    const { user: updatedUser } = await acceptClinicInvitation({
       invitationId,
       userId,
+      email,
     });
-
-    // Verify invitation belongs to current user
-    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
-      return new ChatSDKError(
-        'forbidden:api',
-        'Este convite não pertence a você',
-      ).toResponse();
-    }
 
     // Get new clinic details
     const newClinic = await getClinicByUserId({ userId });

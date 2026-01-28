@@ -13,10 +13,10 @@ export async function POST(
 ) {
   try {
     const { invitationId } = await params;
-    await validateBasicAuth();
+    const { email } = await validateBasicAuth();
 
-    // Reject invitation
-    await rejectClinicInvitation({ invitationId });
+    // Reject invitation (with ownership check)
+    await rejectClinicInvitation({ invitationId, email });
 
     return NextResponse.json({ success: true });
   } catch (error) {

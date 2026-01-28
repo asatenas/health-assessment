@@ -2300,9 +2300,11 @@ export async function getClinicInvitationsByEmail({
 export async function acceptClinicInvitation({
   invitationId,
   userId,
+  email,
 }: {
   invitationId: string;
   userId: string;
+  email: string;
 }): Promise<{ user: User; invitation: ClinicInvitation }> {
   try {
     // Get invitation details
@@ -2313,6 +2315,14 @@ export async function acceptClinicInvitation({
 
     if (!invitation) {
       throw new ChatSDKError('not_found:database', 'Invitation not found');
+    }
+
+    // Verify invitation belongs to the user
+    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+      throw new ChatSDKError(
+        'forbidden:api',
+        'Este convite não pertence a você',
+      );
     }
 
     // Check if expired
@@ -2349,14 +2359,37 @@ export async function acceptClinicInvitation({
  */
 export async function rejectClinicInvitation({
   invitationId,
+  email,
 }: {
   invitationId: string;
+  email: string;
 }): Promise<void> {
   try {
+    // Verify the invitation belongs to the user
+    const [invitation] = await db
+      .select()
+      .from(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    if (!invitation) {
+      throw new ChatSDKError('not_found:database', 'Invitation not found');
+    }
+
+    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+      throw new ChatSDKError(
+        'forbidden:api',
+        'Este convite não pertence a você',
+      );
+    }
+
+    // Delete the invitation
     await db
       .delete(clinicInvitation)
       .where(eq(clinicInvitation.id, invitationId));
   } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to reject clinic invitation',
