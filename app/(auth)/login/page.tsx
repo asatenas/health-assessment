@@ -41,6 +41,14 @@ export default function Page() {
             'E-mail não verificado. Envie um email para suporte@asatenas.com.br para verificação.',
         });
         break;
+      case 'clinic_not_authorized':
+        // English: 'Clinic not verified. Send an email to suporte@asatenas.com.br for verification.';
+        toast({
+          type: 'error',
+          description:
+            'Usuário não verificado. Envie um email para suporte@asatenas.com.br para verificação.',
+        });
+        break;
       case 'failed':
         // English: 'Invalid credentials!'
         toast({

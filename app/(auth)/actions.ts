@@ -2,7 +2,7 @@
 
 import { z } from 'zod/v3';
 
-import { createUser, getUser } from '@/lib/db/queries';
+import { createUser, getClinicByUserId, getUser } from '@/lib/db/queries';
 
 import { signIn } from './auth';
 import { sendWebhook } from '@/lib/shared/utils';
@@ -13,7 +13,13 @@ const authFormSchema = z.object({
 });
 
 export interface LoginActionState {
-  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'email_not_verified';
+  status:
+    | 'idle'
+    | 'in_progress'
+    | 'success'
+    | 'failed'
+    | 'email_not_verified'
+    | 'clinic_not_authorized';
 }
 
 export const login = async (
@@ -32,6 +38,10 @@ export const login = async (
       const [user] = users;
       if (!user.emailVerified) {
         return { status: 'email_not_verified' };
+      }
+      const clinic = await getClinicByUserId({ userId: user.id });
+      if (!clinic?.authorized) {
+        return { status: 'clinic_not_authorized' };
       }
     }
 
