@@ -2178,6 +2178,31 @@ export async function reactivateUser({
   }
 }
 
+/**
+ * Update user password.
+ */
+export async function updateUserPassword({
+  userId,
+  hashedPassword,
+}: {
+  userId: string;
+  hashedPassword: string;
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({ password: hashedPassword })
+      .where(eq(user.id, userId))
+      .returning();
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user password',
+    );
+  }
+}
+
 // ============================================================================
 // Clinic Invitation Queries
 // ============================================================================
