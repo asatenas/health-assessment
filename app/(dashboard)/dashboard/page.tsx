@@ -407,12 +407,9 @@ export default function ClinicDashboard() {
               </>
             )}
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 items-end sm:items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:justify-end">
             <PermissionGate permission="assessments.create">
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:hidden">
-                  {isCreating ? 'Criando...' : 'Criar nova avaliação'}
-                </span>
                 <Button
                   onClick={createNewChat}
                   disabled={isCreating}
@@ -427,15 +424,15 @@ export default function ClinicDashboard() {
                     {isCreating ? 'Criando...' : 'Criar nova avaliação'}
                   </span>
                 </Button>
+                <span className="text-sm sm:hidden">
+                  {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+                </span>
               </div>
             </PermissionGate>
             <PermissionGate
               permissions={['assessments.read', 'assessments.read.summary']}
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:hidden">
-                  {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-                </span>
                 <Button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
@@ -451,11 +448,13 @@ export default function ClinicDashboard() {
                     {isRefreshing ? 'Atualizando...' : 'Atualizar'}
                   </span>
                 </Button>
+                <span className="text-sm sm:hidden">
+                  {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+                </span>
               </div>
             </PermissionGate>
             <PermissionGate permission="org.manage">
               <div className="flex items-center gap-2">
-                <span className="text-sm sm:hidden">Configurações</span>
                 <Button
                   onClick={() => setIsConfigurationsOpen(true)}
                   variant="outline"
@@ -468,10 +467,10 @@ export default function ClinicDashboard() {
                     Configurações
                   </span>
                 </Button>
+                <span className="text-sm sm:hidden">Configurações</span>
               </div>
             </PermissionGate>
             <div className="flex items-center gap-2">
-              <span className="text-sm sm:hidden">Sair</span>
               <Button
                 onClick={() => signOut({ redirectTo: '/login' })}
                 variant="secondary"
@@ -482,6 +481,7 @@ export default function ClinicDashboard() {
                 <LogOut className="size-4" />
                 <span className="hidden sm:inline sm:ml-2">Sair</span>
               </Button>
+              <span className="text-sm sm:hidden">Sair</span>
             </div>
           </div>
         </div>
