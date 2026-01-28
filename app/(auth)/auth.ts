@@ -1,7 +1,13 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { getUser, getUserById, getClinicByUserId } from '@/lib/db/queries';
+import {
+  getUser,
+  getUserById,
+  getClinicByUserId,
+  getClinicInvitationsByEmail,
+  createUserFromInvitation,
+} from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/shared/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
@@ -81,34 +87,70 @@ export const {
       async authorize({ email, password }: any) {
         const users = await getUser(email);
 
+        // Case 1: No existing user - check ClinicInvitation
         if (users.length === 0) {
+          // Check for pending invitation with this email (case-insensitive)
+          const [invitation] = await getClinicInvitationsByEmail({ email });
+
+          if (!invitation) {
+            // No invitation found
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Only proceed if invitation has a temporary password (for new users)
+          if (!invitation.temporaryPassword) {
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Validate password against invitation's temporary password
+          // Non-null assertion safe here because we checked above
+          const passwordsMatch = await compare(
+            password,
+            invitation.temporaryPassword,
+          );
+
+          if (!passwordsMatch) {
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Valid! Create User record from invitation
+          const newUser = await createUserFromInvitation({
+            invitationId: invitation.id,
+          });
+
+          return {
+            id: newUser.id,
+            email: newUser.email,
+          };
+        }
+
+        // Case 2: Existing user - validate normally
+        const [existingUser] = users;
+
+        if (!existingUser.password) {
           await compare(password, DUMMY_PASSWORD);
           return null;
         }
 
-        const [user] = users;
-
-        if (!user.password) {
-          await compare(password, DUMMY_PASSWORD);
-          return null;
-        }
-
-        const passwordsMatch = await compare(password, user.password);
+        const passwordsMatch = await compare(password, existingUser.password);
 
         if (!passwordsMatch) return null;
 
         // Check if email is verified
-        if (!user.emailVerified) {
+        if (!existingUser.emailVerified) {
           return null;
         }
 
-        if (user.status === 'disabled') {
+        if (existingUser.status === 'disabled') {
           return null;
         }
 
         return {
-          id: user.id,
-          email: user.email,
+          id: existingUser.id,
+          email: existingUser.email,
         };
       },
     }),

@@ -4,7 +4,6 @@ import { ChatSDKError } from '@/lib/shared/errors';
 import {
   getClinicMembers,
   getUserByEmailGlobal,
-  createInvitedUser,
   createClinicInvitation,
   getUser,
 } from '@/lib/db/queries';
@@ -122,54 +121,54 @@ export async function POST(request: NextRequest) {
       ).toResponse();
     }
 
-    // Check if email exists in ANY other clinic
+    // Check if user exists globally (case-insensitive)
     const existingUser = await getUserByEmailGlobal({ email });
 
+    // Generate temporary password for new users only
+    const temporaryPassword = !existingUser
+      ? crypto.randomBytes(8).toString('hex')
+      : undefined;
+
+    const hashedPassword = temporaryPassword
+      ? await generateHashedPassword(temporaryPassword)
+      : undefined;
+
+    // Create invitation for ALL users (new and existing)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
+
+    const invitation = await createClinicInvitation({
+      email,
+      clinicId: user.clinicId,
+      role,
+      invitedBy: user.id,
+      expiresAt,
+      temporaryPassword: hashedPassword,
+    });
+
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
+
+    // Return appropriate response based on user type
     if (existingUser) {
-      // Clinic switching scenario: create invitation
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
-
-      const invitation = await createClinicInvitation({
-        email,
-        clinicId: user.clinicId,
-        role,
-        invitedBy: user.id,
-        expiresAt,
-      });
-
       return NextResponse.json({
         type: 'clinic_switch',
         invitationId: invitation.id,
         email,
         role,
         message:
-          'Convite enviado! Este usuário já possui conta em outra clínica e verá o convite ao fazer login.',
+          'Convite enviado! Este usuário já possui conta e verá o convite ao fazer login.',
+      });
+    } else {
+      return NextResponse.json({
+        type: 'new_user',
+        invitationId: invitation.id,
+        email,
+        role,
+        temporaryPassword, // Plain text for display to admin
+        invitationUrl,
+        expiresAt,
       });
     }
-
-    // New user scenario: create user with invited status
-    const temporaryPassword = crypto.randomBytes(8).toString('hex'); // 16 char password
-    const hashedPassword = await generateHashedPassword(temporaryPassword);
-
-    const newUser = await createInvitedUser({
-      email,
-      role,
-      clinicId: user.clinicId,
-      hashedPassword,
-    });
-
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
-
-    return NextResponse.json({
-      type: 'new_user',
-      userId: newUser.id,
-      email: newUser.email,
-      role: newUser.role,
-      temporaryPassword,
-      invitationUrl,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    });
   } catch (error) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();

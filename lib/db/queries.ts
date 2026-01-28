@@ -2018,51 +2018,14 @@ export async function getUserByEmailGlobal({
       })
       .from(user)
       .innerJoin(clinic, eq(user.clinicId, clinic.id))
-      .where(eq(user.email, email));
+      .where(sql`LOWER(${user.email}) = LOWER(${email})`)
+      .limit(1);
 
     return result;
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get user by email globally',
-    );
-  }
-}
-
-/**
- * Create a new user with invited status.
- */
-export async function createInvitedUser({
-  email,
-  role,
-  clinicId,
-  hashedPassword,
-}: {
-  email: string;
-  role: 'secretary' | 'clinician' | 'admin' | 'owner';
-  clinicId: string;
-  hashedPassword: string;
-}): Promise<User> {
-  try {
-    const [newUser] = await db
-      .insert(user)
-      .values({
-        id: generateUUID(),
-        email,
-        role,
-        clinicId,
-        password: hashedPassword,
-        status: 'invited',
-        emailVerified: false,
-        platformAdmin: false,
-      })
-      .returning();
-
-    return newUser;
-  } catch (error) {
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to create invited user',
     );
   }
 }
@@ -2216,12 +2179,14 @@ export async function createClinicInvitation({
   role,
   invitedBy,
   expiresAt,
+  temporaryPassword,
 }: {
   email: string;
   clinicId: string;
   role: 'secretary' | 'clinician' | 'admin' | 'owner';
   invitedBy: string;
   expiresAt: Date;
+  temporaryPassword?: string;
 }): Promise<ClinicInvitation> {
   try {
     const [invitation] = await db
@@ -2234,6 +2199,17 @@ export async function createClinicInvitation({
         invitedBy,
         createdAt: new Date(),
         expiresAt,
+        temporaryPassword,
+      })
+      .onConflictDoUpdate({
+        target: [clinicInvitation.email, clinicInvitation.clinicId],
+        set: {
+          role,
+          expiresAt,
+          temporaryPassword,
+          invitedBy,
+          createdAt: sql`NOW()`,
+        },
       })
       .returning();
 
@@ -2242,6 +2218,30 @@ export async function createClinicInvitation({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to create clinic invitation',
+    );
+  }
+}
+
+/**
+ * Get all pending invitations for a clinic.
+ */
+export async function getClinicInvitations({
+  clinicId,
+}: {
+  clinicId: string;
+}): Promise<ClinicInvitation[]> {
+  try {
+    const invitations = await db
+      .select()
+      .from(clinicInvitation)
+      .where(eq(clinicInvitation.clinicId, clinicId))
+      .orderBy(desc(clinicInvitation.createdAt));
+
+    return invitations;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic invitations',
     );
   }
 }
@@ -2271,6 +2271,7 @@ export async function getClinicInvitationsByEmail({
         invitedBy: clinicInvitation.invitedBy,
         createdAt: clinicInvitation.createdAt,
         expiresAt: clinicInvitation.expiresAt,
+        temporaryPassword: clinicInvitation.temporaryPassword,
         clinicName: clinic.clinicName,
         invitedByEmail: user.email,
       })
@@ -2279,7 +2280,7 @@ export async function getClinicInvitationsByEmail({
       .innerJoin(user, eq(clinicInvitation.invitedBy, user.id))
       .where(
         and(
-          eq(clinicInvitation.email, email),
+          sql`LOWER(${clinicInvitation.email}) = LOWER(${email})`,
           gt(clinicInvitation.expiresAt, new Date()),
         ),
       )
@@ -2290,6 +2291,64 @@ export async function getClinicInvitationsByEmail({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get clinic invitations by email',
+    );
+  }
+}
+
+/**
+ * Create a user from a clinic invitation (for first-time login).
+ */
+export async function createUserFromInvitation({
+  invitationId,
+}: {
+  invitationId: string;
+}): Promise<User> {
+  try {
+    // Get invitation details
+    const [invitation] = await db
+      .select()
+      .from(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    if (!invitation) {
+      throw new ChatSDKError('not_found:database', 'Invitation not found');
+    }
+
+    if (!invitation.temporaryPassword) {
+      throw new ChatSDKError(
+        'bad_request:database',
+        'Invitation has no temporary password',
+      );
+    }
+
+    // Create User record from invitation
+    const [newUser] = await db
+      .insert(user)
+      .values({
+        id: generateUUID(),
+        email: invitation.email,
+        clinicId: invitation.clinicId,
+        role: invitation.role,
+        password: invitation.temporaryPassword,
+        status: 'active',
+        emailVerified: true, // Auto-verify since they got email with temp password
+        platformAdmin: false,
+      })
+      .returning();
+
+    // Delete the invitation
+    await db
+      .delete(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    return newUser;
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create user from invitation',
     );
   }
 }
@@ -2421,6 +2480,7 @@ export async function getPendingInvitationsForClinic({
         invitedBy: clinicInvitation.invitedBy,
         createdAt: clinicInvitation.createdAt,
         expiresAt: clinicInvitation.expiresAt,
+        temporaryPassword: clinicInvitation.temporaryPassword,
         invitedByEmail: user.email,
       })
       .from(clinicInvitation)
