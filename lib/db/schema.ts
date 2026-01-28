@@ -70,6 +70,7 @@ export const clinicInvitation = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     createdAt: timestamp('createdAt').notNull().defaultNow(),
     expiresAt: timestamp('expiresAt').notNull(),
+    temporaryPassword: varchar('temporaryPassword', { length: 64 }),
   },
   (table) => ({
     emailClinicUnique: unique().on(table.email, table.clinicId),
