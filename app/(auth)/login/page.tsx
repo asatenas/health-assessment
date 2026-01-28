@@ -27,25 +27,27 @@ export default function Page() {
   const { update: updateSession } = useSession();
 
   useEffect(() => {
-    if (state.status === 'failed') {
-      // English: 'Invalid credentials or email not verified. Please contact support if you need verification.'
-      toast({
-        type: 'error',
-        description:
-          'Credenciais inválidas ou e-mail não verificado. Contate suporte@asatenas.com.br se precisar de verificação.',
-      });
-    } else if (state.status === 'invalid_data') {
-      // English: 'Failed validating your submission!'
-      toast({
-        type: 'error',
-        description: 'Falha na validação do seu envio!',
-      });
-    } else if (state.status === 'success') {
-      setIsSuccessful(true);
-      (async () => {
-        await updateSession();
+    switch (state.status) {
+      case 'success':
+        setIsSuccessful(true);
+        updateSession();
         router.push('/dashboard');
-      })();
+        return;
+      case 'email_not_verified':
+        // English: 'Email not verified. Send an email to suporte@asatenas.com.br for verification.'
+        toast({
+          type: 'error',
+          description:
+            'E-mail não verificado. Envie um email para suporte@asatenas.com.br para verificação.',
+        });
+        break;
+      case 'failed':
+        // English: 'Invalid credentials!'
+        toast({
+          type: 'error',
+          description: 'Credenciais inválidas!',
+        });
+        break;
     }
     // Reset status back to idle after showing error
     state.status = 'idle';

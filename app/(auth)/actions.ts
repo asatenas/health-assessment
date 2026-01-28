@@ -13,7 +13,7 @@ const authFormSchema = z.object({
 });
 
 export interface LoginActionState {
-  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'email_not_verified';
 }
 
 export const login = async (
@@ -26,6 +26,15 @@ export const login = async (
       password: formData.get('password'),
     });
 
+    // Check if user exists and has unverified email
+    const users = await getUser(validatedData.email);
+    if (users.length > 0) {
+      const [user] = users;
+      if (!user.emailVerified) {
+        return { status: 'email_not_verified' };
+      }
+    }
+
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
@@ -34,10 +43,6 @@ export const login = async (
 
     return { status: 'success' };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { status: 'invalid_data' };
-    }
-
     return { status: 'failed' };
   }
 };
