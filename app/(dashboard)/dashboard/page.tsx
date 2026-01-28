@@ -407,64 +407,82 @@ export default function ClinicDashboard() {
               </>
             )}
           </div>
-          <div className="flex flex-wrap gap-2 justify-end">
+          <div className="flex flex-col sm:flex-row gap-2 items-end sm:items-center">
             <PermissionGate permission="assessments.create">
-              <Button
-                onClick={createNewChat}
-                disabled={isCreating}
-                size="sm"
-                className="sm:px-3 px-3"
-                aria-label={
-                  isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
-                }
-              >
-                <ClipboardList className="size-4" />
-                <span className="hidden sm:inline sm:ml-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:hidden">
                   {isCreating ? 'Criando...' : 'Criar nova avaliação'}
                 </span>
-              </Button>
+                <Button
+                  onClick={createNewChat}
+                  disabled={isCreating}
+                  size="sm"
+                  className="sm:px-3 px-3"
+                  aria-label={
+                    isCreating ? 'Criando avaliação' : 'Criar nova avaliação'
+                  }
+                >
+                  <ClipboardList className="size-4" />
+                  <span className="hidden sm:inline sm:ml-2">
+                    {isCreating ? 'Criando...' : 'Criar nova avaliação'}
+                  </span>
+                </Button>
+              </div>
             </PermissionGate>
             <PermissionGate
               permissions={['assessments.read', 'assessments.read.summary']}
             >
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                variant="outline"
-                size="sm"
-                className="sm:px-3 px-3"
-                aria-label={
-                  isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
-                }
-              >
-                <RefreshCw className="size-4" />
-                <span className="hidden sm:inline sm:ml-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:hidden">
                   {isRefreshing ? 'Atualizando...' : 'Atualizar'}
                 </span>
-              </Button>
+                <Button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  size="sm"
+                  className="sm:px-3 px-3"
+                  aria-label={
+                    isRefreshing ? 'Atualizando dados' : 'Atualizar dados'
+                  }
+                >
+                  <RefreshCw className="size-4" />
+                  <span className="hidden sm:inline sm:ml-2">
+                    {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+                  </span>
+                </Button>
+              </div>
             </PermissionGate>
             <PermissionGate permission="org.manage">
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:hidden">Configurações</span>
+                <Button
+                  onClick={() => setIsConfigurationsOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="sm:px-3 px-3"
+                  aria-label="Configurações"
+                >
+                  <Settings className="size-4" />
+                  <span className="hidden sm:inline sm:ml-2">
+                    Configurações
+                  </span>
+                </Button>
+              </div>
+            </PermissionGate>
+            <div className="flex items-center gap-2">
+              <span className="text-sm sm:hidden">Sair</span>
               <Button
-                onClick={() => setIsConfigurationsOpen(true)}
-                variant="outline"
+                onClick={() => signOut({ redirectTo: '/login' })}
+                variant="secondary"
                 size="sm"
                 className="sm:px-3 px-3"
-                aria-label="Configurações"
+                aria-label="Sair"
               >
-                <Settings className="size-4" />
-                <span className="hidden sm:inline sm:ml-2">Configurações</span>
+                <LogOut className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Sair</span>
               </Button>
-            </PermissionGate>
-            <Button
-              onClick={() => signOut({ redirectTo: '/login' })}
-              variant="secondary"
-              size="sm"
-              className="sm:px-3 px-3"
-              aria-label="Sair"
-            >
-              <LogOut className="size-4" />
-              <span className="hidden sm:inline sm:ml-2">Sair</span>
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -527,14 +545,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   ID da avaliação
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.chatId}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.chatId)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>
@@ -545,14 +564,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Token
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.token}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.token)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>
@@ -563,14 +583,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   URL do paciente
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.url}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.url)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>

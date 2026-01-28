@@ -121,78 +121,80 @@ export function WeeklySurgeriesPanel({
           <CardTitle>Cirurgias da Semana</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day, index) => (
-              <div
-                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                key={index}
-                className={cn(
-                  'border rounded-lg flex flex-col h-[550px]',
-                  day.isToday && 'border-blue-500 border-2',
-                  day.isPast && 'bg-gray-50 dark:bg-gray-900',
-                )}
-              >
-                {/* Day Header */}
+          <div className="overflow-x-auto md:overflow-visible">
+            <div className="flex md:grid md:grid-cols-7 gap-2">
+              {weekDays.map((day, index) => (
                 <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                  key={index}
                   className={cn(
-                    'p-2 border-b flex items-center justify-center gap-1.5',
-                    day.isToday && 'bg-blue-50 dark:bg-blue-950',
+                    'border rounded-lg flex flex-col h-[550px] w-[165px] sm:w-auto sm:min-w-0 sm:flex-shrink',
+                    day.isToday && 'border-blue-500 border-2',
+                    day.isPast && 'bg-gray-50 dark:bg-gray-900',
                   )}
                 >
-                  <div className="text-xs font-semibold text-muted-foreground">
-                    {day.dayName}
+                  {/* Day Header */}
+                  <div
+                    className={cn(
+                      'p-2 border-b flex items-center justify-center gap-1.5',
+                      day.isToday && 'bg-blue-50 dark:bg-blue-950',
+                    )}
+                  >
+                    <div className="text-xs font-semibold text-muted-foreground">
+                      {day.dayName}
+                    </div>
+                    <div className="text-lg font-bold">{day.dayNumber}</div>
+                    <Badge variant="secondary" className="text-xs">
+                      {day.surgeries.length}
+                    </Badge>
                   </div>
-                  <div className="text-lg font-bold">{day.dayNumber}</div>
-                  <Badge variant="secondary" className="text-xs">
-                    {day.surgeries.length}
-                  </Badge>
-                </div>
 
-                {/* Surgery Cards */}
-                <div className="flex-1 p-2 space-y-2 overflow-y-auto">
-                  {day.surgeries.map((surgery) => (
-                    <button
-                      type="button"
-                      key={surgery.chatId}
-                      onClick={() => handleSurgeryClick(surgery.chatId)}
-                      className={cn(
-                        'w-full p-2 rounded border text-left transition-all',
-                        'hover:shadow-md hover:border-blue-300',
-                        'focus:outline-none focus:ring-2 focus:ring-blue-500',
-                        day.isPast && 'opacity-60',
-                      )}
-                    >
-                      <div className="space-y-1">
-                        <Badge
-                          className={cn(
-                            'text-xs',
-                            getRiskColor(surgery.riskLevel),
-                          )}
-                        >
-                          {surgery.riskLevel}
-                        </Badge>
-                        {surgery.surgeryTime && (
-                          <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                            {surgery.surgeryTime}
-                          </div>
+                  {/* Surgery Cards */}
+                  <div className="flex-1 p-2 space-y-2 overflow-y-auto">
+                    {day.surgeries.map((surgery) => (
+                      <button
+                        type="button"
+                        key={surgery.chatId}
+                        onClick={() => handleSurgeryClick(surgery.chatId)}
+                        className={cn(
+                          'w-full p-2 rounded border text-left transition-all',
+                          'hover:shadow-md hover:border-blue-300',
+                          'focus:outline-none focus:ring-2 focus:ring-blue-500',
+                          day.isPast && 'opacity-60',
                         )}
-                        {/* <div className="text-xs">
+                      >
+                        <div className="space-y-1">
+                          <Badge
+                            className={cn(
+                              'text-xs',
+                              getRiskColor(surgery.riskLevel),
+                            )}
+                          >
+                            {surgery.riskLevel}
+                          </Badge>
+                          {surgery.surgeryTime && (
+                            <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                              {surgery.surgeryTime}
+                            </div>
+                          )}
+                          {/* <div className="text-xs">
                           <span className="text-muted-foreground">Idade:</span>{' '}
                           <span className="font-medium">
                             {surgery.patientAge}
                           </span>
                         </div> */}
-                        {surgery.surgeryName && (
-                          <div className="text-xs truncate text-muted-foreground">
-                            {surgery.surgeryName}
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
+                          {surgery.surgeryName && (
+                            <div className="text-xs truncate text-muted-foreground">
+                              {surgery.surgeryName}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
