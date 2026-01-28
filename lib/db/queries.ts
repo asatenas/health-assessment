@@ -13,6 +13,7 @@ import {
   lte,
   sql,
   type SQL,
+  ilike,
 } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -30,6 +31,8 @@ import {
   stream,
   checkpoint,
   surgery,
+  clinicInvitation,
+  type ClinicInvitation,
 } from './schema';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
@@ -1890,6 +1893,474 @@ export async function getUserForImpersonation({
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get user for impersonation',
+    );
+  }
+}
+
+// ============================================================================
+// User Management Queries
+// ============================================================================
+
+/**
+ * Get all members of a clinic with pagination, search, and filters.
+ */
+export async function getClinicMembers({
+  clinicId,
+  page = 1,
+  limit = 10,
+  search,
+  status,
+  role,
+}: {
+  clinicId: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'active' | 'invited' | 'disabled';
+  role?: 'secretary' | 'clinician' | 'admin' | 'owner';
+}): Promise<{ members: User[]; total: number }> {
+  try {
+    const offset = (page - 1) * limit;
+    const conditions: SQL[] = [eq(user.clinicId, clinicId)];
+
+    if (search) {
+      conditions.push(ilike(user.email, `%${search}%`));
+    }
+
+    if (status) {
+      conditions.push(eq(user.status, status));
+    }
+
+    if (role) {
+      conditions.push(eq(user.role, role));
+    }
+
+    const whereClause = and(...conditions);
+
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(user)
+      .where(whereClause);
+
+    // Order by role hierarchy (owner > admin > clinician > secretary), then email
+    const roleOrder = sql`CASE ${user.role}
+      WHEN 'owner' THEN 1
+      WHEN 'admin' THEN 2
+      WHEN 'clinician' THEN 3
+      WHEN 'secretary' THEN 4
+      ELSE 5
+    END`;
+
+    const members = await db
+      .select()
+      .from(user)
+      .where(whereClause)
+      .orderBy(roleOrder, asc(user.email))
+      .limit(limit)
+      .offset(offset);
+
+    return { members, total };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic members',
+    );
+  }
+}
+
+/**
+ * Count active owners in a clinic.
+ */
+export async function countActiveOwners({
+  clinicId,
+}: { clinicId: string }): Promise<number> {
+  try {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(user)
+      .where(
+        and(
+          eq(user.clinicId, clinicId),
+          eq(user.role, 'owner'),
+          eq(user.status, 'active'),
+        ),
+      );
+
+    return total;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to count active owners',
+    );
+  }
+}
+
+/**
+ * Get user by email across ALL clinics (global search).
+ */
+export async function getUserByEmailGlobal({
+  email,
+}: {
+  email: string;
+}): Promise<(User & { clinicName: string | null }) | undefined> {
+  try {
+    const [result] = await db
+      .select({
+        id: user.id,
+        email: user.email,
+        password: user.password,
+        emailVerified: user.emailVerified,
+        role: user.role,
+        status: user.status,
+        platformAdmin: user.platformAdmin,
+        clinicId: user.clinicId,
+        clinicName: clinic.clinicName,
+      })
+      .from(user)
+      .innerJoin(clinic, eq(user.clinicId, clinic.id))
+      .where(eq(user.email, email));
+
+    return result;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get user by email globally',
+    );
+  }
+}
+
+/**
+ * Create a new user with invited status.
+ */
+export async function createInvitedUser({
+  email,
+  role,
+  clinicId,
+  hashedPassword,
+}: {
+  email: string;
+  role: 'secretary' | 'clinician' | 'admin' | 'owner';
+  clinicId: string;
+  hashedPassword: string;
+}): Promise<User> {
+  try {
+    const [newUser] = await db
+      .insert(user)
+      .values({
+        id: generateUUID(),
+        email,
+        role,
+        clinicId,
+        password: hashedPassword,
+        status: 'invited',
+        emailVerified: false,
+        platformAdmin: false,
+      })
+      .returning();
+
+    return newUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create invited user',
+    );
+  }
+}
+
+/**
+ * Update user role.
+ */
+export async function updateUserRole({
+  userId,
+  newRole,
+}: {
+  userId: string;
+  newRole: 'secretary' | 'clinician' | 'admin' | 'owner';
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({ role: newRole })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user role',
+    );
+  }
+}
+
+/**
+ * Update user's clinic and role (for clinic switching).
+ */
+export async function updateUserClinic({
+  userId,
+  clinicId,
+  role,
+}: {
+  userId: string;
+  clinicId: string;
+  role: 'secretary' | 'clinician' | 'admin' | 'owner';
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({ clinicId, role })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user clinic',
+    );
+  }
+}
+
+/**
+ * Soft delete a user by setting status to disabled.
+ */
+export async function disableUser({
+  userId,
+}: { userId: string }): Promise<User> {
+  try {
+    const [disabledUser] = await db
+      .update(user)
+      .set({ status: 'disabled' })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return disabledUser;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to disable user');
+  }
+}
+
+/**
+ * Reactivate a disabled user.
+ */
+export async function reactivateUser({
+  userId,
+}: { userId: string }): Promise<User> {
+  try {
+    const [reactivatedUser] = await db
+      .update(user)
+      .set({ status: 'active' })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return reactivatedUser;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to reactivate user');
+  }
+}
+
+// ============================================================================
+// Clinic Invitation Queries
+// ============================================================================
+
+/**
+ * Create a clinic invitation for an existing user to switch clinics.
+ */
+export async function createClinicInvitation({
+  email,
+  clinicId,
+  role,
+  invitedBy,
+  expiresAt,
+}: {
+  email: string;
+  clinicId: string;
+  role: 'secretary' | 'clinician' | 'admin' | 'owner';
+  invitedBy: string;
+  expiresAt: Date;
+}): Promise<ClinicInvitation> {
+  try {
+    const [invitation] = await db
+      .insert(clinicInvitation)
+      .values({
+        id: generateUUID(),
+        email,
+        clinicId,
+        role,
+        invitedBy,
+        createdAt: new Date(),
+        expiresAt,
+      })
+      .returning();
+
+    return invitation;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create clinic invitation',
+    );
+  }
+}
+
+/**
+ * Get all pending invitations for an email address.
+ */
+export async function getClinicInvitationsByEmail({
+  email,
+}: {
+  email: string;
+}): Promise<
+  Array<
+    ClinicInvitation & {
+      clinicName: string | null;
+      invitedByEmail: string;
+    }
+  >
+> {
+  try {
+    const invitations = await db
+      .select({
+        id: clinicInvitation.id,
+        email: clinicInvitation.email,
+        clinicId: clinicInvitation.clinicId,
+        role: clinicInvitation.role,
+        invitedBy: clinicInvitation.invitedBy,
+        createdAt: clinicInvitation.createdAt,
+        expiresAt: clinicInvitation.expiresAt,
+        clinicName: clinic.clinicName,
+        invitedByEmail: user.email,
+      })
+      .from(clinicInvitation)
+      .innerJoin(clinic, eq(clinicInvitation.clinicId, clinic.id))
+      .innerJoin(user, eq(clinicInvitation.invitedBy, user.id))
+      .where(
+        and(
+          eq(clinicInvitation.email, email),
+          gt(clinicInvitation.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(clinicInvitation.createdAt));
+
+    return invitations;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic invitations by email',
+    );
+  }
+}
+
+/**
+ * Accept a clinic invitation and update user's clinic.
+ */
+export async function acceptClinicInvitation({
+  invitationId,
+  userId,
+}: {
+  invitationId: string;
+  userId: string;
+}): Promise<{ user: User; invitation: ClinicInvitation }> {
+  try {
+    // Get invitation details
+    const [invitation] = await db
+      .select()
+      .from(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    if (!invitation) {
+      throw new ChatSDKError('not_found:database', 'Invitation not found');
+    }
+
+    // Check if expired
+    if (invitation.expiresAt < new Date()) {
+      throw new ChatSDKError('bad_request:database', 'Invitation expired');
+    }
+
+    // Update user's clinic and role
+    const updatedUser = await updateUserClinic({
+      userId,
+      clinicId: invitation.clinicId,
+      role: invitation.role,
+    });
+
+    // Delete invitation
+    await db
+      .delete(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    return { user: updatedUser, invitation };
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to accept clinic invitation',
+    );
+  }
+}
+
+/**
+ * Reject a clinic invitation.
+ */
+export async function rejectClinicInvitation({
+  invitationId,
+}: {
+  invitationId: string;
+}): Promise<void> {
+  try {
+    await db
+      .delete(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to reject clinic invitation',
+    );
+  }
+}
+
+/**
+ * Get all pending invitations for a clinic.
+ */
+export async function getPendingInvitationsForClinic({
+  clinicId,
+}: {
+  clinicId: string;
+}): Promise<
+  Array<
+    ClinicInvitation & {
+      invitedByEmail: string;
+    }
+  >
+> {
+  try {
+    const invitations = await db
+      .select({
+        id: clinicInvitation.id,
+        email: clinicInvitation.email,
+        clinicId: clinicInvitation.clinicId,
+        role: clinicInvitation.role,
+        invitedBy: clinicInvitation.invitedBy,
+        createdAt: clinicInvitation.createdAt,
+        expiresAt: clinicInvitation.expiresAt,
+        invitedByEmail: user.email,
+      })
+      .from(clinicInvitation)
+      .innerJoin(user, eq(clinicInvitation.invitedBy, user.id))
+      .where(
+        and(
+          eq(clinicInvitation.clinicId, clinicId),
+          gt(clinicInvitation.expiresAt, new Date()),
+        ),
+      )
+      .orderBy(desc(clinicInvitation.createdAt));
+
+    return invitations;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get pending invitations for clinic',
     );
   }
 }
