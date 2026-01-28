@@ -2414,6 +2414,54 @@ export async function acceptClinicInvitation({
 }
 
 /**
+ * Delete a clinic invitation by ID (admin action).
+ */
+export async function deleteClinicInvitation({
+  invitationId,
+  clinicId,
+}: {
+  invitationId: string;
+  clinicId: string;
+}): Promise<void> {
+  try {
+    // Verify invitation belongs to this clinic
+    const [invitation] = await db
+      .select()
+      .from(clinicInvitation)
+      .where(eq(clinicInvitation.id, invitationId));
+
+    if (!invitation) {
+      throw new ChatSDKError('not_found:database', 'Convite não encontrado');
+    }
+
+    if (invitation.clinicId !== clinicId) {
+      throw new ChatSDKError(
+        'forbidden:api',
+        'Este convite não pertence à sua clínica',
+      );
+    }
+
+    // Delete the invitation
+    await db
+      .delete(clinicInvitation)
+      .where(
+        and(
+          eq(clinicInvitation.id, invitationId),
+          eq(clinicInvitation.clinicId, clinicId),
+        ),
+      );
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to delete clinic invitation',
+    );
+  }
+}
+
+/**
  * Reject a clinic invitation.
  */
 export async function rejectClinicInvitation({

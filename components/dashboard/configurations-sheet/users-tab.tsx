@@ -15,11 +15,17 @@ import { Loader2, UserPlus, Search } from 'lucide-react';
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { UsersList } from './users-list';
 import { InviteUserDialog } from './invite-user-dialog';
-import type { User } from '@/lib/db/schema';
+import type { User, ClinicInvitation } from '@/lib/db/schema';
+
+// Combined type for members and pending invitations
+type MemberOrInvitation =
+  | (User & { type: 'user' })
+  | (ClinicInvitation & { type: 'invitation'; status: 'invited' });
 
 export function UsersTab() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<User[]>([]);
+  const [invitations, setInvitations] = useState<ClinicInvitation[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -44,12 +50,29 @@ export function UsersTab() {
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (roleFilter !== 'all') params.append('role', roleFilter);
 
-      const response = await fetch(`/api/clinic/members?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch members');
+      // Fetch both members and invitations in parallel
+      const [membersResponse, invitationsResponse] = await Promise.all([
+        fetch(`/api/clinic/members?${params}`),
+        fetch('/api/clinic/invitations'),
+      ]);
 
-      const data = await response.json();
-      setMembers(data.members);
-      setTotal(data.total);
+      if (!membersResponse.ok) throw new Error('Failed to fetch members');
+
+      const membersData = await membersResponse.json();
+      setMembers(membersData.members);
+      setTotal(membersData.total);
+
+      // Fetch invitations (only if not filtering by non-invited status)
+      if (
+        invitationsResponse.ok &&
+        statusFilter !== 'active' &&
+        statusFilter !== 'disabled'
+      ) {
+        const invitationsData = await invitationsResponse.json();
+        setInvitations(invitationsData.invitations || []);
+      } else {
+        setInvitations([]);
+      }
     } catch (error) {
       console.error('Error fetching members:', error);
     } finally {
@@ -66,7 +89,33 @@ export function UsersTab() {
     fetchMembers();
   };
 
-  const totalPages = Math.ceil(total / limit);
+  // Merge members and invitations for display
+  const combinedList: MemberOrInvitation[] = [
+    ...members.map((m) => ({ ...m, type: 'user' as const })),
+    ...invitations.map((i) => ({
+      ...i,
+      type: 'invitation' as const,
+      status: 'invited' as const,
+    })),
+  ];
+
+  // Filter invitations by search and role if applicable
+  const filteredList = combinedList.filter((item) => {
+    if (
+      search &&
+      item.email &&
+      !item.email.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return false;
+    }
+    if (roleFilter !== 'all' && item.role !== roleFilter) {
+      return false;
+    }
+    return true;
+  });
+
+  const totalWithInvitations = total + invitations.length;
+  const totalPages = Math.ceil(totalWithInvitations / limit);
 
   return (
     <Card>
@@ -149,13 +198,13 @@ export function UsersTab() {
             </div>
           ) : (
             <>
-              <UsersList members={members} onUpdate={handleMemberUpdate} />
+              <UsersList members={filteredList} onUpdate={handleMemberUpdate} />
 
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
                   <p className="text-sm text-muted-foreground">
-                    Página {page} de {totalPages} ({total} usuários)
+                    Página {page} de {totalPages} ({totalWithInvitations} total)
                   </p>
                   <div className="flex gap-2">
                     <Button
