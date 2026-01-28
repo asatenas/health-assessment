@@ -447,10 +447,8 @@ export default function ClinicDashboard() {
               <>
                 <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
                 <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
-                  {canReadAssessments
-                    ? view === 'analytics'
-                      ? 'Visualize métricas e análises das avaliações pré-anestésicas'
-                      : 'Gerencie todos as avaliações dos pacientes'
+                  {canReadFull
+                    ? 'Visualize métricas e análises das avaliações pré-anestésicas'
                     : 'Crie uma nova avaliação usando o botão à direita'}
                 </p>
               </>
