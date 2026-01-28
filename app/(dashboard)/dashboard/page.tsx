@@ -545,14 +545,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   ID da avaliação
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.chatId}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.chatId)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>
@@ -563,14 +564,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Token
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.token}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.token)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>
@@ -581,14 +583,15 @@ export default function ClinicDashboard() {
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   URL do paciente
                 </label>
-                <div className="flex gap-2 mt-1">
-                  <code className="flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm">
+                <div className="flex flex-col sm:flex-row gap-2 mt-1 items-center sm:items-stretch">
+                  <code className="w-full sm:flex-1 p-2 bg-white dark:bg-gray-900 rounded border text-sm break-all">
                     {newChatData.url}
                   </code>
                   <Button
                     onClick={() => copyToClipboard(newChatData.url)}
                     variant="outline"
                     size="sm"
+                    className="w-auto"
                   >
                     Copiar
                   </Button>
