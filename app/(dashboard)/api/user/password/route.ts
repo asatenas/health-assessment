@@ -1,10 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { compare } from 'bcrypt-ts';
 import { z } from 'zod';
-import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
-import { getUserById, updateUserPassword } from '@/lib/db/queries';
+import {
+  getUserById,
+  updateUserPassword,
+  reactivateUser,
+} from '@/lib/db/queries';
 import { generateHashedPassword } from '@/lib/db/utils';
+import { auth } from '@/app/(auth)/auth';
 
 const passwordChangeSchema = z.object({
   currentPassword: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
@@ -17,7 +21,35 @@ const passwordChangeSchema = z.object({
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const currentUser = await validateClinicAccess();
+    const session = await auth();
+    const currentUserId = session?.user?.id;
+
+    if (!currentUserId) {
+      return new ChatSDKError('unauthorized:api').toResponse();
+    }
+
+    const user = await getUserById({ userId: currentUserId });
+
+    if (!user || !user.password) {
+      return new ChatSDKError(
+        'not_found:api',
+        'Usuário não encontrado',
+      ).toResponse();
+    }
+
+    if (!user.emailVerified) {
+      return new ChatSDKError(
+        'unauthorized:api',
+        'Email not verified',
+      ).toResponse();
+    }
+
+    if (user.status === 'disabled') {
+      return new ChatSDKError(
+        'unauthorized:api',
+        'User account is not active',
+      ).toResponse();
+    }
 
     const body = await request.json();
 
@@ -42,7 +74,6 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Fetch user from database
-    const user = await getUserById({ userId: currentUser.id });
     if (!user || !user.password) {
       return new ChatSDKError(
         'not_found:api',
@@ -64,13 +95,19 @@ export async function PATCH(request: NextRequest) {
 
     // Update password in database
     await updateUserPassword({
-      userId: currentUser.id,
+      userId: currentUserId,
       hashedPassword,
     });
+
+    // If user is in 'invited' status, activate them after password change
+    if (user.status === 'invited') {
+      await reactivateUser({ userId: currentUserId });
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Senha alterada com sucesso',
+      statusChanged: user.status === 'invited',
     });
   } catch (error) {
     if (error instanceof ChatSDKError) {

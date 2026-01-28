@@ -46,6 +46,7 @@ declare module 'next-auth/jwt' {
     id: string;
     email: string;
     role: 'secretary' | 'clinician' | 'admin' | 'owner';
+    status: 'active' | 'invited' | 'disabled';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
     clinicId: string;
@@ -120,9 +121,10 @@ export const {
             token.platformAdmin = true;
           }
 
-          // Set role and permissions
+          // Set role, status, and permissions
           if (dbUser?.role) {
             token.role = dbUser.role;
+            token.status = dbUser.status;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.clinicId = dbUser.clinicId;
           }
@@ -137,9 +139,17 @@ export const {
         }
       }
 
-      // Handle session updates (used for starting/stopping impersonation)
-      if (trigger === 'update' && session) {
-        if (session.impersonation !== undefined) {
+      // Handle session updates (used for starting/stopping impersonation and status changes)
+      if (trigger === 'update') {
+        // Refresh user status from database (e.g., after password change)
+        if (token.id && !session?.impersonation) {
+          const dbUser = await getUserById({ userId: token.id });
+          if (dbUser) {
+            token.status = dbUser.status;
+          }
+        }
+
+        if (session?.impersonation !== undefined) {
           // If starting impersonation, save original user data and swap to target user
           if (session.impersonation) {
             const targetUserId = session.impersonation.user.id;

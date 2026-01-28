@@ -24,15 +24,38 @@ export async function middleware(request: NextRequest) {
   });
 
   const isLoggedIn = !!token;
+  const userStatus = token?.status;
 
   if (pathname.startsWith('/chat/')) {
     return NextResponse.next();
   }
 
   if (['/login', '/register'].includes(pathname)) {
-    return isLoggedIn
-      ? NextResponse.redirect(new URL('/dashboard', request.url))
-      : NextResponse.next();
+    if (isLoggedIn) {
+      // Redirect invited users to change password page
+      if (userStatus === 'invited') {
+        return NextResponse.redirect(new URL('/change-password', request.url));
+      }
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Allow invited users to access change-password page
+  if (pathname === '/change-password') {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    // If user is already active, redirect to dashboard
+    if (userStatus !== 'invited') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Protect dashboard and all other routes from invited users
+  if (isLoggedIn && userStatus === 'invited') {
+    return NextResponse.redirect(new URL('/change-password', request.url));
   }
 
   if (['/dashboard'].includes(pathname)) {
