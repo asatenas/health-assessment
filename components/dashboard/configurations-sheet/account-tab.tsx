@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, Info } from 'lucide-react';
 
 export function AccountTab() {
+  const { data: session } = useSession();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -77,77 +79,104 @@ export function AccountTab() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Alterar Senha</CardTitle>
-        <p className="text-xs text-muted-foreground mt-1">
-          Atualize sua senha de acesso à plataforma
-        </p>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Informações da Conta</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Dados da sua conta na plataforma
+          </p>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="current-password">Senha Atual</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="current-password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Digite sua senha atual"
-              disabled={loading}
-              required
-              minLength={6}
+              id="email"
+              type="email"
+              value={session?.user?.email || ''}
+              disabled
+              readOnly
+              className="bg-muted"
             />
+            <p className="text-xs text-muted-foreground">
+              Seu endereço de email não pode ser alterado
+            </p>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="space-y-2">
-            <Label htmlFor="new-password">Nova Senha</Label>
-            <Input
-              id="new-password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Digite sua nova senha (mínimo 6 caracteres)"
-              disabled={loading}
-              required
-              minLength={6}
-            />
-          </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Alterar Senha</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Atualize sua senha de acesso à plataforma
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Senha Atual</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Digite sua senha atual"
+                disabled={loading}
+                required
+                minLength={6}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Digite novamente sua nova senha"
-              disabled={loading}
-              required
-              minLength={6}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Nova Senha</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Digite sua nova senha (mínimo 6 caracteres)"
+                disabled={loading}
+                required
+                minLength={6}
+              />
+            </div>
 
-          {error && (
-            <Alert variant="destructive">
-              <Info className="size-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Digite novamente sua nova senha"
+                disabled={loading}
+                required
+                minLength={6}
+              />
+            </div>
 
-          {success && (
-            <Alert>
-              <CheckCircle className="size-4" />
-              <AlertDescription>Senha alterada com sucesso!</AlertDescription>
-            </Alert>
-          )}
+            {error && (
+              <Alert variant="destructive">
+                <Info className="size-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {loading ? 'Alterando senha...' : 'Alterar Senha'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            {success && (
+              <Alert>
+                <CheckCircle className="size-4" />
+                <AlertDescription>Senha alterada com sucesso!</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {loading ? 'Alterando senha...' : 'Alterar Senha'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
