@@ -1,19 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useActionState, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useActionState, useEffect, useState, Suspense } from 'react';
 import { toast } from '@/components/ui/toast';
 
 import { AuthForm } from '@/components/auth/auth-form';
 import { SubmitButton } from '@/components/auth/submit-button';
+import { PasswordChangedNotification } from '@/components/auth/password-changed-notification';
 
 import { login, type LoginActionState } from '../actions';
 import { useSession } from 'next-auth/react';
 
 export default function Page() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -26,18 +26,6 @@ export default function Page() {
   );
 
   const { update: updateSession } = useSession();
-
-  // Show success message if redirected after password change
-  useEffect(() => {
-    if (searchParams.get('passwordChanged') === 'true') {
-      toast({
-        type: 'success',
-        description:
-          'Senha alterada com sucesso! Por favor, faça login com sua nova senha.',
-      });
-      router.replace('/login');
-    }
-  }, [searchParams, router]);
 
   useEffect(() => {
     switch (state.status) {
@@ -81,6 +69,9 @@ export default function Page() {
 
   return (
     <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
+      <Suspense fallback={null}>
+        <PasswordChangedNotification />
+      </Suspense>
       <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-12">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
           <h3 className="text-xl font-semibold dark:text-zinc-50">
