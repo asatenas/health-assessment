@@ -30,6 +30,7 @@ import { ChevronDown, Loader2, Users } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
 import { useSession } from 'next-auth/react';
+import { UsersTab } from './configurations-sheet/users-tab';
 
 const SECTION_ORDER = [
   'basicInfo',
@@ -404,9 +405,10 @@ export function ConfigurationsSheet({
                       )}
 
                     <Tabs defaultValue="form" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="form">Formulário</TabsTrigger>
                         <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                        <TabsTrigger value="users">Usuários</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="form" className="mt-4">
@@ -576,6 +578,10 @@ export function ConfigurationsSheet({
                             </div>
                           </CardContent>
                         </Card>
+                      </TabsContent>
+
+                      <TabsContent value="users" className="mt-4">
+                        <UsersTab />
                       </TabsContent>
                     </Tabs>
                   </>
