@@ -102,6 +102,10 @@ export const {
           return null;
         }
 
+        if (user.status === 'disabled') {
+          return null;
+        }
+
         return {
           id: user.id,
           email: user.email,
