@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 
@@ -13,6 +13,7 @@ import { useSession } from 'next-auth/react';
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -25,6 +26,18 @@ export default function Page() {
   );
 
   const { update: updateSession } = useSession();
+
+  // Show success message if redirected after password change
+  useEffect(() => {
+    if (searchParams.get('passwordChanged') === 'true') {
+      toast({
+        type: 'success',
+        description:
+          'Senha alterada com sucesso! Por favor, faça login com sua nova senha.',
+      });
+      router.replace('/login');
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     switch (state.status) {

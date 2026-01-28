@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -59,11 +59,11 @@ export default function ChangePasswordPage() {
         throw new Error(data.cause || data.message || 'Falha ao alterar senha');
       }
 
-      // Update session to reflect the new status
-      await update();
-
-      // Redirect to dashboard after successful password change
-      router.push('/dashboard');
+      // Sign out and redirect to login to ensure fresh authentication
+      await signOut({
+        redirect: true,
+        callbackUrl: '/login?passwordChanged=true',
+      });
     } catch (error) {
       console.error('Error changing password:', error);
       setError(
