@@ -12,6 +12,7 @@ import {
   integer,
   check,
   unique,
+  index,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { CHAT_STATUSES } from './chat-status';
@@ -52,6 +53,32 @@ export const user = pgTable(
 );
 
 export type User = InferSelectModel<typeof user>;
+
+export const clinicInvitation = pgTable(
+  'ClinicInvitation',
+  {
+    id: uuid('id').primaryKey().notNull().defaultRandom(),
+    email: varchar('email', { length: 64 }).notNull(),
+    clinicId: uuid('clinicId')
+      .notNull()
+      .references(() => clinic.id, { onDelete: 'cascade' }),
+    role: varchar('role', {
+      enum: ['secretary', 'clinician', 'admin', 'owner'],
+    }).notNull(),
+    invitedBy: uuid('invitedBy')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    expiresAt: timestamp('expiresAt').notNull(),
+  },
+  (table) => ({
+    emailClinicUnique: unique().on(table.email, table.clinicId),
+    emailIdx: index('idx_clinic_invitation_email').on(table.email),
+    clinicIdx: index('idx_clinic_invitation_clinic').on(table.clinicId),
+  }),
+);
+
+export type ClinicInvitation = InferSelectModel<typeof clinicInvitation>;
 
 export const patient = pgTable(
   'Patient',
