@@ -47,6 +47,8 @@ export default function Page() {
         router.push('/dashboard');
       })();
     }
+    // Reset status back to idle after showing error
+    state.status = 'idle';
   }, [state.status]);
 
   const handleSubmit = (formData: FormData) => {
