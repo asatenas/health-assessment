@@ -363,7 +363,7 @@ export function SurgeryDetailModal({
               {assessmentDetails.medications && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                    Medicamentos em uso
+                    Suspender medicamentos em uso
                   </h3>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100 whitespace-pre-line">
                     {(() => {
