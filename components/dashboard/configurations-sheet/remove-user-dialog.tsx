@@ -19,6 +19,7 @@ interface RemoveUserDialogProps {
   onOpenChange: (open: boolean) => void;
   user: User;
   onSuccess: () => void;
+  permanent?: boolean;
 }
 
 export function RemoveUserDialog({
@@ -26,6 +27,7 @@ export function RemoveUserDialog({
   onOpenChange,
   user,
   onSuccess,
+  permanent = false,
 }: RemoveUserDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,8 @@ export function RemoveUserDialog({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/clinic/members/${user.id}`, {
+      const url = `/api/clinic/members/${user.id}${permanent ? '?permanent=true' : ''}`;
+      const response = await fetch(url, {
         method: 'DELETE',
       });
 
@@ -64,18 +67,23 @@ export function RemoveUserDialog({
   };
 
   const isInvited = user.status === 'invited';
+  const isPermanentDelete = isInvited || permanent;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isInvited ? 'Deletar Convite' : 'Desativar Usuário'}
+            {isPermanentDelete
+              ? 'Deletar Permanentemente'
+              : 'Desativar Usuário'}
           </DialogTitle>
           <DialogDescription>
             {isInvited
               ? `Tem certeza que deseja deletar o convite para ${user.email}?`
-              : `Tem certeza que deseja desativar ${user.email}?`}
+              : permanent
+                ? `Tem certeza que deseja deletar permanentemente ${user.email}?`
+                : `Tem certeza que deseja desativar ${user.email}?`}
           </DialogDescription>
         </DialogHeader>
 
@@ -101,6 +109,24 @@ export function RemoveUserDialog({
                       <li>Você pode criar um novo convite se necessário</li>
                     </ul>
                   </>
+                ) : permanent ? (
+                  <>
+                    <p className="font-medium mb-2">
+                      O usuário será permanentemente deletado:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Todos os dados do usuário serão removidos</li>
+                      <li>
+                        As avaliações e cirurgias criadas permanecerão no
+                        sistema
+                      </li>
+                      <li>Esta ação não pode ser desfeita</li>
+                      <li>
+                        Você pode criar um novo convite para este email se
+                        necessário
+                      </li>
+                    </ul>
+                  </>
                 ) : (
                   <>
                     <p className="font-medium mb-2">
@@ -121,8 +147,8 @@ export function RemoveUserDialog({
             </Alert>
 
             <p className="text-sm text-muted-foreground">
-              {isInvited
-                ? 'Esta ação não pode ser desfeita. O convite será permanentemente deletado.'
+              {isPermanentDelete
+                ? 'Esta ação não pode ser desfeita. O usuário será permanentemente deletado.'
                 : 'Esta é uma ação reversível. Você pode reativar este usuário posteriormente se necessário.'}
             </p>
           </div>
@@ -140,10 +166,10 @@ export function RemoveUserDialog({
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin mr-2" />
-                  {isInvited ? 'Deletando...' : 'Desativando...'}
+                  {isPermanentDelete ? 'Deletando...' : 'Desativando...'}
                 </>
-              ) : isInvited ? (
-                'Deletar Convite'
+              ) : isPermanentDelete ? (
+                'Deletar Permanentemente'
               ) : (
                 'Desativar Usuário'
               )}

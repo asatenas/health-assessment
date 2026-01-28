@@ -2141,10 +2141,10 @@ export async function disableUser({
 }
 
 /**
- * Hard delete an invited user (permanently remove from database).
- * Should only be used for users in 'invited' status who haven't accepted.
+ * Hard delete a user (permanently remove from database).
+ * Should only be used for users in 'invited' or 'disabled' status.
  */
-export async function deleteInvitedUser({
+export async function deleteUser({
   userId,
 }: { userId: string }): Promise<User> {
   try {
@@ -2155,10 +2155,7 @@ export async function deleteInvitedUser({
 
     return deletedUser;
   } catch (error) {
-    throw new ChatSDKError(
-      'bad_request:database',
-      'Failed to delete invited user',
-    );
+    throw new ChatSDKError('bad_request:database', 'Failed to delete user');
   }
 }
 

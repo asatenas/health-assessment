@@ -79,6 +79,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [permanentDelete, setPermanentDelete] = useState(false);
 
   const currentUserId = session?.user?.id;
 
@@ -91,8 +92,9 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
     setShowChangeRoleDialog(true);
   };
 
-  const handleRemove = (user: User) => {
+  const handleRemove = (user: User, permanent = false) => {
     setSelectedUser(user);
+    setPermanentDelete(permanent);
     setShowRemoveDialog(true);
   };
 
@@ -258,13 +260,26 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                               )}
                             </>
                           )}
-                          {member.status === 'disabled' && canInvite && (
-                            <DropdownMenuItem
-                              onClick={() => handleReactivate(member)}
-                            >
-                              <UserPlus className="size-4 mr-2" />
-                              Reativar
-                            </DropdownMenuItem>
+                          {member.status === 'disabled' && (
+                            <>
+                              {canInvite && (
+                                <DropdownMenuItem
+                                  onClick={() => handleReactivate(member)}
+                                >
+                                  <UserPlus className="size-4 mr-2" />
+                                  Reativar
+                                </DropdownMenuItem>
+                              )}
+                              {canRemoveUser && (
+                                <DropdownMenuItem
+                                  onClick={() => handleRemove(member, true)}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="size-4 mr-2" />
+                                  Deletar
+                                </DropdownMenuItem>
+                              )}
+                            </>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -374,13 +389,26 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                           )}
                         </>
                       )}
-                      {member.status === 'disabled' && canInvite && (
-                        <DropdownMenuItem
-                          onClick={() => handleReactivate(member)}
-                        >
-                          <UserPlus className="size-4 mr-2" />
-                          Reativar
-                        </DropdownMenuItem>
+                      {member.status === 'disabled' && (
+                        <>
+                          {canInvite && (
+                            <DropdownMenuItem
+                              onClick={() => handleReactivate(member)}
+                            >
+                              <UserPlus className="size-4 mr-2" />
+                              Reativar
+                            </DropdownMenuItem>
+                          )}
+                          {canRemoveUser && (
+                            <DropdownMenuItem
+                              onClick={() => handleRemove(member, true)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="size-4 mr-2" />
+                              Deletar
+                            </DropdownMenuItem>
+                          )}
+                        </>
                       )}
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -405,6 +433,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
             onOpenChange={setShowRemoveDialog}
             user={selectedUser}
             onSuccess={onUpdate}
+            permanent={permanentDelete}
           />
         </>
       )}
