@@ -48,7 +48,7 @@ export default function Page() {
           'Conta criada com sucesso. Nosso time foi notificado e realizará a verificação do email.',
       });
 
-      setIsSuccessful(true);
+      // setIsSuccessful(true); // don't set as true yet so it doesn't bug
       updateSession();
       router.refresh();
     }
