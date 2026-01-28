@@ -1,7 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
-import { getUserById, disableUser, countActiveOwners } from '@/lib/db/queries';
+import {
+  getUserById,
+  disableUser,
+  deleteInvitedUser,
+  countActiveOwners,
+} from '@/lib/db/queries';
 
 /**
  * DELETE /api/clinic/members/[userId]
@@ -28,7 +33,10 @@ export async function DELETE(
     // Get target user
     const targetUser = await getUserById({ userId });
     if (!targetUser) {
-      return new ChatSDKError('not_found:api', 'Usuário não encontrado').toResponse();
+      return new ChatSDKError(
+        'not_found:api',
+        'Usuário não encontrado',
+      ).toResponse();
     }
 
     // Verify user belongs to same clinic
@@ -58,14 +66,26 @@ export async function DELETE(
       }
     }
 
-    // Soft delete
-    const disabledUserResult = await disableUser({ userId });
+    // Hard delete for invited users (who haven't accepted), soft delete for active users
+    if (targetUser.status === 'invited') {
+      const deletedUserResult = await deleteInvitedUser({ userId });
 
-    return NextResponse.json({
-      userId: disabledUserResult.id,
-      email: disabledUserResult.email,
-      status: 'disabled',
-    });
+      return NextResponse.json({
+        userId: deletedUserResult.id,
+        email: deletedUserResult.email,
+        status: 'deleted',
+        message: 'Convite deletado com sucesso',
+      });
+    } else {
+      // Soft delete for active users
+      const disabledUserResult = await disableUser({ userId });
+
+      return NextResponse.json({
+        userId: disabledUserResult.id,
+        email: disabledUserResult.email,
+        status: 'disabled',
+      });
+    }
   } catch (error) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();

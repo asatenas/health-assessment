@@ -17,7 +17,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, UserCog, UserMinus, UserPlus } from 'lucide-react';
+import {
+  MoreVertical,
+  UserCog,
+  UserMinus,
+  UserPlus,
+  Trash2,
+} from 'lucide-react';
 import type { User } from '@/lib/db/schema';
 import { useSession } from 'next-auth/react';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -237,8 +243,17 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                                   onClick={() => handleRemove(member)}
                                   className="text-destructive"
                                 >
-                                  <UserMinus className="size-4 mr-2" />
-                                  Desativar
+                                  {member.status === 'invited' ? (
+                                    <>
+                                      <Trash2 className="size-4 mr-2" />
+                                      Deletar Convite
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserMinus className="size-4 mr-2" />
+                                      Desativar
+                                    </>
+                                  )}
                                 </DropdownMenuItem>
                               )}
                             </>
@@ -344,8 +359,17 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                               onClick={() => handleRemove(member)}
                               className="text-destructive"
                             >
-                              <UserMinus className="size-4 mr-2" />
-                              Desativar
+                              {member.status === 'invited' ? (
+                                <>
+                                  <Trash2 className="size-4 mr-2" />
+                                  Deletar Convite
+                                </>
+                              ) : (
+                                <>
+                                  <UserMinus className="size-4 mr-2" />
+                                  Desativar
+                                </>
+                              )}
                             </DropdownMenuItem>
                           )}
                         </>

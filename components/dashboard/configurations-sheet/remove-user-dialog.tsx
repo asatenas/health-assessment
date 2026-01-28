@@ -63,13 +63,19 @@ export function RemoveUserDialog({
     onOpenChange(false);
   };
 
+  const isInvited = user.status === 'invited';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Desativar Usuário</DialogTitle>
+          <DialogTitle>
+            {isInvited ? 'Deletar Convite' : 'Desativar Usuário'}
+          </DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja desativar {user.email}?
+            {isInvited
+              ? `Tem certeza que deseja deletar o convite para ${user.email}?`
+              : `Tem certeza que deseja desativar ${user.email}?`}
           </DialogDescription>
         </DialogHeader>
 
@@ -84,22 +90,40 @@ export function RemoveUserDialog({
             <Alert>
               <Info className="size-4" />
               <AlertDescription>
-                <p className="font-medium mb-2">O usuário será desativado e:</p>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Não poderá mais fazer login no sistema</li>
-                  <li>
-                    Todas as avaliações e cirurgias criadas permanecerão no
-                    sistema
-                  </li>
-                  <li>Poderá ser reativado a qualquer momento</li>
-                  <li>Seus dados não serão permanentemente excluídos</li>
-                </ul>
+                {isInvited ? (
+                  <>
+                    <p className="font-medium mb-2">
+                      O convite será permanentemente deletado:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>O usuário não poderá mais aceitar este convite</li>
+                      <li>Todos os dados do convite serão removidos</li>
+                      <li>Você pode criar um novo convite se necessário</li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium mb-2">
+                      O usuário será desativado e:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Não poderá mais fazer login no sistema</li>
+                      <li>
+                        Todas as avaliações e cirurgias criadas permanecerão no
+                        sistema
+                      </li>
+                      <li>Poderá ser reativado a qualquer momento</li>
+                      <li>Seus dados não serão permanentemente excluídos</li>
+                    </ul>
+                  </>
+                )}
               </AlertDescription>
             </Alert>
 
             <p className="text-sm text-muted-foreground">
-              Esta é uma ação reversível. Você pode reativar este usuário
-              posteriormente se necessário.
+              {isInvited
+                ? 'Esta ação não pode ser desfeita. O convite será permanentemente deletado.'
+                : 'Esta é uma ação reversível. Você pode reativar este usuário posteriormente se necessário.'}
             </p>
           </div>
 
@@ -116,8 +140,10 @@ export function RemoveUserDialog({
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin mr-2" />
-                  Desativando...
+                  {isInvited ? 'Deletando...' : 'Desativando...'}
                 </>
+              ) : isInvited ? (
+                'Deletar Convite'
               ) : (
                 'Desativar Usuário'
               )}
