@@ -60,36 +60,36 @@ export function RiskDistributionChart({
             Nenhum dado disponível
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent = 0 }) =>
-                  `${name}: ${(percent * 100).toFixed(0)}%`
-                }
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {data.map((entry) => (
-                  <Cell key={`cell-${entry.name}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                formatter={(value, entry: any) => (
-                  <span className="text-sm">
-                    {value} ({entry.payload.value})
-                  </span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="h-[320px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ percent = 0 }) => `${(percent * 100).toFixed(0)}%`}
+                  outerRadius="55%"
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {data.map((entry) => (
+                    <Cell key={`cell-${entry.name}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  formatter={(value, entry: any) => (
+                    <span className="text-sm">
+                      {value} ({entry.payload.value})
+                    </span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </CardContent>
     </Card>
