@@ -66,7 +66,7 @@ export function UsersTab() {
       if (
         invitationsResponse.ok &&
         statusFilter !== 'active' &&
-        statusFilter !== 'disabled'
+        statusFilter !== 'removed'
       ) {
         const invitationsData = await invitationsResponse.json();
         setInvitations(invitationsData.invitations || []);

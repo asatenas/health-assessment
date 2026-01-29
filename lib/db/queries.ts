@@ -2107,7 +2107,7 @@ export async function removeUser({
 
 /**
  * Hard delete a user (permanently remove from database).
- * Should only be used for users in 'invited' or 'disabled' status.
+ * Should only be used for users in 'invited' or 'removed' status.
  */
 export async function deleteUser({
   userId,

@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest) {
     //   ).toResponse();
     // }
 
-    if (user.status === 'disabled') {
+    if (user.status === 'removed') {
       return new ChatSDKError(
         'unauthorized:api',
         'User account is not active',

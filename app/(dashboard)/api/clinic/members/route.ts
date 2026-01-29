@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') as
       | 'active'
       | 'invited'
-      | 'disabled'
+      | 'removed'
       | undefined;
     const role = searchParams.get('role') as
       | 'secretary'
