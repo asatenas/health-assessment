@@ -111,11 +111,13 @@ export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 
   try {
-    // First create the clinic
+    // Create clinic with temporary name and unauthorized status
     const [newClinic] = await db
       .insert(clinic)
       .values({
+        clinicName: 'Painel da Clínica',
         email,
+        authorized: false,
         formConfig: DEFAULT_FORM_CONFIG,
         updatedAt: new Date(),
       })
@@ -123,7 +125,7 @@ export async function createUser(email: string, password: string) {
         id: clinic.id,
       });
 
-    // Then create the user (owner) for that clinic
+    // Create user as owner with active status
     await db.insert(user).values({
       clinicId: newClinic.id,
       email,
@@ -1916,7 +1918,7 @@ export async function getClinicMembers({
   page?: number;
   limit?: number;
   search?: string;
-  status?: 'active' | 'invited' | 'disabled';
+  status?: 'active' | 'invited' | 'removed';
   role?: 'secretary' | 'clinician' | 'admin' | 'owner';
 }): Promise<{ members: User[]; total: number }> {
   try {
@@ -2085,21 +2087,21 @@ export async function updateUserClinic({
 }
 
 /**
- * Soft delete a user by setting status to disabled.
+ * Remove a user by setting status to removed.
  */
-export async function disableUser({
+export async function removeUser({
   userId,
 }: { userId: string }): Promise<User> {
   try {
-    const [disabledUser] = await db
+    const [removedUser] = await db
       .update(user)
-      .set({ status: 'disabled' })
+      .set({ status: 'removed' })
       .where(eq(user.id, userId))
       .returning();
 
-    return disabledUser;
+    return removedUser;
   } catch (error) {
-    throw new ChatSDKError('bad_request:database', 'Failed to disable user');
+    throw new ChatSDKError('bad_request:database', 'Failed to remove user');
   }
 }
 
@@ -2549,3 +2551,70 @@ export async function getPendingInvitationsForClinic({
     );
   }
 }
+
+/**
+ * Delete clinic invitations created by a specific user.
+ */
+export async function deleteInvitationsByInviter({
+  invitedBy,
+}: {
+  invitedBy: string;
+}): Promise<void> {
+  try {
+    await db
+      .delete(clinicInvitation)
+      .where(eq(clinicInvitation.invitedBy, invitedBy));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to delete invitations by inviter',
+    );
+  }
+}
+
+/**
+ * Create a new clinic and transfer a removed user to it.
+ * Sets the user status to active and role to owner.
+ */
+export async function createClinicAndTransferUser({
+  clinicName,
+  userEmail,
+  userId,
+}: {
+  clinicName: string;
+  userEmail: string;
+  userId: string;
+}): Promise<{ clinicId: string }> {
+  try {
+    // Create new clinic
+    const [newClinic] = await db
+      .insert(clinic)
+      .values({
+        clinicName: clinicName.trim(),
+        email: userEmail,
+        authorized: false, // Awaits approval
+        formConfig: DEFAULT_FORM_CONFIG,
+        updatedAt: new Date(),
+      })
+      .returning({ id: clinic.id });
+
+    // Transfer user to new clinic
+    await db
+      .update(user)
+      .set({
+        clinicId: newClinic.id,
+        role: 'owner',
+        status: 'active', // Back to active
+      })
+      .where(eq(user.id, userId));
+
+    return { clinicId: newClinic.id };
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create clinic and transfer user',
+    );
+  }
+}
+
+export type { User };

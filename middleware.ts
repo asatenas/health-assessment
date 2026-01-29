@@ -24,10 +24,22 @@ export async function middleware(request: NextRequest) {
   });
 
   const isLoggedIn = !!token;
-  const userStatus = token?.status;
+  const userStatus = token?.status as string | undefined;
 
   if (pathname.startsWith('/chat/')) {
     return NextResponse.next();
+  }
+
+  // Redirect removed users to create-clinic page
+  if (userStatus === 'removed') {
+    if (
+      !pathname.startsWith('/create-clinic') &&
+      !pathname.startsWith('/api/user/delete') &&
+      !pathname.startsWith('/api/clinic') &&
+      !pathname.startsWith('/api/user/clinic-invitations')
+    ) {
+      return NextResponse.redirect(new URL('/create-clinic', request.url));
+    }
   }
 
   if (['/login', '/register'].includes(pathname)) {

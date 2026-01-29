@@ -1,12 +1,12 @@
 import { auth } from '@/app/(auth)/auth';
 import { ChatSDKError } from '@/lib/shared/errors';
-import { getUserById } from '@/lib/db/queries';
+import { getUserById, type User } from '@/lib/db/queries';
 
 /**
  * Basic authentication guard for user-level operations.
  * Only verifies user is authenticated and exists - does NOT check:
  * - Email verification
- * - User status (active/invited/disabled)
+ * - User status (active/invited/removed)
  * - Clinic authorization
  * - Permissions
  *
@@ -16,6 +16,7 @@ import { getUserById } from '@/lib/db/queries';
 export async function validateBasicAuth(): Promise<{
   userId: string;
   email: string;
+  user: User;
 }> {
   const session = await auth();
 
@@ -33,5 +34,6 @@ export async function validateBasicAuth(): Promise<{
   return {
     userId: user.id,
     email: user.email,
+    user,
   };
 }

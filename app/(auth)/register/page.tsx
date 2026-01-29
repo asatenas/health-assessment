@@ -41,16 +41,13 @@ export default function Page() {
       });
     } else if (state.status === 'success') {
       // English: 'Account created successfully!'
-      // toast({ type: 'success', description: 'Conta criada com sucesso!' });
       toast({
         type: 'success',
-        description:
-          'Conta criada com sucesso. Nosso time foi notificado e realizará a verificação do email.',
+        description: 'Conta criada com sucesso!',
       });
 
-      // setIsSuccessful(true); // don't set as true yet so it doesn't bug
       updateSession();
-      router.refresh();
+      router.push('/create-clinic');
     }
   }, [state]);
 

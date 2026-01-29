@@ -42,7 +42,7 @@ export const user = pgTable(
     role: varchar('role', {
       enum: ['secretary', 'clinician', 'admin', 'owner'],
     }).notNull(),
-    status: varchar('status', { enum: ['active', 'invited', 'disabled'] })
+    status: varchar('status', { enum: ['active', 'invited', 'removed'] })
       .notNull()
       .default('active'),
     platformAdmin: boolean('platformAdmin').notNull().default(false),

@@ -18,6 +18,7 @@ declare module 'next-auth' {
     user: {
       id: string;
       role: 'secretary' | 'clinician' | 'admin' | 'owner';
+      status?: 'active' | 'invited' | 'removed';
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
     } & DefaultSession['user'];
@@ -50,7 +51,7 @@ declare module 'next-auth/jwt' {
     id: string;
     email: string;
     role: 'secretary' | 'clinician' | 'admin' | 'owner';
-    status: 'active' | 'invited' | 'disabled';
+    status: 'active' | 'invited' | 'removed';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
     clinicId: string;
@@ -146,11 +147,16 @@ export const {
           userId: existingUser.id,
         });
 
-        if (!clinic?.authorized) {
-          return null;
+        // If user is removed, allow login (they can access /create-clinic)
+        if (existingUser.status === 'removed') {
+          return {
+            id: existingUser.id,
+            email: existingUser.email,
+          };
         }
 
-        if (existingUser.status === 'disabled') {
+        // For other statuses, check if clinic is authorized
+        if (!clinic?.authorized) {
           return null;
         }
 
@@ -262,9 +268,12 @@ export const {
           session.user.platformAdmin = true;
         }
 
-        // Add role and permissions
+        // Add role, status, and permissions
         if (token.role) {
           session.user.role = token.role;
+        }
+        if (token.status) {
+          session.user.status = token.status;
         }
         if (token.permissions) {
           session.user.permissions = token.permissions;

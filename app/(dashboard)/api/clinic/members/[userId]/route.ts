@@ -3,17 +3,18 @@ import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 import {
   getUserById,
-  disableUser,
+  removeUser,
   deleteUser,
   countActiveOwners,
+  deleteInvitationsByInviter,
 } from '@/lib/db/queries';
 
 /**
- * DELETE /api/clinic/members/[userId]?permanent=true
- * Remove a user (soft or hard delete)
- * - For invited users: always hard delete
- * - For disabled users with ?permanent=true: hard delete
- * - For active users: soft delete (change status to disabled)
+ * DELETE /api/clinic/members/[userId]
+ * Remove a user from the clinic
+ * - For invited users: hard delete
+ * - For active users: set status to 'removed'
+ * - Deleted invitations created by the removed user
  */
 export async function DELETE(
   request: NextRequest,
@@ -21,8 +22,6 @@ export async function DELETE(
 ) {
   try {
     const { userId } = await params;
-    const { searchParams } = new URL(request.url);
-    const permanent = searchParams.get('permanent') === 'true';
 
     const currentUser = await validateClinicAccess(undefined, {
       permissions: ['users.remove'],
@@ -72,38 +71,30 @@ export async function DELETE(
       }
     }
 
-    // Determine deletion strategy based on status and permanent flag
-    if (
-      targetUser.status === 'invited' ||
-      (targetUser.status === 'disabled' && permanent)
-    ) {
-      // Hard delete invited users or disabled users with permanent flag
+    // Delete invitations created by this user
+    await deleteInvitationsByInviter({ invitedBy: userId });
+
+    // Determine removal strategy based on status
+    if (targetUser.status === 'invited') {
+      // Hard delete invited users
       const deletedUserResult = await deleteUser({ userId });
 
       return NextResponse.json({
         userId: deletedUserResult.id,
         email: deletedUserResult.email,
         status: 'deleted',
-        message:
-          targetUser.status === 'invited'
-            ? 'Convite deletado com sucesso'
-            : 'Usuário deletado permanentemente',
-      });
-    } else if (targetUser.status === 'active') {
-      // Soft delete for active users
-      const disabledUserResult = await disableUser({ userId });
-
-      return NextResponse.json({
-        userId: disabledUserResult.id,
-        email: disabledUserResult.email,
-        status: 'disabled',
+        message: 'Convite deletado com sucesso',
       });
     } else {
-      // Disabled user without permanent flag - cannot delete
-      return new ChatSDKError(
-        'bad_request:api',
-        'Use o parâmetro permanent=true para deletar permanentemente um usuário desativado',
-      ).toResponse();
+      // Set status to 'removed' for active users
+      const removedUserResult = await removeUser({ userId });
+
+      return NextResponse.json({
+        userId: removedUserResult.id,
+        email: removedUserResult.email,
+        status: 'removed',
+        message: 'Usuário removido com sucesso',
+      });
     }
   } catch (error) {
     if (error instanceof ChatSDKError) {
