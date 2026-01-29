@@ -200,8 +200,6 @@ interface ConfigurationsSheetProps {
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
   initialClinicName: string;
-  initialFormConfig: FormConfiguration;
-  initialDashboardConfig: DashboardConfiguration;
 }
 
 export function ConfigurationsSheet({
@@ -209,16 +207,13 @@ export function ConfigurationsSheet({
   onOpenChange,
   onSaved,
   initialClinicName,
-  initialFormConfig,
-  initialDashboardConfig,
 }: ConfigurationsSheetProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [clinicName, setClinicName] = useState(initialClinicName);
-  const [formConfig, setFormConfig] =
-    useState<FormConfiguration>(initialFormConfig);
+  const [formConfig, setFormConfig] = useState<FormConfiguration | null>(null);
   const [dashboardConfig, setDashboardConfig] =
-    useState<DashboardConfiguration>(initialDashboardConfig);
+    useState<DashboardConfiguration | null>(null);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [showImpersonationDialog, setShowImpersonationDialog] = useState(false);
@@ -227,6 +222,9 @@ export function ConfigurationsSheet({
   // Check if user is secretary or clinician (only see Account tab)
   const isBasicUser =
     session?.user?.role === 'secretary' || session?.user?.role === 'clinician';
+
+  // Basic users don't have access to form/dashboard configs
+  const hasAdvancedConfigs = !isBasicUser && formConfig && dashboardConfig;
 
   useEffect(() => {
     if (open) {
@@ -245,12 +243,9 @@ export function ConfigurationsSheet({
 
       const data = await response.json();
       setClinicName(data.clinicName);
-      if (data.formConfig) {
-        setFormConfig(data.formConfig);
-      }
-      if (data.dashboardConfig) {
-        setDashboardConfig(data.dashboardConfig);
-      }
+      // For basic users, formConfig and dashboardConfig will be undefined
+      setFormConfig(data.formConfig || null);
+      setDashboardConfig(data.dashboardConfig || null);
     } catch (error) {
       console.error('Error loading config:', error);
       setError('Erro ao carregar configurações');
@@ -263,10 +258,30 @@ export function ConfigurationsSheet({
     setSaving(true);
     setError(null);
     try {
+      // Basic users can't save, this should never be called for them
+      // but adding safety check
+      if (isBasicUser) {
+        return;
+      }
+
+      const payload: {
+        clinicName: string;
+        formConfig?: FormConfiguration | null;
+        dashboardConfig?: DashboardConfiguration | null;
+      } = { clinicName };
+
+      // Only include configs if they exist (non-basic users)
+      if (formConfig) {
+        payload.formConfig = formConfig;
+      }
+      if (dashboardConfig) {
+        payload.dashboardConfig = dashboardConfig;
+      }
+
       const response = await fetch('/api/clinic/config', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clinicName, formConfig, dashboardConfig }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -284,6 +299,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleSection = (sectionKey: string) => {
+    if (!formConfig) {
+      return;
+    }
     setFormConfig({
       ...formConfig,
       sections: {
@@ -301,6 +319,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleField = (sectionKey: string, fieldKey: string) => {
+    if (!formConfig) {
+      return;
+    }
     const section =
       formConfig.sections[sectionKey as keyof typeof formConfig.sections];
     const fields = section.fields as Record<string, FormFieldConfig>;
@@ -323,6 +344,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleWidget = (widgetKey: string) => {
+    if (!dashboardConfig) {
+      return;
+    }
     setDashboardConfig({
       ...dashboardConfig,
       widgets: {
@@ -349,8 +373,9 @@ export function ConfigurationsSheet({
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Configurações da Clínica</SheetTitle>
           <SheetDescription>
-            Configure o nome da clínica, os campos do formulário e os widgets do
-            dashboard
+            {isBasicUser
+              ? 'Gerencie suas configurações de conta'
+              : 'Configure o nome da clínica, os campos do formulário e os widgets do dashboard'}
           </SheetDescription>
         </SheetHeader>
 
@@ -384,14 +409,16 @@ export function ConfigurationsSheet({
                             value={clinicName}
                             onChange={(e) => setClinicName(e.target.value)}
                             placeholder="Ex: Clínica Santa Maria"
-                            disabled={isBasicUser}
-                            readOnly={isBasicUser}
+                            disabled={!hasAdvancedConfigs}
+                            readOnly={!hasAdvancedConfigs}
                             className={
-                              isBasicUser ? 'bg-muted cursor-not-allowed' : ''
+                              !hasAdvancedConfigs
+                                ? 'bg-muted cursor-not-allowed'
+                                : ''
                             }
                           />
                           <p className="text-xs text-muted-foreground">
-                            {!isBasicUser &&
+                            {hasAdvancedConfigs &&
                               'Este nome será exibido no painel da clínica'}
                           </p>
                         </div>
@@ -426,23 +453,23 @@ export function ConfigurationsSheet({
                       )}
 
                     <Tabs
-                      defaultValue={isBasicUser ? 'account' : 'form'}
+                      defaultValue={hasAdvancedConfigs ? 'form' : 'account'}
                       className="w-full"
                     >
-                      {isBasicUser ? (
-                        <TabsList className="grid w-full grid-cols-1">
-                          <TabsTrigger value="account">Conta</TabsTrigger>
-                        </TabsList>
-                      ) : (
+                      {hasAdvancedConfigs ? (
                         <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="form">Formulário</TabsTrigger>
                           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                           <TabsTrigger value="users">Usuários</TabsTrigger>
                           <TabsTrigger value="account">Conta</TabsTrigger>
                         </TabsList>
+                      ) : (
+                        <TabsList className="grid w-full grid-cols-1">
+                          <TabsTrigger value="account">Conta</TabsTrigger>
+                        </TabsList>
                       )}
 
-                      {!isBasicUser && (
+                      {hasAdvancedConfigs && (
                         <TabsContent value="form" className="mt-4">
                           <Card>
                             <CardHeader>
@@ -569,7 +596,7 @@ export function ConfigurationsSheet({
                         </TabsContent>
                       )}
 
-                      {!isBasicUser && (
+                      {hasAdvancedConfigs && (
                         <TabsContent value="dashboard" className="mt-4">
                           <Card>
                             <CardHeader>
@@ -615,7 +642,7 @@ export function ConfigurationsSheet({
                         </TabsContent>
                       )}
 
-                      {!isBasicUser && (
+                      {hasAdvancedConfigs && (
                         <TabsContent value="users" className="mt-4">
                           <UsersTab />
                         </TabsContent>
@@ -636,9 +663,9 @@ export function ConfigurationsSheet({
                 onClick={() => onOpenChange(false)}
                 disabled={saving}
               >
-                {isBasicUser ? 'Fechar' : 'Cancelar'}
+                {hasAdvancedConfigs ? 'Cancelar' : 'Fechar'}
               </Button>
-              {!isBasicUser && (
+              {hasAdvancedConfigs && (
                 <Button onClick={handleSave} disabled={saving}>
                   {saving ? (
                     <>
