@@ -2330,7 +2330,7 @@ export async function createUserFromInvitation({
         clinicId: invitation.clinicId,
         role: invitation.role,
         password: invitation.temporaryPassword,
-        status: 'active',
+        status: 'invited',
         emailVerified: true, // Auto-verify since they got email with temp password
         platformAdmin: false,
       })
