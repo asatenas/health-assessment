@@ -39,7 +39,7 @@ export default function Page() {
         toast({
           type: 'error',
           description:
-            'E-mail não verificado. Envie um email para suporte@asatenas.com.br para verificação.',
+            'E-mail não verificado. Envie um email para suporte@asatenas.com.br para verificação do email.',
         });
         break;
       case 'clinic_not_authorized':
@@ -47,7 +47,7 @@ export default function Page() {
         toast({
           type: 'error',
           description:
-            'Usuário não verificado. Envie um email para suporte@asatenas.com.br para verificação.',
+            'Usuário não verificado. Envie um email para suporte@asatenas.com.br para verificação do email.',
         });
         break;
       case 'failed':

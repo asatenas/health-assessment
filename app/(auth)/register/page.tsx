@@ -43,11 +43,12 @@ export default function Page() {
       // English: 'Account created successfully!'
       toast({
         type: 'success',
-        description: 'Conta criada com sucesso!',
+        description:
+          'Conta criada com sucesso! Envie um email para suporte@asatenas.com.br para realizar a verificação do email.',
       });
 
       updateSession();
-      router.push('/create-clinic');
+      router.push('/dashboard');
     }
   }, [state]);
 
