@@ -14,7 +14,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Info, Building2, UserX, Trash2, LogOut } from 'lucide-react';
+import {
+  Loader2,
+  Info,
+  Building2,
+  UserX,
+  Trash2,
+  LogOut,
+  Home,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CreateClinicPage() {
@@ -24,11 +32,14 @@ export default function CreateClinicPage() {
   const [loading, setLoading] = useState(false);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loadingInvitations, setLoadingInvitations] = useState(false);
+  const [originalClinic, setOriginalClinic] = useState<any>(null);
+  const [loadingOriginalClinic, setLoadingOriginalClinic] = useState(true);
 
-  // Fetch pending invitations
+  // Fetch pending invitations and original clinic
   useEffect(() => {
     if (session?.user?.email) {
       fetchInvitations();
+      fetchOriginalClinic();
     }
   }, [session]);
 
@@ -44,6 +55,21 @@ export default function CreateClinicPage() {
       console.error('Error fetching invitations:', error);
     } finally {
       setLoadingInvitations(false);
+    }
+  };
+
+  const fetchOriginalClinic = async () => {
+    setLoadingOriginalClinic(true);
+    try {
+      const response = await fetch('/api/clinic/original');
+      if (response.ok) {
+        const data = await response.json();
+        setOriginalClinic(data.clinic || null);
+      }
+    } catch (error) {
+      console.error('Error fetching original clinic:', error);
+    } finally {
+      setLoadingOriginalClinic(false);
     }
   };
 
@@ -123,12 +149,36 @@ export default function CreateClinicPage() {
     }
   };
 
+  const handleReturnToOriginalClinic = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/clinic/return-to-original', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(
+          data.message || 'Erro ao retornar para clínica original',
+        );
+      }
+
+      toast.success('Retornando para sua clínica original...');
+
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao retornar para clínica original');
+      setLoading(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
-    if (
-      !confirm(
-        'Tem certeza que deseja deletar sua conta permanentemente? Esta ação não pode ser desfeita.',
-      )
-    ) {
+    const confirmMessage = originalClinic
+      ? 'Tem certeza que deseja deletar sua conta e sua clínica original permanentemente? Esta ação não pode ser desfeita.'
+      : 'Tem certeza que deseja deletar sua conta permanentemente? Esta ação não pode ser desfeita.';
+
+    if (!confirm(confirmMessage)) {
       return;
     }
 
@@ -185,45 +235,79 @@ export default function CreateClinicPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Create new clinic */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Building2 className="size-5" />
-                Criar nova clínica
-              </h3>
-              <form onSubmit={handleCreateNewClinic} className="space-y-4">
-                <div>
-                  <Label htmlFor="clinicName">Nome da clínica</Label>
-                  <Input
-                    id="clinicName"
-                    type="text"
-                    value={clinicName}
-                    onChange={(e) => setClinicName(e.target.value)}
-                    placeholder="Digite o nome da sua clínica"
-                    disabled={loading}
-                    minLength={3}
-                    required
-                  />
-                </div>
-                <Button type="submit" disabled={loading} className="w-full">
+            {/* Return to original clinic */}
+            {loadingOriginalClinic ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="size-6 animate-spin" />
+              </div>
+            ) : originalClinic ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Home className="size-5" />
+                  Retornar para sua clínica original
+                </h3>
+                <Alert>
+                  <Info className="size-4" />
+                  <AlertDescription>
+                    Encontramos sua clínica original:{' '}
+                    <strong>{originalClinic.clinicName}</strong>
+                  </AlertDescription>
+                </Alert>
+                <Button
+                  onClick={handleReturnToOriginalClinic}
+                  disabled={loading}
+                  className="w-full"
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 size-4 animate-spin" />
-                      Criando...
+                      Retornando...
                     </>
                   ) : (
-                    'Criar clínica'
+                    'Retornar para minha clínica'
                   )}
                 </Button>
-              </form>
-              <Alert>
-                <Info className="size-4" />
-                <AlertDescription>
-                  Após criar sua clínica, ela precisará ser aprovada pelo
-                  suporte antes que você possa utilizá-la.
-                </AlertDescription>
-              </Alert>
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Building2 className="size-5" />
+                  Criar nova clínica
+                </h3>
+                <form onSubmit={handleCreateNewClinic} className="space-y-4">
+                  <div>
+                    <Label htmlFor="clinicName">Nome da clínica</Label>
+                    <Input
+                      id="clinicName"
+                      type="text"
+                      value={clinicName}
+                      onChange={(e) => setClinicName(e.target.value)}
+                      placeholder="Digite o nome da sua clínica"
+                      disabled={loading}
+                      minLength={3}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      'Criar clínica'
+                    )}
+                  </Button>
+                </form>
+                <Alert>
+                  <Info className="size-4" />
+                  <AlertDescription>
+                    Após criar sua clínica, ela precisará ser aprovada pelo
+                    suporte antes que você possa utilizá-la.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
 
             {/* Accept invitations */}
             {invitations.length > 0 && (
@@ -260,8 +344,9 @@ export default function CreateClinicPage() {
                 Deletar minha conta
               </h3>
               <p className="text-sm text-gray-600">
-                Se você não deseja mais usar o sistema, pode deletar sua conta
-                permanentemente.
+                {originalClinic
+                  ? 'Se você não deseja mais usar o sistema, pode deletar sua conta e sua clínica original permanentemente.'
+                  : 'Se você não deseja mais usar o sistema, pode deletar sua conta permanentemente.'}
               </p>
               <Button
                 variant="destructive"
@@ -269,7 +354,9 @@ export default function CreateClinicPage() {
                 disabled={loading}
                 className="w-full"
               >
-                Deletar conta permanentemente
+                {originalClinic
+                  ? 'Deletar conta e clínica permanentemente'
+                  : 'Deletar conta permanentemente'}
               </Button>
             </div>
           </CardContent>

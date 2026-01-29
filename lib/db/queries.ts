@@ -2617,4 +2617,76 @@ export async function createClinicAndTransferUser({
   }
 }
 
+/**
+ * Get clinic by email address.
+ */
+export async function getClinicByEmail({
+  email,
+}: { email: string }): Promise<Clinic | undefined> {
+  try {
+    const [result] = await db
+      .select()
+      .from(clinic)
+      .where(eq(clinic.email, email));
+    return result;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get clinic by email',
+    );
+  }
+}
+
+/**
+ * Transfer user to an existing clinic.
+ */
+export async function transferUserToExistingClinic({
+  userId,
+  clinicId,
+  role,
+  status,
+}: {
+  userId: string;
+  clinicId: string;
+  role: 'secretary' | 'clinician' | 'admin' | 'owner';
+  status: 'active' | 'invited' | 'removed';
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({
+        clinicId,
+        role,
+        status,
+      })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to transfer user to clinic',
+    );
+  }
+}
+
+/**
+ * Delete a clinic by ID.
+ */
+export async function deleteClinic({
+  clinicId,
+}: { clinicId: string }): Promise<Clinic> {
+  try {
+    const [deletedClinic] = await db
+      .delete(clinic)
+      .where(eq(clinic.id, clinicId))
+      .returning();
+
+    return deletedClinic;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to delete clinic');
+  }
+}
+
 export type { User };
