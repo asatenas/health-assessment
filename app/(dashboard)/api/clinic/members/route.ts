@@ -146,8 +146,6 @@ export async function POST(request: NextRequest) {
       temporaryPassword: hashedPassword,
     });
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
-
     // Return appropriate response based on user type
     if (existingUser) {
       return NextResponse.json({
@@ -165,7 +163,7 @@ export async function POST(request: NextRequest) {
         email,
         role,
         temporaryPassword, // Plain text for display to admin
-        invitationUrl,
+        invitationUrl: `${process.env.APP_URL}/login`,
         expiresAt,
       });
     }
