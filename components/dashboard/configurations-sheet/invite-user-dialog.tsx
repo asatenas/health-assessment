@@ -65,6 +65,7 @@ export function InviteUserDialog({
   } | null>(null);
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [invitationCreated, setInvitationCreated] = useState(false);
 
   const isAdmin = session?.user?.role === 'admin';
 
@@ -87,14 +88,7 @@ export function InviteUserDialog({
       }
 
       setInvitationResult(data);
-
-      // If clinic switch, close after 3 seconds
-      if (data.type === 'clinic_switch') {
-        setTimeout(() => {
-          handleClose();
-          onSuccess();
-        }, 3000);
-      }
+      setInvitationCreated(true);
     } catch (error) {
       console.error('Error inviting user:', error);
       setError(
@@ -106,10 +100,17 @@ export function InviteUserDialog({
   };
 
   const handleClose = () => {
+    // If invitation was created, trigger refresh before closing
+    if (invitationCreated) {
+      onSuccess();
+    }
+
+    // Reset all state
     setEmail('');
     setRole('');
     setError(null);
     setInvitationResult(null);
+    setInvitationCreated(false);
     setCopiedPassword(false);
     setCopiedUrl(false);
     onOpenChange(false);
@@ -132,7 +133,14 @@ export function InviteUserDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          handleClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
@@ -216,14 +224,7 @@ export function InviteUserDialog({
                 </div>
 
                 <DialogFooter>
-                  <Button
-                    onClick={() => {
-                      handleClose();
-                      onSuccess();
-                    }}
-                  >
-                    Fechar
-                  </Button>
+                  <Button onClick={handleClose}>Fechar</Button>
                 </DialogFooter>
               </>
             ) : (
