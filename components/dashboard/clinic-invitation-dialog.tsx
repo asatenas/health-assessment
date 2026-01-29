@@ -45,7 +45,7 @@ export function ClinicInvitationDialog({
   onReject,
 }: ClinicInvitationDialogProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState<'accept' | 'reject' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -55,7 +55,7 @@ export function ClinicInvitationDialog({
     if (!currentInvitation) return;
 
     setError(null);
-    setLoading(currentInvitation.id);
+    setLoading('accept');
 
     try {
       await onAccept(currentInvitation.id);
@@ -76,7 +76,7 @@ export function ClinicInvitationDialog({
     if (!currentInvitation) return;
 
     setError(null);
-    setLoading(currentInvitation.id);
+    setLoading('reject');
 
     try {
       await onReject(currentInvitation.id);
@@ -190,7 +190,7 @@ export function ClinicInvitationDialog({
             disabled={loading !== null}
             className="w-full sm:w-auto"
           >
-            {loading === currentInvitation.id ? (
+            {loading === 'reject' ? (
               <>
                 <Loader2 className="size-4 animate-spin mr-2" />
                 Recusando...
@@ -205,7 +205,7 @@ export function ClinicInvitationDialog({
             disabled={loading !== null}
             className="w-full sm:w-auto"
           >
-            {loading === currentInvitation.id ? (
+            {loading === 'accept' ? (
               <>
                 <Loader2 className="size-4 animate-spin mr-2" />
                 Aceitando...
