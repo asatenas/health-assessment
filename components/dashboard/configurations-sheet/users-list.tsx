@@ -56,7 +56,7 @@ const ROLE_LABELS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
   active: 'Ativo',
   invited: 'Convidado',
-  disabled: 'Desativado',
+  removed: 'Removido',
 };
 
 const ROLE_VARIANTS: Record<
@@ -75,7 +75,7 @@ const STATUS_VARIANTS: Record<
 > = {
   active: 'default',
   invited: 'secondary',
-  disabled: 'destructive',
+  removed: 'destructive',
 };
 
 export function UsersList({ members, onUpdate }: UsersListProps) {
@@ -304,33 +304,20 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                                       ) : (
                                         <>
                                           <UserMinus className="size-4 mr-2" />
-                                          Desativar
+                                          Remover
                                         </>
                                       )}
                                     </DropdownMenuItem>
                                   )}
                                 </>
                               )}
-                              {member.status === 'disabled' && (
-                                <>
-                                  {canInvite && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleReactivate(member)}
-                                    >
-                                      <UserPlus className="size-4 mr-2" />
-                                      Reativar
-                                    </DropdownMenuItem>
-                                  )}
-                                  {canRemoveUser && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleRemove(member, true)}
-                                      className="text-destructive"
-                                    >
-                                      <Trash2 className="size-4 mr-2" />
-                                      Deletar
-                                    </DropdownMenuItem>
-                                  )}
-                                </>
+                              {member.status === 'removed' && canInvite && (
+                                <DropdownMenuItem
+                                  onClick={() => handleReactivate(member)}
+                                >
+                                  <UserPlus className="size-4 mr-2" />
+                                  Reativar
+                                </DropdownMenuItem>
                               )}
                             </>
                           )}
@@ -450,33 +437,20 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                                   ) : (
                                     <>
                                       <UserMinus className="size-4 mr-2" />
-                                      Desativar
+                                      Remover
                                     </>
                                   )}
                                 </DropdownMenuItem>
                               )}
                             </>
                           )}
-                          {member.status === 'disabled' && (
-                            <>
-                              {canInvite && (
-                                <DropdownMenuItem
-                                  onClick={() => handleReactivate(member)}
-                                >
-                                  <UserPlus className="size-4 mr-2" />
-                                  Reativar
-                                </DropdownMenuItem>
-                              )}
-                              {canRemoveUser && (
-                                <DropdownMenuItem
-                                  onClick={() => handleRemove(member, true)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="size-4 mr-2" />
-                                  Deletar
-                                </DropdownMenuItem>
-                              )}
-                            </>
+                          {member.status === 'removed' && canInvite && (
+                            <DropdownMenuItem
+                              onClick={() => handleReactivate(member)}
+                            >
+                              <UserPlus className="size-4 mr-2" />
+                              Reativar
+                            </DropdownMenuItem>
                           )}
                         </>
                       )}

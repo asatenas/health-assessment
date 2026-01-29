@@ -74,16 +74,14 @@ export function RemoveUserDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isPermanentDelete
-              ? 'Deletar Permanentemente'
-              : 'Desativar Usuário'}
+            {isPermanentDelete ? 'Deletar Permanentemente' : 'Remover Usuário'}
           </DialogTitle>
           <DialogDescription>
             {isInvited
               ? `Tem certeza que deseja deletar o convite para ${user.email}?`
               : permanent
                 ? `Tem certeza que deseja deletar permanentemente ${user.email}?`
-                : `Tem certeza que deseja desativar ${user.email}?`}
+                : `Tem certeza que deseja remover ${user.email}?`}
           </DialogDescription>
         </DialogHeader>
 
@@ -130,10 +128,10 @@ export function RemoveUserDialog({
                 ) : (
                   <>
                     <p className="font-medium mb-2">
-                      O usuário será desativado e:
+                      O usuário será removido e:
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-sm">
-                      <li>Não poderá mais fazer login no sistema</li>
+                      <li>Perderá acesso aos recursos desta clínica</li>
                       <li>
                         Todas as avaliações e cirurgias criadas permanecerão no
                         sistema
@@ -166,12 +164,12 @@ export function RemoveUserDialog({
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin mr-2" />
-                  {isPermanentDelete ? 'Deletando...' : 'Desativando...'}
+                  {isPermanentDelete ? 'Deletando...' : 'Removendo...'}
                 </>
               ) : isPermanentDelete ? (
                 'Deletar Permanentemente'
               ) : (
-                'Desativar Usuário'
+                'Remover Usuário'
               )}
             </Button>
           </DialogFooter>

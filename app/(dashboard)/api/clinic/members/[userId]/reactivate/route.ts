@@ -5,7 +5,7 @@ import { getUserById, reactivateUser } from '@/lib/db/queries';
 
 /**
  * POST /api/clinic/members/[userId]/reactivate
- * Reactivate a disabled user
+ * Reactivate a removed user
  */
 export async function POST(
   request: NextRequest,
@@ -31,11 +31,11 @@ export async function POST(
       return new ChatSDKError('forbidden:api').toResponse();
     }
 
-    // Check if user is disabled
-    if (targetUser.status !== 'disabled') {
+    // Check if user is removed
+    if (targetUser.status !== 'removed') {
       return new ChatSDKError(
         'bad_request:api',
-        'Usuário não está desativado',
+        'Usuário não está removido',
       ).toResponse();
     }
 
