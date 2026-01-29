@@ -41,9 +41,10 @@ export async function validateClinicAccess(
     throw new ChatSDKError('unauthorized:api');
   }
 
-  if (!user.emailVerified) {
-    throw new ChatSDKError('unauthorized:api', 'Email not verified');
-  }
+  // TODO: currently disable email verification since we don't send emails
+  // if (!user.emailVerified) {
+  //   throw new ChatSDKError('unauthorized:api', 'Email not verified');
+  // }
 
   if (user.status !== 'active') {
     throw new ChatSDKError('unauthorized:api', 'User account is not active');

@@ -36,9 +36,10 @@ export const login = async (
     const users = await getUser(validatedData.email);
     if (users.length > 0) {
       const [user] = users;
-      if (!user.emailVerified) {
-        return { status: 'email_not_verified' };
-      }
+      // TODO: currently disable email verification since we don't send emails
+      // if (!user.emailVerified) {
+      //   return { status: 'email_not_verified' };
+      // }
       const clinic = await getClinicByUserId({ userId: user.id });
       if (!clinic?.authorized) {
         return { status: 'clinic_not_authorized' };

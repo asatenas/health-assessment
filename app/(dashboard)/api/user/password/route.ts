@@ -37,12 +37,13 @@ export async function PATCH(request: NextRequest) {
       ).toResponse();
     }
 
-    if (!user.emailVerified) {
-      return new ChatSDKError(
-        'unauthorized:api',
-        'Email not verified',
-      ).toResponse();
-    }
+    // TODO: currently disable email verification since we don't send emails
+    // if (!user.emailVerified) {
+    //   return new ChatSDKError(
+    //     'unauthorized:api',
+    //     'Email not verified',
+    //   ).toResponse();
+    // }
 
     if (user.status === 'disabled') {
       return new ChatSDKError(

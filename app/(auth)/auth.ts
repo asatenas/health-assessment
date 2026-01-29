@@ -136,10 +136,11 @@ export const {
 
         if (!passwordsMatch) return null;
 
-        // Check if email is verified
-        if (!existingUser.emailVerified) {
-          return null;
-        }
+        // TODO: currently disable email verification since we don't send emails
+        // // Check if email is verified
+        // if (!existingUser.emailVerified) {
+        //   return null;
+        // }
 
         if (existingUser.status === 'disabled') {
           return null;
