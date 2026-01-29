@@ -142,6 +142,14 @@ export const {
         //   return null;
         // }
 
+        const clinic = await getClinicByUserId({
+          userId: existingUser.id,
+        });
+
+        if (!clinic?.authorized) {
+          return null;
+        }
+
         if (existingUser.status === 'disabled') {
           return null;
         }
