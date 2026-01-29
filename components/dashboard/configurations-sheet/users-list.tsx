@@ -23,6 +23,7 @@ import {
   UserMinus,
   UserPlus,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 import type { User, ClinicInvitation } from '@/lib/db/schema';
 import { useSession } from 'next-auth/react';
@@ -87,6 +88,9 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
   const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
+  const [reactivatingUserId, setReactivatingUserId] = useState<string | null>(
+    null,
+  );
 
   const currentUserId = session?.user?.id;
 
@@ -110,6 +114,7 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
   const handleReactivate = async (member: MemberOrInvitation) => {
     if (member.type !== 'user') return;
 
+    setReactivatingUserId(member.id);
     try {
       const response = await fetch(
         `/api/clinic/members/${member.id}/reactivate`,
@@ -129,6 +134,8 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
       alert(
         error instanceof Error ? error.message : 'Erro ao reativar usuário',
       );
+    } finally {
+      setReactivatingUserId(null);
     }
   };
 
@@ -226,9 +233,17 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANTS[member.status]}>
-                      {STATUS_LABELS[member.status]}
-                    </Badge>
+                    {member.type === 'user' &&
+                    reactivatingUserId === member.id ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <Loader2 className="size-3 animate-spin" />
+                        Reativando...
+                      </Badge>
+                    ) : (
+                      <Badge variant={STATUS_VARIANTS[member.status]}>
+                        {STATUS_LABELS[member.status]}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     {isCurrentUser ? (
@@ -314,9 +329,19 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                               {member.status === 'removed' && canInvite && (
                                 <DropdownMenuItem
                                   onClick={() => handleReactivate(member)}
+                                  disabled={reactivatingUserId === member.id}
                                 >
-                                  <UserPlus className="size-4 mr-2" />
-                                  Reativar
+                                  {reactivatingUserId === member.id ? (
+                                    <>
+                                      <Loader2 className="size-4 mr-2 animate-spin" />
+                                      Reativando...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserPlus className="size-4 mr-2" />
+                                      Reativar
+                                    </>
+                                  )}
                                 </DropdownMenuItem>
                               )}
                             </>
@@ -361,9 +386,17 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                     <Badge variant={ROLE_VARIANTS[member.role]}>
                       {ROLE_LABELS[member.role]}
                     </Badge>
-                    <Badge variant={STATUS_VARIANTS[member.status]}>
-                      {STATUS_LABELS[member.status]}
-                    </Badge>
+                    {member.type === 'user' &&
+                    reactivatingUserId === member.id ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <Loader2 className="size-3 animate-spin" />
+                        Reativando...
+                      </Badge>
+                    ) : (
+                      <Badge variant={STATUS_VARIANTS[member.status]}>
+                        {STATUS_LABELS[member.status]}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 {isCurrentUser ? (
@@ -447,9 +480,19 @@ export function UsersList({ members, onUpdate }: UsersListProps) {
                           {member.status === 'removed' && canInvite && (
                             <DropdownMenuItem
                               onClick={() => handleReactivate(member)}
+                              disabled={reactivatingUserId === member.id}
                             >
-                              <UserPlus className="size-4 mr-2" />
-                              Reativar
+                              {reactivatingUserId === member.id ? (
+                                <>
+                                  <Loader2 className="size-4 mr-2 animate-spin" />
+                                  Reativando...
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="size-4 mr-2" />
+                                  Reativar
+                                </>
+                              )}
                             </DropdownMenuItem>
                           )}
                         </>
