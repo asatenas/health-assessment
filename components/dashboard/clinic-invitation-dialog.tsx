@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertTriangle, Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface ClinicInvitation {
   id: string;
@@ -59,15 +60,12 @@ export function ClinicInvitationDialog({
 
     try {
       await onAccept(currentInvitation.id);
-      // Refresh the page to update session
-      router.refresh();
-      window.location.href = '/dashboard';
+      await signOut({ redirectTo: '/login' });
     } catch (error) {
       console.error('Error accepting invitation:', error);
       setError(
         error instanceof Error ? error.message : 'Erro ao aceitar convite',
       );
-    } finally {
       setLoading(null);
     }
   };
@@ -148,6 +146,9 @@ export function ClinicInvitationDialog({
               <AlertDescription>
                 <p className="font-medium mb-2">Importante:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>
+                    Você será desconectado e precisará fazer login novamente
+                  </li>
                   <li>
                     Você perderá acesso à sua clínica atual
                     {currentClinicName && (

@@ -26,7 +26,7 @@ import {
 import { toast } from 'sonner';
 
 export default function CreateClinicPage() {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [clinicName, setClinicName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -124,8 +124,7 @@ export default function CreateClinicPage() {
 
       toast.success('Clínica criada! Aguarde aprovação do suporte.');
 
-      // Sign out and redirect to login
-      await signOut({ redirect: true, callbackUrl: '/login' });
+      await handleLogout();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar clínica');
       setLoading(false);
@@ -148,10 +147,9 @@ export default function CreateClinicPage() {
         throw new Error(data.message || 'Erro ao aceitar convite');
       }
 
-      toast.success('Convite aceito! Redirecionando...');
+      toast.success('Convite aceito! Você será redirecionado...');
 
-      await update();
-      router.push('/dashboard');
+      await signOut({ redirectTo: '/login' });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao aceitar convite');
       setLoading(false);
@@ -174,8 +172,7 @@ export default function CreateClinicPage() {
 
       toast.success('Retornando para sua clínica original...');
 
-      await update();
-      router.push('/dashboard');
+      await signOut({ redirectTo: '/login' });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao retornar para clínica original');
       setLoading(false);
@@ -204,8 +201,7 @@ export default function CreateClinicPage() {
 
       toast.success('Conta deletada com sucesso');
 
-      // Sign out and redirect to login
-      await signOut({ redirect: true, callbackUrl: '/login' });
+      await handleLogout();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao deletar conta');
       setLoading(false);
@@ -213,7 +209,7 @@ export default function CreateClinicPage() {
   };
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: '/login' });
+    await signOut({ redirectTo: '/login' });
   };
 
   // Render for removed users
@@ -254,8 +250,14 @@ export default function CreateClinicPage() {
                 <Alert>
                   <Info className="size-4" />
                   <AlertDescription>
-                    Encontramos sua clínica original:{' '}
-                    <strong>{originalClinic.clinicName}</strong>
+                    <p className="mb-2">
+                      Encontramos sua clínica original:{' '}
+                      <strong>{originalClinic.clinicName}</strong>
+                    </p>
+                    <p className="text-sm font-medium">
+                      Você será desconectado e precisará fazer login novamente
+                      para acessar sua clínica.
+                    </p>
                   </AlertDescription>
                 </Alert>
                 <Button
@@ -307,8 +309,16 @@ export default function CreateClinicPage() {
                 <Alert>
                   <Info className="size-4" />
                   <AlertDescription>
-                    Após criar sua clínica, ela precisará ser aprovada pelo
-                    suporte antes que você possa utilizá-la.
+                    <p className="font-medium mb-1">Importante:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>
+                        Você será desconectado e precisará fazer login novamente
+                      </li>
+                      <li>
+                        Sua clínica precisará ser aprovada pelo suporte antes
+                        que você possa utilizá-la
+                      </li>
+                    </ul>
                   </AlertDescription>
                 </Alert>
               </div>

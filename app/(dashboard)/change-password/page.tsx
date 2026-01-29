@@ -95,8 +95,14 @@ export default function ChangePasswordPage() {
           <Alert className="mb-6">
             <AlertTriangle className="size-4" />
             <AlertDescription>
-              Para sua segurança, você precisa criar uma nova senha antes de
-              acessar o sistema.
+              <p className="mb-2">
+                Para sua segurança, você precisa criar uma nova senha antes de
+                acessar o sistema.
+              </p>
+              <p className="text-sm font-medium">
+                Após alterar sua senha, você será desconectado e precisará fazer
+                login novamente com sua nova senha.
+              </p>
             </AlertDescription>
           </Alert>
 
