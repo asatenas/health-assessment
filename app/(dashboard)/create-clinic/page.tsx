@@ -29,7 +29,9 @@ export default function CreateClinicPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [clinicName, setClinicName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<
+    'create' | 'accept' | 'return' | 'delete' | null
+  >(null);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loadingInvitations, setLoadingInvitations] = useState(false);
   const [originalClinic, setOriginalClinic] = useState<any>(null);
@@ -107,7 +109,7 @@ export default function CreateClinicPage() {
       return;
     }
 
-    setLoading(true);
+    setLoading('create');
 
     try {
       const response = await fetch('/api/clinic/create', {
@@ -127,12 +129,12 @@ export default function CreateClinicPage() {
       await handleLogout();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar clínica');
-      setLoading(false);
+      setLoading(null);
     }
   };
 
   const handleAcceptInvitation = async (invitationId: string) => {
-    setLoading(true);
+    setLoading('accept');
     try {
       const response = await fetch(
         `/api/user/clinic-invitations/${invitationId}/accept`,
@@ -152,12 +154,12 @@ export default function CreateClinicPage() {
       await signOut({ redirectTo: '/login' });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao aceitar convite');
-      setLoading(false);
+      setLoading(null);
     }
   };
 
   const handleReturnToOriginalClinic = async () => {
-    setLoading(true);
+    setLoading('return');
     try {
       const response = await fetch('/api/clinic/return-to-original', {
         method: 'POST',
@@ -175,7 +177,7 @@ export default function CreateClinicPage() {
       await signOut({ redirectTo: '/login' });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao retornar para clínica original');
-      setLoading(false);
+      setLoading(null);
     }
   };
 
@@ -188,7 +190,7 @@ export default function CreateClinicPage() {
       return;
     }
 
-    setLoading(true);
+    setLoading('delete');
     try {
       const response = await fetch('/api/user/delete', {
         method: 'DELETE',
@@ -204,7 +206,7 @@ export default function CreateClinicPage() {
       await handleLogout();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao deletar conta');
-      setLoading(false);
+      setLoading(null);
     }
   };
 
@@ -262,10 +264,10 @@ export default function CreateClinicPage() {
                 </Alert>
                 <Button
                   onClick={handleReturnToOriginalClinic}
-                  disabled={loading}
+                  disabled={loading !== null}
                   className="w-full"
                 >
-                  {loading ? (
+                  {loading === 'return' ? (
                     <>
                       <Loader2 className="mr-2 size-4 animate-spin" />
                       Retornando...
@@ -290,13 +292,17 @@ export default function CreateClinicPage() {
                       value={clinicName}
                       onChange={(e) => setClinicName(e.target.value)}
                       placeholder="Digite o nome da sua clínica"
-                      disabled={loading}
+                      disabled={loading !== null}
                       minLength={3}
                       required
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? (
+                  <Button
+                    type="submit"
+                    disabled={loading !== null}
+                    className="w-full"
+                  >
+                    {loading === 'create' ? (
                       <>
                         <Loader2 className="mr-2 size-4 animate-spin" />
                         Criando...
@@ -340,10 +346,17 @@ export default function CreateClinicPage() {
                         </div>
                         <Button
                           onClick={() => handleAcceptInvitation(invitation.id)}
-                          disabled={loading}
+                          disabled={loading !== null}
                           size="sm"
                         >
-                          Aceitar
+                          {loading === 'accept' ? (
+                            <>
+                              <Loader2 className="mr-2 size-4 animate-spin" />
+                              Aceitando...
+                            </>
+                          ) : (
+                            'Aceitar'
+                          )}
                         </Button>
                       </div>
                     </Card>
@@ -366,12 +379,19 @@ export default function CreateClinicPage() {
               <Button
                 variant="destructive"
                 onClick={handleDeleteAccount}
-                disabled={loading}
+                disabled={loading !== null}
                 className="w-full"
               >
-                {originalClinic
-                  ? 'Deletar conta e clínica permanentemente'
-                  : 'Deletar conta permanentemente'}
+                {loading === 'delete' ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Deletando...
+                  </>
+                ) : originalClinic ? (
+                  'Deletar conta e clínica permanentemente'
+                ) : (
+                  'Deletar conta permanentemente'
+                )}
               </Button>
             </div>
           </CardContent>
