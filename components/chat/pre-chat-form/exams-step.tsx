@@ -77,7 +77,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="p-0 max-w-xs sm:max-w-md"
+                  className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto"
                   onPointerDownOutside={() => setHemoglobinaTooltipOpen(false)}
                   onEscapeKeyDown={() => setHemoglobinaTooltipOpen(false)}
                 >
@@ -86,7 +86,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                     alt="Exemplo de exame de hemoglobina"
                     width={400}
                     height={300}
-                    className="rounded-md"
+                    className="rounded-md w-full h-auto"
                   />
                 </TooltipContent>
               </Tooltip>
@@ -154,7 +154,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
-                  className="p-0 max-w-xs sm:max-w-md"
+                  className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto"
                   onPointerDownOutside={() => setCreatininaTooltipOpen(false)}
                   onEscapeKeyDown={() => setCreatininaTooltipOpen(false)}
                 >
@@ -163,7 +163,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                     alt="Exemplo de exame de creatinina"
                     width={400}
                     height={300}
-                    className="rounded-md"
+                    className="rounded-md w-full h-auto"
                   />
                 </TooltipContent>
               </Tooltip>
