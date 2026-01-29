@@ -53,6 +53,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === '/create-clinic' && userStatus !== 'removed') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   // Allow invited users to access change-password page
   if (pathname === '/change-password') {
     if (!isLoggedIn) {
