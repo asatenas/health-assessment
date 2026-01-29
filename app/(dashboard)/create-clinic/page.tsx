@@ -90,6 +90,15 @@ export default function CreateClinicPage() {
     return null;
   }
 
+  // Wait for all data to load before rendering
+  if (loadingOriginalClinic || loadingInvitations) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="size-8 animate-spin" />
+      </div>
+    );
+  }
+
   const handleCreateNewClinic = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -236,11 +245,7 @@ export default function CreateClinicPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Return to original clinic */}
-            {loadingOriginalClinic ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="size-6 animate-spin" />
-              </div>
-            ) : originalClinic ? (
+            {originalClinic ? (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Home className="size-5" />
