@@ -25,7 +25,6 @@ import type {
   FormFieldConfig,
   DashboardConfiguration,
 } from '@/lib/types/clinic-config';
-import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { ChevronDown, Loader2, Users } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
@@ -200,19 +199,26 @@ interface ConfigurationsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
+  initialClinicName: string;
+  initialFormConfig: FormConfiguration;
+  initialDashboardConfig: DashboardConfiguration;
 }
 
 export function ConfigurationsSheet({
   open,
   onOpenChange,
   onSaved,
+  initialClinicName,
+  initialFormConfig,
+  initialDashboardConfig,
 }: ConfigurationsSheetProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [clinicName, setClinicName] = useState('');
-  const [formConfig, setFormConfig] = useState<FormConfiguration | null>(null);
+  const [clinicName, setClinicName] = useState(initialClinicName);
+  const [formConfig, setFormConfig] =
+    useState<FormConfiguration>(initialFormConfig);
   const [dashboardConfig, setDashboardConfig] =
-    useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
+    useState<DashboardConfiguration>(initialDashboardConfig);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [showImpersonationDialog, setShowImpersonationDialog] = useState(false);
@@ -231,24 +237,20 @@ export function ConfigurationsSheet({
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      // Basic users (secretary/clinician) only need the Account tab
-      // Skip fetching clinic config for them
-      if (isBasicUser) {
-        // Set a dummy config so the component renders properly
-        setFormConfig({} as FormConfiguration);
-        setError(null);
-        setLoading(false);
-        return;
-      }
-
       const response = await fetch('/api/clinic/config');
-      if (!response.ok) throw new Error('Failed to fetch config');
+      if (!response.ok) {
+        throw new Error('Failed to fetch config');
+      }
+      setError(null);
 
       const data = await response.json();
-      setClinicName(data.clinicName || '');
-      setFormConfig(data.formConfig);
-      setDashboardConfig(data.dashboardConfig || DEFAULT_DASHBOARD_CONFIG);
-      setError(null);
+      setClinicName(data.clinicName);
+      if (data.formConfig) {
+        setFormConfig(data.formConfig);
+      }
+      if (data.dashboardConfig) {
+        setDashboardConfig(data.dashboardConfig);
+      }
     } catch (error) {
       console.error('Error loading config:', error);
       setError('Erro ao carregar configurações');
@@ -267,7 +269,9 @@ export function ConfigurationsSheet({
         body: JSON.stringify({ clinicName, formConfig, dashboardConfig }),
       });
 
-      if (!response.ok) throw new Error('Failed to save');
+      if (!response.ok) {
+        throw new Error('Failed to save');
+      }
 
       onOpenChange(false);
       onSaved?.();
@@ -280,8 +284,6 @@ export function ConfigurationsSheet({
   };
 
   const toggleSection = (sectionKey: string) => {
-    if (!formConfig) return;
-
     setFormConfig({
       ...formConfig,
       sections: {
@@ -299,8 +301,6 @@ export function ConfigurationsSheet({
   };
 
   const toggleField = (sectionKey: string, fieldKey: string) => {
-    if (!formConfig) return;
-
     const section =
       formConfig.sections[sectionKey as keyof typeof formConfig.sections];
     const fields = section.fields as Record<string, FormFieldConfig>;
@@ -368,31 +368,35 @@ export function ConfigurationsSheet({
                   </div>
                 )}
 
-                {formConfig ? (
+                {
                   <>
-                    {!isBasicUser && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">
-                            Informações Gerais
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <Label htmlFor="clinicName">Nome da Clínica</Label>
-                            <Input
-                              id="clinicName"
-                              value={clinicName}
-                              onChange={(e) => setClinicName(e.target.value)}
-                              placeholder="Ex: Clínica Santa Maria"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                              Este nome será exibido no painel da clínica
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">
+                          Informações Gerais
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <Label htmlFor="clinicName">Nome da Clínica</Label>
+                          <Input
+                            id="clinicName"
+                            value={clinicName}
+                            onChange={(e) => setClinicName(e.target.value)}
+                            placeholder="Ex: Clínica Santa Maria"
+                            disabled={isBasicUser}
+                            readOnly={isBasicUser}
+                            className={
+                              isBasicUser ? 'bg-muted cursor-not-allowed' : ''
+                            }
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {!isBasicUser &&
+                              'Este nome será exibido no painel da clínica'}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
 
                     {session?.user?.platformAdmin &&
                       !session?.impersonation && (
@@ -622,11 +626,7 @@ export function ConfigurationsSheet({
                       </TabsContent>
                     </Tabs>
                   </>
-                ) : (
-                  <div className="p-4 text-center text-red-500">
-                    Erro ao carregar configurações
-                  </div>
-                )}
+                }
               </div>
             </ScrollArea>
 
@@ -639,7 +639,7 @@ export function ConfigurationsSheet({
                 {isBasicUser ? 'Fechar' : 'Cancelar'}
               </Button>
               {!isBasicUser && (
-                <Button onClick={handleSave} disabled={saving || !formConfig}>
+                <Button onClick={handleSave} disabled={saving}>
                   {saving ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />

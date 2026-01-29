@@ -23,7 +23,6 @@ declare module 'next-auth' {
     } & DefaultSession['user'];
     clinic: {
       id: string;
-      name: string;
     };
     impersonation?: {
       user: {
@@ -35,7 +34,6 @@ declare module 'next-auth' {
       };
       clinic: {
         id: string;
-        name: string;
       };
       startedAt: Date;
     };
@@ -67,7 +65,6 @@ declare module 'next-auth/jwt' {
       };
       clinic: {
         id: string;
-        name: string;
       };
       startedAt: string;
     };
@@ -212,7 +209,6 @@ export const {
               },
               clinic: {
                 id: token.clinicId,
-                name: token.clinicName || '',
               },
               startedAt: session.impersonation.startedAt,
             };
@@ -238,7 +234,6 @@ export const {
               token.role = token.impersonation.user.role;
               token.permissions = token.impersonation.user.permissions;
               token.clinicId = token.impersonation.clinic.id;
-              token.clinicName = token.impersonation.clinic.name;
             }
             // Clear impersonation
             token.impersonation = undefined;
@@ -270,7 +265,6 @@ export const {
         if (token.clinicId) {
           session.clinic = {
             id: token.clinicId,
-            name: token.clinicName || '',
           };
         }
 

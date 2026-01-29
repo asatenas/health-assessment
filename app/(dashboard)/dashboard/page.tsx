@@ -21,7 +21,10 @@ import { TodaysSurgeriesPanel } from '@/components/dashboard/todays-surgeries-pa
 import { WeeklySurgeriesPanel } from '@/components/dashboard/weekly-surgeries-panel';
 import { MonthlySurgeriesPanel } from '@/components/dashboard/monthly-surgeries-panel';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
-import type { DashboardConfiguration } from '@/lib/types/clinic-config';
+import type {
+  DashboardConfiguration,
+  FormConfiguration,
+} from '@/lib/types/clinic-config';
 import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
@@ -59,6 +62,9 @@ export default function ClinicDashboard() {
   );
   const [clinicName, setClinicName] = useState<string>('');
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
+  const [formConfig, setFormConfig] = useState<FormConfiguration>(
+    {} as FormConfiguration,
+  );
   const [dashboardConfig, setDashboardConfig] =
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
   const [clinicInvitations, setClinicInvitations] = useState<any[]>([]);
@@ -86,28 +92,22 @@ export default function ClinicDashboard() {
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
 
-  // Set clinic name from session and fetch dashboard config for admins/owners
+  // Fetch clinic config from API
   const fetchClinicConfig = useCallback(async () => {
-    // Set clinic name from session
-    setClinicName(clinic?.name || 'Painel da Clínica');
-
-    // Only fetch config if user has org.manage permission (for dashboard config)
-    if (!canManageOrg) {
-      return;
+    const response = await fetch('/api/clinic/config');
+    if (!response.ok) {
+      setClinicName('Painel da Clínica');
+      throw new Error('Erro ao carregar configurações da clínica');
     }
-
-    try {
-      const response = await fetch('/api/clinic/config');
-      if (response.ok) {
-        const { dashboardConfig } = await response.json();
-        if (dashboardConfig) {
-          setDashboardConfig(dashboardConfig);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch clinic config:', error);
+    const data = await response.json();
+    setClinicName(data.clinicName);
+    if (data.formConfig) {
+      setFormConfig(data.formConfig);
     }
-  }, [clinic, canManageOrg]);
+    if (data.dashboardConfig) {
+      setDashboardConfig(data.dashboardConfig);
+    }
+  }, []);
 
   useEffect(() => {
     fetchClinicConfig();
@@ -769,6 +769,9 @@ export default function ClinicDashboard() {
         open={isConfigurationsOpen}
         onOpenChange={setIsConfigurationsOpen}
         onSaved={fetchClinicConfig}
+        initialClinicName={clinicName}
+        initialFormConfig={formConfig}
+        initialDashboardConfig={dashboardConfig}
       />
 
       {/* Clinic Invitation Dialog */}
