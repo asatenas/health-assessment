@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, Suspense } from 'react';
 import { toast } from '@/components/ui/toast';
 
 import { AuthForm } from '@/components/auth/auth-form';
 import { SubmitButton } from '@/components/auth/submit-button';
+import { PasswordChangedNotification } from '@/components/auth/password-changed-notification';
 
 import { login, type LoginActionState } from '../actions';
 import { useSession } from 'next-auth/react';
@@ -27,26 +28,38 @@ export default function Page() {
   const { update: updateSession } = useSession();
 
   useEffect(() => {
-    if (state.status === 'failed') {
-      // English: 'Invalid credentials or email not verified. Please contact support if you need verification.'
-      toast({
-        type: 'error',
-        description:
-          'Credenciais inválidas ou e-mail não verificado. Contate suporte@asatenas.com.br se precisar de verificação.',
-      });
-    } else if (state.status === 'invalid_data') {
-      // English: 'Failed validating your submission!'
-      toast({
-        type: 'error',
-        description: 'Falha na validação do seu envio!',
-      });
-    } else if (state.status === 'success') {
-      setIsSuccessful(true);
-      (async () => {
-        await updateSession();
+    switch (state.status) {
+      case 'success':
+        setIsSuccessful(true);
+        updateSession();
         router.push('/dashboard');
-      })();
+        return;
+      case 'email_not_verified':
+        // English: 'Email not verified. Send an email to suporte@asatenas.com.br for verification.'
+        toast({
+          type: 'error',
+          description:
+            'E-mail não verificado. Envie um email para suporte@asatenas.com.br para verificação do email.',
+        });
+        break;
+      case 'clinic_not_authorized':
+        // English: 'Clinic not verified. Send an email to suporte@asatenas.com.br for verification.';
+        toast({
+          type: 'error',
+          description:
+            'Usuário não verificado. Envie um email para suporte@asatenas.com.br para verificação do email.',
+        });
+        break;
+      case 'failed':
+        // English: 'Invalid credentials!'
+        toast({
+          type: 'error',
+          description: 'Credenciais inválidas!',
+        });
+        break;
     }
+    // Reset status back to idle after showing error
+    state.status = 'idle';
   }, [state.status]);
 
   const handleSubmit = (formData: FormData) => {
@@ -56,6 +69,9 @@ export default function Page() {
 
   return (
     <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
+      <Suspense fallback={null}>
+        <PasswordChangedNotification />
+      </Suspense>
       <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-12">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
           <h3 className="text-xl font-semibold dark:text-zinc-50">

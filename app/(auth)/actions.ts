@@ -2,7 +2,7 @@
 
 import { z } from 'zod/v3';
 
-import { createUser, getUser } from '@/lib/db/queries';
+import { createUser, getClinicByUserId, getUser } from '@/lib/db/queries';
 
 import { signIn } from './auth';
 import { sendWebhook } from '@/lib/shared/utils';
@@ -13,7 +13,13 @@ const authFormSchema = z.object({
 });
 
 export interface LoginActionState {
-  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+  status:
+    | 'idle'
+    | 'in_progress'
+    | 'success'
+    | 'failed'
+    | 'email_not_verified'
+    | 'clinic_not_authorized';
 }
 
 export const login = async (
@@ -26,6 +32,20 @@ export const login = async (
       password: formData.get('password'),
     });
 
+    // Check if user exists and has unverified email
+    const users = await getUser(validatedData.email);
+    if (users.length > 0) {
+      const [user] = users;
+      // TODO: currently disable email verification since we don't send emails
+      // if (!user.emailVerified) {
+      //   return { status: 'email_not_verified' };
+      // }
+      const clinic = await getClinicByUserId({ userId: user.id });
+      if (!clinic?.authorized) {
+        return { status: 'clinic_not_authorized' };
+      }
+    }
+
     await signIn('credentials', {
       email: validatedData.email,
       password: validatedData.password,
@@ -34,10 +54,6 @@ export const login = async (
 
     return { status: 'success' };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { status: 'invalid_data' };
-    }
-
     return { status: 'failed' };
   }
 };

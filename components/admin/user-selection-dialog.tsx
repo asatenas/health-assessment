@@ -142,7 +142,7 @@ export function UserSelectionDialog({
                 {selectedUser.clinicName || 'N/A'}
               </div>
               <div>
-                <span className="font-semibold">Papel:</span>{' '}
+                <span className="font-semibold">Perfil:</span>{' '}
                 {selectedUser.role}
               </div>
             </div>
@@ -201,7 +201,7 @@ export function UserSelectionDialog({
               <div className="bg-muted/50 px-4 py-3 grid grid-cols-12 gap-4 font-medium text-sm border-b">
                 <div className="col-span-4">Email</div>
                 <div className="col-span-3">Clínica</div>
-                <div className="col-span-3">Papel</div>
+                <div className="col-span-3">Perfil</div>
                 <div className="col-span-2" />
               </div>
               <div className="divide-y">

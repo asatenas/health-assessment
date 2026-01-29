@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
         },
         clinic: {
           id: targetUser.clinicId,
-          name: targetUser.clinicName || '',
         },
         startedAt: new Date().toISOString(),
       },
@@ -55,7 +54,6 @@ export async function POST(request: NextRequest) {
         id: targetUser.id,
         email: targetUser.email,
         clinicId: targetUser.clinicId,
-        clinicName: targetUser.clinicName,
         role: targetUser.role,
       },
     });

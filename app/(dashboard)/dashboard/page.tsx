@@ -30,6 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet';
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { usePermissions } from '@/hooks/use-permissions';
+import { ClinicInvitationDialog } from '@/components/dashboard/clinic-invitation-dialog';
 
 type CreateChatResponse = {
   chatId: string;
@@ -60,6 +61,7 @@ export default function ClinicDashboard() {
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
   const [dashboardConfig, setDashboardConfig] =
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
+  const [clinicInvitations, setClinicInvitations] = useState<any[]>([]);
 
   // Dashboard metrics state
   const [metrics, setMetrics] = useState<any>(null);
@@ -84,32 +86,70 @@ export default function ClinicDashboard() {
   const [totalChats, setTotalChats] = useState(0);
   const limit = 20;
 
-  // Set clinic name from session and fetch dashboard config for admins/owners
+  // Fetch clinic config from API
   const fetchClinicConfig = useCallback(async () => {
-    // Set clinic name from session
-    setClinicName(clinic?.name || 'Painel da Clínica');
-
-    // Only fetch config if user has org.manage permission (for dashboard config)
-    if (!canManageOrg) {
-      return;
+    const response = await fetch('/api/clinic/config');
+    if (!response.ok) {
+      setClinicName('Painel da Clínica');
+      throw new Error('Erro ao carregar configurações da clínica');
     }
-
-    try {
-      const response = await fetch('/api/clinic/config');
-      if (response.ok) {
-        const { dashboardConfig } = await response.json();
-        if (dashboardConfig) {
-          setDashboardConfig(dashboardConfig);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch clinic config:', error);
+    const data = await response.json();
+    setClinicName(data.clinicName);
+    if (data.dashboardConfig) {
+      setDashboardConfig(data.dashboardConfig);
     }
-  }, [clinic, canManageOrg]);
+  }, []);
 
   useEffect(() => {
     fetchClinicConfig();
+    fetchClinicInvitations();
   }, [fetchClinicConfig]);
+
+  // Fetch clinic invitations on mount
+  const fetchClinicInvitations = async () => {
+    try {
+      const response = await fetch('/api/user/clinic-invitations');
+      if (response.ok) {
+        const data = await response.json();
+        setClinicInvitations(data.invitations || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch clinic invitations:', error);
+    }
+  };
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    const response = await fetch(
+      `/api/user/clinic-invitations/${invitationId}/accept`,
+      {
+        method: 'POST',
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to accept invitation');
+    }
+  };
+
+  const handleRejectInvitation = async (invitationId: string) => {
+    const response = await fetch(
+      `/api/user/clinic-invitations/${invitationId}/reject`,
+      {
+        method: 'POST',
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to reject invitation');
+    }
+
+    // Remove from list after rejecting
+    setClinicInvitations((prev) =>
+      prev.filter((inv) => inv.id !== invitationId),
+    );
+  };
 
   // Fetch dashboard metrics
   const fetchDashboardMetrics = useCallback(async () => {
@@ -398,10 +438,8 @@ export default function ClinicDashboard() {
               <>
                 <h1 className="text-2xl sm:text-3xl font-bold">{clinicName}</h1>
                 <p className="text-gray-600 dark:text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
-                  {canReadAssessments
-                    ? view === 'analytics'
-                      ? 'Visualize métricas e análises das avaliações pré-anestésicas'
-                      : 'Gerencie todos as avaliações dos pacientes'
+                  {canReadFull
+                    ? 'Visualize métricas e análises das avaliações pré-anestésicas'
                     : 'Crie uma nova avaliação usando o botão à direita'}
                 </p>
               </>
@@ -453,23 +491,19 @@ export default function ClinicDashboard() {
                 </Button>
               </div>
             </PermissionGate>
-            <PermissionGate permission="org.manage">
-              <div className="flex items-center gap-2">
-                <span className="text-sm sm:hidden">Configurações</span>
-                <Button
-                  onClick={() => setIsConfigurationsOpen(true)}
-                  variant="outline"
-                  size="sm"
-                  className="sm:px-3 px-3"
-                  aria-label="Configurações"
-                >
-                  <Settings className="size-4" />
-                  <span className="hidden sm:inline sm:ml-2">
-                    Configurações
-                  </span>
-                </Button>
-              </div>
-            </PermissionGate>
+            <div className="flex items-center gap-2">
+              <span className="text-sm sm:hidden">Configurações</span>
+              <Button
+                onClick={() => setIsConfigurationsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label="Configurações"
+              >
+                <Settings className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Configurações</span>
+              </Button>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm sm:hidden">Sair</span>
               <Button
@@ -726,7 +760,18 @@ export default function ClinicDashboard() {
         open={isConfigurationsOpen}
         onOpenChange={setIsConfigurationsOpen}
         onSaved={fetchClinicConfig}
+        initialClinicName={clinicName}
       />
+
+      {/* Clinic Invitation Dialog */}
+      {clinicInvitations.length > 0 && (
+        <ClinicInvitationDialog
+          invitations={clinicInvitations}
+          currentClinicName={clinicName}
+          onAccept={handleAcceptInvitation}
+          onReject={handleRejectInvitation}
+        />
+      )}
     </div>
   );
 }

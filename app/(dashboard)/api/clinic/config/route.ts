@@ -10,12 +10,11 @@ import type {
 import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { type NextRequest, NextResponse } from 'next/server';
 import { validateClinicAccess } from '@/lib/api/clinic-guard';
+import { getPermissionsForRole } from '@/lib/permissions';
 
 export async function GET() {
   try {
-    const user = await validateClinicAccess(undefined, {
-      permissions: ['org.manage'],
-    });
+    const user = await validateClinicAccess();
 
     const config = await getClinicConfigByClinicId({
       clinicId: user.clinicId,
@@ -28,9 +27,22 @@ export async function GET() {
       ).toResponse();
     }
 
+    const permissions = getPermissionsForRole(user.role);
+    const canManageOrg = permissions.includes('org.manage');
+    const clinicName = config.clinicName || 'Painel da Clínica';
+
+    // Users without org.manage permission only get clinic name
+    if (!canManageOrg) {
+      return NextResponse.json({
+        clinicName,
+      });
+    }
+
     return NextResponse.json({
-      ...config,
+      clinicName,
+      formConfig: config.formConfig,
       dashboardConfig: config.dashboardConfig || DEFAULT_DASHBOARD_CONFIG,
+      updatedAt: config.updatedAt,
     });
   } catch (error) {
     if (error instanceof ChatSDKError) {

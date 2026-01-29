@@ -1,0 +1,32 @@
+import { type NextRequest, NextResponse } from 'next/server';
+import { validateBasicAuth } from '@/lib/api/basic-auth-guard';
+import { ChatSDKError } from '@/lib/shared/errors';
+import { rejectClinicInvitation } from '@/lib/db/queries';
+
+/**
+ * POST /api/user/clinic-invitations/[invitationId]/reject
+ * Reject a clinic invitation
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ invitationId: string }> },
+) {
+  try {
+    const { invitationId } = await params;
+    const { email } = await validateBasicAuth();
+
+    // Reject invitation (with ownership check)
+    await rejectClinicInvitation({ invitationId, email });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
+    console.error('Error rejecting clinic invitation:', error);
+    return new ChatSDKError(
+      'bad_request:database',
+      'Failed to reject clinic invitation',
+    ).toResponse();
+  }
+}

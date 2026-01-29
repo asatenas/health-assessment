@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ImpersonationBanner } from './impersonation-banner';
@@ -8,7 +8,17 @@ import { ImpersonationBanner } from './impersonation-banner';
 export function ImpersonationBannerWrapper() {
   const { data: session, update } = useSession();
   const [exiting, setExiting] = useState(false);
+  const [clinicName, setClinicName] = useState<string>('');
   const router = useRouter();
+
+  useEffect(() => {
+    if (session?.impersonation) {
+      fetch('/api/clinic/config')
+        .then((res) => res.json())
+        .then((data) => setClinicName(data.clinicName))
+        .catch((err) => console.error('Failed to fetch clinic name:', err));
+    }
+  }, [session?.impersonation]);
 
   if (!session?.impersonation) {
     return null;
@@ -41,7 +51,7 @@ export function ImpersonationBannerWrapper() {
     <>
       <ImpersonationBanner
         email={session.user.email || ''}
-        clinicName={session.clinic?.name || ''}
+        clinicName={clinicName}
         onExit={handleExitImpersonation}
         exiting={exiting}
       />

@@ -281,6 +281,20 @@
       "when": 1768254000000,
       "tag": "0039_add_user_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1768255000000,
+      "tag": "0040_create_clinic_invitation",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1768256000000,
+      "tag": "0041_add_temp_password_to_invitation",
+      "breakpoints": true
     }
   ]
 }

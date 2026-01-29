@@ -41,8 +41,16 @@ export async function validateClinicAccess(
     throw new ChatSDKError('unauthorized:api');
   }
 
-  if (!user.emailVerified) {
-    throw new ChatSDKError('unauthorized:api', 'Email not verified');
+  // TODO: currently disable email verification since we don't send emails
+  // if (!user.emailVerified) {
+  //   throw new ChatSDKError('unauthorized:api', 'Email not verified');
+  // }
+
+  if (user.status === 'removed') {
+    throw new ChatSDKError(
+      'forbidden:api',
+      'Removed users cannot access clinic resources',
+    );
   }
 
   if (user.status !== 'active') {
@@ -62,7 +70,10 @@ export async function validateClinicAccess(
 
   const userClinic = await getClinicByUserId({ userId: session.user.id });
   if (!userClinic?.authorized) {
-    throw new ChatSDKError('unauthorized:api', 'Clinic not authorized');
+    throw new ChatSDKError(
+      'unauthorized:api',
+      'Clinic not authorized. Please wait for support approval.',
+    );
   }
 
   if (chatId) {

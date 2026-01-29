@@ -1,7 +1,13 @@
 import { compare } from 'bcrypt-ts';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { getUser, getUserById, getClinicByUserId } from '@/lib/db/queries';
+import {
+  getUser,
+  getUserById,
+  getClinicByUserId,
+  getClinicInvitationsByEmail,
+  createUserFromInvitation,
+} from '@/lib/db/queries';
 import { authConfig } from './auth.config';
 import { DUMMY_PASSWORD } from '@/lib/shared/constants';
 import type { DefaultJWT } from 'next-auth/jwt';
@@ -12,12 +18,12 @@ declare module 'next-auth' {
     user: {
       id: string;
       role: 'secretary' | 'clinician' | 'admin' | 'owner';
+      status?: 'active' | 'invited' | 'removed';
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
     } & DefaultSession['user'];
     clinic: {
       id: string;
-      name: string;
     };
     impersonation?: {
       user: {
@@ -29,7 +35,6 @@ declare module 'next-auth' {
       };
       clinic: {
         id: string;
-        name: string;
       };
       startedAt: Date;
     };
@@ -46,6 +51,7 @@ declare module 'next-auth/jwt' {
     id: string;
     email: string;
     role: 'secretary' | 'clinician' | 'admin' | 'owner';
+    status: 'active' | 'invited' | 'removed';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
     clinicId: string;
@@ -60,7 +66,6 @@ declare module 'next-auth/jwt' {
       };
       clinic: {
         id: string;
-        name: string;
       };
       startedAt: string;
     };
@@ -80,30 +85,84 @@ export const {
       async authorize({ email, password }: any) {
         const users = await getUser(email);
 
+        // Case 1: No existing user - check ClinicInvitation
         if (users.length === 0) {
+          // Check for pending invitation with this email (case-insensitive)
+          const [invitation] = await getClinicInvitationsByEmail({ email });
+
+          if (!invitation) {
+            // No invitation found
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Only proceed if invitation has a temporary password (for new users)
+          if (!invitation.temporaryPassword) {
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Validate password against invitation's temporary password
+          // Non-null assertion safe here because we checked above
+          const passwordsMatch = await compare(
+            password,
+            invitation.temporaryPassword,
+          );
+
+          if (!passwordsMatch) {
+            await compare(password, DUMMY_PASSWORD); // Timing attack prevention
+            return null;
+          }
+
+          // Valid! Create User record from invitation
+          const newUser = await createUserFromInvitation({
+            invitationId: invitation.id,
+          });
+
+          return {
+            id: newUser.id,
+            email: newUser.email,
+          };
+        }
+
+        // Case 2: Existing user - validate normally
+        const [existingUser] = users;
+
+        if (!existingUser.password) {
           await compare(password, DUMMY_PASSWORD);
           return null;
         }
 
-        const [user] = users;
-
-        if (!user.password) {
-          await compare(password, DUMMY_PASSWORD);
-          return null;
-        }
-
-        const passwordsMatch = await compare(password, user.password);
+        const passwordsMatch = await compare(password, existingUser.password);
 
         if (!passwordsMatch) return null;
 
-        // Check if email is verified
-        if (!user.emailVerified) {
+        // TODO: currently disable email verification since we don't send emails
+        // // Check if email is verified
+        // if (!existingUser.emailVerified) {
+        //   return null;
+        // }
+
+        const clinic = await getClinicByUserId({
+          userId: existingUser.id,
+        });
+
+        // If user is removed, allow login (they can access /create-clinic)
+        if (existingUser.status === 'removed') {
+          return {
+            id: existingUser.id,
+            email: existingUser.email,
+          };
+        }
+
+        // For other statuses, check if clinic is authorized
+        if (!clinic?.authorized) {
           return null;
         }
 
         return {
-          id: user.id,
-          email: user.email,
+          id: existingUser.id,
+          email: existingUser.email,
         };
       },
     }),
@@ -120,9 +179,10 @@ export const {
             token.platformAdmin = true;
           }
 
-          // Set role and permissions
+          // Set role, status, and permissions
           if (dbUser?.role) {
             token.role = dbUser.role;
+            token.status = dbUser.status;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.clinicId = dbUser.clinicId;
           }
@@ -137,9 +197,27 @@ export const {
         }
       }
 
-      // Handle session updates (used for starting/stopping impersonation)
-      if (trigger === 'update' && session) {
-        if (session.impersonation !== undefined) {
+      // Handle session updates (used for starting/stopping impersonation and status changes)
+      if (trigger === 'update') {
+        // Refresh all user data from database (e.g., after status change, clinic change)
+        if (token.id && !session?.impersonation) {
+          const dbUser = await getUserById({ userId: token.id });
+          if (dbUser) {
+            token.status = dbUser.status;
+            token.role = dbUser.role;
+            token.clinicId = dbUser.clinicId;
+            token.permissions = getPermissionsForRole(dbUser.role);
+            token.platformAdmin = dbUser.platformAdmin;
+
+            // Fetch updated clinic name
+            const clinic = await getClinicByUserId({ userId: dbUser.id });
+            if (clinic?.clinicName) {
+              token.clinicName = clinic.clinicName;
+            }
+          }
+        }
+
+        if (session?.impersonation !== undefined) {
           // If starting impersonation, save original user data and swap to target user
           if (session.impersonation) {
             const targetUserId = session.impersonation.user.id;
@@ -156,7 +234,6 @@ export const {
               },
               clinic: {
                 id: token.clinicId,
-                name: token.clinicName || '',
               },
               startedAt: session.impersonation.startedAt,
             };
@@ -166,7 +243,9 @@ export const {
             token.email = targetEmail;
             token.platformAdmin = undefined; // Don't pass platformAdmin when impersonating
             token.role = session.impersonation.user.role;
-            token.permissions = getPermissionsForRole(session.impersonation.user.role);
+            token.permissions = getPermissionsForRole(
+              session.impersonation.user.role,
+            );
 
             // Use clinic from impersonation data (already complete from API)
             token.clinicId = session.impersonation.clinic.id;
@@ -180,7 +259,6 @@ export const {
               token.role = token.impersonation.user.role;
               token.permissions = token.impersonation.user.permissions;
               token.clinicId = token.impersonation.clinic.id;
-              token.clinicName = token.impersonation.clinic.name;
             }
             // Clear impersonation
             token.impersonation = undefined;
@@ -200,9 +278,12 @@ export const {
           session.user.platformAdmin = true;
         }
 
-        // Add role and permissions
+        // Add role, status, and permissions
         if (token.role) {
           session.user.role = token.role;
+        }
+        if (token.status) {
+          session.user.status = token.status;
         }
         if (token.permissions) {
           session.user.permissions = token.permissions;
@@ -212,7 +293,6 @@ export const {
         if (token.clinicId) {
           session.clinic = {
             id: token.clinicId,
-            name: token.clinicName || '',
           };
         }
 

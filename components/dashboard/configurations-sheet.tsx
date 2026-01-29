@@ -25,11 +25,12 @@ import type {
   FormFieldConfig,
   DashboardConfiguration,
 } from '@/lib/types/clinic-config';
-import { DEFAULT_DASHBOARD_CONFIG } from '@/lib/config/default-dashboard-config';
 import { ChevronDown, Loader2, Users } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
 import { useSession } from 'next-auth/react';
+import { UsersTab } from './configurations-sheet/users-tab';
+import { AccountTab } from './configurations-sheet/account-tab';
 
 const SECTION_ORDER = [
   'basicInfo',
@@ -198,23 +199,32 @@ interface ConfigurationsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
+  initialClinicName: string;
 }
 
 export function ConfigurationsSheet({
   open,
   onOpenChange,
   onSaved,
+  initialClinicName,
 }: ConfigurationsSheetProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [clinicName, setClinicName] = useState('');
+  const [clinicName, setClinicName] = useState(initialClinicName);
   const [formConfig, setFormConfig] = useState<FormConfiguration | null>(null);
   const [dashboardConfig, setDashboardConfig] =
-    useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
+    useState<DashboardConfiguration | null>(null);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [showImpersonationDialog, setShowImpersonationDialog] = useState(false);
   const { data: session } = useSession();
+
+  // Check if user is secretary or clinician (only see Account tab)
+  const isBasicUser =
+    session?.user?.role === 'secretary' || session?.user?.role === 'clinician';
+
+  // Basic users don't have access to form/dashboard configs
+  const hasAdvancedConfigs = !isBasicUser && formConfig && dashboardConfig;
 
   useEffect(() => {
     if (open) {
@@ -226,13 +236,16 @@ export function ConfigurationsSheet({
     setLoading(true);
     try {
       const response = await fetch('/api/clinic/config');
-      if (!response.ok) throw new Error('Failed to fetch config');
+      if (!response.ok) {
+        throw new Error('Failed to fetch config');
+      }
+      setError(null);
 
       const data = await response.json();
-      setClinicName(data.clinicName || '');
-      setFormConfig(data.formConfig);
-      setDashboardConfig(data.dashboardConfig || DEFAULT_DASHBOARD_CONFIG);
-      setError(null);
+      setClinicName(data.clinicName);
+      // For basic users, formConfig and dashboardConfig will be undefined
+      setFormConfig(data.formConfig || null);
+      setDashboardConfig(data.dashboardConfig || null);
     } catch (error) {
       console.error('Error loading config:', error);
       setError('Erro ao carregar configurações');
@@ -245,13 +258,35 @@ export function ConfigurationsSheet({
     setSaving(true);
     setError(null);
     try {
+      // Basic users can't save, this should never be called for them
+      // but adding safety check
+      if (isBasicUser) {
+        return;
+      }
+
+      const payload: {
+        clinicName: string;
+        formConfig?: FormConfiguration | null;
+        dashboardConfig?: DashboardConfiguration | null;
+      } = { clinicName };
+
+      // Only include configs if they exist (non-basic users)
+      if (formConfig) {
+        payload.formConfig = formConfig;
+      }
+      if (dashboardConfig) {
+        payload.dashboardConfig = dashboardConfig;
+      }
+
       const response = await fetch('/api/clinic/config', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clinicName, formConfig, dashboardConfig }),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Failed to save');
+      if (!response.ok) {
+        throw new Error('Failed to save');
+      }
 
       onOpenChange(false);
       onSaved?.();
@@ -264,8 +299,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleSection = (sectionKey: string) => {
-    if (!formConfig) return;
-
+    if (!formConfig) {
+      return;
+    }
     setFormConfig({
       ...formConfig,
       sections: {
@@ -283,8 +319,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleField = (sectionKey: string, fieldKey: string) => {
-    if (!formConfig) return;
-
+    if (!formConfig) {
+      return;
+    }
     const section =
       formConfig.sections[sectionKey as keyof typeof formConfig.sections];
     const fields = section.fields as Record<string, FormFieldConfig>;
@@ -307,6 +344,9 @@ export function ConfigurationsSheet({
   };
 
   const toggleWidget = (widgetKey: string) => {
+    if (!dashboardConfig) {
+      return;
+    }
     setDashboardConfig({
       ...dashboardConfig,
       widgets: {
@@ -333,8 +373,9 @@ export function ConfigurationsSheet({
         <SheetHeader className="px-6 pt-6 pb-4">
           <SheetTitle>Configurações da Clínica</SheetTitle>
           <SheetDescription>
-            Configure o nome da clínica, os campos do formulário e os widgets do
-            dashboard
+            {isBasicUser
+              ? 'Gerencie suas configurações de conta'
+              : 'Configure o nome da clínica, os campos do formulário e os widgets do dashboard'}
           </SheetDescription>
         </SheetHeader>
 
@@ -352,7 +393,7 @@ export function ConfigurationsSheet({
                   </div>
                 )}
 
-                {formConfig ? (
+                {
                   <>
                     <Card>
                       <CardHeader>
@@ -368,9 +409,17 @@ export function ConfigurationsSheet({
                             value={clinicName}
                             onChange={(e) => setClinicName(e.target.value)}
                             placeholder="Ex: Clínica Santa Maria"
+                            disabled={!hasAdvancedConfigs}
+                            readOnly={!hasAdvancedConfigs}
+                            className={
+                              !hasAdvancedConfigs
+                                ? 'bg-muted cursor-not-allowed'
+                                : ''
+                            }
                           />
                           <p className="text-xs text-muted-foreground">
-                            Este nome será exibido no painel da clínica
+                            {hasAdvancedConfigs &&
+                              'Este nome será exibido no painel da clínica'}
                           </p>
                         </div>
                       </CardContent>
@@ -403,187 +452,208 @@ export function ConfigurationsSheet({
                         </Card>
                       )}
 
-                    <Tabs defaultValue="form" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="form">Formulário</TabsTrigger>
-                        <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                      </TabsList>
+                    <Tabs
+                      defaultValue={hasAdvancedConfigs ? 'form' : 'account'}
+                      className="w-full"
+                    >
+                      {hasAdvancedConfigs ? (
+                        <TabsList className="grid w-full grid-cols-4">
+                          <TabsTrigger value="form">Formulário</TabsTrigger>
+                          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                          <TabsTrigger value="users">Usuários</TabsTrigger>
+                          <TabsTrigger value="account">Conta</TabsTrigger>
+                        </TabsList>
+                      ) : (
+                        <TabsList className="grid w-full grid-cols-1">
+                          <TabsTrigger value="account">Conta</TabsTrigger>
+                        </TabsList>
+                      )}
 
-                      <TabsContent value="form" className="mt-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-base">
-                              Configuração do Formulário
-                            </CardTitle>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Marque as seções e campos que deseja habilitar no
-                              formulário de avaliação. Campos desmarcados não
-                              aparecerão para o paciente.
-                            </p>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              {SECTION_ORDER.map((sectionKey) => {
-                                const section =
-                                  formConfig.sections[
-                                    sectionKey as keyof typeof formConfig.sections
-                                  ];
-                                return (
-                                  <Collapsible
-                                    key={sectionKey}
-                                    open={openSections[sectionKey]}
-                                    onOpenChange={(open) =>
-                                      setOpenSections({
-                                        ...openSections,
-                                        [sectionKey]: open,
-                                      })
-                                    }
-                                  >
-                                    <div className="border rounded-lg">
-                                      <div className="flex items-center justify-between p-3">
-                                        <div className="flex items-center gap-3">
-                                          <Checkbox
-                                            checked={section.enabled}
-                                            disabled={REQUIRED_SECTIONS.has(
-                                              sectionKey,
-                                            )}
-                                            onCheckedChange={() =>
-                                              toggleSection(sectionKey)
-                                            }
-                                          />
-                                          <span className="font-medium text-sm">
-                                            {SECTION_LABELS[sectionKey]}
-                                            {REQUIRED_SECTIONS.has(
-                                              sectionKey,
-                                            ) && (
-                                              <span className="ml-2 text-xs text-muted-foreground">
-                                                (Obrigatório)
-                                              </span>
-                                            )}
-                                          </span>
-                                        </div>
-                                        <CollapsibleTrigger asChild>
-                                          <Button variant="ghost" size="sm">
-                                            <ChevronDown
-                                              className={`size-4 transition-transform ${
-                                                openSections[sectionKey]
-                                                  ? 'rotate-180'
-                                                  : ''
-                                              }`}
+                      {hasAdvancedConfigs && (
+                        <TabsContent value="form" className="mt-4">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">
+                                Configuração do Formulário
+                              </CardTitle>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Marque as seções e campos que deseja habilitar
+                                no formulário de avaliação. Campos desmarcados
+                                não aparecerão para o paciente.
+                              </p>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                {SECTION_ORDER.map((sectionKey) => {
+                                  const section =
+                                    formConfig.sections[
+                                      sectionKey as keyof typeof formConfig.sections
+                                    ];
+                                  return (
+                                    <Collapsible
+                                      key={sectionKey}
+                                      open={openSections[sectionKey]}
+                                      onOpenChange={(open) =>
+                                        setOpenSections({
+                                          ...openSections,
+                                          [sectionKey]: open,
+                                        })
+                                      }
+                                    >
+                                      <div className="border rounded-lg">
+                                        <div className="flex items-center justify-between p-3">
+                                          <div className="flex items-center gap-3">
+                                            <Checkbox
+                                              checked={section.enabled}
+                                              disabled={REQUIRED_SECTIONS.has(
+                                                sectionKey,
+                                              )}
+                                              onCheckedChange={() =>
+                                                toggleSection(sectionKey)
+                                              }
                                             />
-                                          </Button>
-                                        </CollapsibleTrigger>
-                                      </div>
-                                      <CollapsibleContent>
-                                        <div className="border-t p-3 space-y-2 bg-muted/50">
-                                          {FIELD_ORDER[sectionKey].map(
-                                            (fieldKey) => {
-                                              const fields =
-                                                section.fields as Record<
-                                                  string,
-                                                  FormFieldConfig
-                                                >;
-                                              const field = fields[fieldKey];
-                                              return (
-                                                <div
-                                                  key={fieldKey}
-                                                  className="flex items-center justify-between py-2"
-                                                >
-                                                  <Label
-                                                    htmlFor={`${sectionKey}-${fieldKey}`}
-                                                    className={
-                                                      !section.enabled
-                                                        ? 'text-muted-foreground text-sm'
-                                                        : 'text-sm'
-                                                    }
-                                                  >
-                                                    {FIELD_LABELS[fieldKey] ||
-                                                      fieldKey}
-                                                  </Label>
-                                                  <Checkbox
-                                                    id={`${sectionKey}-${fieldKey}`}
-                                                    checked={field.enabled}
-                                                    disabled={
-                                                      !section.enabled ||
-                                                      REQUIRED_SECTIONS.has(
-                                                        sectionKey,
-                                                      ) ||
-                                                      REQUIRED_FIELDS[
-                                                        sectionKey
-                                                      ]?.has(fieldKey)
-                                                    }
-                                                    onCheckedChange={() =>
-                                                      toggleField(
-                                                        sectionKey,
-                                                        fieldKey,
-                                                      )
-                                                    }
-                                                  />
-                                                </div>
-                                              );
-                                            },
-                                          )}
+                                            <span className="font-medium text-sm">
+                                              {SECTION_LABELS[sectionKey]}
+                                              {REQUIRED_SECTIONS.has(
+                                                sectionKey,
+                                              ) && (
+                                                <span className="ml-2 text-xs text-muted-foreground">
+                                                  (Obrigatório)
+                                                </span>
+                                              )}
+                                            </span>
+                                          </div>
+                                          <CollapsibleTrigger asChild>
+                                            <Button variant="ghost" size="sm">
+                                              <ChevronDown
+                                                className={`size-4 transition-transform ${
+                                                  openSections[sectionKey]
+                                                    ? 'rotate-180'
+                                                    : ''
+                                                }`}
+                                              />
+                                            </Button>
+                                          </CollapsibleTrigger>
                                         </div>
-                                      </CollapsibleContent>
-                                    </div>
-                                  </Collapsible>
-                                );
-                              })}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
+                                        <CollapsibleContent>
+                                          <div className="border-t p-3 space-y-2 bg-muted/50">
+                                            {FIELD_ORDER[sectionKey].map(
+                                              (fieldKey) => {
+                                                const fields =
+                                                  section.fields as Record<
+                                                    string,
+                                                    FormFieldConfig
+                                                  >;
+                                                const field = fields[fieldKey];
+                                                return (
+                                                  <div
+                                                    key={fieldKey}
+                                                    className="flex items-center justify-between py-2"
+                                                  >
+                                                    <Label
+                                                      htmlFor={`${sectionKey}-${fieldKey}`}
+                                                      className={
+                                                        !section.enabled
+                                                          ? 'text-muted-foreground text-sm'
+                                                          : 'text-sm'
+                                                      }
+                                                    >
+                                                      {FIELD_LABELS[fieldKey] ||
+                                                        fieldKey}
+                                                    </Label>
+                                                    <Checkbox
+                                                      id={`${sectionKey}-${fieldKey}`}
+                                                      checked={field.enabled}
+                                                      disabled={
+                                                        !section.enabled ||
+                                                        REQUIRED_SECTIONS.has(
+                                                          sectionKey,
+                                                        ) ||
+                                                        REQUIRED_FIELDS[
+                                                          sectionKey
+                                                        ]?.has(fieldKey)
+                                                      }
+                                                      onCheckedChange={() =>
+                                                        toggleField(
+                                                          sectionKey,
+                                                          fieldKey,
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                );
+                                              },
+                                            )}
+                                          </div>
+                                        </CollapsibleContent>
+                                      </div>
+                                    </Collapsible>
+                                  );
+                                })}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                      )}
 
-                      <TabsContent value="dashboard" className="mt-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-base">
-                              Widgets do Dashboard
-                            </CardTitle>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Configure quais widgets serão exibidos no
-                              dashboard. Widgets desabilitados não aparecerão na
-                              visualização de análise.
-                            </p>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
-                              {DASHBOARD_WIDGETS.map((widget) => (
-                                <div
-                                  key={widget.key}
-                                  className="flex items-start justify-between p-3 border rounded-lg"
-                                >
-                                  <div className="flex-1 space-y-1">
-                                    <div className="font-medium text-sm">
-                                      {widget.label}
+                      {hasAdvancedConfigs && (
+                        <TabsContent value="dashboard" className="mt-4">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">
+                                Widgets do Dashboard
+                              </CardTitle>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Configure quais widgets serão exibidos no
+                                dashboard. Widgets desabilitados não aparecerão
+                                na visualização de análise.
+                              </p>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                {DASHBOARD_WIDGETS.map((widget) => (
+                                  <div
+                                    key={widget.key}
+                                    className="flex items-start justify-between p-3 border rounded-lg"
+                                  >
+                                    <div className="flex-1 space-y-1">
+                                      <div className="font-medium text-sm">
+                                        {widget.label}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground">
+                                        {widget.description}
+                                      </p>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
-                                      {widget.description}
-                                    </p>
+                                    <Switch
+                                      checked={
+                                        dashboardConfig.widgets[
+                                          widget.key as keyof typeof dashboardConfig.widgets
+                                        ].enabled
+                                      }
+                                      onCheckedChange={() =>
+                                        toggleWidget(widget.key)
+                                      }
+                                    />
                                   </div>
-                                  <Switch
-                                    checked={
-                                      dashboardConfig.widgets[
-                                        widget.key as keyof typeof dashboardConfig.widgets
-                                      ].enabled
-                                    }
-                                    onCheckedChange={() =>
-                                      toggleWidget(widget.key)
-                                    }
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                      )}
+
+                      {hasAdvancedConfigs && (
+                        <TabsContent value="users" className="mt-4">
+                          <UsersTab />
+                        </TabsContent>
+                      )}
+
+                      <TabsContent value="account" className="mt-4">
+                        <AccountTab />
                       </TabsContent>
                     </Tabs>
                   </>
-                ) : (
-                  <div className="p-4 text-center text-red-500">
-                    Erro ao carregar configurações
-                  </div>
-                )}
+                }
               </div>
             </ScrollArea>
 
@@ -593,18 +663,20 @@ export function ConfigurationsSheet({
                 onClick={() => onOpenChange(false)}
                 disabled={saving}
               >
-                Cancelar
+                {hasAdvancedConfigs ? 'Cancelar' : 'Fechar'}
               </Button>
-              <Button onClick={handleSave} disabled={saving || !formConfig}>
-                {saving ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  'Salvar'
-                )}
-              </Button>
+              {hasAdvancedConfigs && (
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Salvar'
+                  )}
+                </Button>
+              )}
             </div>
           </>
         )}

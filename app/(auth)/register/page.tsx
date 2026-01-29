@@ -41,16 +41,14 @@ export default function Page() {
       });
     } else if (state.status === 'success') {
       // English: 'Account created successfully!'
-      // toast({ type: 'success', description: 'Conta criada com sucesso!' });
       toast({
         type: 'success',
         description:
-          'Conta criada com sucesso. Nosso time foi notificado e realizará a verificação do email.',
+          'Conta criada com sucesso! Envie um email para suporte@asatenas.com.br para realizar a verificação do email.',
       });
 
-      setIsSuccessful(true);
       updateSession();
-      router.refresh();
+      router.push('/dashboard');
     }
   }, [state]);
 
