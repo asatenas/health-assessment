@@ -199,11 +199,21 @@ export const {
 
       // Handle session updates (used for starting/stopping impersonation and status changes)
       if (trigger === 'update') {
-        // Refresh user status from database (e.g., after password change)
+        // Refresh all user data from database (e.g., after status change, clinic change)
         if (token.id && !session?.impersonation) {
           const dbUser = await getUserById({ userId: token.id });
           if (dbUser) {
             token.status = dbUser.status;
+            token.role = dbUser.role;
+            token.clinicId = dbUser.clinicId;
+            token.permissions = getPermissionsForRole(dbUser.role);
+            token.platformAdmin = dbUser.platformAdmin;
+
+            // Fetch updated clinic name
+            const clinic = await getClinicByUserId({ userId: dbUser.id });
+            if (clinic?.clinicName) {
+              token.clinicName = clinic.clinicName;
+            }
           }
         }
 

@@ -26,7 +26,7 @@ import {
 import { toast } from 'sonner';
 
 export default function CreateClinicPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [clinicName, setClinicName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -150,8 +150,8 @@ export default function CreateClinicPage() {
 
       toast.success('Convite aceito! Redirecionando...');
 
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
+      await update();
+      router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Erro ao aceitar convite');
       setLoading(false);
@@ -174,8 +174,8 @@ export default function CreateClinicPage() {
 
       toast.success('Retornando para sua clínica original...');
 
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
+      await update();
+      router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Erro ao retornar para clínica original');
       setLoading(false);
