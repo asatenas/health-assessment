@@ -22,7 +22,7 @@ export const clinic = pgTable('Clinic', {
   clinicName: varchar('clinicName', { length: 255 }),
   email: varchar('email', { length: 64 }).notNull().unique(),
   formConfig: json('formConfig'),
-  dashboardConfig: json('dashboardConfig'),
+  dashboardConfig: json('dashboardConfig').notNull(),
   updatedAt: timestamp('updatedAt').notNull().default(sql`now()`),
   authorized: boolean('authorized').notNull().default(false),
 });

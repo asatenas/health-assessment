@@ -295,6 +295,20 @@
       "when": 1768256000000,
       "tag": "0041_add_temp_password_to_invitation",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1768258000000,
+      "tag": "0042_make_dashboard_config_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1768259000000,
+      "tag": "0043_add_removed_status",
+      "breakpoints": true
     }
   ]
 }
