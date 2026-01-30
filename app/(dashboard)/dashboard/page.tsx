@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Settings,
   LogOut,
+  HelpCircle,
 } from 'lucide-react';
 // Import new dashboard components
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
@@ -31,6 +32,7 @@ import { ConfigurationsSheet } from '@/components/dashboard/configurations-sheet
 import { PermissionGate } from '@/components/auth/permission-gate';
 import { usePermissions } from '@/hooks/use-permissions';
 import { ClinicInvitationDialog } from '@/components/dashboard/clinic-invitation-dialog';
+import { HelpModal } from '@/components/dashboard/help-modal';
 
 type CreateChatResponse = {
   chatId: string;
@@ -59,6 +61,7 @@ export default function ClinicDashboard() {
   );
   const [clinicName, setClinicName] = useState<string>('');
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [dashboardConfig, setDashboardConfig] =
     useState<DashboardConfiguration>(DEFAULT_DASHBOARD_CONFIG);
   const [clinicInvitations, setClinicInvitations] = useState<any[]>([]);
@@ -492,6 +495,19 @@ export default function ClinicDashboard() {
               </div>
             </PermissionGate>
             <div className="flex items-center gap-2">
+              <span className="text-sm sm:hidden">Ajuda</span>
+              <Button
+                onClick={() => setIsHelpOpen(true)}
+                variant="outline"
+                size="sm"
+                className="sm:px-3 px-3"
+                aria-label="Ajuda"
+              >
+                <HelpCircle className="size-4" />
+                <span className="hidden sm:inline sm:ml-2">Ajuda</span>
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-sm sm:hidden">Configurações</span>
               <Button
                 onClick={() => setIsConfigurationsOpen(true)}
@@ -762,6 +778,9 @@ export default function ClinicDashboard() {
         onSaved={fetchClinicConfig}
         initialClinicName={clinicName}
       />
+
+      {/* Help Modal */}
+      <HelpModal open={isHelpOpen} onOpenChange={setIsHelpOpen} />
 
       {/* Clinic Invitation Dialog */}
       {clinicInvitations.length > 0 && (
