@@ -77,6 +77,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
+                  side="bottom"
                   className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto overscroll-contain touch-pan-y"
                   onPointerDownOutside={() => setHemoglobinaTooltipOpen(false)}
                   onEscapeKeyDown={() => setHemoglobinaTooltipOpen(false)}
@@ -154,6 +155,7 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
+                  side="bottom"
                   className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto overscroll-contain touch-pan-y"
                   onPointerDownOutside={() => setCreatininaTooltipOpen(false)}
                   onEscapeKeyDown={() => setCreatininaTooltipOpen(false)}
