@@ -42,15 +42,15 @@ export function DesktopTable({
               style={{ width: '200px' }}
             />
             <col style={{ width: '140px' }} />
+            <col
+              className="hidden lg:table-column"
+              style={{ width: '130px' }}
+            />
             {canReadFull && (
               <>
                 <col
                   className="hidden lg:table-column"
                   style={{ width: '120px' }}
-                />
-                <col
-                  className="hidden lg:table-column"
-                  style={{ width: '130px' }}
                 />
                 <col
                   className="hidden xl:table-column"
@@ -77,13 +77,13 @@ export function DesktopTable({
               <th className="p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
               </th>
+              <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Dias até cirurgia
+              </th>
               {canReadFull && (
                 <>
                   <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Risco
-                  </th>
-                  <th className="hidden lg:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Dias até cirurgia
                   </th>
                   <th className="hidden xl:table-cell p-3 sm:px-6 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     RCRI
@@ -113,13 +113,13 @@ export function DesktopTable({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20" />
                     </td>
+                    <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
+                    </td>
                     {canReadFull && (
                       <>
                         <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-20" />
-                        </td>
-                        <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
-                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-16" />
                         </td>
                         <td className="hidden xl:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-12" />
@@ -135,7 +135,7 @@ export function DesktopTable({
             ) : chats.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canReadFull ? 8 : 4}
+                  colSpan={canReadFull ? 8 : 5}
                   className="px-6 py-8 text-center"
                 >
                   <div className="flex flex-col items-center gap-3">
@@ -222,6 +222,9 @@ export function DesktopTable({
                         {getStatusLabel(chat.status)}
                       </span>
                     </td>
+                    <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                      {getDaysUntilSurgery(chat.surgeryDate)}
+                    </td>
                     {canReadFull && (
                       <>
                         <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap">
@@ -230,9 +233,6 @@ export function DesktopTable({
                           >
                             {getRiskLevel(chat).level}
                           </span>
-                        </td>
-                        <td className="hidden lg:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {getDaysUntilSurgery(chat.surgeryDate)}
                         </td>
                         <td className="hidden xl:table-cell p-3 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           {chat.score_rcri !== null &&
