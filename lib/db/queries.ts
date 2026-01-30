@@ -44,6 +44,7 @@ import type {
   DashboardConfiguration,
 } from '@/lib/types/clinic-config';
 import { DEFAULT_FORM_CONFIG } from '../config/default-form-config';
+import { DEFAULT_DASHBOARD_CONFIG } from '../config/default-dashboard-config';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -119,6 +120,7 @@ export async function createUser(email: string, password: string) {
         email,
         authorized: false,
         formConfig: DEFAULT_FORM_CONFIG,
+        dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
         updatedAt: new Date(),
       })
       .returning({
@@ -2594,6 +2596,7 @@ export async function createClinicAndTransferUser({
         email: userEmail,
         authorized: false, // Awaits approval
         formConfig: DEFAULT_FORM_CONFIG,
+        dashboardConfig: DEFAULT_DASHBOARD_CONFIG,
         updatedAt: new Date(),
       })
       .returning({ id: clinic.id });
