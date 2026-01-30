@@ -92,11 +92,10 @@ export async function POST(request: NextRequest) {
       return new ChatSDKError('bad_request:api', 'Invalid role').toResponse();
     }
 
-    // Check if admin is trying to invite an owner
-    if (user.role === 'admin' && role === 'owner') {
+    if (role === 'owner') {
       return new ChatSDKError(
         'forbidden:api',
-        'Apenas proprietários podem convidar outros proprietários',
+        'Não é possível convidar usuários como proprietários.',
       ).toResponse();
     }
 

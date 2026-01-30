@@ -59,26 +59,23 @@ export async function PATCH(
       return new ChatSDKError('forbidden:api').toResponse();
     }
 
-    // Admin restrictions
-    if (currentUser.role === 'admin') {
-      // Cannot promote to owner
-      if (newRole === 'owner') {
-        return new ChatSDKError(
-          'forbidden:api',
-          'Apenas proprietários podem promover outros usuários a proprietário',
-        ).toResponse();
-      }
+    if (newRole === 'owner') {
+      return new ChatSDKError(
+        'forbidden:api',
+        'Não é possível promover usuários a proprietário.',
+      ).toResponse();
+    }
 
+    if (currentUser.role === 'admin') {
       // Cannot modify owners
       if (targetUser.role === 'owner') {
         return new ChatSDKError(
           'forbidden:api',
-          'Apenas proprietários podem modificar outros proprietários',
+          'Você não tem permissão para essa operação',
         ).toResponse();
       }
     }
 
-    // Last owner protection: if demoting from owner, check count
     if (targetUser.role === 'owner' && newRole !== 'owner') {
       const ownerCount = await countActiveOwners({
         clinicId: currentUser.clinicId,
@@ -87,7 +84,7 @@ export async function PATCH(
       if (ownerCount <= 1) {
         return new ChatSDKError(
           'bad_request:api',
-          'Não é possível rebaixar o último proprietário. Promova outro usuário primeiro.',
+          'Não é possível remover o único proprietário. Para transferência da clínica, entre em contato com o suporte.',
         ).toResponse();
       }
     }

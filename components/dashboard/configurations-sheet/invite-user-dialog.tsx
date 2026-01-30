@@ -273,9 +273,6 @@ export function InviteUserDialog({
                     <SelectValue placeholder="Selecione um perfil" />
                   </SelectTrigger>
                   <SelectContent>
-                    {!isAdmin && (
-                      <SelectItem value="owner">{ROLE_LABELS.owner}</SelectItem>
-                    )}
                     <SelectItem value="admin">{ROLE_LABELS.admin}</SelectItem>
                     <SelectItem value="clinician">
                       {ROLE_LABELS.clinician}
