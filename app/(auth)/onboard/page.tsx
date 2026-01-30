@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Form from 'next/form';
+import { Loader2 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,18 +52,20 @@ export default function OnboardPage() {
   const [foundersConsent, setFoundersConsent] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const hasHandledSuccessRef = useRef(false);
 
   // Only owners should be able to set clinic name (not invited users)
   // Invited users join an existing clinic and shouldn't change its name
   const canSetClinicName = session?.user?.role === 'owner';
 
-  const [state, formAction] = useActionState<CompleteOnboardingState, FormData>(
-    completeOnboarding,
-    { status: 'idle' },
-  );
+  const [state, formAction, isPending] = useActionState<
+    CompleteOnboardingState,
+    FormData
+  >(completeOnboarding, { status: 'idle' });
 
   useEffect(() => {
-    if (state.status === 'success') {
+    if (state.status === 'success' && !hasHandledSuccessRef.current) {
+      hasHandledSuccessRef.current = true;
       toast({
         type: 'success',
         description: 'Cadastro completo! Bem-vindo.',
@@ -82,7 +85,7 @@ export default function OnboardPage() {
         description: 'Por favor, verifique os campos e tente novamente.',
       });
     }
-  }, [state, router, updateSession]);
+  }, [state.status, updateSession, router]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -162,7 +165,6 @@ export default function OnboardPage() {
       referralSource === 'other' ? otherReferral : referralSource,
     );
     formData.set('foundersConsent', foundersConsent.toString());
-
     formAction(formData);
   };
 
@@ -372,16 +374,22 @@ export default function OnboardPage() {
             type="submit"
             className="w-full"
             disabled={
-              state.status === 'in_progress' ||
               !phoneNumber ||
               !referralSource ||
               (referralSource === 'other' && !otherReferral) ||
-              isUploading
+              isUploading ||
+              isPending ||
+              hasHandledSuccessRef.current
             }
           >
-            {state.status === 'in_progress'
-              ? 'Finalizando...'
-              : 'Finalizar Cadastro'}
+            {isPending || hasHandledSuccessRef.current ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Finalizando...
+              </>
+            ) : (
+              'Finalizar Cadastro'
+            )}
           </Button>
         </Form>
       </div>
