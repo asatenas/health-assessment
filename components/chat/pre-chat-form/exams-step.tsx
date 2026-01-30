@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Info } from 'lucide-react';
 import Image from 'next/image';
 import type { StepProps } from './types';
 
 export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
   const examsConfig = formConfig.sections.exams.fields;
-  const [hemoglobinaTooltipOpen, setHemoglobinaTooltipOpen] = useState(false);
-  const [creatininaTooltipOpen, setCreatininaTooltipOpen] = useState(false);
+  const [hemoglobinaModalOpen, setHemoglobinaModalOpen] = useState(false);
+  const [creatininaModalOpen, setCreatininaModalOpen] = useState(false);
 
   const handleExameChange = (
     exame: 'hemoglobina' | 'creatinina',
@@ -62,35 +63,31 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-sm font-normal">Hemoglobina (g/dL)</Label>
-              <Tooltip open={hemoglobinaTooltipOpen}>
-                <TooltipTrigger asChild>
+              <Dialog
+                open={hemoglobinaModalOpen}
+                onOpenChange={setHemoglobinaModalOpen}
+              >
+                <DialogTrigger asChild>
                   <button
                     type="button"
-                    onClick={() =>
-                      setHemoglobinaTooltipOpen(!hemoglobinaTooltipOpen)
-                    }
-                    onPointerEnter={(e) => e.preventDefault()}
-                    onPointerLeave={(e) => e.preventDefault()}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   >
                     <Info className="size-4" />
                   </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto overscroll-contain touch-pan-y"
-                  onPointerDownOutside={() => setHemoglobinaTooltipOpen(false)}
-                  onEscapeKeyDown={() => setHemoglobinaTooltipOpen(false)}
-                >
+                </DialogTrigger>
+                <DialogContent className="p-0 max-w-2xl max-h-[90vh] overflow-auto">
+                  <DialogTitle className="sr-only">
+                    Exemplo de exame de hemoglobina
+                  </DialogTitle>
                   <Image
                     src="/images/exams/hemoglobina.jpeg"
                     alt="Exemplo de exame de hemoglobina"
-                    width={400}
-                    height={300}
+                    width={800}
+                    height={600}
                     className="rounded-md w-full h-auto"
                   />
-                </TooltipContent>
-              </Tooltip>
+                </DialogContent>
+              </Dialog>
             </div>
             <div className="flex gap-2">
               {formData.exames.hemoglobina.tipo === 'texto' ? (
@@ -140,35 +137,31 @@ export function ExamsStep({ formData, setFormData, formConfig }: StepProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-sm font-normal">Creatinina (mg/dL)</Label>
-              <Tooltip open={creatininaTooltipOpen}>
-                <TooltipTrigger asChild>
+              <Dialog
+                open={creatininaModalOpen}
+                onOpenChange={setCreatininaModalOpen}
+              >
+                <DialogTrigger asChild>
                   <button
                     type="button"
-                    onClick={() =>
-                      setCreatininaTooltipOpen(!creatininaTooltipOpen)
-                    }
-                    onPointerEnter={(e) => e.preventDefault()}
-                    onPointerLeave={(e) => e.preventDefault()}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   >
                     <Info className="size-4" />
                   </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="p-0 max-w-xs sm:max-w-md max-h-[80vh] overflow-auto overscroll-contain touch-pan-y"
-                  onPointerDownOutside={() => setCreatininaTooltipOpen(false)}
-                  onEscapeKeyDown={() => setCreatininaTooltipOpen(false)}
-                >
+                </DialogTrigger>
+                <DialogContent className="p-0 max-w-2xl max-h-[90vh] overflow-auto">
+                  <DialogTitle className="sr-only">
+                    Exemplo de exame de creatinina
+                  </DialogTitle>
                   <Image
                     src="/images/exams/creatinina.jpeg"
                     alt="Exemplo de exame de creatinina"
-                    width={400}
-                    height={300}
+                    width={800}
+                    height={600}
                     className="rounded-md w-full h-auto"
                   />
-                </TooltipContent>
-              </Tooltip>
+                </DialogContent>
+              </Dialog>
             </div>
             <div className="flex gap-2">
               {formData.exames.creatinina.tipo === 'texto' ? (
