@@ -14,7 +14,7 @@ const onboardingSchema = z.object({
     .refine((val) => val.length === 10 || val.length === 11, {
       message: 'Telefone deve ter 10 ou 11 dígitos',
     }),
-  clinicName: z.string().min(1, 'Nome da clínica é obrigatório'),
+  clinicName: z.string().nullable().optional(), // Optional - not required for invited users
   profilePhotoUrl: z.string().optional(),
   referralSource: z.string().min(1, 'Como você nos conheceu é obrigatório'),
   foundersConsent: z.boolean(),
@@ -67,11 +67,13 @@ export const completeOnboarding = async (
       onboardingCompleted: true,
     });
 
-    // Update clinic name
-    await updateClinicName({
-      clinicId: session.clinic.id,
-      clinicName: validatedData.clinicName,
-    });
+    // Update clinic name only if provided (new users only, not invited)
+    if (validatedData.clinicName) {
+      await updateClinicName({
+        clinicId: session.clinic.id,
+        clinicName: validatedData.clinicName,
+      });
+    }
 
     return { status: 'success' };
   } catch (error) {

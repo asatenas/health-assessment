@@ -52,6 +52,10 @@ export default function OnboardPage() {
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
+  // Only owners should be able to set clinic name (not invited users)
+  // Invited users join an existing clinic and shouldn't change its name
+  const canSetClinicName = session?.user?.role === 'owner';
+
   const [state, formAction] = useActionState<CompleteOnboardingState, FormData>(
     completeOnboarding,
     { status: 'idle' },
@@ -241,25 +245,29 @@ export default function OnboardPage() {
             )}
           </div>
 
-          {/* Clinic name */}
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="clinicName"
-              className="text-zinc-600 font-normal dark:text-zinc-400"
-            >
-              Nome da clínica ou hospital
-            </Label>
-            <Input
-              id="clinicName"
-              name="clinicName"
-              className="bg-muted text-md md:text-sm"
-              type="text"
-              required
-            />
-            {state.errors?.clinicName && (
-              <p className="text-sm text-red-500">{state.errors.clinicName}</p>
-            )}
-          </div>
+          {/* Clinic name - only for owners, not invited users */}
+          {canSetClinicName && (
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="clinicName"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
+                Nome da clínica ou hospital
+              </Label>
+              <Input
+                id="clinicName"
+                name="clinicName"
+                className="bg-muted text-md md:text-sm"
+                type="text"
+                required
+              />
+              {state.errors?.clinicName && (
+                <p className="text-sm text-red-500">
+                  {state.errors.clinicName}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Profile photo */}
           <div className="flex flex-col gap-2">
