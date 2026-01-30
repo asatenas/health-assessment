@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { User } from '@/lib/db/schema';
 import { useSession } from 'next-auth/react';
 
@@ -138,9 +138,6 @@ export function ChangeRoleDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {!isAdmin && (
-                    <SelectItem value="owner">{ROLE_LABELS.owner}</SelectItem>
-                  )}
                   <SelectItem value="admin">{ROLE_LABELS.admin}</SelectItem>
                   <SelectItem value="clinician">
                     {ROLE_LABELS.clinician}
@@ -156,28 +153,6 @@ export function ChangeRoleDialog({
                 </p>
               )}
             </div>
-
-            {newRole === 'owner' && user.role !== 'owner' && (
-              <Alert>
-                <AlertTriangle className="size-4" />
-                <AlertDescription>
-                  Atenção: Promover um usuário a proprietário dará a ele acesso
-                  completo ao sistema, incluindo a capacidade de gerenciar todos
-                  os outros usuários.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {user.role === 'owner' && newRole !== 'owner' && (
-              <Alert>
-                <AlertTriangle className="size-4" />
-                <AlertDescription>
-                  Atenção: Rebaixar um proprietário removerá suas permissões
-                  completas de gerenciamento. Certifique-se de que há pelo menos
-                  um outro proprietário ativo na clínica.
-                </AlertDescription>
-              </Alert>
-            )}
 
             <Alert>
               <AlertDescription>
