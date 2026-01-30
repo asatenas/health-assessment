@@ -1,5 +1,10 @@
 import type { Chat } from './types';
-import { getRiskLevel, getStatusBadgeColor, getStatusLabel } from './utils';
+import {
+  getRiskLevel,
+  getDaysUntilSurgery,
+  getStatusBadgeColor,
+  getStatusLabel,
+} from './utils';
 
 interface MobileCardsProps {
   chats: Chat[];
@@ -140,6 +145,15 @@ export function MobileCards({
                   </div>
                   <div className="text-sm text-gray-900 dark:text-gray-100">
                     {new Date(chat.createdAt).toLocaleString()}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    Dias até cirurgia
+                  </div>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">
+                    {getDaysUntilSurgery(chat.surgeryDate)}
                   </div>
                 </div>
 
