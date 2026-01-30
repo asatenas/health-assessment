@@ -9,7 +9,11 @@ const onboardingSchema = z.object({
   lastName: z.string().min(1, 'Sobrenome é obrigatório'),
   phoneNumber: z
     .string()
-    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido'),
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido')
+    .transform((val) => val.replace(/\D/g, ''))
+    .refine((val) => val.length === 10 || val.length === 11, {
+      message: 'Telefone deve ter 10 ou 11 dígitos',
+    }),
   clinicName: z.string().min(1, 'Nome da clínica é obrigatório'),
   profilePhotoUrl: z.string().optional(),
   referralSource: z.string().min(1, 'Como você nos conheceu é obrigatório'),
