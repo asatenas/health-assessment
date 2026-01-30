@@ -1,7 +1,12 @@
 'use server';
 
 import { z } from 'zod/v3';
-import { updateUserOnboarding, updateClinicName } from '@/lib/db/queries';
+import {
+  updateUserOnboarding,
+  updateClinicName,
+  reactivateUser,
+  updateUserPassword,
+} from '@/lib/db/queries';
 import { auth } from '@/app/(auth)/auth';
 
 const onboardingSchema = z.object({
@@ -18,6 +23,7 @@ const onboardingSchema = z.object({
   profilePhotoUrl: z.string().optional(),
   referralSource: z.string().min(1, 'Como você nos conheceu é obrigatório'),
   foundersConsent: z.boolean(),
+  hashedPassword: z.string().optional(),
 });
 
 export interface CompleteOnboardingState {
@@ -42,6 +48,9 @@ export const completeOnboarding = async (
       return { status: 'failed' };
     }
 
+    // Check if this is first access flow
+    const isFirstAccess = formData.get('isFirstAccess') === 'true';
+
     // Validate form data
     const validatedData = onboardingSchema.parse({
       firstName: formData.get('firstName'),
@@ -51,7 +60,16 @@ export const completeOnboarding = async (
       profilePhotoUrl: formData.get('profilePhotoUrl') || undefined,
       referralSource: formData.get('referralSource'),
       foundersConsent: formData.get('foundersConsent') === 'true',
+      hashedPassword: formData.get('hashedPassword') || undefined,
     });
+
+    // If this is first access flow, update password with pre-hashed password
+    if (isFirstAccess && validatedData.hashedPassword) {
+      await updateUserPassword({
+        userId: session.user.id,
+        hashedPassword: validatedData.hashedPassword,
+      });
+    }
 
     // Concatenate first and last name
     const fullName = `${validatedData.firstName} ${validatedData.lastName}`;
@@ -73,6 +91,11 @@ export const completeOnboarding = async (
         clinicId: session.clinic.id,
         clinicName: validatedData.clinicName,
       });
+    }
+
+    // If this is first access flow, activate the user
+    if (isFirstAccess && session.user.status === 'invited') {
+      await reactivateUser({ userId: session.user.id });
     }
 
     return { status: 'success' };
