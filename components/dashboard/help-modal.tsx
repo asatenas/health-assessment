@@ -68,10 +68,10 @@ export function HelpModal({ open, onOpenChange }: HelpModalProps) {
           </button>
         </div>
 
-        {/* Content - PDF Viewer */}
+        {/* Content - PDF Viewer with controls */}
         <div className="flex-1 overflow-hidden">
           <iframe
-            src="/help/manual.pdf"
+            src="/web/viewer.html?file=/help/manual.pdf"
             className="size-full border-0"
             title="Manual de Ajuda"
           />
