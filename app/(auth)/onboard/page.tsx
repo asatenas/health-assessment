@@ -67,8 +67,10 @@ export default function OnboardPage() {
         type: 'success',
         description: 'Cadastro completo! Bem-vindo.',
       });
-      updateSession({ trigger: 'update' });
-      router.push('/dashboard');
+      // Wait for session update before navigating to avoid redirect loop
+      updateSession({ trigger: 'update' }).then(() => {
+        router.push('/dashboard');
+      });
     } else if (state.status === 'failed') {
       toast({
         type: 'error',
