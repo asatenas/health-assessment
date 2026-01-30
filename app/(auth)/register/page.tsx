@@ -48,7 +48,7 @@ export default function Page() {
       });
 
       updateSession();
-      router.push('/dashboard');
+      router.push('/onboard');
     }
   }, [state]);
 
@@ -70,7 +70,11 @@ export default function Page() {
             Crie uma conta com seu e-mail e senha
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
+        <AuthForm
+          action={handleSubmit}
+          defaultEmail={email}
+          showPasswordConfirmation={true}
+        >
           <SubmitButton isSuccessful={isSuccessful}>
             {/* English: 'Sign Up' */}
             Cadastrar

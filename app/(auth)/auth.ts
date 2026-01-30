@@ -21,6 +21,7 @@ declare module 'next-auth' {
       status?: 'active' | 'invited' | 'removed';
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
+      onboardingCompleted?: boolean;
     } & DefaultSession['user'];
     clinic: {
       id: string;
@@ -54,6 +55,7 @@ declare module 'next-auth/jwt' {
     status: 'active' | 'invited' | 'removed';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
+    onboardingCompleted?: boolean;
     clinicId: string;
     clinicName: string;
     impersonation?: {
@@ -179,12 +181,13 @@ export const {
             token.platformAdmin = true;
           }
 
-          // Set role, status, and permissions
+          // Set role, status, permissions, and onboarding status
           if (dbUser?.role) {
             token.role = dbUser.role;
             token.status = dbUser.status;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.clinicId = dbUser.clinicId;
+            token.onboardingCompleted = dbUser.onboardingCompleted ?? false;
           }
 
           // Fetch clinic name
@@ -208,6 +211,7 @@ export const {
             token.clinicId = dbUser.clinicId;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.platformAdmin = dbUser.platformAdmin;
+            token.onboardingCompleted = dbUser.onboardingCompleted ?? false;
 
             // Fetch updated clinic name
             const clinic = await getClinicByUserId({ userId: dbUser.id });
@@ -278,7 +282,7 @@ export const {
           session.user.platformAdmin = true;
         }
 
-        // Add role, status, and permissions
+        // Add role, status, permissions, and onboarding status
         if (token.role) {
           session.user.role = token.role;
         }
@@ -287,6 +291,9 @@ export const {
         }
         if (token.permissions) {
           session.user.permissions = token.permissions;
+        }
+        if (token.onboardingCompleted !== undefined) {
+          session.user.onboardingCompleted = token.onboardingCompleted;
         }
 
         // Add clinic info

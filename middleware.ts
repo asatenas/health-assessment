@@ -25,9 +25,30 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = !!token;
   const userStatus = token?.status as string | undefined;
+  const onboardingCompleted = token?.onboardingCompleted as boolean | undefined;
 
   if (pathname.startsWith('/chat/')) {
     return NextResponse.next();
+  }
+
+  // Redirect users who haven't completed onboarding
+  if (
+    isLoggedIn &&
+    userStatus === 'active' &&
+    onboardingCompleted === false &&
+    !pathname.startsWith('/onboard') &&
+    !pathname.startsWith('/api/')
+  ) {
+    return NextResponse.redirect(new URL('/onboard', request.url));
+  }
+
+  // Redirect users who have completed onboarding away from onboard page
+  if (
+    isLoggedIn &&
+    onboardingCompleted === true &&
+    pathname.startsWith('/onboard')
+  ) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Redirect removed users to create-clinic page
@@ -47,6 +68,10 @@ export async function middleware(request: NextRequest) {
       // Redirect invited users to change password page
       if (userStatus === 'invited') {
         return NextResponse.redirect(new URL('/change-password', request.url));
+      }
+      // Redirect to onboarding if not completed
+      if (onboardingCompleted === false) {
+        return NextResponse.redirect(new URL('/onboard', request.url));
       }
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }

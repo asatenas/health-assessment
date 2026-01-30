@@ -1848,6 +1848,12 @@ export async function getAllActiveUsers({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicName: clinic.clinicName,
       })
       .from(user)
@@ -1885,6 +1891,12 @@ export async function getUserForImpersonation({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicId: user.clinicId,
         clinicName: clinic.clinicName,
       })
@@ -2017,6 +2029,12 @@ export async function getUserByEmailGlobal({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicId: user.clinicId,
         clinicName: clinic.clinicName,
       })
@@ -2689,6 +2707,78 @@ export async function deleteClinic({
     return deletedClinic;
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to delete clinic');
+  }
+}
+
+/**
+ * Update user onboarding information.
+ */
+export async function updateUserOnboarding({
+  userId,
+  name,
+  phoneNumber,
+  profilePhotoUrl,
+  referralSource,
+  foundersConsent,
+  onboardingCompleted,
+}: {
+  userId: string;
+  name: string;
+  phoneNumber: string;
+  profilePhotoUrl?: string;
+  referralSource: string;
+  foundersConsent: boolean;
+  onboardingCompleted: boolean;
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({
+        name,
+        phoneNumber,
+        profilePhotoUrl,
+        referralSource,
+        foundersConsent,
+        onboardingCompleted,
+      })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user onboarding',
+    );
+  }
+}
+
+/**
+ * Update clinic name.
+ */
+export async function updateClinicName({
+  clinicId,
+  clinicName,
+}: {
+  clinicId: string;
+  clinicName: string;
+}): Promise<Clinic> {
+  try {
+    const [updatedClinic] = await db
+      .update(clinic)
+      .set({
+        clinicName,
+        updatedAt: new Date(),
+      })
+      .where(eq(clinic.id, clinicId))
+      .returning();
+
+    return updatedClinic;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update clinic name',
+    );
   }
 }
 
