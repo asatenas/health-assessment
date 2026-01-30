@@ -19,14 +19,28 @@ import {
 import { toast } from '@/components/ui/toast';
 import { completeOnboarding, type CompleteOnboardingState } from './actions';
 
-const REFERRAL_OPTIONS = [
+// Shuffle array helper
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const BASE_REFERRAL_OPTIONS = [
   { value: 'colleague', label: 'Indicação de colega/amigo' },
   { value: 'google', label: 'Busca no Google' },
   { value: 'social', label: 'Redes sociais' },
   { value: 'event', label: 'Evento ou conferência' },
   { value: 'ad', label: 'Anúncio online' },
-  { value: 'other', label: 'Outro' },
 ];
+
+const OTHER_OPTION = { value: 'other', label: 'Outro' };
+
+// Randomize options but keep "Outro" at the end
+const REFERRAL_OPTIONS = [...shuffleArray(BASE_REFERRAL_OPTIONS), OTHER_OPTION];
 
 export default function OnboardPage() {
   const router = useRouter();
