@@ -5,6 +5,7 @@ import { SurgeryDetailModal } from './surgery-detail-modal';
 
 import type { Chat, ChatListViewProps } from './chat-list-view/types';
 import { RiskLegend } from './chat-list-view/risk-legend';
+import { StatusLegend } from './chat-list-view/status-legend';
 import { Filters } from './chat-list-view/filters';
 import { DesktopTable } from './chat-list-view/desktop-table';
 import { MobileCards } from './chat-list-view/mobile-cards';
@@ -53,6 +54,8 @@ export function ChatListView({
       <PermissionGate permission="assessments.read">
         <RiskLegend />
       </PermissionGate>
+
+      <StatusLegend />
 
       <Filters
         isLoading={isLoading}
