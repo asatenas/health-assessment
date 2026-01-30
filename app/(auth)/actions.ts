@@ -69,20 +69,15 @@ export const login = async (
   }
 };
 
-export interface RegisterActionState {
-  status:
-    | 'idle'
-    | 'in_progress'
-    | 'success'
-    | 'failed'
-    | 'user_exists'
-    | 'invalid_data';
+// Step 1: Validate email and passwords
+export interface ValidateStep1State {
+  status: 'idle' | 'in_progress' | 'success' | 'user_exists' | 'invalid_data';
 }
 
-export const register = async (
-  _: RegisterActionState,
+export const validateRegistrationStep1 = async (
+  _: ValidateStep1State,
   formData: FormData,
-): Promise<RegisterActionState> => {
+): Promise<ValidateStep1State> => {
   try {
     const validatedData = registerFormSchema.parse({
       email: formData.get('email'),
@@ -93,25 +88,7 @@ export const register = async (
     const [user] = await getUser(validatedData.email);
 
     if (user) {
-      return { status: 'user_exists' } as RegisterActionState;
-    }
-
-    await createUser(validatedData.email, validatedData.password);
-
-    await sendWebhook('user_signup', process.env.NEW_SIGNUPS_WEBHOOK_URL, {
-      email: validatedData.email,
-    });
-
-    try {
-      await signIn('credentials', {
-        email: validatedData.email,
-        password: validatedData.password,
-        redirect: false,
-      });
-    } catch (error) {
-      // let sign up fail
-      // TODO: remove manual email verification
-      return { status: 'success' };
+      return { status: 'user_exists' };
     }
 
     return { status: 'success' };
@@ -120,6 +97,99 @@ export const register = async (
       return { status: 'invalid_data' };
     }
 
+    return { status: 'invalid_data' };
+  }
+};
+
+// Step 2: Complete registration with all data
+const completeRegistrationSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().min(1, 'Nome é obrigatório'),
+  lastName: z.string().min(1, 'Sobrenome é obrigatório'),
+  phoneNumber: z
+    .string()
+    .regex(/^\(\d{2}\) \d{4,5}-\d{4}$/, 'Telefone inválido')
+    .transform((val) => val.replace(/\D/g, ''))
+    .refine((val) => val.length === 10 || val.length === 11, {
+      message: 'Telefone deve ter 10 ou 11 dígitos',
+    }),
+  clinicName: z.string().min(1, 'Nome da clínica é obrigatório'),
+  profilePhotoUrl: z.string().optional(),
+  referralSource: z.string().min(1, 'Como você nos conheceu é obrigatório'),
+  foundersConsent: z.boolean(),
+});
+
+export interface CompleteRegistrationState {
+  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+  errors?: {
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    clinicName?: string;
+    referralSource?: string;
+  };
+}
+
+export const completeRegistration = async (
+  _: CompleteRegistrationState,
+  formData: FormData,
+): Promise<CompleteRegistrationState> => {
+  try {
+    const validatedData = completeRegistrationSchema.parse({
+      email: formData.get('email'),
+      password: formData.get('password'),
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      phoneNumber: formData.get('phoneNumber'),
+      clinicName: formData.get('clinicName'),
+      profilePhotoUrl: formData.get('profilePhotoUrl') || undefined,
+      referralSource: formData.get('referralSource'),
+      foundersConsent: formData.get('foundersConsent') === 'true',
+    });
+
+    // Concatenate first and last name
+    const fullName = `${validatedData.firstName} ${validatedData.lastName}`;
+
+    // Create user with all onboarding data
+    await createUser(
+      validatedData.email,
+      validatedData.password,
+      validatedData.clinicName,
+      fullName,
+      validatedData.phoneNumber,
+      validatedData.profilePhotoUrl,
+      validatedData.referralSource,
+      validatedData.foundersConsent,
+    );
+
+    await sendWebhook('user_signup', process.env.NEW_SIGNUPS_WEBHOOK_URL, {
+      email: validatedData.email,
+      name: fullName,
+      clinicName: validatedData.clinicName,
+    });
+
+    // Don't auto-login - user needs clinic authorization
+    return { status: 'success' };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errors: CompleteRegistrationState['errors'] = {};
+      for (const issue of error.issues) {
+        const path = issue.path[0] as string;
+        if (
+          path === 'firstName' ||
+          path === 'lastName' ||
+          path === 'phoneNumber' ||
+          path === 'clinicName' ||
+          path === 'referralSource'
+        ) {
+          errors[path] = issue.message;
+        }
+      }
+      return { status: 'invalid_data', errors };
+    }
+
+    console.error('Registration error:', error);
     return { status: 'failed' };
   }
 };

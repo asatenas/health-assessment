@@ -108,15 +108,24 @@ export async function getClinicByUserId({
   }
 }
 
-export async function createUser(email: string, password: string) {
+export async function createUser(
+  email: string,
+  password: string,
+  clinicName?: string,
+  name?: string,
+  phoneNumber?: string,
+  profilePhotoUrl?: string,
+  referralSource?: string,
+  foundersConsent?: boolean,
+) {
   const hashedPassword = generateHashedPassword(password);
 
   try {
-    // Create clinic with temporary name and unauthorized status
+    // Create clinic with provided name or default
     const [newClinic] = await db
       .insert(clinic)
       .values({
-        clinicName: 'Painel da Clínica',
+        clinicName: clinicName || 'Painel da Clínica',
         email,
         authorized: false,
         formConfig: DEFAULT_FORM_CONFIG,
@@ -127,13 +136,25 @@ export async function createUser(email: string, password: string) {
         id: clinic.id,
       });
 
-    // Create user as owner with active status
+    // Create user as owner with onboarding data
     await db.insert(user).values({
       clinicId: newClinic.id,
       email,
       password: hashedPassword,
       role: 'owner',
       status: 'active',
+      name,
+      phoneNumber,
+      profilePhotoUrl,
+      referralSource,
+      foundersConsent: foundersConsent ?? false,
+      // If onboarding data is provided, mark as completed
+      onboardingCompleted: !!(
+        name &&
+        phoneNumber &&
+        clinicName &&
+        referralSource
+      ),
     });
 
     // Return the clinic ID for backward compatibility (session uses this)
