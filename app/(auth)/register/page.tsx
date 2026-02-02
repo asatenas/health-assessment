@@ -190,9 +190,9 @@ export default function Page() {
 
   return (
     <div className="flex min-h-screen w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
-          <h3 className="text-2xl font-semibold dark:text-zinc-50">
+          <h3 className="text-xl font-semibold dark:text-zinc-50">
             {step === 1 ? 'Cadastre-se' : 'Complete seu cadastro'}
           </h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
