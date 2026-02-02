@@ -71,7 +71,7 @@ export const login = async (
 
 // Step 1: Validate email and passwords
 export interface ValidateStep1State {
-  status: 'idle' | 'in_progress' | 'success' | 'user_exists' | 'invalid_data';
+  status: 'idle' | 'success' | 'user_exists' | 'invalid_data';
 }
 
 export const validateRegistrationStep1 = async (
@@ -121,7 +121,7 @@ const completeRegistrationSchema = z.object({
 });
 
 export interface CompleteRegistrationState {
-  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+  status: 'idle' | 'success' | 'failed' | 'invalid_data';
   errors?: {
     firstName?: string;
     lastName?: string;

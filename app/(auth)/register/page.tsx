@@ -55,19 +55,24 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [step1State, step1Action] = useActionState<
+  const [step1IsSuccessful, setStep1IsSuccessful] = useState(false);
+  const [step1State, step1Action, isStep1Pending] = useActionState<
     ValidateStep1State,
     FormData
   >(validateRegistrationStep1, { status: 'idle' });
 
   // Step 2 state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [clinicName, setClinicName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [referralSource, setReferralSource] = useState('');
   const [otherReferral, setOtherReferral] = useState('');
   const [foundersConsent, setFoundersConsent] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [step2State, step2Action] = useActionState<
+  const [step2IsSuccessful, setStep2IsSuccessful] = useState(false);
+  const [step2State, step2Action, isStep2Pending] = useActionState<
     CompleteRegistrationState,
     FormData
   >(completeRegistration, { status: 'idle' });
@@ -82,6 +87,7 @@ export default function Page() {
         description: 'Falha na validação. Verifique os campos.',
       });
     } else if (step1State.status === 'success') {
+      setStep1IsSuccessful(true);
       setStep(2);
     }
   }, [step1State]);
@@ -96,6 +102,7 @@ export default function Page() {
         description: 'Falha na validação. Verifique os campos.',
       });
     } else if (step2State.status === 'success') {
+      setStep2IsSuccessful(true);
       toast({
         type: 'success',
         description:
@@ -258,14 +265,10 @@ export default function Page() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={step1State.status === 'in_progress'}
-          >
-            {step1State.status === 'in_progress'
+          <Button type="submit" className="w-full" disabled={isStep1Pending}>
+            {isStep1Pending || step1IsSuccessful
               ? 'Verificando...'
-              : 'Continuar'}
+              : 'Cadastrar'}
           </Button>
 
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
@@ -311,6 +314,8 @@ export default function Page() {
                 name="firstName"
                 className="bg-muted text-md md:text-sm"
                 type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 required
                 autoFocus
               />
@@ -333,6 +338,8 @@ export default function Page() {
                 name="lastName"
                 className="bg-muted text-md md:text-sm"
                 type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 required
               />
               {step2State.errors?.lastName && (
@@ -381,6 +388,8 @@ export default function Page() {
               name="clinicName"
               className="bg-muted text-md md:text-sm"
               type="text"
+              value={clinicName}
+              onChange={(e) => setClinicName(e.target.value)}
               required
             />
             {step2State.errors?.clinicName && (
@@ -482,7 +491,8 @@ export default function Page() {
               htmlFor="foundersConsent"
               className="text-sm text-zinc-600 font-normal dark:text-zinc-400 cursor-pointer"
             >
-              Aceito que os fundadores entrem em contato comigo para feedbacks
+              Aceito que os fundadores entrem em contato comigo para fins de
+              feedback
             </Label>
           </div>
 
@@ -492,7 +502,7 @@ export default function Page() {
               variant="outline"
               className="w-full"
               onClick={() => setStep(1)}
-              disabled={step2State.status === 'in_progress'}
+              disabled={isStep2Pending}
             >
               Voltar
             </Button>
@@ -500,14 +510,18 @@ export default function Page() {
               type="submit"
               className="w-full"
               disabled={
-                step2State.status === 'in_progress' ||
+                isStep2Pending ||
+                step2IsSuccessful ||
+                !firstName.trim() ||
+                !lastName.trim() ||
+                !clinicName.trim() ||
                 !phoneNumber ||
                 !referralSource ||
-                (referralSource === 'other' && !otherReferral) ||
+                (referralSource === 'other' && !otherReferral.trim()) ||
                 isUploading
               }
             >
-              {step2State.status === 'in_progress'
+              {isStep2Pending || step2IsSuccessful
                 ? 'Criando conta...'
                 : 'Finalizar Cadastro'}
             </Button>
