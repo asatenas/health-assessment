@@ -188,322 +188,331 @@ export default function Page() {
     }
   };
 
-  return (
+  return step === 1 ? (
     <div className="flex min-h-screen w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background p-4">
       <div className="w-full max-w-md overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
           <h3 className="text-xl font-semibold dark:text-zinc-50">
-            {step === 1 ? 'Cadastre-se' : 'Complete seu cadastro'}
+            Cadastre-se
           </h3>
           <p className="text-sm text-gray-500 dark:text-zinc-400">
-            {step === 1
-              ? 'Crie uma conta com seu e-mail e senha'
-              : 'Precisamos de algumas informações para personalizar sua experiência'}
+            Crie uma conta com seu e-mail e senha
           </p>
         </div>
 
-        {step === 1 ? (
-          <Form
-            action={handleStep1Submit}
-            className="flex flex-col gap-4 px-4 sm:px-16"
+        <Form
+          action={handleStep1Submit}
+          className="flex flex-col gap-4 px-4 sm:px-16"
+        >
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="email"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Endereço de e-mail
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              className="bg-muted text-md md:text-sm"
+              type="email"
+              placeholder="usuario@exemplo.com"
+              autoComplete="email"
+              required
+              autoFocus
+              defaultValue={email}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="password"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Senha
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              className="bg-muted text-md md:text-sm"
+              type="password"
+              required
+              minLength={6}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="confirmPassword"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Confirmar Senha
+            </Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              className="bg-muted text-md md:text-sm"
+              type="password"
+              required
+              minLength={6}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={step1State.status === 'in_progress'}
           >
+            {step1State.status === 'in_progress'
+              ? 'Verificando...'
+              : 'Continuar'}
+          </Button>
+
+          <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
+            Já tem uma conta?{' '}
+            <Link
+              href="/login"
+              className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
+            >
+              Entrar
+            </Link>{' '}
+            em vez disso.
+          </p>
+        </Form>
+      </div>
+    </div>
+  ) : (
+    <div className="flex min-h-screen w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl">
+        <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
+          <h3 className="text-xl font-semibold dark:text-zinc-50">
+            Complete seu cadastro
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-zinc-400">
+            Precisamos de algumas informações para personalizar sua experiência
+          </p>
+        </div>
+
+        <Form
+          action={handleStep2Submit}
+          className="flex flex-col gap-6 px-4 sm:px-16"
+        >
+          {/* Name fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <Label
-                htmlFor="email"
+                htmlFor="firstName"
                 className="text-zinc-600 font-normal dark:text-zinc-400"
               >
-                Endereço de e-mail
+                Nome
               </Label>
               <Input
-                id="email"
-                name="email"
+                id="firstName"
+                name="firstName"
                 className="bg-muted text-md md:text-sm"
-                type="email"
-                placeholder="usuario@exemplo.com"
-                autoComplete="email"
+                type="text"
                 required
                 autoFocus
-                defaultValue={email}
               />
+              {step2State.errors?.firstName && (
+                <p className="text-sm text-red-500">
+                  {step2State.errors.firstName}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
               <Label
-                htmlFor="password"
+                htmlFor="lastName"
                 className="text-zinc-600 font-normal dark:text-zinc-400"
               >
-                Senha
+                Sobrenome
               </Label>
               <Input
-                id="password"
-                name="password"
+                id="lastName"
+                name="lastName"
                 className="bg-muted text-md md:text-sm"
-                type="password"
+                type="text"
                 required
-                minLength={6}
               />
+              {step2State.errors?.lastName && (
+                <p className="text-sm text-red-500">
+                  {step2State.errors.lastName}
+                </p>
+              )}
             </div>
+          </div>
 
+          {/* Phone number */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="phoneNumber"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Celular
+            </Label>
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              className="bg-muted text-md md:text-sm"
+              type="text"
+              placeholder="(00) 00000-0000"
+              value={phoneNumber}
+              onChange={handlePhoneChange}
+              required
+            />
+            {step2State.errors?.phoneNumber && (
+              <p className="text-sm text-red-500">
+                {step2State.errors.phoneNumber}
+              </p>
+            )}
+          </div>
+
+          {/* Clinic name */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="clinicName"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Nome da clínica ou hospital
+            </Label>
+            <Input
+              id="clinicName"
+              name="clinicName"
+              className="bg-muted text-md md:text-sm"
+              type="text"
+              required
+            />
+            {step2State.errors?.clinicName && (
+              <p className="text-sm text-red-500">
+                {step2State.errors.clinicName}
+              </p>
+            )}
+          </div>
+
+          {/* Profile photo */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="profilePhoto"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Foto de perfil (opcional)
+            </Label>
+            <Input
+              id="profilePhoto"
+              name="profilePhoto"
+              className="bg-muted text-md md:text-sm"
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              disabled={isUploading}
+            />
+            {isUploading && (
+              <p className="text-sm text-gray-500">Enviando foto...</p>
+            )}
+            {profilePhotoUrl && !isUploading && (
+              <p className="text-sm text-green-600">
+                Foto enviada com sucesso!
+              </p>
+            )}
+          </div>
+
+          {/* Referral source */}
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="referralSource"
+              className="text-zinc-600 font-normal dark:text-zinc-400"
+            >
+              Como você nos conheceu?
+            </Label>
+            <Select
+              value={referralSource}
+              onValueChange={setReferralSource}
+              required
+            >
+              <SelectTrigger className="bg-muted">
+                <SelectValue placeholder="Selecione uma opção" />
+              </SelectTrigger>
+              <SelectContent>
+                {REFERRAL_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {step2State.errors?.referralSource && (
+              <p className="text-sm text-red-500">
+                {step2State.errors.referralSource}
+              </p>
+            )}
+          </div>
+
+          {/* Other referral text field */}
+          {referralSource === 'other' && (
             <div className="flex flex-col gap-2">
               <Label
-                htmlFor="confirmPassword"
+                htmlFor="otherReferral"
                 className="text-zinc-600 font-normal dark:text-zinc-400"
               >
-                Confirmar Senha
+                Por favor, especifique
               </Label>
               <Input
-                id="confirmPassword"
-                name="confirmPassword"
+                id="otherReferral"
+                name="otherReferral"
                 className="bg-muted text-md md:text-sm"
-                type="password"
+                type="text"
+                value={otherReferral}
+                onChange={(e) => setOtherReferral(e.target.value)}
                 required
-                minLength={6}
               />
             </div>
+          )}
 
+          {/* Founders consent */}
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="foundersConsent"
+              checked={foundersConsent}
+              onCheckedChange={(checked) =>
+                setFoundersConsent(checked === true)
+              }
+            />
+            <Label
+              htmlFor="foundersConsent"
+              className="text-sm text-zinc-600 font-normal dark:text-zinc-400 cursor-pointer"
+            >
+              Aceito que os fundadores entrem em contato comigo para feedbacks
+            </Label>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setStep(1)}
+              disabled={step2State.status === 'in_progress'}
+            >
+              Voltar
+            </Button>
             <Button
               type="submit"
               className="w-full"
-              disabled={step1State.status === 'in_progress'}
+              disabled={
+                step2State.status === 'in_progress' ||
+                !phoneNumber ||
+                !referralSource ||
+                (referralSource === 'other' && !otherReferral) ||
+                isUploading
+              }
             >
-              {step1State.status === 'in_progress'
-                ? 'Verificando...'
-                : 'Continuar'}
+              {step2State.status === 'in_progress'
+                ? 'Criando conta...'
+                : 'Finalizar Cadastro'}
             </Button>
-
-            <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-              Já tem uma conta?{' '}
-              <Link
-                href="/login"
-                className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
-              >
-                Entrar
-              </Link>{' '}
-              em vez disso.
-            </p>
-          </Form>
-        ) : (
-          <Form
-            action={handleStep2Submit}
-            className="flex flex-col gap-6 px-4 sm:px-16"
-          >
-            {/* Name fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="firstName"
-                  className="text-zinc-600 font-normal dark:text-zinc-400"
-                >
-                  Nome
-                </Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  className="bg-muted text-md md:text-sm"
-                  type="text"
-                  required
-                  autoFocus
-                />
-                {step2State.errors?.firstName && (
-                  <p className="text-sm text-red-500">
-                    {step2State.errors.firstName}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="lastName"
-                  className="text-zinc-600 font-normal dark:text-zinc-400"
-                >
-                  Sobrenome
-                </Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  className="bg-muted text-md md:text-sm"
-                  type="text"
-                  required
-                />
-                {step2State.errors?.lastName && (
-                  <p className="text-sm text-red-500">
-                    {step2State.errors.lastName}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Phone number */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="phoneNumber"
-                className="text-zinc-600 font-normal dark:text-zinc-400"
-              >
-                Celular
-              </Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                className="bg-muted text-md md:text-sm"
-                type="text"
-                placeholder="(00) 00000-0000"
-                value={phoneNumber}
-                onChange={handlePhoneChange}
-                required
-              />
-              {step2State.errors?.phoneNumber && (
-                <p className="text-sm text-red-500">
-                  {step2State.errors.phoneNumber}
-                </p>
-              )}
-            </div>
-
-            {/* Clinic name */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="clinicName"
-                className="text-zinc-600 font-normal dark:text-zinc-400"
-              >
-                Nome da clínica ou hospital
-              </Label>
-              <Input
-                id="clinicName"
-                name="clinicName"
-                className="bg-muted text-md md:text-sm"
-                type="text"
-                required
-              />
-              {step2State.errors?.clinicName && (
-                <p className="text-sm text-red-500">
-                  {step2State.errors.clinicName}
-                </p>
-              )}
-            </div>
-
-            {/* Profile photo */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="profilePhoto"
-                className="text-zinc-600 font-normal dark:text-zinc-400"
-              >
-                Foto de perfil (opcional)
-              </Label>
-              <Input
-                id="profilePhoto"
-                name="profilePhoto"
-                className="bg-muted text-md md:text-sm"
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                disabled={isUploading}
-              />
-              {isUploading && (
-                <p className="text-sm text-gray-500">Enviando foto...</p>
-              )}
-              {profilePhotoUrl && !isUploading && (
-                <p className="text-sm text-green-600">
-                  Foto enviada com sucesso!
-                </p>
-              )}
-            </div>
-
-            {/* Referral source */}
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="referralSource"
-                className="text-zinc-600 font-normal dark:text-zinc-400"
-              >
-                Como você nos conheceu?
-              </Label>
-              <Select
-                value={referralSource}
-                onValueChange={setReferralSource}
-                required
-              >
-                <SelectTrigger className="bg-muted">
-                  <SelectValue placeholder="Selecione uma opção" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REFERRAL_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {step2State.errors?.referralSource && (
-                <p className="text-sm text-red-500">
-                  {step2State.errors.referralSource}
-                </p>
-              )}
-            </div>
-
-            {/* Other referral text field */}
-            {referralSource === 'other' && (
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="otherReferral"
-                  className="text-zinc-600 font-normal dark:text-zinc-400"
-                >
-                  Por favor, especifique
-                </Label>
-                <Input
-                  id="otherReferral"
-                  name="otherReferral"
-                  className="bg-muted text-md md:text-sm"
-                  type="text"
-                  value={otherReferral}
-                  onChange={(e) => setOtherReferral(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-
-            {/* Founders consent */}
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="foundersConsent"
-                checked={foundersConsent}
-                onCheckedChange={(checked) =>
-                  setFoundersConsent(checked === true)
-                }
-              />
-              <Label
-                htmlFor="foundersConsent"
-                className="text-sm text-zinc-600 font-normal dark:text-zinc-400 cursor-pointer"
-              >
-                Aceito que os fundadores entrem em contato comigo para feedbacks
-              </Label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setStep(1)}
-                disabled={step2State.status === 'in_progress'}
-              >
-                Voltar
-              </Button>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={
-                  step2State.status === 'in_progress' ||
-                  !phoneNumber ||
-                  !referralSource ||
-                  (referralSource === 'other' && !otherReferral) ||
-                  isUploading
-                }
-              >
-                {step2State.status === 'in_progress'
-                  ? 'Criando conta...'
-                  : 'Finalizar Cadastro'}
-              </Button>
-            </div>
-          </Form>
-        )}
+          </div>
+        </Form>
       </div>
     </div>
   );
