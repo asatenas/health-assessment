@@ -55,10 +55,10 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [step1State, step1Action] = useActionState<ValidateStep1State, FormData>(
-    validateRegistrationStep1,
-    { status: 'idle' },
-  );
+  const [step1State, step1Action] = useActionState<
+    ValidateStep1State,
+    FormData
+  >(validateRegistrationStep1, { status: 'idle' });
 
   // Step 2 state
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -67,17 +67,20 @@ export default function Page() {
   const [foundersConsent, setFoundersConsent] = useState(false);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [step2State, step2Action] = useActionState<CompleteRegistrationState, FormData>(
-    completeRegistration,
-    { status: 'idle' },
-  );
+  const [step2State, step2Action] = useActionState<
+    CompleteRegistrationState,
+    FormData
+  >(completeRegistration, { status: 'idle' });
 
   // Handle step 1 validation result
   useEffect(() => {
     if (step1State.status === 'user_exists') {
       toast({ type: 'error', description: 'Conta já existe!' });
     } else if (step1State.status === 'invalid_data') {
-      toast({ type: 'error', description: 'Falha na validação. Verifique os campos.' });
+      toast({
+        type: 'error',
+        description: 'Falha na validação. Verifique os campos.',
+      });
     } else if (step1State.status === 'success') {
       setStep(2);
     }
@@ -88,7 +91,10 @@ export default function Page() {
     if (step2State.status === 'failed') {
       toast({ type: 'error', description: 'Falha ao criar a conta!' });
     } else if (step2State.status === 'invalid_data') {
-      toast({ type: 'error', description: 'Falha na validação. Verifique os campos.' });
+      toast({
+        type: 'error',
+        description: 'Falha na validação. Verifique os campos.',
+      });
     } else if (step2State.status === 'success') {
       toast({
         type: 'success',
@@ -144,7 +150,10 @@ export default function Page() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast({ type: 'error', description: 'Por favor, selecione uma imagem válida.' });
+      toast({
+        type: 'error',
+        description: 'Por favor, selecione uma imagem válida.',
+      });
       return;
     }
 
@@ -170,7 +179,10 @@ export default function Page() {
       setProfilePhotoUrl(data.url);
       toast({ type: 'success', description: 'Foto enviada com sucesso!' });
     } catch (error) {
-      toast({ type: 'error', description: 'Erro ao enviar foto. Tente novamente.' });
+      toast({
+        type: 'error',
+        description: 'Erro ao enviar foto. Tente novamente.',
+      });
     } finally {
       setIsUploading(false);
     }
@@ -191,9 +203,15 @@ export default function Page() {
         </div>
 
         {step === 1 ? (
-          <Form action={handleStep1Submit} className="flex flex-col gap-4 px-4 sm:px-16">
+          <Form
+            action={handleStep1Submit}
+            className="flex flex-col gap-4 px-4 sm:px-16"
+          >
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="email"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Endereço de e-mail
               </Label>
               <Input
@@ -210,7 +228,10 @@ export default function Page() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="password"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Senha
               </Label>
               <Input
@@ -240,24 +261,39 @@ export default function Page() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={step1State.status === 'in_progress'}>
-              {step1State.status === 'in_progress' ? 'Verificando...' : 'Continuar'}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={step1State.status === 'in_progress'}
+            >
+              {step1State.status === 'in_progress'
+                ? 'Verificando...'
+                : 'Continuar'}
             </Button>
 
             <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
               Já tem uma conta?{' '}
-              <Link href="/login" className="font-semibold text-gray-800 hover:underline dark:text-zinc-200">
+              <Link
+                href="/login"
+                className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
+              >
                 Entrar
               </Link>{' '}
               em vez disso.
             </p>
           </Form>
         ) : (
-          <Form action={handleStep2Submit} className="flex flex-col gap-6 px-4 sm:px-16">
+          <Form
+            action={handleStep2Submit}
+            className="flex flex-col gap-6 px-4 sm:px-16"
+          >
             {/* Name fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="firstName" className="text-zinc-600 font-normal dark:text-zinc-400">
+                <Label
+                  htmlFor="firstName"
+                  className="text-zinc-600 font-normal dark:text-zinc-400"
+                >
                   Nome
                 </Label>
                 <Input
@@ -269,12 +305,17 @@ export default function Page() {
                   autoFocus
                 />
                 {step2State.errors?.firstName && (
-                  <p className="text-sm text-red-500">{step2State.errors.firstName}</p>
+                  <p className="text-sm text-red-500">
+                    {step2State.errors.firstName}
+                  </p>
                 )}
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="lastName" className="text-zinc-600 font-normal dark:text-zinc-400">
+                <Label
+                  htmlFor="lastName"
+                  className="text-zinc-600 font-normal dark:text-zinc-400"
+                >
                   Sobrenome
                 </Label>
                 <Input
@@ -285,14 +326,19 @@ export default function Page() {
                   required
                 />
                 {step2State.errors?.lastName && (
-                  <p className="text-sm text-red-500">{step2State.errors.lastName}</p>
+                  <p className="text-sm text-red-500">
+                    {step2State.errors.lastName}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Phone number */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="phoneNumber" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="phoneNumber"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Celular
               </Label>
               <Input
@@ -306,13 +352,18 @@ export default function Page() {
                 required
               />
               {step2State.errors?.phoneNumber && (
-                <p className="text-sm text-red-500">{step2State.errors.phoneNumber}</p>
+                <p className="text-sm text-red-500">
+                  {step2State.errors.phoneNumber}
+                </p>
               )}
             </div>
 
             {/* Clinic name */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="clinicName" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="clinicName"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Nome da clínica ou hospital
               </Label>
               <Input
@@ -323,13 +374,18 @@ export default function Page() {
                 required
               />
               {step2State.errors?.clinicName && (
-                <p className="text-sm text-red-500">{step2State.errors.clinicName}</p>
+                <p className="text-sm text-red-500">
+                  {step2State.errors.clinicName}
+                </p>
               )}
             </div>
 
             {/* Profile photo */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="profilePhoto" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="profilePhoto"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Foto de perfil (opcional)
               </Label>
               <Input
@@ -341,18 +397,29 @@ export default function Page() {
                 onChange={handlePhotoUpload}
                 disabled={isUploading}
               />
-              {isUploading && <p className="text-sm text-gray-500">Enviando foto...</p>}
+              {isUploading && (
+                <p className="text-sm text-gray-500">Enviando foto...</p>
+              )}
               {profilePhotoUrl && !isUploading && (
-                <p className="text-sm text-green-600">Foto enviada com sucesso!</p>
+                <p className="text-sm text-green-600">
+                  Foto enviada com sucesso!
+                </p>
               )}
             </div>
 
             {/* Referral source */}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="referralSource" className="text-zinc-600 font-normal dark:text-zinc-400">
+              <Label
+                htmlFor="referralSource"
+                className="text-zinc-600 font-normal dark:text-zinc-400"
+              >
                 Como você nos conheceu?
               </Label>
-              <Select value={referralSource} onValueChange={setReferralSource} required>
+              <Select
+                value={referralSource}
+                onValueChange={setReferralSource}
+                required
+              >
                 <SelectTrigger className="bg-muted">
                   <SelectValue placeholder="Selecione uma opção" />
                 </SelectTrigger>
@@ -365,14 +432,19 @@ export default function Page() {
                 </SelectContent>
               </Select>
               {step2State.errors?.referralSource && (
-                <p className="text-sm text-red-500">{step2State.errors.referralSource}</p>
+                <p className="text-sm text-red-500">
+                  {step2State.errors.referralSource}
+                </p>
               )}
             </div>
 
             {/* Other referral text field */}
             {referralSource === 'other' && (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="otherReferral" className="text-zinc-600 font-normal dark:text-zinc-400">
+                <Label
+                  htmlFor="otherReferral"
+                  className="text-zinc-600 font-normal dark:text-zinc-400"
+                >
                   Por favor, especifique
                 </Label>
                 <Input
@@ -392,7 +464,9 @@ export default function Page() {
               <Checkbox
                 id="foundersConsent"
                 checked={foundersConsent}
-                onCheckedChange={(checked) => setFoundersConsent(checked === true)}
+                onCheckedChange={(checked) =>
+                  setFoundersConsent(checked === true)
+                }
               />
               <Label
                 htmlFor="foundersConsent"
@@ -423,7 +497,9 @@ export default function Page() {
                   isUploading
                 }
               >
-                {step2State.status === 'in_progress' ? 'Criando conta...' : 'Finalizar Cadastro'}
+                {step2State.status === 'in_progress'
+                  ? 'Criando conta...'
+                  : 'Finalizar Cadastro'}
               </Button>
             </div>
           </Form>
