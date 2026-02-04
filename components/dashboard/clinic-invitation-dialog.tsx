@@ -143,9 +143,6 @@ export function ClinicInvitationDialog({
                 <p className="font-medium mb-2">Importante:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>
-                    Você será desconectado e precisará fazer login novamente
-                  </li>
-                  <li>
                     Você perderá acesso à sua clínica atual
                     {currentClinicName && (
                       <span className="font-medium">

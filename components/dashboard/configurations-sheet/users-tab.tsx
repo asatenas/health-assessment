@@ -117,6 +117,12 @@ export function UsersTab() {
   const totalWithInvitations = total + invitations.length;
   const totalPages = Math.ceil(totalWithInvitations / limit);
 
+  // Collect all existing emails (members + invitations)
+  const existingEmails = [
+    ...members.map((m) => m.email),
+    ...invitations.map((i) => i.email),
+  ].filter((email): email is string => email !== null);
+
   return (
     <Card>
       <CardHeader>
@@ -235,6 +241,7 @@ export function UsersTab() {
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
         onSuccess={handleInviteSuccess}
+        existingEmails={existingEmails}
       />
     </Card>
   );
