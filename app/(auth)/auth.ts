@@ -22,6 +22,7 @@ declare module 'next-auth' {
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
       onboardingCompleted?: boolean;
+      phoneNumber?: string;
     } & DefaultSession['user'];
     clinic: {
       id: string;
@@ -281,6 +282,14 @@ export const {
       if (session.user) {
         session.user.id = token.id;
         session.user.email = token.email || '';
+
+        // Fetch user from database to get name, image, and phoneNumber
+        const dbUser = await getUserById({ userId: token.id });
+        if (dbUser) {
+          session.user.name = dbUser.name || '';
+          session.user.image = dbUser.profilePhotoUrl || null;
+          session.user.phoneNumber = dbUser.phoneNumber || '';
+        }
 
         // Only include platformAdmin if true (omit for regular users)
         if (token.platformAdmin) {

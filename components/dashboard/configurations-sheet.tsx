@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,7 +30,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
 import { useSession } from 'next-auth/react';
 import { UsersTab } from './configurations-sheet/users-tab';
-import { AccountTab } from './configurations-sheet/account-tab';
+import {
+  AccountTab,
+  type AccountTabRef,
+} from './configurations-sheet/account-tab';
 
 const SECTION_ORDER = [
   'basicInfo',
@@ -217,7 +220,9 @@ export function ConfigurationsSheet({
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [showImpersonationDialog, setShowImpersonationDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('account');
   const { data: session } = useSession();
+  const accountTabRef = useRef<AccountTabRef>(null);
 
   // Check if user is secretary or clinician (only see Account tab)
   const isBasicUser =
@@ -246,6 +251,15 @@ export function ConfigurationsSheet({
       // For basic users, formConfig and dashboardConfig will be undefined
       setFormConfig(data.formConfig || null);
       setDashboardConfig(data.dashboardConfig || null);
+
+      // Set default tab based on user role
+      if (isBasicUser) {
+        setActiveTab('account');
+      } else if (data.formConfig && data.dashboardConfig) {
+        setActiveTab('form');
+      } else {
+        setActiveTab('account');
+      }
     } catch (error) {
       console.error('Error loading config:', error);
       setError('Erro ao carregar configurações');
@@ -258,8 +272,15 @@ export function ConfigurationsSheet({
     setSaving(true);
     setError(null);
     try {
-      // Basic users can't save, this should never be called for them
-      // but adding safety check
+      // If on account tab, save profile
+      if (activeTab === 'account') {
+        await accountTabRef.current?.saveProfile();
+        onOpenChange(false);
+        onSaved?.();
+        return;
+      }
+
+      // Otherwise, save clinic configs (admin users only)
       if (isBasicUser) {
         return;
       }
@@ -454,6 +475,8 @@ export function ConfigurationsSheet({
 
                     <Tabs
                       defaultValue={hasAdvancedConfigs ? 'form' : 'account'}
+                      value={activeTab}
+                      onValueChange={setActiveTab}
                       className="w-full"
                     >
                       {hasAdvancedConfigs ? (
@@ -649,7 +672,7 @@ export function ConfigurationsSheet({
                       )}
 
                       <TabsContent value="account" className="mt-4">
-                        <AccountTab />
+                        <AccountTab ref={accountTabRef} />
                       </TabsContent>
                     </Tabs>
                   </>
@@ -663,20 +686,18 @@ export function ConfigurationsSheet({
                 onClick={() => onOpenChange(false)}
                 disabled={saving}
               >
-                {hasAdvancedConfigs ? 'Cancelar' : 'Fechar'}
+                Cancelar
               </Button>
-              {hasAdvancedConfigs && (
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Salvando...
-                    </>
-                  ) : (
-                    'Salvar'
-                  )}
-                </Button>
-              )}
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar'
+                )}
+              </Button>
             </div>
           </>
         )}

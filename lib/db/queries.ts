@@ -2775,6 +2775,42 @@ export async function updateUserOnboarding({
 }
 
 /**
+ * Update user profile information.
+ */
+export async function updateUserProfile({
+  userId,
+  name,
+  phoneNumber,
+  profilePhotoUrl,
+}: {
+  userId: string;
+  name?: string;
+  phoneNumber?: string;
+  profilePhotoUrl?: string;
+}): Promise<User> {
+  try {
+    const updateData: Partial<User> = {};
+    if (name !== undefined) updateData.name = name;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (profilePhotoUrl !== undefined)
+      updateData.profilePhotoUrl = profilePhotoUrl;
+
+    const [updatedUser] = await db
+      .update(user)
+      .set(updateData)
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user profile',
+    );
+  }
+}
+
+/**
  * Update clinic name.
  */
 export async function updateClinicName({
