@@ -64,6 +64,7 @@ declare module 'next-auth/jwt' {
         email: string;
         role: 'secretary' | 'clinician' | 'admin' | 'owner';
         permissions?: readonly Permission[];
+        onboardingCompleted?: boolean;
         platformAdmin?: boolean;
       };
       clinic: {
@@ -234,6 +235,7 @@ export const {
                 email: token.email || '',
                 role: token.role,
                 permissions: token.permissions,
+                onboardingCompleted: token.onboardingCompleted,
                 platformAdmin: token.platformAdmin,
               },
               clinic: {
@@ -250,6 +252,7 @@ export const {
             token.permissions = getPermissionsForRole(
               session.impersonation.user.role,
             );
+            token.onboardingCompleted = true; // ignore if did not onboard
 
             // Use clinic from impersonation data (already complete from API)
             token.clinicId = session.impersonation.clinic.id;
@@ -259,6 +262,8 @@ export const {
             if (token.impersonation) {
               token.id = token.impersonation.user.id;
               token.email = token.impersonation.user.email;
+              token.onboardingCompleted =
+                token.impersonation.user.onboardingCompleted;
               token.platformAdmin = token.impersonation.user.platformAdmin;
               token.role = token.impersonation.user.role;
               token.permissions = token.impersonation.user.permissions;
