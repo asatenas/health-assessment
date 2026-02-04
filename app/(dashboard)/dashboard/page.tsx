@@ -92,14 +92,21 @@ export default function ClinicDashboard() {
   // Fetch clinic config from API
   const fetchClinicConfig = useCallback(async () => {
     const response = await fetch('/api/clinic/config');
-    if (!response.ok) {
-      setClinicName('Painel da Clínica');
-      throw new Error('Erro ao carregar configurações da clínica');
-    }
     const data = await response.json();
-    setClinicName(data.clinicName);
-    if (data.dashboardConfig) {
-      setDashboardConfig(data.dashboardConfig);
+
+    if (response.ok) {
+      setClinicName(data.clinicName);
+      if (data.dashboardConfig) {
+        setDashboardConfig(data.dashboardConfig);
+      }
+      return;
+    }
+
+    setClinicName('Painel da Clínica');
+    if (data.cause.toLowerCase().includes('removed users')) {
+      await signOut({ redirectTo: '/login' });
+    } else {
+      throw new Error('Erro ao carregar configurações da clínica');
     }
   }, []);
 
