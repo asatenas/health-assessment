@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
 
 import { toast } from '@/components/ui/toast';
-import { OnboardingForm } from '@/components/onboarding-form';
+import { OnboardingForm } from '@/components/auth/onboarding-form';
 import { completeOnboarding, type CompleteOnboardingState } from './actions';
 
 export default function OnboardPage() {

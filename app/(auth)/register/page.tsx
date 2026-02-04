@@ -1,15 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
-import Form from 'next/form';
 
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
-import { OnboardingForm } from '@/components/onboarding-form';
+import { RegisterForm } from '@/components/auth/register-form';
+import { OnboardingForm } from '@/components/auth/onboarding-form';
+import { OnboardingSection } from '@/components/auth/onboarding-section';
 import {
   validateRegistrationStep1,
   completeRegistration,
@@ -101,103 +98,23 @@ export default function Page() {
           </p>
         </div>
 
-        <Form
-          action={handleStep1Submit}
-          className="flex flex-col gap-4 px-4 sm:px-16"
-        >
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="email"
-              className="text-zinc-600 font-normal dark:text-zinc-400"
-            >
-              Endereço de e-mail
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              className="bg-muted text-md md:text-sm"
-              type="email"
-              placeholder="usuario@exemplo.com"
-              autoComplete="email"
-              required
-              autoFocus
-              defaultValue={email}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="password"
-              className="text-zinc-600 font-normal dark:text-zinc-400"
-            >
-              Senha
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              className="bg-muted text-md md:text-sm"
-              type="password"
-              required
-              minLength={6}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="confirmPassword"
-              className="text-zinc-600 font-normal dark:text-zinc-400"
-            >
-              Confirmar Senha
-            </Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              className="bg-muted text-md md:text-sm"
-              type="password"
-              required
-              minLength={6}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isStep1Pending}>
-            {isStep1Pending || step1IsSuccessful
-              ? 'Verificando...'
-              : 'Cadastrar'}
-          </Button>
-
-          <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-            Já tem uma conta?{' '}
-            <Link
-              href="/login"
-              className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
-            >
-              Entrar
-            </Link>{' '}
-            em vez disso.
-          </p>
-        </Form>
-      </div>
-    </div>
-  ) : (
-    <div className="flex min-h-screen w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl">
-        <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
-          <h3 className="text-xl font-semibold dark:text-zinc-50">
-            Complete seu cadastro
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Precisamos de algumas informações para personalizar sua experiência
-          </p>
-        </div>
-
-        <OnboardingForm
-          onSubmit={handleStep2Submit}
-          isPending={isStep2Pending}
-          isSuccessful={step2IsSuccessful}
-          showClinicName={true}
-          errors={step2State.errors}
+        <RegisterForm
+          onSubmit={handleStep1Submit}
+          isPending={isStep1Pending}
+          isSuccessful={step1IsSuccessful}
+          defaultEmail={email}
         />
       </div>
     </div>
+  ) : (
+    <OnboardingSection>
+      <OnboardingForm
+        onSubmit={handleStep2Submit}
+        isPending={isStep2Pending}
+        isSuccessful={step2IsSuccessful}
+        showClinicName={true}
+        errors={step2State.errors}
+      />
+    </OnboardingSection>
   );
 }

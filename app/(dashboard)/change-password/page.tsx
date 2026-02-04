@@ -3,14 +3,11 @@
 import { useState, useEffect, useActionState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Info, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
-import { OnboardingForm } from '@/components/onboarding-form';
+import { ChangePasswordForm } from '@/components/auth/change-password-form';
+import { OnboardingForm } from '@/components/auth/onboarding-form';
+import { OnboardingSection } from '@/components/auth/onboarding-section';
 import {
   completeOnboarding,
   type CompleteOnboardingState,
@@ -144,110 +141,20 @@ export default function ChangePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {step === 1 ? (
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-xl">Primeiro Acesso</CardTitle>
-            <p className="text-sm text-muted-foreground mt-2">
-              Por favor, altere sua senha temporária para continuar
-            </p>
-          </CardHeader>
-          <CardContent>
-            <Alert className="mb-4">
-              <AlertTriangle className="size-4" />
-              <AlertDescription>
-                Para sua segurança, você precisa criar uma nova senha antes de
-                acessar o sistema.
-              </AlertDescription>
-            </Alert>
-
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={session?.user?.email || ''}
-                  disabled
-                  readOnly
-                  className="bg-muted"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Senha Temporária</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Digite a senha temporária que você recebeu"
-                  disabled={validatingPassword}
-                  required
-                  minLength={6}
-                  autoFocus
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="new-password">Nova Senha</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Digite sua nova senha (mínimo 6 caracteres)"
-                  disabled={validatingPassword}
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Digite novamente sua nova senha"
-                  disabled={validatingPassword}
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <Info className="size-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <Button
-                type="submit"
-                disabled={validatingPassword}
-                className="w-full"
-              >
-                {validatingPassword && (
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                )}
-                {validatingPassword ? 'Validando...' : 'Continuar'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <ChangePasswordForm
+          email={session?.user?.email || ''}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          confirmPassword={confirmPassword}
+          error={error}
+          isValidating={validatingPassword}
+          onCurrentPasswordChange={setCurrentPassword}
+          onNewPasswordChange={setNewPassword}
+          onConfirmPasswordChange={setConfirmPassword}
+          onSubmit={handlePasswordSubmit}
+        />
       ) : (
-        <div className="w-full max-w-2xl overflow-hidden rounded-2xl">
-          <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
-            <h3 className="text-2xl font-semibold dark:text-zinc-50">
-              Primeiro Acesso
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-zinc-400">
-              Precisamos de algumas informações para personalizar sua
-              experiência
-            </p>
-          </div>
-
+        <OnboardingSection>
           <OnboardingForm
             onSubmit={handleOnboardingSubmit}
             isPending={isPending}
@@ -255,7 +162,7 @@ export default function ChangePasswordPage() {
             showClinicName={false}
             errors={state.errors}
           />
-        </div>
+        </OnboardingSection>
       )}
     </div>
   );
