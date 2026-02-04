@@ -416,6 +416,33 @@ export function ConfigurationsSheet({
 
                 {
                   <>
+                    {session?.user?.platformAdmin &&
+                      !session?.impersonation && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-base">
+                              Administração de Plataforma
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start"
+                                onClick={() => setShowImpersonationDialog(true)}
+                              >
+                                <Users className="size-4 mr-2" />
+                                Personificar Usuário
+                              </Button>
+                              <p className="text-xs text-muted-foreground">
+                                Visualize o sistema como qualquer usuário ativo
+                                para fins de suporte e teste
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base">
@@ -445,33 +472,6 @@ export function ConfigurationsSheet({
                         </div>
                       </CardContent>
                     </Card>
-
-                    {session?.user?.platformAdmin &&
-                      !session?.impersonation && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-base">
-                              Administração de Plataforma
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                onClick={() => setShowImpersonationDialog(true)}
-                              >
-                                <Users className="size-4 mr-2" />
-                                Personificar Usuário
-                              </Button>
-                              <p className="text-xs text-muted-foreground">
-                                Visualize o sistema como qualquer usuário ativo
-                                para fins de suporte e teste
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
 
                     <Tabs
                       defaultValue={hasAdvancedConfigs ? 'form' : 'account'}
