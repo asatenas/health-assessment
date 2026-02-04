@@ -2,12 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect, useState, Suspense } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { toast } from '@/components/ui/toast';
 
 import { AuthForm } from '@/components/auth/auth-form';
 import { SubmitButton } from '@/components/auth/submit-button';
-import { PasswordChangedNotification } from '@/components/auth/password-changed-notification';
 
 import { login, type LoginActionState } from '../actions';
 import { useSession } from 'next-auth/react';
@@ -26,14 +25,15 @@ export default function Page() {
     },
   );
 
-  const { update: updateSession } = useSession();
+  const { update } = useSession();
 
   useEffect(() => {
     switch (state.status) {
       case 'success':
         setIsSuccessful(true);
-        updateSession();
-        router.push('/dashboard');
+        update({ trigger: 'update' }).then(() => {
+          router.push('/dashboard');
+        });
         return;
       case 'email_not_verified':
         // English: 'Email not verified. Send an email to suporte@asatenas.com.br for verification.'
@@ -73,10 +73,6 @@ export default function Page() {
       title="Entrar"
       description="Use seu e-mail e senha para entrar"
     >
-      <Suspense fallback={null}>
-        <PasswordChangedNotification />
-      </Suspense>
-
       <AuthForm action={handleSubmit} defaultEmail={email}>
         <SubmitButton isSuccessful={isSuccessful}>Entrar</SubmitButton>
         <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
