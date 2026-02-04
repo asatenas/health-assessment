@@ -3,9 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Loader2 } from 'lucide-react';
-
 import { toast } from '@/components/ui/toast';
+import { OnboardingSection } from '@/components/auth/onboarding-section';
 import { OnboardingForm } from '@/components/auth/onboarding-form';
 import {
   completeOnboarding,
@@ -14,7 +13,7 @@ import {
 
 export default function OnboardPage() {
   const router = useRouter();
-  const { data: session, update: updateSession } = useSession();
+  const { data: session, update } = useSession();
   const [isSuccessful, setIsSuccessful] = useState(false);
 
   const [state, formAction, isPending] = useActionState<
@@ -27,12 +26,10 @@ export default function OnboardPage() {
       setIsSuccessful(true);
       toast({
         type: 'success',
-        description:
-          'Cadastro completo! Você será desconectado para fazer login com sua nova senha.',
+        description: 'Cadastro completo! Bem-vindo.',
       });
-      // Wait for session update before navigating to avoid redirect loop
-      updateSession({ trigger: 'update' }).then(() => {
-        setTimeout(() => router.push('/dashboard'), 2000);
+      update({ trigger: 'update' }).then(() => {
+        router.push('/dashboard');
       });
     } else if (state.status === 'failed') {
       toast({
@@ -45,29 +42,11 @@ export default function OnboardPage() {
         description: 'Por favor, verifique os campos e tente novamente.',
       });
     }
-  }, [state.status, updateSession, router, isSuccessful]);
-
-  // Show loading state when redirecting to dashboard
-  if (isSuccessful) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  }, [state.status, update, router, isSuccessful]);
 
   return (
-    <div className="flex min-h-screen w-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl">
-        <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16 mb-8">
-          <h3 className="text-2xl font-semibold dark:text-zinc-50">
-            Complete seu cadastro
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Precisamos de algumas informações para personalizar sua experiência
-          </p>
-        </div>
-
+    <>
+      <OnboardingSection>
         <OnboardingForm
           onSubmit={formAction}
           isPending={isPending}
@@ -75,7 +54,7 @@ export default function OnboardPage() {
           showClinicName={session?.user?.role === 'owner'}
           errors={state.errors}
         />
-      </div>
-    </div>
+      </OnboardingSection>
+    </>
   );
 }
