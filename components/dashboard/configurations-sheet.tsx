@@ -256,7 +256,7 @@ export function ConfigurationsSheet({
       if (isBasicUser) {
         setActiveTab('account');
       } else if (data.formConfig && data.dashboardConfig) {
-        setActiveTab('form');
+        setActiveTab('clinic');
       } else {
         setActiveTab('account');
       }
@@ -443,53 +443,57 @@ export function ConfigurationsSheet({
                         </Card>
                       )}
 
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">
-                          Informações Gerais
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <Label htmlFor="clinicName">Nome da Clínica</Label>
-                          <Input
-                            id="clinicName"
-                            value={clinicName}
-                            onChange={(e) => setClinicName(e.target.value)}
-                            placeholder="Ex: Clínica Santa Maria"
-                            disabled={!hasAdvancedConfigs}
-                            readOnly={!hasAdvancedConfigs}
-                            className={
-                              !hasAdvancedConfigs
-                                ? 'bg-muted cursor-not-allowed'
-                                : ''
-                            }
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            {hasAdvancedConfigs &&
-                              'Este nome será exibido no painel da clínica'}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
                     <Tabs
-                      defaultValue={hasAdvancedConfigs ? 'form' : 'account'}
+                      defaultValue={hasAdvancedConfigs ? 'clinic' : 'account'}
                       value={activeTab}
                       onValueChange={setActiveTab}
                       className="w-full"
                     >
                       {hasAdvancedConfigs ? (
-                        <TabsList className="grid w-full grid-cols-4">
-                          <TabsTrigger value="form">Formulário</TabsTrigger>
-                          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-5">
+                          <TabsTrigger value="clinic">Clínica</TabsTrigger>
                           <TabsTrigger value="users">Usuários</TabsTrigger>
+                          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                          <TabsTrigger value="form">Formulário</TabsTrigger>
                           <TabsTrigger value="account">Conta</TabsTrigger>
                         </TabsList>
                       ) : (
                         <TabsList className="grid w-full grid-cols-1">
                           <TabsTrigger value="account">Conta</TabsTrigger>
                         </TabsList>
+                      )}
+
+                      {hasAdvancedConfigs && (
+                        <TabsContent value="clinic" className="mt-4">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">
+                                Informações da Clínica
+                              </CardTitle>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Configure o nome da sua clínica
+                              </p>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                <Label htmlFor="clinicName">
+                                  Nome da Clínica
+                                </Label>
+                                <Input
+                                  id="clinicName"
+                                  value={clinicName}
+                                  onChange={(e) =>
+                                    setClinicName(e.target.value)
+                                  }
+                                  placeholder="Ex: Clínica Santa Maria"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  Este nome será exibido no painel da clínica
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
                       )}
 
                       {hasAdvancedConfigs && (
