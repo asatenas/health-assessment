@@ -7,7 +7,10 @@ import { Loader2 } from 'lucide-react';
 
 import { toast } from '@/components/ui/toast';
 import { OnboardingForm } from '@/components/auth/onboarding-form';
-import { completeOnboarding, type CompleteOnboardingState } from './actions';
+import {
+  completeOnboarding,
+  type CompleteOnboardingState,
+} from '@/app/(auth)/actions';
 
 export default function OnboardPage() {
   const router = useRouter();

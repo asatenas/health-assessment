@@ -10,9 +10,9 @@ import { OnboardingForm } from '@/components/auth/onboarding-form';
 import { OnboardingSection } from '@/components/auth/onboarding-section';
 import {
   completeOnboarding,
+  validateAndHashPassword,
   type CompleteOnboardingState,
-} from '@/app/(auth)/onboard/actions';
-import { validateAndHashPassword } from './actions';
+} from '@/app/(auth)/actions';
 
 export default function ChangePasswordPage() {
   const router = useRouter();
