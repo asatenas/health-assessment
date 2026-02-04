@@ -2114,7 +2114,7 @@ export async function updateUserClinic({
   try {
     const [updatedUser] = await db
       .update(user)
-      .set({ clinicId, role })
+      .set({ clinicId, role, status: 'active' })
       .where(eq(user.id, userId))
       .returning();
 
