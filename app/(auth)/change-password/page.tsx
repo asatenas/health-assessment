@@ -3,7 +3,7 @@
 import { useState, useEffect, useActionState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
 import { ChangePasswordForm } from '@/components/auth/change-password-form';
 import { OnboardingForm } from '@/components/auth/onboarding-form';
@@ -13,6 +13,7 @@ import {
   validateAndHashPassword,
   type CompleteOnboardingState,
 } from '@/app/(auth)/actions';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function ChangePasswordPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [hashedNewPassword, setHashedNewPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
   const [validatingPassword, setValidatingPassword] = useState(false);
 
   // Step 2 state - Onboarding
@@ -37,7 +38,7 @@ export default function ChangePasswordPage() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError('');
 
     // Client-side validation
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -141,18 +142,31 @@ export default function ChangePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {step === 1 ? (
-        <ChangePasswordForm
-          email={session?.user?.email || ''}
-          currentPassword={currentPassword}
-          newPassword={newPassword}
-          confirmPassword={confirmPassword}
-          error={error}
-          isValidating={validatingPassword}
-          onCurrentPasswordChange={setCurrentPassword}
-          onNewPasswordChange={setNewPassword}
-          onConfirmPasswordChange={setConfirmPassword}
-          onSubmit={handlePasswordSubmit}
-        />
+        <OnboardingSection
+          title="Primeiro Acesso"
+          description="Por favor, altere sua senha temporária para continuar"
+        >
+          <Alert className="-mt-8">
+            <AlertTriangle className="size-4" />
+            <AlertDescription>
+              Para sua segurança, você precisa criar uma nova senha antes de
+              acessar o sistema.
+            </AlertDescription>
+          </Alert>
+
+          <ChangePasswordForm
+            email={session?.user?.email || ''}
+            currentPassword={currentPassword}
+            newPassword={newPassword}
+            confirmPassword={confirmPassword}
+            error={error}
+            isValidating={validatingPassword}
+            onCurrentPasswordChange={setCurrentPassword}
+            onNewPasswordChange={setNewPassword}
+            onConfirmPasswordChange={setConfirmPassword}
+            onSubmit={handlePasswordSubmit}
+          />
+        </OnboardingSection>
       ) : (
         <OnboardingSection>
           <OnboardingForm
