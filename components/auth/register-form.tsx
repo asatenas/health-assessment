@@ -20,7 +20,7 @@ export function RegisterForm({
   defaultEmail = '',
 }: RegisterFormProps) {
   return (
-    <Form action={onSubmit} className="flex flex-col gap-4 px-4 sm:px-16">
+    <Form action={onSubmit} className="flex flex-col gap-6 px-4 sm:px-16">
       <div className="flex flex-col gap-2">
         <Label
           htmlFor="email"

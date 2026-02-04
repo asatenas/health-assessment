@@ -15,7 +15,7 @@ export function OnboardingSection({
     <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
       <div
         className={[
-          'w-full overflow-hidden rounded-2xl flex flex-col gap-6 px-4 sm:px-16',
+          'w-full overflow-hidden rounded-2xl',
           wide ? 'max-w-2xl' : 'max-w-md',
         ].join(' ')}
       >

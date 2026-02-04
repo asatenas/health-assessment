@@ -72,6 +72,7 @@ export default function Page() {
     <OnboardingSection
       title="Entrar"
       description="Use seu e-mail e senha para entrar"
+      wide={false}
     >
       <AuthForm action={handleSubmit} defaultEmail={email}>
         <SubmitButton isSuccessful={isSuccessful}>Entrar</SubmitButton>
