@@ -108,15 +108,24 @@ export async function getClinicByUserId({
   }
 }
 
-export async function createUser(email: string, password: string) {
+export async function createUser(
+  email: string,
+  password: string,
+  clinicName?: string,
+  name?: string,
+  phoneNumber?: string,
+  profilePhotoUrl?: string,
+  referralSource?: string,
+  foundersConsent?: boolean,
+) {
   const hashedPassword = generateHashedPassword(password);
 
   try {
-    // Create clinic with temporary name and unauthorized status
+    // Create clinic with provided name or default
     const [newClinic] = await db
       .insert(clinic)
       .values({
-        clinicName: 'Painel da Clínica',
+        clinicName: clinicName || 'Painel da Clínica',
         email,
         authorized: false,
         formConfig: DEFAULT_FORM_CONFIG,
@@ -127,13 +136,25 @@ export async function createUser(email: string, password: string) {
         id: clinic.id,
       });
 
-    // Create user as owner with active status
+    // Create user as owner with onboarding data
     await db.insert(user).values({
       clinicId: newClinic.id,
       email,
       password: hashedPassword,
       role: 'owner',
       status: 'active',
+      name,
+      phoneNumber,
+      profilePhotoUrl,
+      referralSource,
+      foundersConsent: foundersConsent ?? false,
+      // If onboarding data is provided, mark as completed
+      onboardingCompleted: !!(
+        name &&
+        phoneNumber &&
+        clinicName &&
+        referralSource
+      ),
     });
 
     // Return the clinic ID for backward compatibility (session uses this)
@@ -1848,6 +1869,12 @@ export async function getAllActiveUsers({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicName: clinic.clinicName,
       })
       .from(user)
@@ -1885,6 +1912,12 @@ export async function getUserForImpersonation({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicId: user.clinicId,
         clinicName: clinic.clinicName,
       })
@@ -2017,6 +2050,12 @@ export async function getUserByEmailGlobal({
         role: user.role,
         status: user.status,
         platformAdmin: user.platformAdmin,
+        name: user.name,
+        phoneNumber: user.phoneNumber,
+        profilePhotoUrl: user.profilePhotoUrl,
+        referralSource: user.referralSource,
+        foundersConsent: user.foundersConsent,
+        onboardingCompleted: user.onboardingCompleted,
         clinicId: user.clinicId,
         clinicName: clinic.clinicName,
       })
@@ -2075,7 +2114,7 @@ export async function updateUserClinic({
   try {
     const [updatedUser] = await db
       .update(user)
-      .set({ clinicId, role })
+      .set({ clinicId, role, status: 'active' })
       .where(eq(user.id, userId))
       .returning();
 
@@ -2689,6 +2728,114 @@ export async function deleteClinic({
     return deletedClinic;
   } catch (error) {
     throw new ChatSDKError('bad_request:database', 'Failed to delete clinic');
+  }
+}
+
+/**
+ * Update user onboarding information.
+ */
+export async function updateUserOnboarding({
+  userId,
+  name,
+  phoneNumber,
+  profilePhotoUrl,
+  referralSource,
+  foundersConsent,
+  onboardingCompleted,
+}: {
+  userId: string;
+  name: string;
+  phoneNumber: string;
+  profilePhotoUrl?: string;
+  referralSource: string;
+  foundersConsent: boolean;
+  onboardingCompleted: boolean;
+}): Promise<User> {
+  try {
+    const [updatedUser] = await db
+      .update(user)
+      .set({
+        name,
+        phoneNumber,
+        profilePhotoUrl,
+        referralSource,
+        foundersConsent,
+        onboardingCompleted,
+      })
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user onboarding',
+    );
+  }
+}
+
+/**
+ * Update user profile information.
+ */
+export async function updateUserProfile({
+  userId,
+  name,
+  phoneNumber,
+  profilePhotoUrl,
+}: {
+  userId: string;
+  name?: string;
+  phoneNumber?: string;
+  profilePhotoUrl?: string;
+}): Promise<User> {
+  try {
+    const updateData: Partial<User> = {};
+    if (name !== undefined) updateData.name = name;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (profilePhotoUrl !== undefined)
+      updateData.profilePhotoUrl = profilePhotoUrl;
+
+    const [updatedUser] = await db
+      .update(user)
+      .set(updateData)
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update user profile',
+    );
+  }
+}
+
+/**
+ * Update clinic name.
+ */
+export async function updateClinicName({
+  clinicId,
+  clinicName,
+}: {
+  clinicId: string;
+  clinicName: string;
+}): Promise<Clinic> {
+  try {
+    const [updatedClinic] = await db
+      .update(clinic)
+      .set({
+        clinicName,
+        updatedAt: new Date(),
+      })
+      .where(eq(clinic.id, clinicId))
+      .returning();
+
+    return updatedClinic;
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to update clinic name',
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 {
-  "id": "6682730c-90fb-4c7c-b72d-4b5784c97a27",
-  "prevId": "3d7f1eda-b128-45cd-bcb5-7b85dad0afe7",
+  "id": "a7007558-79ab-4495-88c9-4dd5822ba98f",
+  "prevId": "6682730c-90fb-4c7c-b72d-4b5784c97a27",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -763,6 +763,44 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
+          "default": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phoneNumber": {
+          "name": "phoneNumber",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profilePhotoUrl": {
+          "name": "profilePhotoUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referralSource": {
+          "name": "referralSource",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "foundersConsent": {
+          "name": "foundersConsent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "onboardingCompleted": {
+          "name": "onboardingCompleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
           "default": false
         }
       },

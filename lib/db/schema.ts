@@ -46,6 +46,12 @@ export const user = pgTable(
       .notNull()
       .default('active'),
     platformAdmin: boolean('platformAdmin').notNull().default(false),
+    name: varchar('name', { length: 200 }),
+    phoneNumber: varchar('phoneNumber', { length: 20 }),
+    profilePhotoUrl: text('profilePhotoUrl'),
+    referralSource: text('referralSource'),
+    foundersConsent: boolean('foundersConsent').default(false),
+    onboardingCompleted: boolean('onboardingCompleted').default(false),
   },
   (table) => ({
     clinicEmailUnique: unique().on(table.clinicId, table.email),

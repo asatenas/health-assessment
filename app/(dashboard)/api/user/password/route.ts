@@ -2,11 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { compare } from 'bcrypt-ts';
 import { z } from 'zod';
 import { ChatSDKError } from '@/lib/shared/errors';
-import {
-  getUserById,
-  updateUserPassword,
-  reactivateUser,
-} from '@/lib/db/queries';
+import { getUserById, updateUserPassword } from '@/lib/db/queries';
 import { generateHashedPassword } from '@/lib/db/utils';
 import { auth } from '@/app/(auth)/auth';
 
@@ -100,15 +96,9 @@ export async function PATCH(request: NextRequest) {
       hashedPassword,
     });
 
-    // If user is in 'invited' status, activate them after password change
-    if (user.status === 'invited') {
-      await reactivateUser({ userId: currentUserId });
-    }
-
     return NextResponse.json({
       success: true,
       message: 'Senha alterada com sucesso',
-      statusChanged: user.status === 'invited',
     });
   } catch (error) {
     if (error instanceof ChatSDKError) {

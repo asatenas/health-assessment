@@ -26,7 +26,7 @@ import {
 import { toast } from 'sonner';
 
 export default function CreateClinicPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const [clinicName, setClinicName] = useState('');
   const [loading, setLoading] = useState<
@@ -75,21 +75,12 @@ export default function CreateClinicPage() {
     }
   };
 
-  // Check if user is removed
-  const isRemoved = session?.user?.status === 'removed';
-
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="size-8 animate-spin" />
       </div>
     );
-  }
-
-  // Only removed users can access this page
-  if (!isRemoved) {
-    router.push('/dashboard');
-    return null;
   }
 
   // Wait for all data to load before rendering
@@ -151,7 +142,7 @@ export default function CreateClinicPage() {
 
       toast.success('Convite aceito! Você será redirecionado...');
 
-      await signOut({ redirectTo: '/login' });
+      handleRedirect();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao aceitar convite');
       setLoading(null);
@@ -174,7 +165,7 @@ export default function CreateClinicPage() {
 
       toast.success('Retornando para sua clínica original...');
 
-      await signOut({ redirectTo: '/login' });
+      handleRedirect();
     } catch (error: any) {
       toast.error(error.message || 'Erro ao retornar para clínica original');
       setLoading(null);
@@ -212,6 +203,12 @@ export default function CreateClinicPage() {
 
   const handleLogout = async () => {
     await signOut({ redirectTo: '/login' });
+  };
+
+  const handleRedirect = () => {
+    update({ trigger: 'update' }).then(() => {
+      router.push('/dashboard');
+    });
   };
 
   // Render for removed users
@@ -252,13 +249,9 @@ export default function CreateClinicPage() {
                 <Alert>
                   <Info className="size-4" />
                   <AlertDescription>
-                    <p className="mb-2">
+                    <p>
                       Encontramos sua clínica original:{' '}
                       <strong>{originalClinic.clinicName}</strong>
-                    </p>
-                    <p className="text-sm font-medium">
-                      Você será desconectado e precisará fazer login novamente
-                      para acessar sua clínica.
                     </p>
                   </AlertDescription>
                 </Alert>

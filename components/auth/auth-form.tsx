@@ -7,15 +7,17 @@ export function AuthForm({
   action,
   children,
   defaultEmail = '',
+  showPasswordConfirmation = false,
 }: {
   action: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
   children: React.ReactNode;
   defaultEmail?: string;
+  showPasswordConfirmation?: boolean;
 }) {
   return (
-    <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
+    <Form action={action} className="flex flex-col gap-6 px-4 sm:px-16">
       <div className="flex flex-col gap-2">
         <Label
           htmlFor="email"
@@ -54,8 +56,30 @@ export function AuthForm({
           className="bg-muted text-md md:text-sm"
           type="password"
           required
+          minLength={6}
         />
       </div>
+
+      {showPasswordConfirmation && (
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="confirmPassword"
+            className="text-zinc-600 font-normal dark:text-zinc-400"
+          >
+            {/* English: 'Confirm Password' */}
+            Confirmar Senha
+          </Label>
+
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            className="bg-muted text-md md:text-sm"
+            type="password"
+            required
+            minLength={6}
+          />
+        </div>
+      )}
 
       {children}
     </Form>

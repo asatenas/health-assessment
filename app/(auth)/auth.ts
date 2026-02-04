@@ -21,6 +21,8 @@ declare module 'next-auth' {
       status?: 'active' | 'invited' | 'removed';
       permissions?: readonly Permission[];
       platformAdmin?: boolean;
+      onboardingCompleted?: boolean;
+      phoneNumber?: string;
     } & DefaultSession['user'];
     clinic: {
       id: string;
@@ -54,6 +56,7 @@ declare module 'next-auth/jwt' {
     status: 'active' | 'invited' | 'removed';
     permissions?: readonly Permission[];
     platformAdmin?: boolean;
+    onboardingCompleted?: boolean;
     clinicId: string;
     clinicName: string;
     impersonation?: {
@@ -62,6 +65,7 @@ declare module 'next-auth/jwt' {
         email: string;
         role: 'secretary' | 'clinician' | 'admin' | 'owner';
         permissions?: readonly Permission[];
+        onboardingCompleted?: boolean;
         platformAdmin?: boolean;
       };
       clinic: {
@@ -179,12 +183,13 @@ export const {
             token.platformAdmin = true;
           }
 
-          // Set role, status, and permissions
+          // Set role, status, permissions, and onboarding status
           if (dbUser?.role) {
             token.role = dbUser.role;
             token.status = dbUser.status;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.clinicId = dbUser.clinicId;
+            token.onboardingCompleted = dbUser.onboardingCompleted ?? false;
           }
 
           // Fetch clinic name
@@ -208,6 +213,7 @@ export const {
             token.clinicId = dbUser.clinicId;
             token.permissions = getPermissionsForRole(dbUser.role);
             token.platformAdmin = dbUser.platformAdmin;
+            token.onboardingCompleted = dbUser.onboardingCompleted ?? false;
 
             // Fetch updated clinic name
             const clinic = await getClinicByUserId({ userId: dbUser.id });
@@ -230,6 +236,7 @@ export const {
                 email: token.email || '',
                 role: token.role,
                 permissions: token.permissions,
+                onboardingCompleted: token.onboardingCompleted,
                 platformAdmin: token.platformAdmin,
               },
               clinic: {
@@ -246,6 +253,7 @@ export const {
             token.permissions = getPermissionsForRole(
               session.impersonation.user.role,
             );
+            token.onboardingCompleted = true; // ignore if did not onboard
 
             // Use clinic from impersonation data (already complete from API)
             token.clinicId = session.impersonation.clinic.id;
@@ -255,6 +263,8 @@ export const {
             if (token.impersonation) {
               token.id = token.impersonation.user.id;
               token.email = token.impersonation.user.email;
+              token.onboardingCompleted =
+                token.impersonation.user.onboardingCompleted;
               token.platformAdmin = token.impersonation.user.platformAdmin;
               token.role = token.impersonation.user.role;
               token.permissions = token.impersonation.user.permissions;
@@ -273,12 +283,20 @@ export const {
         session.user.id = token.id;
         session.user.email = token.email || '';
 
+        // Fetch user from database to get name, image, and phoneNumber
+        const dbUser = await getUserById({ userId: token.id });
+        if (dbUser) {
+          session.user.name = dbUser.name || '';
+          session.user.image = dbUser.profilePhotoUrl || null;
+          session.user.phoneNumber = dbUser.phoneNumber || '';
+        }
+
         // Only include platformAdmin if true (omit for regular users)
         if (token.platformAdmin) {
           session.user.platformAdmin = true;
         }
 
-        // Add role, status, and permissions
+        // Add role, status, permissions, and onboarding status
         if (token.role) {
           session.user.role = token.role;
         }
@@ -287,6 +305,9 @@ export const {
         }
         if (token.permissions) {
           session.user.permissions = token.permissions;
+        }
+        if (token.onboardingCompleted !== undefined) {
+          session.user.onboardingCompleted = token.onboardingCompleted;
         }
 
         // Add clinic info

@@ -1,92 +1,113 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 
-import { AuthForm } from '@/components/auth/auth-form';
-import { SubmitButton } from '@/components/auth/submit-button';
-
-import { register, type RegisterActionState } from '../actions';
 import { toast } from '@/components/ui/toast';
-import { useSession } from 'next-auth/react';
+import { RegisterForm } from '@/components/auth/register-form';
+import { OnboardingForm } from '@/components/auth/onboarding-form';
+import { OnboardingSection } from '@/components/auth/onboarding-section';
+import {
+  validateRegistrationStep1,
+  completeRegistration,
+  type ValidateStep1State,
+  type CompleteRegistrationState,
+} from '../actions';
 
 export default function Page() {
   const router = useRouter();
+  const [step, setStep] = useState<1 | 2>(1);
 
+  // Step 1 state
   const [email, setEmail] = useState('');
-  const [isSuccessful, setIsSuccessful] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [step1IsSuccessful, setStep1IsSuccessful] = useState(false);
+  const [step1State, step1Action, isStep1Pending] = useActionState<
+    ValidateStep1State,
+    FormData
+  >(validateRegistrationStep1, { status: 'idle' });
 
-  const [state, formAction] = useActionState<RegisterActionState, FormData>(
-    register,
-    {
-      status: 'idle',
-    },
-  );
+  // Step 2 state
+  const [step2IsSuccessful, setStep2IsSuccessful] = useState(false);
+  const [step2State, step2Action, isStep2Pending] = useActionState<
+    CompleteRegistrationState,
+    FormData
+  >(completeRegistration, { status: 'idle' });
 
-  const { update: updateSession } = useSession();
-
+  // Handle step 1 validation result
   useEffect(() => {
-    if (state.status === 'user_exists') {
-      // English: 'Account already exists!'
+    if (step1State.status === 'user_exists') {
       toast({ type: 'error', description: 'Conta já existe!' });
-    } else if (state.status === 'failed') {
-      // English: 'Failed to create account!'
-      toast({ type: 'error', description: 'Falha ao criar a conta!' });
-    } else if (state.status === 'invalid_data') {
+    } else if (step1State.status === 'invalid_data') {
       toast({
         type: 'error',
-        // English: 'Failed validating your submission!'
-        description: 'Falha na validação do seu envio!',
+        description: 'Falha na validação. Verifique os campos.',
       });
-    } else if (state.status === 'success') {
-      // English: 'Account created successfully!'
+    } else if (step1State.status === 'success') {
+      setStep1IsSuccessful(true);
+      setStep(2);
+    }
+  }, [step1State]);
+
+  // Handle step 2 registration result
+  useEffect(() => {
+    if (step2State.status === 'failed') {
+      toast({ type: 'error', description: 'Falha ao criar a conta!' });
+    } else if (step2State.status === 'invalid_data') {
+      toast({
+        type: 'error',
+        description: 'Falha na validação. Verifique os campos.',
+      });
+    } else if (step2State.status === 'success') {
+      setStep2IsSuccessful(true);
       toast({
         type: 'success',
         description:
-          'Conta criada com sucesso! Envie um email para suporte@asatenas.com.br para realizar a verificação do email.',
+          'Conta criada com sucesso! Aguarde a autorização da clínica. Você receberá um e-mail quando sua conta for ativada.',
       });
-
-      updateSession();
-      router.push('/dashboard');
+      setTimeout(() => router.push('/login'), 2000);
     }
-  }, [state]);
+  }, [step2State, router]);
 
-  const handleSubmit = (formData: FormData) => {
+  const handleStep1Submit = (formData: FormData) => {
     setEmail(formData.get('email') as string);
-    formAction(formData);
+    setPassword(formData.get('password') as string);
+    setConfirmPassword(formData.get('confirmPassword') as string);
+    step1Action(formData);
   };
 
-  return (
-    <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl gap-12 flex flex-col">
-        <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
-          <h3 className="text-xl font-semibold dark:text-zinc-50">
-            {/* English: 'Sign Up' */}
-            Cadastre-se
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            {/* English: 'Create an account with your email and password' */}
-            Crie uma conta com seu e-mail e senha
-          </p>
-        </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>
-            {/* English: 'Sign Up' */}
-            Cadastrar
-          </SubmitButton>
-          <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-            {/* English: 'Already have an account? ' */} Já tem uma conta?{' '}
-            <Link
-              href="/login"
-              className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
-            >
-              {/* English: 'Sign in' */} Entrar
-            </Link>{' '}
-            {/* English: 'instead.' */} em vez disso.
-          </p>
-        </AuthForm>
-      </div>
-    </div>
+  const handleStep2Submit = (formData: FormData) => {
+    // Add step 1 data
+    formData.set('email', email);
+    formData.set('password', password);
+
+    // Step 2 data is already added by OnboardingForm component
+    step2Action(formData);
+  };
+
+  return step === 1 ? (
+    <OnboardingSection
+      title="Cadastre-se"
+      description="Crie uma conta com seu e-mail e senha"
+      wide={false}
+    >
+      <RegisterForm
+        onSubmit={handleStep1Submit}
+        isPending={isStep1Pending}
+        isSuccessful={step1IsSuccessful}
+        defaultEmail={email}
+      />
+    </OnboardingSection>
+  ) : (
+    <OnboardingSection>
+      <OnboardingForm
+        onSubmit={handleStep2Submit}
+        isPending={isStep2Pending}
+        isSuccessful={step2IsSuccessful}
+        showClinicName={true}
+        errors={step2State.errors}
+      />
+    </OnboardingSection>
   );
 }

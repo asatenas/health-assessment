@@ -27,6 +27,7 @@ interface InviteUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  existingEmails: string[];
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -51,6 +52,7 @@ export function InviteUserDialog({
   open,
   onOpenChange,
   onSuccess,
+  existingEmails,
 }: InviteUserDialogProps) {
   const { data: session } = useSession();
   const [email, setEmail] = useState('');
@@ -66,12 +68,20 @@ export function InviteUserDialog({
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [invitationCreated, setInvitationCreated] = useState(false);
+  const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
   const isAdmin = session?.user?.role === 'admin';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate email doesn't already exist
+    if (emailAlreadyExists) {
+      setError('Este email já está associado a um membro ou convite pendente');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -113,6 +123,7 @@ export function InviteUserDialog({
     setInvitationCreated(false);
     setCopiedPassword(false);
     setCopiedUrl(false);
+    setEmailAlreadyExists(false);
     onOpenChange(false);
   };
 
@@ -259,11 +270,31 @@ export function InviteUserDialog({
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    const newEmail = e.target.value;
+                    setEmail(newEmail);
+                    setError(null);
+
+                    // Check if email already exists (case-insensitive)
+                    const isDuplicate =
+                      newEmail.trim() !== '' &&
+                      existingEmails.some(
+                        (existingEmail) =>
+                          existingEmail.toLowerCase() ===
+                          newEmail.trim().toLowerCase(),
+                      );
+                    setEmailAlreadyExists(isDuplicate);
+                  }}
                   placeholder="usuario@exemplo.com"
                   required
                   disabled={loading}
+                  className={emailAlreadyExists ? 'border-destructive' : ''}
                 />
+                {emailAlreadyExists && (
+                  <p className="text-xs text-destructive">
+                    Este email já está associado a um membro ou convite pendente
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -299,7 +330,10 @@ export function InviteUserDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading || !email || !role}>
+              <Button
+                type="submit"
+                disabled={loading || !email || !role || emailAlreadyExists}
+              >
                 {loading ? (
                   <>
                     <Loader2 className="size-4 animate-spin mr-2" />
