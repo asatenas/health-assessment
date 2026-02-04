@@ -27,7 +27,7 @@ const onboardingSchema = z.object({
 });
 
 export interface CompleteOnboardingState {
-  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+  status: 'idle' | 'success' | 'failed' | 'invalid_data';
   errors?: {
     firstName?: string;
     lastName?: string;
