@@ -28,9 +28,16 @@ export default function OnboardPage() {
         type: 'success',
         description: 'Cadastro completo! Bem-vindo.',
       });
-      update({ trigger: 'update' }).then(() => {
-        router.push('/dashboard');
-      });
+      (async () => {
+        try {
+          await update({ trigger: 'update' });
+          router.push('/dashboard');
+          router.refresh?.();
+        } catch (err) {
+          console.error('Falha ao atualizar sessão:', err);
+          window.location.assign('/dashboard');
+        }
+      })();
     } else if (state.status === 'failed') {
       toast({
         type: 'error',
