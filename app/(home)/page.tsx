@@ -57,16 +57,15 @@ export default function HomePage() {
                   color: '#008E9B',
                 }}
               >
-                Feito para cirurgiões
+                Feito para cirurgiões e anestesistas
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
                 Revolucionando a estratificação de risco cirúrgico.
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 Evite até 40% do cancelamentos de cirurgias. Automatize a coleta
-                de dados pré-operatórios com nossos índices inteligentes (RCRI e
-                AUB-HAS2). Mais segurança para o paciente, menos burocracia para
-                sua equipe.
+                de dados pré-operatórios com inteligência artificial. Segurança
+                e privacidade para o paciente, eficiência para sua equipe.
               </p>
               <div className="flex justify-center">
                 <Link href="/register">
@@ -93,7 +92,7 @@ export default function HomePage() {
                     />
                   </svg>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Triagem automática por IA
+                    Triagem automática com IA
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
