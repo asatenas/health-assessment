@@ -11,9 +11,9 @@ import { ImpersonationBannerWrapper } from '@/components/admin/impersonation-ban
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
-  title: 'Asatenas Health',
+  title: 'Asatenas',
   description:
-    'Automatize a coleta de dados pré-operatórios com índices inteligentes (Lee Revisado e AUB-HAS2). Mais segurança para o paciente, menos burocracia para sua equipe.',
+    'Automatize a coleta de dados pré-operatórios com inteligência artificial. Segurança e privacidade para o paciente, eficiência para sua equipe.',
   robots: {
     index: false,
     follow: false,
