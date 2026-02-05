@@ -654,8 +654,8 @@ export default function HomePage() {
             Pronto para revolucionar sua estratificação de risco?
           </h2>
           <p className="text-xl text-cyan-100 mb-8">
-            Junte-se às clínicas e hospitais que já confiam na Asatenas Health
-            para garantir mais segurança aos seus pacientes.
+            Junte-se às clínicas e hospitais que já confiam na Asatenas para
+            garantir mais segurança aos seus pacientes.
           </p>
           <Link href="/register">
             <Button
@@ -674,9 +674,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <div className="text-2xl font-bold text-white mb-4">
-                Asatenas Health
-              </div>
+              <div className="text-2xl font-bold text-white mb-4">Asatenas</div>
               <p className="text-gray-400 mb-4">
                 Revolucionando a estratificação de risco cirúrgico com
                 tecnologia e inteligência artificial.
@@ -741,7 +739,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Asatenas Health. Todos os direitos reservados.</p>
+            <p>&copy; 2025 Asatenas. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
