@@ -38,6 +38,7 @@ export function SurgeryDetailsModal({
     null,
   );
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   // Fetch surgery details when modal opens
   useEffect(() => {
@@ -46,6 +47,7 @@ export function SurgeryDetailsModal({
     } else {
       // Reset state when modal closes
       setSurgeryDetails(null);
+      setNotFound(false);
     }
   }, [open, assessmentId]);
 
@@ -83,8 +85,15 @@ export function SurgeryDetailsModal({
     if (!assessmentId) return;
 
     setIsLoadingDetails(true);
+    setNotFound(false);
     try {
       const response = await fetch(`/api/clinic/surgeries/${assessmentId}`);
+
+      if (response.status === 404) {
+        setNotFound(true);
+        setSurgeryDetails(null);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch surgery details');
@@ -92,6 +101,7 @@ export function SurgeryDetailsModal({
 
       const data = await response.json();
       setSurgeryDetails(data);
+      setNotFound(false);
     } catch (error) {
       console.error('Error fetching surgery details:', error);
       setSurgeryDetails(null);
@@ -366,6 +376,35 @@ export function SurgeryDetailsModal({
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          ) : notFound ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+              <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Detalhes da Cirurgia Não Disponíveis
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                  Os detalhes específicos da cirurgia ainda não foram
+                  registrados para esta avaliação. Você pode visualizar as
+                  informações da avaliação clicando no botão abaixo.
+                </p>
               </div>
             </div>
           ) : (
