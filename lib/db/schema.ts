@@ -7,7 +7,6 @@ import {
   uuid,
   text,
   primaryKey,
-  foreignKey,
   boolean,
   integer,
   check,
@@ -184,7 +183,7 @@ export const message = pgTable('Message_v2', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   chatId: uuid('assessmentId')
     .notNull()
-    .references(() => chat.id),
+    .references(() => chat.id, { onDelete: 'cascade' }),
   role: varchar('role').notNull(),
   parts: json('parts').notNull(),
   attachments: json('attachments').notNull(),
@@ -197,15 +196,13 @@ export const stream = pgTable(
   'Stream',
   {
     id: uuid('id').notNull().defaultRandom(),
-    chatId: uuid('assessmentId').notNull(),
+    chatId: uuid('assessmentId')
+      .notNull()
+      .references(() => chat.id, { onDelete: 'cascade' }),
     createdAt: timestamp('createdAt').notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.id] }),
-    chatRef: foreignKey({
-      columns: [table.chatId],
-      foreignColumns: [chat.id],
-    }),
   }),
 );
 

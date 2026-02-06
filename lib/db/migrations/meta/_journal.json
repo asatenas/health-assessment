@@ -316,6 +316,13 @@
       "when": 1769791316712,
       "tag": "0044_cheerful_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1770392733427,
+      "tag": "0045_bored_zarda",
+      "breakpoints": true
     }
   ]
 }
