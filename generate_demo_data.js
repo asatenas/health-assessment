@@ -282,24 +282,7 @@ function main() {
   lines.push(`-- surgeries_generated=${surgeryRows.length}`);
   lines.push(`-- latexAllergy_true_forms=${latexTrueUsed}`);
   lines.push(`-- generated_at_local=${now.toString()}`);
-
-  lines.push(`
-DELETE FROM "Stream"
-WHERE "assessmentId" IN (
-  SELECT "id"
-  FROM "Assessment"
-  WHERE "clinicId" = '${CLINIC_ID}'
-);
-`);
-
-  lines.push(`
-DELETE FROM "Message_v2"
-WHERE "assessmentId" IN (
-  SELECT "id"
-  FROM "Assessment"
-  WHERE "clinicId" = '${CLINIC_ID}'
-);
-`);
+  lines.push('');
 
   lines.push(`DELETE FROM "Assessment" WHERE "clinicId" = '${CLINIC_ID}';`);
 
