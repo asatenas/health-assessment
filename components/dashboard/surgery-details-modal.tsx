@@ -143,10 +143,35 @@ export function SurgeryDetailsModal({
         {/* Content */}
         <div className="overflow-y-auto p-4 sm:p-6">
           {isLoadingDetails ? (
-            <div className="space-y-4">
-              <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="space-y-6">
+              {/* Basic Information Skeleton */}
+              <div className="space-y-4">
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+              {/* Status Skeleton */}
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                </div>
+              </div>
+              {/* Interventions Skeleton */}
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+              {/* Adjustments Skeleton */}
+              <div className="space-y-4">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
             </div>
           ) : surgeryDetails ? (
             <div className="space-y-6">
