@@ -1507,7 +1507,7 @@ export async function getTodaysSurgeriesForSwipe({
       const formData = chatItem?.form as any;
 
       return {
-        chatId: surgeryItem.assessmentId,
+        assessmentId: surgeryItem.assessmentId,
         patientAge: formData?.age || 0,
         riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
         surgeryDate: surgeryItem.date?.toISOString() || '',

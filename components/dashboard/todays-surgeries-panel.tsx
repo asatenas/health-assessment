@@ -4,22 +4,37 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AssessmentDetailsModal } from './assessment-details-modal';
+import { SurgeryDetailsModal } from './surgery-details-modal';
 
 interface Surgery {
-  chatId: string;
+  assessmentId: string;
+
+  // Display fields for surgery card
   patientAge: number;
   riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido';
   surgeryDate: string;
   surgeryName?: string;
   surgeryTime?: string;
-  rcriScore?: number;
-  has2Score?: number;
+  rcriScore?: number | null;
+  has2Score?: number | null;
+
+  // Surgery details for modal
+  name: string | null;
+  date: string | null;
+  completed: boolean;
+  rescheduled: boolean;
+  cancelled: boolean;
+  statusReason: string | null;
+  medicalInterventionRequired: boolean;
+  interventionNotes: string | null;
+  adjustmentsRequired: boolean;
+  adjustmentNotes: string | null;
 }
 
 interface TodaysSurgeriesPanelProps {
   surgeries: Surgery[];
   onUpdateStatus: (
-    chatId: string,
+    assessmentId: string,
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
 }
@@ -31,7 +46,8 @@ export function TodaysSurgeriesPanel({
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<
     string | null
   >(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [surgeryModalOpen, setSurgeryModalOpen] = useState(false);
+  const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -46,9 +62,9 @@ export function TodaysSurgeriesPanel({
     }
   };
 
-  const handleCardClick = (chatId: string) => {
-    setSelectedAssessmentId(chatId);
-    setModalOpen(true);
+  const handleCardClick = (assessmentId: string) => {
+    setSelectedAssessmentId(assessmentId);
+    setSurgeryModalOpen(true);
   };
 
   const handleStatusUpdate = async (
@@ -57,8 +73,20 @@ export function TodaysSurgeriesPanel({
     if (!selectedAssessmentId) return;
     await onUpdateStatus(selectedAssessmentId, status);
     // Close modal after status update
-    setModalOpen(false);
+    setSurgeryModalOpen(false);
     setSelectedAssessmentId(null);
+  };
+
+  const handleViewAssessment = () => {
+    // Close surgery modal and open assessment modal
+    setSurgeryModalOpen(false);
+    setAssessmentModalOpen(true);
+  };
+
+  const handleViewSurgery = () => {
+    // Close assessment modal and open surgery modal
+    setAssessmentModalOpen(false);
+    setSurgeryModalOpen(true);
   };
 
   const formatTime = (timeString?: string) => {
@@ -95,9 +123,9 @@ export function TodaysSurgeriesPanel({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {surgeries.map((surgery) => (
                 <Card
-                  key={surgery.chatId}
+                  key={surgery.assessmentId}
                   className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                  onClick={() => handleCardClick(surgery.chatId)}
+                  onClick={() => handleCardClick(surgery.assessmentId)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start gap-2">
@@ -150,16 +178,29 @@ export function TodaysSurgeriesPanel({
         </CardContent>
       </Card>
 
-      <AssessmentDetailsModal
+      <SurgeryDetailsModal
         assessmentId={selectedAssessmentId}
-        open={modalOpen}
+        open={surgeryModalOpen}
         onOpenChange={(open) => {
-          setModalOpen(open);
+          setSurgeryModalOpen(open);
           if (!open) {
             setSelectedAssessmentId(null);
           }
         }}
         onStatusUpdate={handleStatusUpdate}
+        onViewAssessment={handleViewAssessment}
+      />
+
+      <AssessmentDetailsModal
+        assessmentId={selectedAssessmentId}
+        open={assessmentModalOpen}
+        onOpenChange={(open) => {
+          setAssessmentModalOpen(open);
+          if (!open) {
+            setSelectedAssessmentId(null);
+          }
+        }}
+        onViewSurgery={handleViewSurgery}
       />
     </>
   );
