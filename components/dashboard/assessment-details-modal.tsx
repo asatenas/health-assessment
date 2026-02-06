@@ -10,6 +10,7 @@ interface AssessmentDetailsModalProps {
   onStatusUpdate?: (
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
+  onViewSurgery?: () => void;
 }
 
 interface AssessmentDetails {
@@ -72,6 +73,7 @@ export function AssessmentDetailsModal({
   open,
   onOpenChange,
   onStatusUpdate,
+  onViewSurgery,
 }: AssessmentDetailsModalProps) {
   const [assessmentDetails, setAssessmentDetails] =
     useState<AssessmentDetails | null>(null);
@@ -517,10 +519,17 @@ export function AssessmentDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
-          <Button onClick={() => onOpenChange(false)} variant="outline">
-            Fechar
-          </Button>
+        <div className="flex justify-between items-center gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
+          {onViewSurgery && (
+            <Button onClick={onViewSurgery} variant="outline">
+              Ver Detalhes da Cirurgia
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button onClick={() => onOpenChange(false)} variant="outline">
+              Fechar
+            </Button>
+          </div>
         </div>
       </div>
     </div>

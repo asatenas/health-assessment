@@ -119,9 +119,17 @@ export function WeeklySurgeriesPanel({
   };
 
   const handleViewAssessment = () => {
-    // Since surgeryId is the same as assessmentId (it's the primary key)
+    // Close surgery modal and open assessment modal
+    setDetailModalOpen(false);
     setSelectedAssessmentId(selectedSurgery);
     setAssessmentModalOpen(true);
+  };
+
+  const handleViewSurgery = () => {
+    // Close assessment modal and open surgery modal
+    setAssessmentModalOpen(false);
+    setSelectedSurgery(selectedAssessmentId);
+    setDetailModalOpen(true);
   };
 
   const getRiskColor = (risk: string) => {
@@ -246,6 +254,7 @@ export function WeeklySurgeriesPanel({
             setSelectedAssessmentId(null);
           }
         }}
+        onViewSurgery={handleViewSurgery}
       />
     </>
   );
