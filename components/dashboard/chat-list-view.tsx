@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { AssessmentDetailsModal } from './assessment-details-modal';
+import { SurgeryDetailsModal } from './surgery-details-modal';
 
 import type { Chat, ChatListViewProps } from './chat-list-view/types';
 import { RiskLegend } from './chat-list-view/risk-legend';
@@ -35,6 +36,10 @@ export function ChatListView({
 }: ChatListViewProps) {
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [surgeryDetailsModalOpen, setSurgeryDetailsModalOpen] = useState(false);
+  const [selectedSurgeryId, setSelectedSurgeryId] = useState<string | null>(
+    null,
+  );
 
   const hasActiveFilters = useMemo(() => {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
@@ -47,6 +52,20 @@ export function ChatListView({
     setSelectedChatId(chat.id);
     setChatDetailsModalOpen(true);
     event?.currentTarget.blur();
+  };
+
+  const handleViewSurgery = () => {
+    // Close assessment modal and open surgery modal
+    setChatDetailsModalOpen(false);
+    setSelectedSurgeryId(selectedChatId);
+    setSurgeryDetailsModalOpen(true);
+  };
+
+  const handleViewAssessment = () => {
+    // Close surgery modal and open assessment modal
+    setSurgeryDetailsModalOpen(false);
+    setSelectedChatId(selectedSurgeryId);
+    setChatDetailsModalOpen(true);
   };
 
   return (
@@ -108,6 +127,19 @@ export function ChatListView({
             setSelectedChatId(null);
           }
         }}
+        onViewSurgery={handleViewSurgery}
+      />
+
+      <SurgeryDetailsModal
+        assessmentId={selectedSurgeryId}
+        open={surgeryDetailsModalOpen}
+        onOpenChange={(open) => {
+          setSurgeryDetailsModalOpen(open);
+          if (!open) {
+            setSelectedSurgeryId(null);
+          }
+        }}
+        onViewAssessment={handleViewAssessment}
       />
     </div>
   );
