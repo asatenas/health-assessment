@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 interface SurgeryDetailsModalProps {
-  surgeryId: string | null;
+  assessmentId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusUpdate?: (
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
+  onViewAssessment?: () => void;
 }
 
 interface SurgeryDetails {
@@ -27,10 +28,11 @@ interface SurgeryDetails {
 }
 
 export function SurgeryDetailsModal({
-  surgeryId,
+  assessmentId,
   open,
   onOpenChange,
   onStatusUpdate,
+  onViewAssessment,
 }: SurgeryDetailsModalProps) {
   const [surgeryDetails, setSurgeryDetails] = useState<SurgeryDetails | null>(
     null,
@@ -39,13 +41,13 @@ export function SurgeryDetailsModal({
 
   // Fetch surgery details when modal opens
   useEffect(() => {
-    if (open && surgeryId) {
+    if (open && assessmentId) {
       fetchSurgeryDetails();
     } else {
       // Reset state when modal closes
       setSurgeryDetails(null);
     }
-  }, [open, surgeryId]);
+  }, [open, assessmentId]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -78,11 +80,11 @@ export function SurgeryDetailsModal({
   }, [open]);
 
   const fetchSurgeryDetails = async () => {
-    if (!surgeryId) return;
+    if (!assessmentId) return;
 
     setIsLoadingDetails(true);
     try {
-      const response = await fetch(`/api/clinic/surgeries/${surgeryId}`);
+      const response = await fetch(`/api/clinic/surgeries/${assessmentId}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch surgery details');
@@ -148,46 +150,59 @@ export function SurgeryDetailsModal({
             </div>
           ) : surgeryDetails ? (
             <div className="space-y-6">
-              {/* Surgery ID */}
-              <div>
-                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  ID da Avaliação
-                </div>
-                <code className="block p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono text-gray-900 dark:text-gray-100">
-                  {surgeryDetails.assessmentId}
-                </code>
-              </div>
-
               {/* Surgery Basic Information */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                  Informações da Cirurgia
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Nome da Cirurgia
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                      {surgeryDetails.name || 'Não especificado'}
-                    </div>
+              <div className="space-y-4">
+                {/* Assessment ID */}
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    ID da Avaliação
                   </div>
+                  <code className="block p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm font-mono text-gray-900 dark:text-gray-100">
+                    {surgeryDetails.assessmentId}
+                  </code>
+                </div>
 
-                  <div>
-                    <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Data da Cirurgia
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
-                      {surgeryDetails.date
-                        ? new Date(surgeryDetails.date).toLocaleString(
-                            'pt-BR',
-                            {
-                              dateStyle: 'long',
-                              timeStyle: 'short',
-                            },
-                          )
-                        : 'Não especificada'}
-                    </div>
+                {/* Surgery Name */}
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nome da Cirurgia
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                    {surgeryDetails.name || 'Não especificado'}
+                  </div>
+                </div>
+
+                {/* Surgery Date */}
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Data da Cirurgia
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                    {surgeryDetails.date
+                      ? new Date(surgeryDetails.date).toLocaleDateString(
+                          'pt-BR',
+                          {
+                            dateStyle: 'long',
+                          },
+                        )
+                      : 'Não especificada'}
+                  </div>
+                </div>
+
+                {/* Surgery Time */}
+                <div>
+                  <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Hora da Cirurgia
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                    {surgeryDetails.date
+                      ? new Date(surgeryDetails.date).toLocaleTimeString(
+                          'pt-BR',
+                          {
+                            timeStyle: 'short',
+                          },
+                        )
+                      : 'Não especificada'}
                   </div>
                 </div>
               </div>
@@ -336,10 +351,17 @@ export function SurgeryDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
-          <Button onClick={() => onOpenChange(false)} variant="outline">
-            Fechar
-          </Button>
+        <div className="flex justify-between items-center gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
+          {onViewAssessment && (
+            <Button onClick={onViewAssessment} variant="outline">
+              Ver Detalhes da Avaliação
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button onClick={() => onOpenChange(false)} variant="outline">
+              Fechar
+            </Button>
+          </div>
         </div>
       </div>
     </div>
