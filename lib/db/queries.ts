@@ -1609,7 +1609,7 @@ export async function getMonthlySurgeries({
         chatItem?.score_aub_has2 ?? null,
       );
       groupedByDay[key].push({
-        chatId: surgeryItem.assessmentId,
+        assessmentId: surgeryItem.assessmentId,
         patientAge: formData?.age || 0,
         riskLevel: mapRiskLevelToPortuguese(riskLevel),
         surgeryDate: surgeryItem.date.toISOString(),
