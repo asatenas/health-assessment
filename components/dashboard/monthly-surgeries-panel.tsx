@@ -5,28 +5,45 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { SurgeryDetailModal } from './surgery-detail-modal';
+import { AssessmentDetailsModal } from './assessment-details-modal';
+import { SurgeryDetailsModal } from './surgery-details-modal';
 import { cn } from '@/lib/shared/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Surgery {
-  chatId: string;
+  assessmentId: string;
+
+  // Display fields for surgery card
   patientAge: number;
   riskLevel: 'baixo' | 'moderado' | 'alto' | 'unknown';
   surgeryDate: string;
   surgeryName?: string;
   surgeryTime?: string;
+  rcriScore?: number | null;
+  has2Score?: number | null;
+
+  // Surgery status fields
   surgeryCompleted: boolean;
   surgeryCancelled: boolean;
   surgeryRescheduled: boolean;
-  rcriScore?: number;
-  has2Score?: number;
+
+  // Surgery details for modal
+  name: string | null;
+  date: string | null;
+  completed: boolean;
+  rescheduled: boolean;
+  cancelled: boolean;
+  statusReason: string | null;
+  medicalInterventionRequired: boolean;
+  interventionNotes: string | null;
+  adjustmentsRequired: boolean;
+  adjustmentNotes: string | null;
 }
 
 interface MonthlySurgeriesPanelProps {
   surgeriesByDay: Record<string, Surgery[]>;
   onUpdateStatus: (
-    chatId: string,
+    assessmentId: string,
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
 }
@@ -50,7 +67,8 @@ export function MonthlySurgeriesPanel({
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<
     string | null
   >(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [surgeryModalOpen, setSurgeryModalOpen] = useState(false);
+  const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
   const [monthlySurgeries, setMonthlySurgeries] =
     useState<Record<string, Surgery[]>>(surgeriesByDay);
   const [isLoading, setIsLoading] = useState(false);
@@ -236,9 +254,9 @@ export function MonthlySurgeriesPanel({
     setDayModalOpen(true);
   };
 
-  const handleSurgeryClick = (chatId: string) => {
-    setSelectedAssessmentId(chatId);
-    setDetailModalOpen(true);
+  const handleSurgeryClick = (assessmentId: string) => {
+    setSelectedAssessmentId(assessmentId);
+    setSurgeryModalOpen(true);
   };
 
   const handleStatusUpdate = async (
@@ -246,7 +264,7 @@ export function MonthlySurgeriesPanel({
   ) => {
     if (!selectedAssessmentId) return;
     await onUpdateStatus(selectedAssessmentId, status);
-    setDetailModalOpen(false);
+    setSurgeryModalOpen(false);
     setSelectedAssessmentId(null);
 
     // Invalidate cache for current month and refetch
@@ -262,6 +280,18 @@ export function MonthlySurgeriesPanel({
 
     // Refetch monthly surgeries to reflect the updated status
     await fetchMonthlySurgeries();
+  };
+
+  const handleViewAssessment = () => {
+    // Close surgery modal and open assessment modal
+    setSurgeryModalOpen(false);
+    setAssessmentModalOpen(true);
+  };
+
+  const handleViewSurgery = () => {
+    // Close assessment modal and open surgery modal
+    setAssessmentModalOpen(false);
+    setSurgeryModalOpen(true);
   };
 
   const getRiskColor = (risk: string) => {
@@ -458,9 +488,9 @@ export function MonthlySurgeriesPanel({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {selectedDaySurgeries.map((surgery) => (
                     <Card
-                      key={surgery.chatId}
+                      key={surgery.assessmentId}
                       className="cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                      onClick={() => handleSurgeryClick(surgery.chatId)}
+                      onClick={() => handleSurgeryClick(surgery.assessmentId)}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex justify-between items-start gap-2">
@@ -571,16 +601,30 @@ export function MonthlySurgeriesPanel({
       )}
 
       {/* Surgery Detail Modal */}
-      <SurgeryDetailModal
+      <SurgeryDetailsModal
         assessmentId={selectedAssessmentId}
-        open={detailModalOpen}
+        open={surgeryModalOpen}
         onOpenChange={(open) => {
-          setDetailModalOpen(open);
+          setSurgeryModalOpen(open);
           if (!open) {
             setSelectedAssessmentId(null);
           }
         }}
         onStatusUpdate={handleStatusUpdate}
+        onViewAssessment={handleViewAssessment}
+      />
+
+      {/* Assessment Detail Modal */}
+      <AssessmentDetailsModal
+        assessmentId={selectedAssessmentId}
+        open={assessmentModalOpen}
+        onOpenChange={(open) => {
+          setAssessmentModalOpen(open);
+          if (!open) {
+            setSelectedAssessmentId(null);
+          }
+        }}
+        onViewSurgery={handleViewSurgery}
       />
     </>
   );

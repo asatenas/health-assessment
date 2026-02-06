@@ -3,24 +3,39 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SurgeryDetailModal } from './surgery-detail-modal';
+import { SurgeryDetailsModal } from './surgery-details-modal';
+import { AssessmentDetailsModal } from './assessment-details-modal';
 import { cn } from '@/lib/shared/utils';
 
 interface Surgery {
-  chatId: string;
+  assessmentId: string;
+
+  // Display fields for surgery card
   patientAge: number;
   riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido';
   surgeryDate: string;
   surgeryName?: string;
   surgeryTime?: string;
-  rcriScore?: number;
-  has2Score?: number;
+  rcriScore?: number | null;
+  has2Score?: number | null;
+
+  // Surgery details for modal
+  name: string | null;
+  date: string | null;
+  completed: boolean;
+  rescheduled: boolean;
+  cancelled: boolean;
+  statusReason: string | null;
+  medicalInterventionRequired: boolean;
+  interventionNotes: string | null;
+  adjustmentsRequired: boolean;
+  adjustmentNotes: string | null;
 }
 
 interface WeeklySurgeriesPanelProps {
   surgeries: Surgery[];
   onUpdateStatus: (
-    chatId: string,
+    assessmentId: string,
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
 }
@@ -38,10 +53,12 @@ export function WeeklySurgeriesPanel({
   surgeries,
   onUpdateStatus,
 }: WeeklySurgeriesPanelProps) {
+  const [selectedSurgery, setSelectedSurgery] = useState<string | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<
     string | null
   >(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
 
   const weekDays = useMemo(() => {
     const today = new Date();
@@ -87,18 +104,32 @@ export function WeeklySurgeriesPanel({
     return days;
   }, [surgeries]);
 
-  const handleSurgeryClick = (chatId: string) => {
-    setSelectedAssessmentId(chatId);
+  const handleSurgeryClick = (assessmentId: string) => {
+    setSelectedSurgery(assessmentId);
     setDetailModalOpen(true);
   };
 
   const handleStatusUpdate = async (
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => {
-    if (!selectedAssessmentId) return;
-    await onUpdateStatus(selectedAssessmentId, status);
+    if (!selectedSurgery) return;
+    await onUpdateStatus(selectedSurgery, status);
     setDetailModalOpen(false);
-    setSelectedAssessmentId(null);
+    setSelectedSurgery(null);
+  };
+
+  const handleViewAssessment = () => {
+    // Close surgery modal and open assessment modal
+    setDetailModalOpen(false);
+    setSelectedAssessmentId(selectedSurgery);
+    setAssessmentModalOpen(true);
+  };
+
+  const handleViewSurgery = () => {
+    // Close assessment modal and open surgery modal
+    setAssessmentModalOpen(false);
+    setSelectedSurgery(selectedAssessmentId);
+    setDetailModalOpen(true);
   };
 
   const getRiskColor = (risk: string) => {
@@ -154,8 +185,8 @@ export function WeeklySurgeriesPanel({
                     {day.surgeries.map((surgery) => (
                       <button
                         type="button"
-                        key={surgery.chatId}
-                        onClick={() => handleSurgeryClick(surgery.chatId)}
+                        key={surgery.assessmentId}
+                        onClick={() => handleSurgeryClick(surgery.assessmentId)}
                         className={cn(
                           'w-full p-2 rounded border text-left transition-all',
                           'hover:shadow-md hover:border-blue-300',
@@ -200,16 +231,30 @@ export function WeeklySurgeriesPanel({
       </Card>
 
       {/* Surgery Detail Modal */}
-      <SurgeryDetailModal
-        assessmentId={selectedAssessmentId}
+      <SurgeryDetailsModal
+        assessmentId={selectedSurgery}
         open={detailModalOpen}
         onOpenChange={(open) => {
           setDetailModalOpen(open);
           if (!open) {
-            setSelectedAssessmentId(null);
+            setSelectedSurgery(null);
           }
         }}
         onStatusUpdate={handleStatusUpdate}
+        onViewAssessment={handleViewAssessment}
+      />
+
+      {/* Assessment Detail Modal */}
+      <AssessmentDetailsModal
+        assessmentId={selectedAssessmentId}
+        open={assessmentModalOpen}
+        onOpenChange={(open) => {
+          setAssessmentModalOpen(open);
+          if (!open) {
+            setSelectedAssessmentId(null);
+          }
+        }}
+        onViewSurgery={handleViewSurgery}
       />
     </>
   );

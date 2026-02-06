@@ -1154,7 +1154,6 @@ export async function getDashboardMetrics({
       cancellationsAndReschedulesByReason,
     };
   } catch (error) {
-    console.log(error);
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get dashboard metrics',
@@ -1508,7 +1507,7 @@ export async function getTodaysSurgeriesForSwipe({
       const formData = chatItem?.form as any;
 
       return {
-        chatId: surgeryItem.assessmentId,
+        assessmentId: surgeryItem.assessmentId,
         patientAge: formData?.age || 0,
         riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
         surgeryDate: surgeryItem.date?.toISOString() || '',
@@ -1610,7 +1609,7 @@ export async function getMonthlySurgeries({
         chatItem?.score_aub_has2 ?? null,
       );
       groupedByDay[key].push({
-        chatId: surgeryItem.assessmentId,
+        assessmentId: surgeryItem.assessmentId,
         patientAge: formData?.age || 0,
         riskLevel: mapRiskLevelToPortuguese(riskLevel),
         surgeryDate: surgeryItem.date.toISOString(),
@@ -1626,7 +1625,6 @@ export async function getMonthlySurgeries({
 
     return groupedByDay;
   } catch (error) {
-    console.log(error);
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get monthly surgeries',
@@ -1686,7 +1684,10 @@ export async function getWeeklySurgeries({
         );
 
         return {
-          chatId: surgeryItem.assessmentId,
+          // IDs
+          assessmentId: surgeryItem.assessmentId, // Assessment/Chat ID
+
+          // Display fields for surgery card
           patientAge: formData?.age || 0,
           riskLevel: mapRiskLevelToPortugueseCapitalized(riskLevel),
           surgeryDate: surgeryItem?.date?.toISOString(),
@@ -1694,15 +1695,55 @@ export async function getWeeklySurgeries({
           surgeryTime: formData?.surgeryTime || undefined,
           rcriScore: chatItem?.score_rcri ?? null,
           has2Score: chatItem?.score_aub_has2 ?? null,
+
+          // Surgery details for modal
+          name: surgeryItem.name,
+          date: surgeryItem.date?.toISOString() ?? null,
+          completed: surgeryItem.completed,
+          rescheduled: surgeryItem.rescheduled,
+          cancelled: surgeryItem.cancelled,
+          statusReason: surgeryItem.statusReason,
+          medicalInterventionRequired: surgeryItem.medicalInterventionRequired,
+          interventionNotes: surgeryItem.interventionNotes,
+          adjustmentsRequired: surgeryItem.adjustmentsRequired,
+          adjustmentNotes: surgeryItem.adjustmentNotes,
         };
       });
 
     return formattedSurgeries;
   } catch (error) {
-    console.log(error);
     throw new ChatSDKError(
       'bad_request:database',
       'Failed to get weekly surgeries',
+    );
+  }
+}
+
+export async function getSurgeryByAssessmentId({
+  assessmentId,
+}: {
+  assessmentId: string;
+}) {
+  try {
+    const surgeryData = await db
+      .select()
+      .from(surgery)
+      .where(eq(surgery.assessmentId, assessmentId))
+      .limit(1);
+
+    if (!surgeryData || surgeryData.length === 0) {
+      throw new ChatSDKError('not_found:database', 'Surgery not found');
+    }
+
+    return surgeryData[0];
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get surgery details',
     );
   }
 }

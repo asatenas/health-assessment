@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-interface SurgeryDetailModalProps {
+interface AssessmentDetailsModalProps {
   assessmentId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStatusUpdate?: (
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
+  onViewSurgery?: () => void;
 }
 
 interface AssessmentDetails {
@@ -67,12 +68,13 @@ interface ConversationMessage {
   text: string;
 }
 
-export function SurgeryDetailModal({
+export function AssessmentDetailsModal({
   assessmentId,
   open,
   onOpenChange,
   onStatusUpdate,
-}: SurgeryDetailModalProps) {
+  onViewSurgery,
+}: AssessmentDetailsModalProps) {
   const [assessmentDetails, setAssessmentDetails] =
     useState<AssessmentDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -212,10 +214,53 @@ export function SurgeryDetailModal({
         {/* Content */}
         <div className="overflow-y-auto p-4 sm:p-6">
           {isLoadingDetails ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Assessment ID Skeleton */}
               <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+
+              {/* Patient Information Skeleton */}
+              <div className="space-y-4">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                </div>
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                </div>
+              </div>
+
+              {/* Medications Skeleton */}
+              <div className="space-y-3">
+                <div className="h-6 w-44 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+
+              {/* Risk Scores Skeleton */}
+              <div className="space-y-3">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                </div>
+              </div>
+
+              {/* Results Skeleton */}
+              <div className="space-y-3">
+                <div className="h-6 w-56 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+
+              {/* Conversation Skeleton */}
+              <div className="space-y-3">
+                <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
             </div>
           ) : assessmentDetails ? (
             <div className="space-y-6">
@@ -517,10 +562,17 @@ export function SurgeryDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
-          <Button onClick={() => onOpenChange(false)} variant="outline">
-            Fechar
-          </Button>
+        <div className="flex justify-between items-center gap-2 p-4 sm:p-6 border-t dark:border-gray-800">
+          {onViewSurgery && (
+            <Button onClick={onViewSurgery} variant="outline">
+              Ver Detalhes da Cirurgia
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button onClick={() => onOpenChange(false)} variant="outline">
+              Fechar
+            </Button>
+          </div>
         </div>
       </div>
     </div>
