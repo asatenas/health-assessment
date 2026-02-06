@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SurgeryDetailModal } from './surgery-detail-modal';
+import { AssessmentDetailsModal } from './assessment-details-modal';
 import { cn } from '@/lib/shared/utils';
 
 interface Surgery {
@@ -200,7 +200,7 @@ export function WeeklySurgeriesPanel({
       </Card>
 
       {/* Surgery Detail Modal */}
-      <SurgeryDetailModal
+      <AssessmentDetailsModal
         assessmentId={selectedAssessmentId}
         open={detailModalOpen}
         onOpenChange={(open) => {

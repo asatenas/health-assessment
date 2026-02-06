@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-interface SurgeryDetailModalProps {
+interface AssessmentDetailsModalProps {
   assessmentId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -67,12 +67,12 @@ interface ConversationMessage {
   text: string;
 }
 
-export function SurgeryDetailModal({
+export function AssessmentDetailsModal({
   assessmentId,
   open,
   onOpenChange,
   onStatusUpdate,
-}: SurgeryDetailModalProps) {
+}: AssessmentDetailsModalProps) {
   const [assessmentDetails, setAssessmentDetails] =
     useState<AssessmentDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { SurgeryDetailModal } from './surgery-detail-modal';
+import { AssessmentDetailsModal } from './assessment-details-modal';
 
 interface Surgery {
   chatId: string;
@@ -150,7 +150,7 @@ export function TodaysSurgeriesPanel({
         </CardContent>
       </Card>
 
-      <SurgeryDetailModal
+      <AssessmentDetailsModal
         assessmentId={selectedAssessmentId}
         open={modalOpen}
         onOpenChange={(open) => {

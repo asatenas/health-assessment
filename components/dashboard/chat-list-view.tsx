@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { SurgeryDetailModal } from './surgery-detail-modal';
+import { AssessmentDetailsModal } from './assessment-details-modal';
 
 import type { Chat, ChatListViewProps } from './chat-list-view/types';
 import { RiskLegend } from './chat-list-view/risk-legend';
@@ -99,7 +99,7 @@ export function ChatListView({
         onPageChange={onPageChange}
       />
 
-      <SurgeryDetailModal
+      <AssessmentDetailsModal
         assessmentId={selectedChatId}
         open={chatDetailsModalOpen}
         onOpenChange={(open) => {
