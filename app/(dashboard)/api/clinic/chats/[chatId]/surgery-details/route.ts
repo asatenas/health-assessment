@@ -26,6 +26,7 @@ export async function PATCH(
       interventionNotes,
       adjustmentsRequired,
       adjustmentNotes,
+      notes,
     } = body;
 
     // Update surgery details
@@ -40,6 +41,7 @@ export async function PATCH(
       interventionNotes,
       adjustmentsRequired,
       adjustmentNotes,
+      notes,
     });
 
     return Response.json({

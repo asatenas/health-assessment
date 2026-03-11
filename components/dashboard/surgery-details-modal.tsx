@@ -25,6 +25,7 @@ interface SurgeryDetails {
   interventionNotes: string | null;
   adjustmentsRequired: boolean;
   adjustmentNotes: string | null;
+  notes: string | null;
 }
 
 export function SurgeryDetailsModal({
@@ -39,6 +40,9 @@ export function SurgeryDetailsModal({
   );
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [notesSaved, setNotesSaved] = useState(false);
 
   // Fetch surgery details when modal opens
   useEffect(() => {
@@ -48,8 +52,17 @@ export function SurgeryDetailsModal({
       // Reset state when modal closes
       setSurgeryDetails(null);
       setNotFound(false);
+      setNotes('');
+      setNotesSaved(false);
     }
   }, [open, assessmentId]);
+
+  // Sync notes state when surgery details are loaded
+  useEffect(() => {
+    if (surgeryDetails) {
+      setNotes(surgeryDetails.notes ?? '');
+    }
+  }, [surgeryDetails]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -107,6 +120,31 @@ export function SurgeryDetailsModal({
       setSurgeryDetails(null);
     } finally {
       setIsLoadingDetails(false);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!assessmentId) return;
+    setIsSavingNotes(true);
+    setNotesSaved(false);
+    try {
+      const response = await fetch(
+        `/api/clinic/chats/${assessmentId}/surgery-details`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes }),
+        },
+      );
+      if (!response.ok) {
+        throw new Error('Failed to save notes');
+      }
+      setNotesSaved(true);
+      setTimeout(() => setNotesSaved(false), 2000);
+    } catch (error) {
+      console.error('Error saving notes:', error);
+    } finally {
+      setIsSavingNotes(false);
     }
   };
 
@@ -375,6 +413,37 @@ export function SurgeryDetailsModal({
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                  Anotações
+                </h3>
+                <div className="space-y-2">
+                  <textarea
+                    id="surgery-notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Escreva aqui qualquer anotação sobre esta cirurgia..."
+                    rows={4}
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-vertical focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                  <div className="flex items-center justify-end gap-2">
+                    {notesSaved && (
+                      <span className="text-sm text-green-600 dark:text-green-400">
+                        Anotações salvas!
+                      </span>
+                    )}
+                    <Button
+                      onClick={handleSaveNotes}
+                      disabled={isSavingNotes}
+                      size="sm"
+                    >
+                      {isSavingNotes ? 'Salvando...' : 'Salvar Anotações'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
