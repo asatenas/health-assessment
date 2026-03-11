@@ -72,23 +72,25 @@ export function CancellationsAndReschedulesChart({
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={formattedData} layout="vertical">
+            <BarChart data={formattedData} margin={{ bottom: 60 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
-                type="number"
+                dataKey="reason"
                 className="text-xs"
-                tick={{ fill: 'currentColor' }}
+                tick={{ fill: 'currentColor', fontSize: 12 }}
+                angle={-40}
+                textAnchor="end"
+                interval={0}
               />
               <YAxis
-                dataKey="reason"
-                type="category"
-                width={150}
                 className="text-xs"
                 tick={{ fill: 'currentColor' }}
+                allowDecimals={false}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: '14px' }}
+                verticalAlign="top"
+                wrapperStyle={{ fontSize: '14px', paddingBottom: '12px' }}
                 formatter={(value) => {
                   const labels: Record<string, string> = {
                     cancellations: 'Cancelamentos',
@@ -100,13 +102,13 @@ export function CancellationsAndReschedulesChart({
               <Bar
                 dataKey="cancellations"
                 fill="#ef4444"
-                radius={[0, 4, 4, 0]}
+                radius={[4, 4, 0, 0]}
                 name="cancellations"
               />
               <Bar
                 dataKey="reschedulings"
                 fill="#f59e0b"
-                radius={[0, 4, 4, 0]}
+                radius={[4, 4, 0, 0]}
                 name="reschedulings"
               />
             </BarChart>

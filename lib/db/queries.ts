@@ -9,8 +9,10 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
   lt,
   lte,
+  or,
   sql,
   type SQL,
   ilike,
@@ -1093,49 +1095,55 @@ export async function getDashboardMetrics({
       return surgeryDate >= today && surgeryDate < endOfWeek;
     });
 
-    // Cancellation and reschedule breakdown by reason
+    // Cancellation and reschedule breakdown by reason — filtered by surgery.date
+    const surgeryStatusConditions: SQL<any>[] = [
+      eq(chat.clinicId, clinicId),
+      or(eq(surgery.cancelled, true), eq(surgery.rescheduled, true))!,
+      isNotNull(surgery.statusReason),
+    ];
+
+    if (dateFrom) {
+      surgeryStatusConditions.push(gte(surgery.date, dateFrom));
+    }
+    if (dateTo) {
+      const endDateSurgery = new Date(dateTo);
+      endDateSurgery.setDate(endDateSurgery.getDate() + 1);
+      surgeryStatusConditions.push(lt(surgery.date, endDateSurgery));
+    }
+
+    const cancelledRescheduledRows = await db
+      .select({
+        cancelled: surgery.cancelled,
+        rescheduled: surgery.rescheduled,
+        statusReason: surgery.statusReason,
+      })
+      .from(surgery)
+      .innerJoin(chat, eq(surgery.assessmentId, chat.id))
+      .where(and(...surgeryStatusConditions));
+
     const reasonMap = new Map<
       string,
       { cancelled: number; rescheduled: number }
     >();
 
-    for (const surgeryItem of allSurgeries) {
-      if (
-        (surgeryItem.cancelled || surgeryItem.rescheduled) &&
-        surgeryItem.statusReason
-      ) {
-        const current = reasonMap.get(surgeryItem.statusReason) || {
-          cancelled: 0,
-          rescheduled: 0,
-        };
-        if (surgeryItem.cancelled) current.cancelled++;
-        if (surgeryItem.rescheduled) current.rescheduled++;
-        reasonMap.set(surgeryItem.statusReason, current);
-      }
+    for (const row of cancelledRescheduledRows) {
+      if (!row.statusReason) continue;
+      const current = reasonMap.get(row.statusReason) || {
+        cancelled: 0,
+        rescheduled: 0,
+      };
+      if (row.cancelled) current.cancelled++;
+      if (row.rescheduled) current.rescheduled++;
+      reasonMap.set(row.statusReason, current);
     }
 
-    const cancellationsAndReschedulesByReason: Array<{
-      reason: string;
-      count: number;
-      type: 'cancelled' | 'rescheduled';
-    }> = [];
-
-    for (const [reason, counts] of reasonMap.entries()) {
-      if (counts.cancelled > 0) {
-        cancellationsAndReschedulesByReason.push({
-          reason,
-          count: counts.cancelled,
-          type: 'cancelled',
-        });
-      }
-      if (counts.rescheduled > 0) {
-        cancellationsAndReschedulesByReason.push({
-          reason,
-          count: counts.rescheduled,
-          type: 'rescheduled',
-        });
-      }
-    }
+    const cancellationsAndReschedulesByReason = Array.from(
+      reasonMap.entries(),
+    ).map(([reason, counts]) => ({
+      reason,
+      cancellations: counts.cancelled,
+      reschedulings: counts.rescheduled,
+    }));
 
     return {
       totalAssessments,
@@ -1299,7 +1307,7 @@ export async function getHighPriorityNotifications({
         );
         if (riskLevel === 'high') {
           notifications.push({
-            id: generateUUID(),
+            id: `${chatItem.id}:high_risk_soon`,
             priority: 'high',
             type: 'high_risk_soon',
             message: `Paciente de alto risco com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
@@ -1311,10 +1319,18 @@ export async function getHighPriorityNotifications({
       }
 
       // High priority: Form not completed and deadline passed (> 2 days since creation)
+      // Skip if surgery is in the past or already resolved
       const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-      if (chatItem.status !== 'finished' && chatItem.createdAt < twoDaysAgo) {
+      if (
+        chatItem.status !== 'finished' &&
+        chatItem.createdAt < twoDaysAgo &&
+        surgeryDate !== null &&
+        surgeryDate >= now &&
+        !surgeryItem?.completed &&
+        !surgeryItem?.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:incomplete_form`,
           priority: 'high',
           type: 'incomplete_form',
           message: `Formulário não concluído - prazo vencido (criado em ${chatItem.createdAt.toLocaleDateString('pt-BR')})`,
@@ -1323,10 +1339,15 @@ export async function getHighPriorityNotifications({
         });
       }
 
-      // High priority: Medical intervention required
-      if (surgeryItem?.medicalInterventionRequired) {
+      // High priority: Medical intervention required (only for upcoming surgeries)
+      if (
+        surgeryItem?.medicalInterventionRequired &&
+        (!surgeryDate || surgeryDate >= now) &&
+        !surgeryItem.completed &&
+        !surgeryItem.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:intervention_required`,
           priority: 'high',
           type: 'intervention_required',
           message: 'Intervenção médica necessária',
@@ -1343,7 +1364,7 @@ export async function getHighPriorityNotifications({
         chatItem.status !== 'finished'
       ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:surgery_soon_incomplete`,
           priority: 'high',
           type: 'surgery_soon_incomplete',
           message: `Cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')} sem avaliação concluída`,
@@ -1361,7 +1382,7 @@ export async function getHighPriorityNotifications({
         );
         if (riskLevel === 'medium') {
           notifications.push({
-            id: generateUUID(),
+            id: `${chatItem.id}:moderate_risk_soon`,
             priority: 'medium',
             type: 'moderate_risk_soon',
             message: `Paciente de risco moderado com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
@@ -1372,10 +1393,15 @@ export async function getHighPriorityNotifications({
         }
       }
 
-      // Medium priority: Adjustments required
-      if (surgeryItem?.adjustmentsRequired) {
+      // Medium priority: Adjustments required (only for upcoming surgeries)
+      if (
+        surgeryItem?.adjustmentsRequired &&
+        (!surgeryDate || surgeryDate >= now) &&
+        !surgeryItem.completed &&
+        !surgeryItem.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:adjustments_required`,
           priority: 'medium',
           type: 'adjustments_required',
           message: 'Ajustes necessários',

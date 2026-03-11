@@ -9,6 +9,25 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/shared/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const STATUS_REASON_OPTIONS = [
+  { value: 'paciente_nao_liberado', label: 'Paciente não liberado' },
+  { value: 'exames_pendentes', label: 'Exames pendentes' },
+  { value: 'pedido_paciente', label: 'Pedido do paciente' },
+  { value: 'risco_alto', label: 'Risco muito alto' },
+  { value: 'intervencao_necessaria', label: 'Intervenção necessária' },
+  { value: 'indisponibilidade_sala', label: 'Sala indisponível' },
+  { value: 'indisponibilidade_equipe', label: 'Equipe indisponível' },
+  { value: 'conflito_agenda', label: 'Conflito de agenda' },
+  { value: 'outros', label: 'Outros' },
+];
 
 // Helper for extracting HH:mm from a date string (if valid)
 function extractTime(dateString: string | null) {
@@ -213,12 +232,14 @@ export function SurgeryDetailsModal({
       completed: formState.completed !== surgeryDetails.completed,
       rescheduled: formState.rescheduled !== surgeryDetails.rescheduled,
       cancelled: formState.cancelled !== surgeryDetails.cancelled,
-      statusReason: formState.statusReason !== (surgeryDetails.statusReason ?? ''),
+      statusReason:
+        formState.statusReason !== (surgeryDetails.statusReason ?? ''),
       medicalInterventionRequired:
         formState.medicalInterventionRequired !==
         surgeryDetails.medicalInterventionRequired,
       interventionNotes:
-        formState.interventionNotes !== (surgeryDetails.interventionNotes ?? ''),
+        formState.interventionNotes !==
+        (surgeryDetails.interventionNotes ?? ''),
       adjustmentsRequired:
         formState.adjustmentsRequired !== surgeryDetails.adjustmentsRequired,
       adjustmentNotes:
@@ -229,6 +250,8 @@ export function SurgeryDetailsModal({
 
   const changedFields = calculateChangedFields();
   const hasChanges = Object.values(changedFields).some((changed) => changed);
+  const needsReason =
+    (formState.cancelled || formState.rescheduled) && !formState.statusReason;
 
   const handleSaveAllFields = async () => {
     if (!assessmentId || !hasChanges) return;
@@ -283,8 +306,8 @@ export function SurgeryDetailsModal({
 
       // Update local state directly instead of refetching the entire page
       // This prevents the footer from hiding during the 'isLoadingDetails' phase
-      setSurgeryDetails((prev) => 
-        prev 
+      setSurgeryDetails((prev) =>
+        prev
           ? {
               ...prev,
               name: formState.name,
@@ -293,13 +316,14 @@ export function SurgeryDetailsModal({
               rescheduled: formState.rescheduled,
               cancelled: formState.cancelled,
               statusReason: formState.statusReason,
-              medicalInterventionRequired: formState.medicalInterventionRequired,
+              medicalInterventionRequired:
+                formState.medicalInterventionRequired,
               interventionNotes: formState.interventionNotes,
               adjustmentsRequired: formState.adjustmentsRequired,
               adjustmentNotes: formState.adjustmentNotes,
               notes: formState.notes,
             }
-          : prev
+          : prev,
       );
 
       setTimeout(() => setHasSaved(false), 3000);
@@ -454,10 +478,10 @@ export function SurgeryDetailsModal({
                         setFormState((prev) => ({
                           ...prev,
                           completed: checked,
-                          // Autotoggle off the others
                           ...(checked && {
                             cancelled: false,
                             rescheduled: false,
+                            statusReason: '',
                           }),
                         }))
                       }
@@ -482,10 +506,9 @@ export function SurgeryDetailsModal({
                         setFormState((prev) => ({
                           ...prev,
                           rescheduled: checked,
-                          ...(checked && {
-                            completed: false,
-                            cancelled: false,
-                          }),
+                          ...(checked
+                            ? { completed: false, cancelled: false }
+                            : !prev.cancelled && { statusReason: '' }),
                         }))
                       }
                     />
@@ -497,7 +520,7 @@ export function SurgeryDetailsModal({
                           'text-blue-600 dark:text-blue-400',
                       )}
                     >
-                      Remarcada {changedFields.rescheduled && '*'}
+                      Reagendada {changedFields.rescheduled && '*'}
                     </Label>
                   </div>
 
@@ -509,10 +532,9 @@ export function SurgeryDetailsModal({
                         setFormState((prev) => ({
                           ...prev,
                           cancelled: checked,
-                          ...(checked && {
-                            completed: false,
-                            rescheduled: false,
-                          }),
+                          ...(checked
+                            ? { completed: false, rescheduled: false }
+                            : !prev.rescheduled && { statusReason: '' }),
                         }))
                       }
                     />
@@ -529,28 +551,51 @@ export function SurgeryDetailsModal({
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-2">
-                  <Label
-                    htmlFor="status-reason"
-                    className={cn(
-                      changedFields.statusReason &&
-                        'text-blue-600 dark:text-blue-400',
-                    )}
-                  >
-                    Motivo do Status {changedFields.statusReason && '*'}
-                  </Label>
-                  <Input
-                    id="status-reason"
-                    value={formState.statusReason}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        statusReason: e.target.value,
-                      }))
-                    }
-                    placeholder="Descreva o motivo (opcional)"
-                  />
-                </div>
+                {(formState.cancelled || formState.rescheduled) && (
+                  <div className="space-y-2 pt-2">
+                    <Label
+                      htmlFor="status-reason"
+                      className={cn(
+                        changedFields.statusReason &&
+                          'text-blue-600 dark:text-blue-400',
+                        !formState.statusReason && 'text-red-500',
+                      )}
+                    >
+                      Motivo{' '}
+                      {changedFields.statusReason && !formState.statusReason
+                        ? '(obrigatório)'
+                        : changedFields.statusReason
+                          ? '*'
+                          : '(obrigatório)'}
+                    </Label>
+                    <Select
+                      value={formState.statusReason}
+                      onValueChange={(value) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          statusReason: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger
+                        id="status-reason"
+                        className={cn(
+                          !formState.statusReason &&
+                            'border-red-400 dark:border-red-500',
+                        )}
+                      >
+                        <SelectValue placeholder="Selecione o motivo..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUS_REASON_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Interventions Section */}
@@ -634,7 +679,8 @@ export function SurgeryDetailsModal({
                         'text-blue-600 dark:text-blue-400',
                     )}
                   >
-                    Ajustes Necessários {changedFields.adjustmentsRequired && '*'}
+                    Ajustes Necessários{' '}
+                    {changedFields.adjustmentsRequired && '*'}
                   </Label>
                 </div>
 
@@ -730,7 +776,10 @@ export function SurgeryDetailsModal({
                   Salvo!
                 </span>
               )}
-              <Button onClick={handleSaveAllFields} disabled={isSaving || !hasChanges}>
+              <Button
+                onClick={handleSaveAllFields}
+                disabled={isSaving || !hasChanges || needsReason}
+              >
                 {isSaving ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </div>
