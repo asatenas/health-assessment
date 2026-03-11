@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Workflow Rules
+
+- **Never commit unless explicitly asked.** Do not create git commits proactively.
+- **No co-author lines.** Do not add `Co-Authored-By` trailers to commit messages.
+
 ## Commands
 
 ```bash
@@ -65,6 +70,25 @@ User roles within a clinic: `secretary`, `clinician`, `admin`, `owner`
 5. AI uses structured tools to collect RCRI/HAS2 risk factor data
 6. `finalize-interview` tool triggers score calculation; webhook fires at `FINALIZE_INTERVIEW_WEBHOOK_URL`
 7. Results appear in clinic dashboard immediately
+
+### Dashboard Panels (`components/dashboard/`)
+
+The analytics view (`analytics-view.tsx`) composes several panels, all SWR-backed:
+
+- **Today's + weekly panels** — props-driven from `useDashboardMetrics` and `useWeeklySurgeries`
+- **Monthly panel** (`monthly-surgeries-panel.tsx`) — uses `useSWR` keyed by `month/year`; navigating months changes the key, SWR handles caching per month
+
+**SWR invalidation after surgery mutations:** use `useSWRConfig`'s `mutate` with a filter matching both prefixes:
+```ts
+mutate(
+  (key: unknown) =>
+    typeof key === 'string' &&
+    (key.startsWith('/api/clinic/metrics') ||
+      key.startsWith('/api/clinic/monthly-surgeries')),
+);
+```
+
+**`SurgeryDetailsModal`** stays open on save and triggers the above invalidation. The `onStatusUpdate` prop is a separate callback that closes the modal — do not call it from the save handler or the modal will close unexpectedly.
 
 ### Configuration System
 
