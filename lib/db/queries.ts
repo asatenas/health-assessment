@@ -1519,7 +1519,12 @@ export async function getTodaysSurgeriesForSwipe({
     const chats = await db
       .select()
       .from(chat)
-      .where(and(eq(chat.clinicId, clinicId), eq(chat.status, 'finished')));
+      .where(
+        and(
+          eq(chat.clinicId, clinicId),
+          sql`${chat.status} IN ('finished', 'in_progress', 'active')`,
+        ),
+      );
 
     // Get surgeries scheduled for today
     const todaysSurgeries = await db
@@ -1618,7 +1623,7 @@ export async function getMonthlySurgeries({
       .where(
         and(
           eq(chat.clinicId, clinicId),
-          sql`${chat.status} IN ('finished', 'in_progress')`,
+          sql`${chat.status} IN ('finished', 'in_progress', 'active')`,
         ),
       );
 
@@ -1728,7 +1733,7 @@ export async function getWeeklySurgeries({
       .where(
         and(
           eq(chat.clinicId, clinicId),
-          sql`${chat.status} IN ('finished', 'in_progress')`,
+          sql`${chat.status} IN ('finished', 'in_progress', 'active')`,
         ),
       );
 
@@ -1948,11 +1953,13 @@ export async function upsertSurgery({
   name,
   date,
   time,
+  locationId,
 }: {
   assessmentId: string;
   name?: string;
   date?: string;
   time?: string;
+  locationId?: string;
 }) {
   try {
     // Combine date and time into a single timestamp if both provided
@@ -1969,6 +1976,7 @@ export async function upsertSurgery({
 
     if (name !== undefined) surgeryData.name = name;
     if (surgeryDateTime !== undefined) surgeryData.date = surgeryDateTime;
+    if (locationId !== undefined) surgeryData.locationId = locationId;
 
     return await db
       .insert(surgery)
@@ -1978,6 +1986,7 @@ export async function upsertSurgery({
         set: {
           ...(name !== undefined && { name }),
           ...(surgeryDateTime !== undefined && { date: surgeryDateTime }),
+          ...(locationId !== undefined && { locationId }),
         },
       });
   } catch (error) {
