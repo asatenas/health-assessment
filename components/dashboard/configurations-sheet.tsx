@@ -25,7 +25,8 @@ import type {
   FormFieldConfig,
   DashboardConfiguration,
 } from '@/lib/types/clinic-config';
-import { ChevronDown, Loader2, Users } from 'lucide-react';
+import { ChevronDown, Loader2, Users, Plus, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/shared/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserSelectionDialog } from '@/components/admin/user-selection-dialog';
 import { useSession } from 'next-auth/react';
@@ -34,6 +35,7 @@ import {
   AccountTab,
   type AccountTabRef,
 } from './configurations-sheet/account-tab';
+import { useClinicLocations } from '@/hooks/swr/use-clinic-locations';
 
 const SECTION_ORDER = [
   'basicInfo',
@@ -197,6 +199,189 @@ const DASHBOARD_WIDGETS = [
     description: 'Alertas e lembretes importantes',
   },
 ] as const;
+
+function LocationsManager() {
+  const { locations, mutate } = useClinicLocations();
+  const [bulkCount, setBulkCount] = useState(0);
+  const [bulkPrefix, setBulkPrefix] = useState('Sala de Cirurgia');
+  const [newName, setNewName] = useState('');
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+
+  const handleBulkCreate = async () => {
+    if (bulkCount <= 0 || !bulkPrefix.trim()) return;
+    setBulkLoading(true);
+    try {
+      const items = Array.from({ length: bulkCount }, (_, i) => ({
+        name: `${bulkPrefix.trim()} ${i + 1}`,
+      }));
+      await fetch('/api/clinic/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locations: items }),
+      });
+      mutate();
+      setBulkCount(0);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleAddSingle = async () => {
+    if (!newName.trim()) return;
+    setAddLoading(true);
+    try {
+      await fetch('/api/clinic/locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locations: [{ name: newName.trim() }] }),
+      });
+      mutate();
+      setNewName('');
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
+  const handleUpdate = async (
+    id: string,
+    data: { name?: string; enabled?: boolean },
+  ) => {
+    await fetch(`/api/clinic/locations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    mutate();
+  };
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/clinic/locations/${id}`, { method: 'DELETE' });
+    mutate();
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Locais de Cirurgia</CardTitle>
+        <p className="text-xs text-muted-foreground mt-2">
+          Gerencie salas de cirurgia ou hospitais onde as cirurgias são
+          realizadas
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Bulk creation */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Criar em lote</Label>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              min={1}
+              max={50}
+              value={bulkCount || ''}
+              onChange={(e) => setBulkCount(Number(e.target.value))}
+              placeholder="Qtd"
+              className="w-20"
+            />
+            <Input
+              value={bulkPrefix}
+              onChange={(e) => setBulkPrefix(e.target.value)}
+              placeholder="Prefixo"
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              onClick={handleBulkCreate}
+              disabled={bulkLoading || bulkCount <= 0}
+            >
+              {bulkLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                'Criar'
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Ex: 5 + &quot;Sala de Cirurgia&quot; → Sala de Cirurgia 1, 2, 3,
+            4, 5
+          </p>
+        </div>
+
+        {/* Individual creation */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Adicionar individual</Label>
+          <div className="flex gap-2">
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Ex: Hospital São Paulo"
+              className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAddSingle();
+              }}
+            />
+            <Button
+              size="sm"
+              onClick={handleAddSingle}
+              disabled={addLoading || !newName.trim()}
+            >
+              {addLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Plus className="size-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Existing locations list */}
+        {locations.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Locais existentes ({locations.length})
+            </Label>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {locations.map((loc) => (
+                <div
+                  key={loc.id}
+                  className={cn(
+                    'flex items-center gap-2 p-2 border rounded-lg',
+                    !loc.enabled && 'opacity-50',
+                  )}
+                >
+                  <Input
+                    defaultValue={loc.name}
+                    className="flex-1 h-8 text-sm"
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val && val !== loc.name) {
+                        handleUpdate(loc.id, { name: val });
+                      }
+                    }}
+                  />
+                  <Switch
+                    checked={loc.enabled}
+                    onCheckedChange={(checked) =>
+                      handleUpdate(loc.id, { enabled: checked })
+                    }
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                    onClick={() => handleDelete(loc.id)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 interface ConfigurationsSheetProps {
   open: boolean;
@@ -464,7 +649,7 @@ export function ConfigurationsSheet({
                       )}
 
                       {hasAdvancedConfigs && (
-                        <TabsContent value="clinic" className="mt-4">
+                        <TabsContent value="clinic" className="mt-4 space-y-4">
                           <Card>
                             <CardHeader>
                               <CardTitle className="text-base">
@@ -493,6 +678,7 @@ export function ConfigurationsSheet({
                               </div>
                             </CardContent>
                           </Card>
+                          <LocationsManager />
                         </TabsContent>
                       )}
 

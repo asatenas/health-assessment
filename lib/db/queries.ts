@@ -33,6 +33,7 @@ import {
   stream,
   checkpoint,
   surgery,
+  surgeryLocation,
   clinicInvitation,
   type ClinicInvitation,
 } from './schema';
@@ -1446,6 +1447,7 @@ export async function updateChatSurgeryDetails({
   adjustmentNotes,
   notes,
   name,
+  locationId,
 }: {
   chatId: string;
   surgeryDate?: Date;
@@ -1459,6 +1461,7 @@ export async function updateChatSurgeryDetails({
   adjustmentNotes?: string;
   notes?: string;
   name?: string;
+  locationId?: string | null;
 }) {
   try {
     const updateData: any = {};
@@ -1482,6 +1485,8 @@ export async function updateChatSurgeryDetails({
       updateData.notes = notes;
     if (name !== undefined)
       updateData.name = name;
+    if (locationId !== undefined)
+      updateData.locationId = locationId;
 
     const [updatedSurgery] = await db
       .update(surgery)
@@ -1518,8 +1523,27 @@ export async function getTodaysSurgeriesForSwipe({
 
     // Get surgeries scheduled for today
     const todaysSurgeries = await db
-      .select()
+      .select({
+        assessmentId: surgery.assessmentId,
+        name: surgery.name,
+        date: surgery.date,
+        locationId: surgery.locationId,
+        locationName: surgeryLocation.name,
+        completed: surgery.completed,
+        rescheduled: surgery.rescheduled,
+        cancelled: surgery.cancelled,
+        statusReason: surgery.statusReason,
+        medicalInterventionRequired: surgery.medicalInterventionRequired,
+        interventionNotes: surgery.interventionNotes,
+        adjustmentsRequired: surgery.adjustmentsRequired,
+        adjustmentNotes: surgery.adjustmentNotes,
+        notes: surgery.notes,
+      })
       .from(surgery)
+      .leftJoin(
+        surgeryLocation,
+        eq(surgery.locationId, surgeryLocation.id),
+      )
       .where(
         and(
           inArray(
@@ -1549,6 +1573,7 @@ export async function getTodaysSurgeriesForSwipe({
         surgeryTime: formData?.surgeryTime,
         rcriScore: rcriScore,
         has2Score: has2Score,
+        locationName: surgeryItem.locationName,
       };
     });
   } catch (error) {
@@ -1599,8 +1624,27 @@ export async function getMonthlySurgeries({
 
     // Get surgeries scheduled in the target month
     const surgeries = await db
-      .select()
+      .select({
+        assessmentId: surgery.assessmentId,
+        name: surgery.name,
+        date: surgery.date,
+        locationId: surgery.locationId,
+        locationName: surgeryLocation.name,
+        completed: surgery.completed,
+        rescheduled: surgery.rescheduled,
+        cancelled: surgery.cancelled,
+        statusReason: surgery.statusReason,
+        medicalInterventionRequired: surgery.medicalInterventionRequired,
+        interventionNotes: surgery.interventionNotes,
+        adjustmentsRequired: surgery.adjustmentsRequired,
+        adjustmentNotes: surgery.adjustmentNotes,
+        notes: surgery.notes,
+      })
       .from(surgery)
+      .leftJoin(
+        surgeryLocation,
+        eq(surgery.locationId, surgeryLocation.id),
+      )
       .where(
         and(
           inArray(
@@ -1654,6 +1698,7 @@ export async function getMonthlySurgeries({
         surgeryRescheduled: surgeryItem.rescheduled,
         rcriScore: chatItem?.score_rcri ?? null,
         has2Score: chatItem?.score_aub_has2 ?? null,
+        locationName: surgeryItem.locationName,
       });
     });
 
@@ -1689,8 +1734,27 @@ export async function getWeeklySurgeries({
 
     // Get surgeries scheduled in the date range
     const surgeries = await db
-      .select()
+      .select({
+        assessmentId: surgery.assessmentId,
+        name: surgery.name,
+        date: surgery.date,
+        locationId: surgery.locationId,
+        locationName: surgeryLocation.name,
+        completed: surgery.completed,
+        rescheduled: surgery.rescheduled,
+        cancelled: surgery.cancelled,
+        statusReason: surgery.statusReason,
+        medicalInterventionRequired: surgery.medicalInterventionRequired,
+        interventionNotes: surgery.interventionNotes,
+        adjustmentsRequired: surgery.adjustmentsRequired,
+        adjustmentNotes: surgery.adjustmentNotes,
+        notes: surgery.notes,
+      })
       .from(surgery)
+      .leftJoin(
+        surgeryLocation,
+        eq(surgery.locationId, surgeryLocation.id),
+      )
       .where(
         and(
           inArray(
@@ -1729,10 +1793,12 @@ export async function getWeeklySurgeries({
           surgeryTime: formData?.surgeryTime || undefined,
           rcriScore: chatItem?.score_rcri ?? null,
           has2Score: chatItem?.score_aub_has2 ?? null,
+          locationName: surgeryItem.locationName,
 
           // Surgery details for modal
           name: surgeryItem.name,
           date: surgeryItem.date?.toISOString() ?? null,
+          locationId: surgeryItem.locationId,
           completed: surgeryItem.completed,
           rescheduled: surgeryItem.rescheduled,
           cancelled: surgeryItem.cancelled,
@@ -1761,8 +1827,27 @@ export async function getSurgeryByAssessmentId({
 }) {
   try {
     const surgeryData = await db
-      .select()
+      .select({
+        assessmentId: surgery.assessmentId,
+        name: surgery.name,
+        date: surgery.date,
+        locationId: surgery.locationId,
+        locationName: surgeryLocation.name,
+        completed: surgery.completed,
+        rescheduled: surgery.rescheduled,
+        cancelled: surgery.cancelled,
+        statusReason: surgery.statusReason,
+        medicalInterventionRequired: surgery.medicalInterventionRequired,
+        interventionNotes: surgery.interventionNotes,
+        adjustmentsRequired: surgery.adjustmentsRequired,
+        adjustmentNotes: surgery.adjustmentNotes,
+        notes: surgery.notes,
+      })
       .from(surgery)
+      .leftJoin(
+        surgeryLocation,
+        eq(surgery.locationId, surgeryLocation.id),
+      )
       .where(eq(surgery.assessmentId, assessmentId))
       .limit(1);
 
@@ -2913,6 +2998,45 @@ export async function updateClinicName({
       'Failed to update clinic name',
     );
   }
+}
+
+// ── Surgery Locations CRUD ──
+
+export async function getClinicLocations(clinicId: string) {
+  return db
+    .select()
+    .from(surgeryLocation)
+    .where(eq(surgeryLocation.clinicId, clinicId))
+    .orderBy(asc(surgeryLocation.name));
+}
+
+export async function createClinicLocations(
+  clinicId: string,
+  locations: { name: string }[],
+) {
+  if (locations.length === 0) return [];
+  return db
+    .insert(surgeryLocation)
+    .values(locations.map((l) => ({ clinicId, name: l.name })))
+    .returning();
+}
+
+export async function updateClinicLocation(
+  id: string,
+  data: { name?: string; enabled?: boolean },
+) {
+  const [updated] = await db
+    .update(surgeryLocation)
+    .set(data)
+    .where(eq(surgeryLocation.id, id))
+    .returning();
+  return updated;
+}
+
+export async function deleteClinicLocation(id: string) {
+  await db
+    .delete(surgeryLocation)
+    .where(eq(surgeryLocation.id, id));
 }
 
 export type { User };
