@@ -25,12 +25,7 @@ export type Chat = {
 };
 
 export interface ChatListViewProps {
-  chats: Chat[];
-  isLoading: boolean;
   currentPage: number;
-  totalPages: number;
-  totalChats: number;
-  limit: number;
   statusFilter: string;
   dateFromFilter: string;
   dateToFilter: string;

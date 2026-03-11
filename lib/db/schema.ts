@@ -248,6 +248,7 @@ export const surgery = pgTable('Surgery', {
   interventionNotes: text('interventionNotes'),
   adjustmentsRequired: boolean('adjustmentsRequired').notNull().default(false),
   adjustmentNotes: text('adjustmentNotes'),
+  notes: text('notes'),
 });
 
 export type Surgery = InferSelectModel<typeof surgery>;

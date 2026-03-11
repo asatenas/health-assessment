@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { AssessmentDetailsModal } from './assessment-details-modal';
 import { SurgeryDetailsModal } from './surgery-details-modal';
 
@@ -12,18 +12,16 @@ import { DesktopTable } from './chat-list-view/desktop-table';
 import { MobileCards } from './chat-list-view/mobile-cards';
 import { Pagination } from './chat-list-view/pagination';
 import { PermissionGate } from '@/components/auth/permission-gate';
+import { useChats } from '@/hooks/swr';
 
 // Re-export types and utils for backward compatibility
 export type { Chat };
 export { calculateRiskLevel } from './chat-list-view/utils';
 
+const LIMIT = 20;
+
 export function ChatListView({
-  chats,
-  isLoading,
   currentPage,
-  totalPages,
-  totalChats,
-  limit,
   statusFilter,
   dateFromFilter,
   dateToFilter,
@@ -37,9 +35,15 @@ export function ChatListView({
   const [chatDetailsModalOpen, setChatDetailsModalOpen] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [surgeryDetailsModalOpen, setSurgeryDetailsModalOpen] = useState(false);
-  const [selectedSurgeryId, setSelectedSurgeryId] = useState<string | null>(
-    null,
-  );
+  const [selectedSurgeryId, setSelectedSurgeryId] = useState<string | null>(null);
+
+  const { chats, totalPages, totalChats, isLoading } = useChats({
+    page: currentPage,
+    limit: LIMIT,
+    status: statusFilter || undefined,
+    dateFrom: dateFromFilter || undefined,
+    dateTo: dateToFilter || undefined,
+  });
 
   const hasActiveFilters = useMemo(() => {
     return statusFilter !== '' || dateFromFilter !== '' || dateToFilter !== '';
@@ -55,14 +59,12 @@ export function ChatListView({
   };
 
   const handleViewSurgery = () => {
-    // Close assessment modal and open surgery modal
     setChatDetailsModalOpen(false);
     setSelectedSurgeryId(selectedChatId);
     setSurgeryDetailsModalOpen(true);
   };
 
   const handleViewAssessment = () => {
-    // Close surgery modal and open assessment modal
     setSurgeryDetailsModalOpen(false);
     setSelectedChatId(selectedSurgeryId);
     setChatDetailsModalOpen(true);
@@ -90,7 +92,7 @@ export function ChatListView({
       <DesktopTable
         chats={chats}
         isLoading={isLoading}
-        limit={limit}
+        limit={LIMIT}
         currentPage={currentPage}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
@@ -101,7 +103,7 @@ export function ChatListView({
       <MobileCards
         chats={chats}
         isLoading={isLoading}
-        limit={limit}
+        limit={LIMIT}
         currentPage={currentPage}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
@@ -114,7 +116,7 @@ export function ChatListView({
         currentPage={currentPage}
         totalPages={totalPages}
         totalChats={totalChats}
-        limit={limit}
+        limit={LIMIT}
         onPageChange={onPageChange}
       />
 
@@ -123,9 +125,7 @@ export function ChatListView({
         open={chatDetailsModalOpen}
         onOpenChange={(open) => {
           setChatDetailsModalOpen(open);
-          if (!open) {
-            setSelectedChatId(null);
-          }
+          if (!open) setSelectedChatId(null);
         }}
         onViewSurgery={handleViewSurgery}
       />
@@ -135,9 +135,7 @@ export function ChatListView({
         open={surgeryDetailsModalOpen}
         onOpenChange={(open) => {
           setSurgeryDetailsModalOpen(open);
-          if (!open) {
-            setSelectedSurgeryId(null);
-          }
+          if (!open) setSelectedSurgeryId(null);
         }}
         onViewAssessment={handleViewAssessment}
       />

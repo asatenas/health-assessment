@@ -1418,6 +1418,8 @@ export async function updateChatSurgeryDetails({
   interventionNotes,
   adjustmentsRequired,
   adjustmentNotes,
+  notes,
+  name,
 }: {
   chatId: string;
   surgeryDate?: Date;
@@ -1429,6 +1431,8 @@ export async function updateChatSurgeryDetails({
   interventionNotes?: string;
   adjustmentsRequired?: boolean;
   adjustmentNotes?: string;
+  notes?: string;
+  name?: string;
 }) {
   try {
     const updateData: any = {};
@@ -1448,6 +1452,10 @@ export async function updateChatSurgeryDetails({
       updateData.adjustmentsRequired = adjustmentsRequired;
     if (adjustmentNotes !== undefined)
       updateData.adjustmentNotes = adjustmentNotes;
+    if (notes !== undefined)
+      updateData.notes = notes;
+    if (name !== undefined)
+      updateData.name = name;
 
     const [updatedSurgery] = await db
       .update(surgery)
@@ -1707,6 +1715,7 @@ export async function getWeeklySurgeries({
           interventionNotes: surgeryItem.interventionNotes,
           adjustmentsRequired: surgeryItem.adjustmentsRequired,
           adjustmentNotes: surgeryItem.adjustmentNotes,
+          notes: surgeryItem.notes,
         };
       });
 
