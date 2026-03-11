@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { DndContext, DragOverlay, useDroppable, useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { SurgeryDetailsModal } from './surgery-details-modal';
 import { AssessmentDetailsModal } from './assessment-details-modal';
 import { cn } from '@/lib/shared/utils';
+import { useSurgeryDragDrop } from '@/hooks/use-surgery-drag-drop';
 
 interface Surgery {
   assessmentId: string;
@@ -32,14 +35,6 @@ interface Surgery {
   adjustmentNotes: string | null;
 }
 
-interface WeeklySurgeriesPanelProps {
-  surgeries: Surgery[];
-  onUpdateStatus: (
-    assessmentId: string,
-    status: 'completed' | 'rescheduled' | 'cancelled',
-  ) => Promise<void>;
-}
-
 interface CalendarDay {
   date: Date;
   dayName: string;
@@ -49,10 +44,110 @@ interface CalendarDay {
   surgeries: Surgery[];
 }
 
+interface DroppableDayProps {
+  day: CalendarDay;
+  children: React.ReactNode;
+}
+
+function DroppableDay({ day, children }: DroppableDayProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: day.date.toISOString() });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'border rounded-lg flex flex-col h-[550px] w-[165px] sm:w-auto sm:min-w-0 sm:flex-shrink',
+        day.isToday && 'border-blue-500 border-2',
+        day.isPast && 'bg-gray-50 dark:bg-gray-900',
+        isOver && 'ring-2 ring-blue-400 bg-blue-50/50 dark:bg-blue-950/20',
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface DraggableSurgeryCardProps {
+  surgery: Surgery;
+  isPast: boolean;
+  getRiskColor: (risk: string) => string;
+  onClick: () => void;
+}
+
+function DraggableSurgeryCard({
+  surgery,
+  isPast,
+  getRiskColor,
+  onClick,
+}: DraggableSurgeryCardProps) {
+  const { setNodeRef, listeners, attributes, isDragging, transform } =
+    useDraggable({ id: surgery.assessmentId, data: { surgery } });
+
+  const style = transform
+    ? { transform: CSS.Translate.toString(transform) }
+    : undefined;
+
+  return (
+    <button
+      ref={setNodeRef}
+      type="button"
+      style={style}
+      {...listeners}
+      {...attributes}
+      onClick={onClick}
+      className={cn(
+        'w-full p-2 rounded border text-left transition-all',
+        'hover:shadow-md hover:border-blue-300',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500',
+        isPast && 'opacity-60',
+        isDragging && 'opacity-30',
+      )}
+    >
+      <SurgeryCardContent surgery={surgery} getRiskColor={getRiskColor} />
+    </button>
+  );
+}
+
+interface SurgeryCardContentProps {
+  surgery: Surgery;
+  getRiskColor: (risk: string) => string;
+}
+
+function SurgeryCardContent({ surgery, getRiskColor }: SurgeryCardContentProps) {
+  return (
+    <div className="space-y-1">
+      <Badge className={cn('text-xs', getRiskColor(surgery.riskLevel))}>
+        {surgery.riskLevel}
+      </Badge>
+      {surgery.surgeryDate && (
+        <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+          {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', {
+            timeStyle: 'short',
+          })}
+        </div>
+      )}
+      {surgery.surgeryName && (
+        <div className="text-xs truncate text-muted-foreground">
+          {surgery.surgeryName}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface WeeklySurgeriesPanelProps {
+  surgeries: Surgery[];
+  onUpdateStatus: (
+    assessmentId: string,
+    status: 'completed' | 'rescheduled' | 'cancelled',
+  ) => Promise<void>;
+}
+
 export function WeeklySurgeriesPanel({
   surgeries,
   onUpdateStatus,
 }: WeeklySurgeriesPanelProps) {
+  const { sensors, activeSurgery, handleDragStart, handleDragEnd } =
+    useSurgeryDragDrop(surgeries);
   const [selectedSurgery, setSelectedSurgery] = useState<string | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<
@@ -153,79 +248,63 @@ export function WeeklySurgeriesPanel({
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto md:overflow-visible">
-            <div className="flex md:grid md:grid-cols-7 gap-2">
-              {weekDays.map((day, index) => (
-                <div
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  key={index}
-                  className={cn(
-                    'border rounded-lg flex flex-col h-[550px] w-[165px] sm:w-auto sm:min-w-0 sm:flex-shrink',
-                    day.isToday && 'border-blue-500 border-2',
-                    day.isPast && 'bg-gray-50 dark:bg-gray-900',
-                  )}
-                >
-                  {/* Day Header */}
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex md:grid md:grid-cols-7 gap-2">
+                {weekDays.map((day, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: stable week order
+                  <DroppableDay key={index} day={day}>
+                    {/* Day Header */}
+                    <div
+                      className={cn(
+                        'p-2 border-b flex items-center justify-center gap-1.5',
+                        day.isToday && 'bg-blue-50 dark:bg-blue-950',
+                      )}
+                    >
+                      <div className="text-xs font-semibold text-muted-foreground">
+                        {day.dayName}
+                      </div>
+                      <div className="text-lg font-bold">{day.dayNumber}</div>
+                      <Badge variant="secondary" className="text-xs">
+                        {day.surgeries.length}
+                      </Badge>
+                    </div>
+
+                    {/* Surgery Cards */}
+                    <div className="flex-1 p-2 space-y-2 overflow-y-auto">
+                      {day.surgeries.map((surgery) => (
+                        <DraggableSurgeryCard
+                          key={surgery.assessmentId}
+                          surgery={surgery}
+                          isPast={day.isPast}
+                          getRiskColor={getRiskColor}
+                          onClick={() => handleSurgeryClick(surgery.assessmentId)}
+                        />
+                      ))}
+                    </div>
+                  </DroppableDay>
+                ))}
+              </div>
+
+              <DragOverlay>
+                {activeSurgery && (
                   <div
                     className={cn(
-                      'p-2 border-b flex items-center justify-center gap-1.5',
-                      day.isToday && 'bg-blue-50 dark:bg-blue-950',
+                      'p-2 rounded border text-left bg-white dark:bg-gray-900',
+                      'shadow-xl rotate-2 scale-105',
                     )}
                   >
-                    <div className="text-xs font-semibold text-muted-foreground">
-                      {day.dayName}
-                    </div>
-                    <div className="text-lg font-bold">{day.dayNumber}</div>
-                    <Badge variant="secondary" className="text-xs">
-                      {day.surgeries.length}
-                    </Badge>
+                    <SurgeryCardContent
+                      surgery={activeSurgery}
+                      getRiskColor={getRiskColor}
+                    />
                   </div>
-
-                  {/* Surgery Cards */}
-                  <div className="flex-1 p-2 space-y-2 overflow-y-auto">
-                    {day.surgeries.map((surgery) => (
-                      <button
-                        type="button"
-                        key={surgery.assessmentId}
-                        onClick={() => handleSurgeryClick(surgery.assessmentId)}
-                        className={cn(
-                          'w-full p-2 rounded border text-left transition-all',
-                          'hover:shadow-md hover:border-blue-300',
-                          'focus:outline-none focus:ring-2 focus:ring-blue-500',
-                          day.isPast && 'opacity-60',
-                        )}
-                      >
-                        <div className="space-y-1">
-                          <Badge
-                            className={cn(
-                              'text-xs',
-                              getRiskColor(surgery.riskLevel),
-                            )}
-                          >
-                            {surgery.riskLevel}
-                          </Badge>
-                          {surgery.surgeryDate && (
-                            <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                              {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', { timeStyle: 'short' })}
-                            </div>
-                          )}
-                          {/* <div className="text-xs">
-                          <span className="text-muted-foreground">Idade:</span>{' '}
-                          <span className="font-medium">
-                            {surgery.patientAge}
-                          </span>
-                        </div> */}
-                          {surgery.surgeryName && (
-                            <div className="text-xs truncate text-muted-foreground">
-                              {surgery.surgeryName}
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </DragOverlay>
+            </DndContext>
           </div>
         </CardContent>
       </Card>
