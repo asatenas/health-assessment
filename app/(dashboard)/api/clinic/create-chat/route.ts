@@ -1,12 +1,12 @@
 import { isDevelopmentEnvironment } from '@/lib/shared/constants';
-import { createChatWithToken } from '@/lib/db/queries';
+import { createChatWithToken, upsertSurgery } from '@/lib/db/queries';
 import { generateUUID, sendWebhook } from '@/lib/shared/utils';
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
 import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import { ChatSDKError } from '@/lib/shared/errors';
 
-export async function POST() {
+export async function POST(request: Request) {
   const chatId = generateUUID();
   const token = `${generateAlphanumeric(4)}-${generateAlphanumeric(4)}`;
 
@@ -15,11 +15,39 @@ export async function POST() {
       permissions: ['assessments.create'],
     });
 
+    // Parse optional surgery data from body
+    let surgeryName: string | undefined;
+    let surgeryDate: string | undefined;
+    let surgeryTime: string | undefined;
+    let locationId: string | undefined;
+
+    try {
+      const body = await request.json();
+      surgeryName = body.surgeryName;
+      surgeryDate = body.surgeryDate;
+      surgeryTime = body.surgeryTime;
+      locationId = body.locationId;
+    } catch {
+      // Empty body is fine — all fields are optional
+    }
+
     await createChatWithToken({
       id: chatId,
       clinicId: user.clinicId,
       token,
     });
+
+    // Create surgery record if any surgery data was provided
+    const hasSurgeryData = surgeryName || surgeryDate || surgeryTime || locationId;
+    if (hasSurgeryData) {
+      await upsertSurgery({
+        assessmentId: chatId,
+        name: surgeryName,
+        date: surgeryDate,
+        time: surgeryTime,
+        locationId,
+      });
+    }
 
     await sendWebhook(
       'chat_created',

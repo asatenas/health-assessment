@@ -231,6 +231,18 @@ export const checkpoint = pgTable('Checkpoint', {
 
 export type Checkpoint = InferSelectModel<typeof checkpoint>;
 
+export const surgeryLocation = pgTable('SurgeryLocation', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  clinicId: uuid('clinicId')
+    .notNull()
+    .references(() => clinic.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  enabled: boolean('enabled').notNull().default(true),
+  createdAt: timestamp('createdAt').notNull().default(sql`now()`),
+});
+
+export type SurgeryLocation = InferSelectModel<typeof surgeryLocation>;
+
 export const surgery = pgTable('Surgery', {
   assessmentId: uuid('assessmentId')
     .primaryKey()
@@ -238,6 +250,9 @@ export const surgery = pgTable('Surgery', {
     .references(() => chat.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }),
   date: timestamp('date'),
+  locationId: uuid('locationId').references(() => surgeryLocation.id, {
+    onDelete: 'set null',
+  }),
   completed: boolean('completed').notNull().default(false),
   rescheduled: boolean('rescheduled').notNull().default(false),
   cancelled: boolean('cancelled').notNull().default(false),

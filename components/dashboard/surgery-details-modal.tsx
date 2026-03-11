@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useClinicLocations } from '@/hooks/swr/use-clinic-locations';
 
 const STATUS_REASON_OPTIONS = [
   { value: 'paciente_nao_liberado', label: 'Paciente não liberado' },
@@ -63,6 +64,8 @@ interface SurgeryDetails {
   assessmentId: string;
   name: string | null;
   date: string | null;
+  locationId: string | null;
+  locationName: string | null;
   completed: boolean;
   rescheduled: boolean;
   cancelled: boolean;
@@ -79,6 +82,7 @@ interface EditableState {
   name: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:mm
+  locationId: string;
   completed: boolean;
   rescheduled: boolean;
   cancelled: boolean;
@@ -99,6 +103,8 @@ export function SurgeryDetailsModal({
   onSaved,
 }: SurgeryDetailsModalProps) {
   const { mutate } = useSWRConfig();
+  const { locations } = useClinicLocations();
+  const enabledLocations = locations.filter((l) => l.enabled);
   const [surgeryDetails, setSurgeryDetails] = useState<SurgeryDetails | null>(
     null,
   );
@@ -109,6 +115,7 @@ export function SurgeryDetailsModal({
     name: '',
     date: '',
     time: '',
+    locationId: '',
     completed: false,
     rescheduled: false,
     cancelled: false,
@@ -142,6 +149,7 @@ export function SurgeryDetailsModal({
         name: surgeryDetails.name ?? '',
         date: extractDate(surgeryDetails.date),
         time: extractTime(surgeryDetails.date),
+        locationId: surgeryDetails.locationId ?? '',
         completed: surgeryDetails.completed,
         rescheduled: surgeryDetails.rescheduled,
         cancelled: surgeryDetails.cancelled,
@@ -229,6 +237,8 @@ export function SurgeryDetailsModal({
       name: formState.name !== (surgeryDetails.name ?? ''),
       date: formState.date !== originalDate,
       time: formState.time !== originalTime,
+      locationId:
+        formState.locationId !== (surgeryDetails.locationId ?? ''),
       completed: formState.completed !== surgeryDetails.completed,
       rescheduled: formState.rescheduled !== surgeryDetails.rescheduled,
       cancelled: formState.cancelled !== surgeryDetails.cancelled,
@@ -277,6 +287,7 @@ export function SurgeryDetailsModal({
           body: JSON.stringify({
             name: formState.name,
             surgeryDate: combinedDate,
+            locationId: formState.locationId || null,
             surgeryCompleted: formState.completed,
             surgeryRescheduled: formState.rescheduled,
             surgeryCancelled: formState.cancelled,
@@ -312,6 +323,11 @@ export function SurgeryDetailsModal({
               ...prev,
               name: formState.name,
               date: combinedDate ?? prev.date,
+              locationId: formState.locationId || null,
+              locationName:
+                enabledLocations.find(
+                  (l) => l.id === formState.locationId,
+                )?.name ?? null,
               completed: formState.completed,
               rescheduled: formState.rescheduled,
               cancelled: formState.cancelled,
@@ -418,6 +434,43 @@ export function SurgeryDetailsModal({
                     placeholder="Nome da cirurgia..."
                   />
                 </div>
+
+                {enabledLocations.length > 0 && (
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <Label
+                      htmlFor="surgery-location"
+                      className={cn(
+                        changedFields.locationId &&
+                          'text-blue-600 dark:text-blue-400',
+                      )}
+                    >
+                      Local da Cirurgia {changedFields.locationId && '*'}
+                    </Label>
+                    <Select
+                      value={formState.locationId}
+                      onValueChange={(value) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          locationId: value === '__none__' ? '' : value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger id="surgery-location">
+                        <SelectValue placeholder="Selecione o local..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">
+                          Nenhum
+                        </SelectItem>
+                        {enabledLocations.map((loc) => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label

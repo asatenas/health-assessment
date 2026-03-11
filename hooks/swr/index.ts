@@ -1,5 +1,6 @@
 export { useClinicConfig } from './use-clinic-config';
 export { useClinicInvitations } from './use-clinic-invitations';
+export { useClinicLocations } from './use-clinic-locations';
 export { useDashboardMetrics } from './use-dashboard-metrics';
 export { useWeeklySurgeries } from './use-weekly-surgeries';
 export { useChats } from './use-chats';

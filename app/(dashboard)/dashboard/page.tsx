@@ -13,6 +13,7 @@ import { ClinicInvitationDialog } from '@/components/dashboard/clinic-invitation
 import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { NewChatBanner } from '@/components/dashboard/new-chat-banner';
+import { CreateAssessmentDialog } from '@/components/dashboard/create-assessment-dialog';
 import { AnalyticsView } from '@/components/dashboard/analytics-view';
 import { ChatListView } from '@/components/dashboard/chat-list-view';
 import {
@@ -35,6 +36,7 @@ export default function ClinicDashboard() {
 
   const [isConfigurationsOpen, setIsConfigurationsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { clinicName, dashboardConfig, mutate: mutateConfig } = useClinicConfig();
   const { invitations, mutate: mutateInvitations } = useClinicInvitations();
@@ -63,10 +65,16 @@ export default function ClinicDashboard() {
     setView('list');
   }
 
-  const handleCreateChat = async () => {
+  const handleCreateChat = async (data: {
+    surgeryName?: string;
+    surgeryDate?: string;
+    surgeryTime?: string;
+    locationId?: string;
+  }) => {
     try {
-      await createChat();
+      await createChat(data);
       toast({ type: 'success', description: 'Avaliação criada com sucesso!' });
+      setIsCreateDialogOpen(false);
     } catch {
       toast({ type: 'error', description: 'Falha ao criar avaliação' });
     }
@@ -133,7 +141,7 @@ export default function ClinicDashboard() {
           clinicName={clinicName}
           isCreating={isCreating}
           isRefreshing={false}
-          onCreateChat={handleCreateChat}
+          onCreateChat={() => setIsCreateDialogOpen(true)}
           onRefresh={handleRefresh}
           onOpenHelp={() => setIsHelpOpen(true)}
           onOpenConfigurations={() => setIsConfigurationsOpen(true)}
@@ -216,6 +224,13 @@ export default function ClinicDashboard() {
       />
 
       <HelpModal open={isHelpOpen} onOpenChange={setIsHelpOpen} />
+
+      <CreateAssessmentDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onConfirm={handleCreateChat}
+        isCreating={isCreating}
+      />
 
       {invitations.length > 0 && (
         <ClinicInvitationDialog

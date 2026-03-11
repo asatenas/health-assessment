@@ -21,6 +21,7 @@ interface Surgery {
   surgeryTime?: string;
   rcriScore?: number | null;
   has2Score?: number | null;
+  locationName?: string | null;
 
   // Surgery details for modal
   name: string | null;
@@ -128,6 +129,11 @@ function SurgeryCardContent({ surgery, getRiskColor }: SurgeryCardContentProps) 
       {surgery.surgeryName && (
         <div className="text-xs truncate text-muted-foreground">
           {surgery.surgeryName}
+        </div>
+      )}
+      {surgery.locationName && (
+        <div className="text-xs truncate text-muted-foreground/70">
+          {surgery.locationName}
         </div>
       )}
     </div>

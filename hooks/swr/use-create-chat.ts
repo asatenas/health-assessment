@@ -9,6 +9,13 @@ type CreateChatResponse = {
   url: string;
 };
 
+type CreateChatOptions = {
+  surgeryName?: string;
+  surgeryDate?: string;
+  surgeryTime?: string;
+  locationId?: string;
+};
+
 export function useCreateChat() {
   const { mutate } = useSWRConfig();
   const [isCreating, setIsCreating] = useState(false);
@@ -16,11 +23,13 @@ export function useCreateChat() {
     null,
   );
 
-  const createChat = async () => {
+  const createChat = async (options?: CreateChatOptions) => {
     setIsCreating(true);
     try {
       const response = await fetch('/api/clinic/create-chat', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(options ?? {}),
       });
 
       if (!response.ok) {

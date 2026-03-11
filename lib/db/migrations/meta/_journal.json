@@ -330,6 +330,13 @@
       "when": 1773234651726,
       "tag": "0046_purple_justice",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1773255928687,
+      "tag": "0047_many_sentry",
+      "breakpoints": true
     }
   ]
 }
