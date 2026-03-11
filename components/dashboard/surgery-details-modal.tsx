@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSWRConfig } from 'swr';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,6 +37,7 @@ interface SurgeryDetailsModalProps {
     status: 'completed' | 'rescheduled' | 'cancelled',
   ) => Promise<void>;
   onViewAssessment?: () => void;
+  onSaved?: () => void;
 }
 
 interface SurgeryDetails {
@@ -75,7 +77,9 @@ export function SurgeryDetailsModal({
   onOpenChange,
   onStatusUpdate,
   onViewAssessment,
+  onSaved,
 }: SurgeryDetailsModalProps) {
+  const { mutate } = useSWRConfig();
   const [surgeryDetails, setSurgeryDetails] = useState<SurgeryDetails | null>(
     null,
   );
@@ -269,6 +273,14 @@ export function SurgeryDetailsModal({
 
       setHasSaved(true);
 
+      mutate(
+        (key: unknown) =>
+          typeof key === 'string' &&
+          (key.startsWith('/api/clinic/metrics') ||
+            key.startsWith('/api/clinic/monthly-surgeries')),
+      );
+      onSaved?.();
+
       // Update local state directly instead of refetching the entire page
       // This prevents the footer from hiding during the 'isLoadingDetails' phase
       setSurgeryDetails((prev) => 
@@ -289,22 +301,6 @@ export function SurgeryDetailsModal({
             }
           : prev
       );
-
-      // Trigger standard status update upstream if provided
-      if (
-        onStatusUpdate &&
-        (changedFields.completed ||
-          changedFields.cancelled ||
-          changedFields.rescheduled)
-      ) {
-        if (formState.completed) {
-          onStatusUpdate('completed');
-        } else if (formState.cancelled) {
-          onStatusUpdate('cancelled');
-        } else if (formState.rescheduled) {
-          onStatusUpdate('rescheduled');
-        }
-      }
 
       setTimeout(() => setHasSaved(false), 3000);
     } catch (error) {

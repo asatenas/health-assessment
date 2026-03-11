@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import useSWR from 'swr';
+import { fetcher } from '@/hooks/swr/fetcher';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,60 +71,12 @@ export function MonthlySurgeriesPanel({
   >(null);
   const [surgeryModalOpen, setSurgeryModalOpen] = useState(false);
   const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
-  const [monthlySurgeries, setMonthlySurgeries] =
-    useState<Record<string, Surgery[]>>(surgeriesByDay);
-  const [isLoading, setIsLoading] = useState(false);
-  // Cache to store fetched months (key: "YYYY-MM")
-  const [surgeriesCache, setSurgeriesCache] = useState<
-    Record<string, Record<string, Surgery[]>>
-  >(() => {
-    // Initialize cache with the initial month's data
-    const now = new Date();
-    const initialKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    return { [initialKey]: surgeriesByDay };
-  });
-
-  // Fetch monthly surgeries function
-  const fetchMonthlySurgeries = useCallback(async () => {
-    const month = currentMonth.getMonth() + 1; // JavaScript months are 0-indexed
-    const year = currentMonth.getFullYear();
-    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
-
-    // Check if data is already cached
-    if (surgeriesCache[cacheKey]) {
-      setMonthlySurgeries(surgeriesCache[cacheKey]);
-      return;
-    }
-
-    // Fetch if not cached
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/clinic/monthly-surgeries?month=${month}&year=${year}`,
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch monthly surgeries');
-      }
-
-      const data = await response.json();
-      setMonthlySurgeries(data);
-      // Store in cache
-      setSurgeriesCache((prev) => ({
-        ...prev,
-        [cacheKey]: data,
-      }));
-    } catch (error) {
-      console.error('Error fetching monthly surgeries:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentMonth, surgeriesCache]);
-
-  // Fetch monthly surgeries when month changes
-  useEffect(() => {
-    fetchMonthlySurgeries();
-  }, [fetchMonthlySurgeries]);
+  const swrKey = `/api/clinic/monthly-surgeries?month=${currentMonth.getMonth() + 1}&year=${currentMonth.getFullYear()}`;
+  const { data: monthlySurgeries = surgeriesByDay, isLoading, mutate: mutateMonthly } = useSWR<Record<string, Surgery[]>>(
+    swrKey,
+    fetcher,
+    { fallbackData: surgeriesByDay },
+  );
 
   // Prevent body scroll when day modal is open
   useEffect(() => {
@@ -266,20 +220,7 @@ export function MonthlySurgeriesPanel({
     await onUpdateStatus(selectedAssessmentId, status);
     setSurgeryModalOpen(false);
     setSelectedAssessmentId(null);
-
-    // Invalidate cache for current month and refetch
-    const month = currentMonth.getMonth() + 1;
-    const year = currentMonth.getFullYear();
-    const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
-
-    setSurgeriesCache((prev) => {
-      const updated = { ...prev };
-      delete updated[cacheKey];
-      return updated;
-    });
-
-    // Refetch monthly surgeries to reflect the updated status
-    await fetchMonthlySurgeries();
+    mutateMonthly();
   };
 
   const handleViewAssessment = () => {
