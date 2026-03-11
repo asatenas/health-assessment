@@ -1419,6 +1419,7 @@ export async function updateChatSurgeryDetails({
   adjustmentsRequired,
   adjustmentNotes,
   notes,
+  name,
 }: {
   chatId: string;
   surgeryDate?: Date;
@@ -1431,6 +1432,7 @@ export async function updateChatSurgeryDetails({
   adjustmentsRequired?: boolean;
   adjustmentNotes?: string;
   notes?: string;
+  name?: string;
 }) {
   try {
     const updateData: any = {};
@@ -1452,6 +1454,8 @@ export async function updateChatSurgeryDetails({
       updateData.adjustmentNotes = adjustmentNotes;
     if (notes !== undefined)
       updateData.notes = notes;
+    if (name !== undefined)
+      updateData.name = name;
 
     const [updatedSurgery] = await db
       .update(surgery)

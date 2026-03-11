@@ -27,11 +27,13 @@ export async function PATCH(
       adjustmentsRequired,
       adjustmentNotes,
       notes,
+      name,
     } = body;
 
     // Update surgery details
     const updatedChat = await updateChatSurgeryDetails({
       chatId,
+      name,
       surgeryDate: surgeryDate ? new Date(surgeryDate) : undefined,
       surgeryCompleted,
       surgeryRescheduled,
