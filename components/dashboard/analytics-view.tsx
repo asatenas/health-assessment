@@ -11,6 +11,7 @@ import { WeeklySurgeriesPanel } from '@/components/dashboard/weekly-surgeries-pa
 import { MonthlySurgeriesPanel } from '@/components/dashboard/monthly-surgeries-panel';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
 import { SurgeryDetailsModal } from '@/components/dashboard/surgery-details-modal';
+import { AssessmentDetailsModal } from '@/components/dashboard/assessment-details-modal';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -54,6 +55,8 @@ export function AnalyticsView({
     string | null
   >(null);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [notificationAssessmentModalOpen, setNotificationAssessmentModalOpen] =
+    useState(false);
 
   const handleNotificationClick = (chatId: string) => {
     setNotificationAssessmentId(chatId);
@@ -153,6 +156,23 @@ export function AnalyticsView({
         onOpenChange={(open) => {
           setNotificationModalOpen(open);
           if (!open) setNotificationAssessmentId(null);
+        }}
+        onViewAssessment={() => {
+          setNotificationModalOpen(false);
+          setNotificationAssessmentModalOpen(true);
+        }}
+      />
+
+      <AssessmentDetailsModal
+        assessmentId={notificationAssessmentId}
+        open={notificationAssessmentModalOpen}
+        onOpenChange={(open) => {
+          setNotificationAssessmentModalOpen(open);
+          if (!open) setNotificationAssessmentId(null);
+        }}
+        onViewSurgery={() => {
+          setNotificationAssessmentModalOpen(false);
+          setNotificationModalOpen(true);
         }}
       />
     </div>

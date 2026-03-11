@@ -1266,6 +1266,21 @@ export async function getHighPriorityNotifications({
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     const in72Hours = new Date(now.getTime() + 72 * 60 * 60 * 1000);
 
+    const formatSurgeryCountdown = (surgeryDate: Date) => {
+      const diffMs = surgeryDate.getTime() - now.getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (diffHours < 1) return 'cirurgia em menos de 1 hora';
+      if (diffHours < 24) {
+        return diffHours === 1
+          ? 'cirurgia em 1 hora'
+          : `cirurgia em ${diffHours} horas`;
+      }
+      return diffDays === 1
+        ? 'cirurgia em 1 dia'
+        : `cirurgia em ${diffDays} dias`;
+    };
+
     const chats = await db
       .select()
       .from(chat)
@@ -1311,7 +1326,7 @@ export async function getHighPriorityNotifications({
             id: `${chatItem.id}:high_risk_soon`,
             priority: 'high',
             type: 'high_risk_soon',
-            message: `Paciente de alto risco com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
+            message: `Paciente de alto risco — ${formatSurgeryCountdown(surgeryDate)}`,
             chatId: chatItem.id,
             patientAge,
             surgeryDate,
@@ -1368,7 +1383,7 @@ export async function getHighPriorityNotifications({
           id: `${chatItem.id}:surgery_soon_incomplete`,
           priority: 'high',
           type: 'surgery_soon_incomplete',
-          message: `Cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')} sem avaliação concluída`,
+          message: `Avaliação não concluída — ${formatSurgeryCountdown(surgeryDate)}`,
           chatId: chatItem.id,
           patientAge,
           surgeryDate,
@@ -1386,7 +1401,7 @@ export async function getHighPriorityNotifications({
             id: `${chatItem.id}:moderate_risk_soon`,
             priority: 'medium',
             type: 'moderate_risk_soon',
-            message: `Paciente de risco moderado com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
+            message: `Paciente de risco moderado — ${formatSurgeryCountdown(surgeryDate)}`,
             chatId: chatItem.id,
             patientAge,
             surgeryDate,
