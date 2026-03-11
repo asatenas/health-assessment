@@ -497,9 +497,9 @@ export function MonthlySurgeriesPanel({
                           <Badge className={getRiskColor(surgery.riskLevel)}>
                             {getRiskLabel(surgery.riskLevel)}
                           </Badge>
-                          {surgery.surgeryTime && (
+                          {surgery.surgeryDate && (
                             <span className="text-sm text-muted-foreground">
-                              {surgery.surgeryTime}
+                              {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', { timeStyle: 'short' })}
                             </span>
                           )}
                         </div>

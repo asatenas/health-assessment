@@ -203,9 +203,9 @@ export function WeeklySurgeriesPanel({
                           >
                             {surgery.riskLevel}
                           </Badge>
-                          {surgery.surgeryTime && (
+                          {surgery.surgeryDate && (
                             <div className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                              {surgery.surgeryTime}
+                              {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', { timeStyle: 'short' })}
                             </div>
                           )}
                           {/* <div className="text-xs">
