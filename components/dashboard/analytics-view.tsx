@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricsOverview } from '@/components/dashboard/metrics-overview';
 import { RiskDistributionChart } from '@/components/dashboard/risk-distribution-chart';
@@ -9,6 +10,7 @@ import { TodaysSurgeriesPanel } from '@/components/dashboard/todays-surgeries-pa
 import { WeeklySurgeriesPanel } from '@/components/dashboard/weekly-surgeries-panel';
 import { MonthlySurgeriesPanel } from '@/components/dashboard/monthly-surgeries-panel';
 import { NotificationsPanel } from '@/components/dashboard/notifications-panel';
+import { SurgeryDetailsModal } from '@/components/dashboard/surgery-details-modal';
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { ExportButton } from '@/components/dashboard/export-button';
 import { PermissionGate } from '@/components/auth/permission-gate';
@@ -47,6 +49,16 @@ export function AnalyticsView({
   } = useDashboardMetrics({ period, dateFrom, dateTo });
 
   const { surgeries: weeklySurgeries } = useWeeklySurgeries();
+
+  const [notificationAssessmentId, setNotificationAssessmentId] = useState<
+    string | null
+  >(null);
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+
+  const handleNotificationClick = (chatId: string) => {
+    setNotificationAssessmentId(chatId);
+    setNotificationModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -127,10 +139,22 @@ export function AnalyticsView({
               />
             )}
           {dashboardConfig.widgets.notifications.enabled && (
-            <NotificationsPanel notifications={notifications} />
+            <NotificationsPanel
+              notifications={notifications}
+              onNotificationClick={handleNotificationClick}
+            />
           )}
         </div>
       )}
+
+      <SurgeryDetailsModal
+        assessmentId={notificationAssessmentId}
+        open={notificationModalOpen}
+        onOpenChange={(open) => {
+          setNotificationModalOpen(open);
+          if (!open) setNotificationAssessmentId(null);
+        }}
+      />
     </div>
   );
 }

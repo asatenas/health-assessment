@@ -1307,7 +1307,7 @@ export async function getHighPriorityNotifications({
         );
         if (riskLevel === 'high') {
           notifications.push({
-            id: generateUUID(),
+            id: `${chatItem.id}:high_risk_soon`,
             priority: 'high',
             type: 'high_risk_soon',
             message: `Paciente de alto risco com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
@@ -1319,10 +1319,18 @@ export async function getHighPriorityNotifications({
       }
 
       // High priority: Form not completed and deadline passed (> 2 days since creation)
+      // Skip if surgery is in the past or already resolved
       const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-      if (chatItem.status !== 'finished' && chatItem.createdAt < twoDaysAgo) {
+      if (
+        chatItem.status !== 'finished' &&
+        chatItem.createdAt < twoDaysAgo &&
+        surgeryDate !== null &&
+        surgeryDate >= now &&
+        !surgeryItem?.completed &&
+        !surgeryItem?.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:incomplete_form`,
           priority: 'high',
           type: 'incomplete_form',
           message: `Formulário não concluído - prazo vencido (criado em ${chatItem.createdAt.toLocaleDateString('pt-BR')})`,
@@ -1331,10 +1339,15 @@ export async function getHighPriorityNotifications({
         });
       }
 
-      // High priority: Medical intervention required
-      if (surgeryItem?.medicalInterventionRequired) {
+      // High priority: Medical intervention required (only for upcoming surgeries)
+      if (
+        surgeryItem?.medicalInterventionRequired &&
+        (!surgeryDate || surgeryDate >= now) &&
+        !surgeryItem.completed &&
+        !surgeryItem.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:intervention_required`,
           priority: 'high',
           type: 'intervention_required',
           message: 'Intervenção médica necessária',
@@ -1351,7 +1364,7 @@ export async function getHighPriorityNotifications({
         chatItem.status !== 'finished'
       ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:surgery_soon_incomplete`,
           priority: 'high',
           type: 'surgery_soon_incomplete',
           message: `Cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')} sem avaliação concluída`,
@@ -1369,7 +1382,7 @@ export async function getHighPriorityNotifications({
         );
         if (riskLevel === 'medium') {
           notifications.push({
-            id: generateUUID(),
+            id: `${chatItem.id}:moderate_risk_soon`,
             priority: 'medium',
             type: 'moderate_risk_soon',
             message: `Paciente de risco moderado com cirurgia em ${surgeryDate.toLocaleDateString('pt-BR')}`,
@@ -1380,10 +1393,15 @@ export async function getHighPriorityNotifications({
         }
       }
 
-      // Medium priority: Adjustments required
-      if (surgeryItem?.adjustmentsRequired) {
+      // Medium priority: Adjustments required (only for upcoming surgeries)
+      if (
+        surgeryItem?.adjustmentsRequired &&
+        (!surgeryDate || surgeryDate >= now) &&
+        !surgeryItem.completed &&
+        !surgeryItem.cancelled
+      ) {
         notifications.push({
-          id: generateUUID(),
+          id: `${chatItem.id}:adjustments_required`,
           priority: 'medium',
           type: 'adjustments_required',
           message: 'Ajustes necessários',

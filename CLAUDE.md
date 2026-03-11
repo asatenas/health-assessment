@@ -90,6 +90,23 @@ mutate(
 
 **`SurgeryDetailsModal`** stays open on save and triggers the above invalidation. The `onStatusUpdate` prop is a separate callback that closes the modal — do not call it from the save handler or the modal will close unexpectedly.
 
+### Notifications System
+
+<!-- TODO: Migrate notifications to a database table (Notification) for:
+     - Persistent read/unread/dismissed state across devices
+     - Notification history and audit trail
+     - Independent fetching (not coupled to metrics endpoint)
+     - Push notifications / real-time updates via websockets
+     Currently computed on-the-fly, which is simple but limits UX. -->
+
+Notifications are **computed on-the-fly** in `getHighPriorityNotifications()` (`lib/db/queries.ts`) — there is no database table. Each dashboard load evaluates all assessments/surgeries against trigger conditions and returns matching notifications.
+
+- **Trigger types:** `high_risk_soon`, `incomplete_form`, `intervention_required`, `surgery_soon_incomplete` (high priority); `moderate_risk_soon`, `adjustments_required` (medium priority)
+- **IDs** are derived from `chatId:type` (stable across requests) for dismiss support
+- **Dismiss state** is stored in `localStorage` (`dismissed-notifications` key) with 7-day auto-expiry — not persisted to DB
+- **Click-to-navigate** opens `SurgeryDetailsModal` for the notification's assessment
+- **Display:** `NotificationsPanel` (`components/dashboard/notifications-panel.tsx`) — color-coded by priority (red/orange), toggleable via `dashboardConfig.widgets.notifications.enabled`
+
 ### Configuration System
 
 Clinics can customize their experience via JSON stored in the `Clinic` table:
