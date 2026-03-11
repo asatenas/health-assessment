@@ -71,42 +71,26 @@ export async function GET(request: Request) {
       }
     }
 
-    // Get metrics
-    const metrics = await getDashboardMetrics({
-      clinicId: user.clinicId,
-      dateFrom,
-      dateTo,
-    });
-
-    // Get timeline data (default to last 30 days if no filter)
+    // Timeline defaults to last 30 days if no filter
     const timelineFrom =
       dateFrom || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const timelineTo = dateTo || new Date();
 
-    const timeline = await getTimelineData({
-      clinicId: user.clinicId,
-      dateFrom: timelineFrom,
-      dateTo: timelineTo,
-    });
-
-    // Get notifications
-    const notifications = await getHighPriorityNotifications({
-      clinicId: user.clinicId,
-    });
-
-    // Get monthly surgeries (defaults to current month)
     const month = monthParam ? Number.parseInt(monthParam, 10) : undefined;
     const year = yearParam ? Number.parseInt(yearParam, 10) : undefined;
-    const monthlySurgeries = await getMonthlySurgeries({
-      clinicId: user.clinicId,
-      month,
-      year,
-    });
 
-    // Get today's surgeries
-    const todaysSurgeries = await getTodaysSurgeriesForSwipe({
-      clinicId: user.clinicId,
-    });
+    const [metrics, timeline, notifications, monthlySurgeries, todaysSurgeries] =
+      await Promise.all([
+        getDashboardMetrics({ clinicId: user.clinicId, dateFrom, dateTo }),
+        getTimelineData({
+          clinicId: user.clinicId,
+          dateFrom: timelineFrom,
+          dateTo: timelineTo,
+        }),
+        getHighPriorityNotifications({ clinicId: user.clinicId }),
+        getMonthlySurgeries({ clinicId: user.clinicId, month, year }),
+        getTodaysSurgeriesForSwipe({ clinicId: user.clinicId }),
+      ]);
 
     return Response.json({
       metrics,
