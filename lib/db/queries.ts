@@ -9,8 +9,10 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
   lt,
   lte,
+  or,
   sql,
   type SQL,
   ilike,
@@ -1093,49 +1095,55 @@ export async function getDashboardMetrics({
       return surgeryDate >= today && surgeryDate < endOfWeek;
     });
 
-    // Cancellation and reschedule breakdown by reason
+    // Cancellation and reschedule breakdown by reason — filtered by surgery.date
+    const surgeryStatusConditions: SQL<any>[] = [
+      eq(chat.clinicId, clinicId),
+      or(eq(surgery.cancelled, true), eq(surgery.rescheduled, true))!,
+      isNotNull(surgery.statusReason),
+    ];
+
+    if (dateFrom) {
+      surgeryStatusConditions.push(gte(surgery.date, dateFrom));
+    }
+    if (dateTo) {
+      const endDateSurgery = new Date(dateTo);
+      endDateSurgery.setDate(endDateSurgery.getDate() + 1);
+      surgeryStatusConditions.push(lt(surgery.date, endDateSurgery));
+    }
+
+    const cancelledRescheduledRows = await db
+      .select({
+        cancelled: surgery.cancelled,
+        rescheduled: surgery.rescheduled,
+        statusReason: surgery.statusReason,
+      })
+      .from(surgery)
+      .innerJoin(chat, eq(surgery.assessmentId, chat.id))
+      .where(and(...surgeryStatusConditions));
+
     const reasonMap = new Map<
       string,
       { cancelled: number; rescheduled: number }
     >();
 
-    for (const surgeryItem of allSurgeries) {
-      if (
-        (surgeryItem.cancelled || surgeryItem.rescheduled) &&
-        surgeryItem.statusReason
-      ) {
-        const current = reasonMap.get(surgeryItem.statusReason) || {
-          cancelled: 0,
-          rescheduled: 0,
-        };
-        if (surgeryItem.cancelled) current.cancelled++;
-        if (surgeryItem.rescheduled) current.rescheduled++;
-        reasonMap.set(surgeryItem.statusReason, current);
-      }
+    for (const row of cancelledRescheduledRows) {
+      if (!row.statusReason) continue;
+      const current = reasonMap.get(row.statusReason) || {
+        cancelled: 0,
+        rescheduled: 0,
+      };
+      if (row.cancelled) current.cancelled++;
+      if (row.rescheduled) current.rescheduled++;
+      reasonMap.set(row.statusReason, current);
     }
 
-    const cancellationsAndReschedulesByReason: Array<{
-      reason: string;
-      count: number;
-      type: 'cancelled' | 'rescheduled';
-    }> = [];
-
-    for (const [reason, counts] of reasonMap.entries()) {
-      if (counts.cancelled > 0) {
-        cancellationsAndReschedulesByReason.push({
-          reason,
-          count: counts.cancelled,
-          type: 'cancelled',
-        });
-      }
-      if (counts.rescheduled > 0) {
-        cancellationsAndReschedulesByReason.push({
-          reason,
-          count: counts.rescheduled,
-          type: 'rescheduled',
-        });
-      }
-    }
+    const cancellationsAndReschedulesByReason = Array.from(
+      reasonMap.entries(),
+    ).map(([reason, counts]) => ({
+      reason,
+      cancellations: counts.cancelled,
+      reschedulings: counts.rescheduled,
+    }));
 
     return {
       totalAssessments,
