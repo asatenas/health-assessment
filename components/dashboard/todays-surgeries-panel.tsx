@@ -17,6 +17,7 @@ interface Surgery {
   surgeryTime?: string;
   rcriScore?: number | null;
   has2Score?: number | null;
+  locationName?: string | null;
 
   // Surgery details for modal
   name: string | null;
@@ -152,6 +153,15 @@ export function TodaysSurgeriesPanel({
                         <span className="text-muted-foreground">Cirurgia:</span>{' '}
                         <span className="font-medium">
                           {surgery.surgeryName}
+                        </span>
+                      </div>
+                    )}
+
+                    {surgery.locationName && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Local:</span>{' '}
+                        <span className="font-medium">
+                          {surgery.locationName}
                         </span>
                       </div>
                     )}
