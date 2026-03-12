@@ -36,6 +36,7 @@ import {
   surgeryLocation,
   clinicInvitation,
   type ClinicInvitation,
+  earlyAccessSignups,
 } from './schema';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
@@ -692,7 +693,27 @@ export async function createStreamId({
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
-      'Failed to create stream id',
+      'Failed to create stream id', // Corrected error message
+    );
+  }
+}
+
+export async function createEarlyAccessSignup({
+  email,
+  variant,
+}: {
+  email: string;
+  variant: string;
+}) {
+  try {
+    return await db.insert(earlyAccessSignups).values({
+      email,
+      variant,
+    });
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to create early access signup',
     );
   }
 }
