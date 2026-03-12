@@ -966,12 +966,12 @@ function mapRiskLevelToPortuguese(
 
 function mapRiskLevelToPortugueseCapitalized(
   riskLevel: 'low' | 'medium' | 'high' | 'unknown',
-): 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido' {
+): 'Baixo' | 'Moderado' | 'Alto' | 'Pendente' {
   const map = {
     low: 'Baixo' as const,
     medium: 'Moderado' as const,
     high: 'Alto' as const,
-    unknown: 'Desconhecido' as const,
+    unknown: 'Pendente' as const,
   };
   return map[riskLevel];
 }
@@ -1496,12 +1496,9 @@ export async function updateChatSurgeryDetails({
       updateData.adjustmentsRequired = adjustmentsRequired;
     if (adjustmentNotes !== undefined)
       updateData.adjustmentNotes = adjustmentNotes;
-    if (notes !== undefined)
-      updateData.notes = notes;
-    if (name !== undefined)
-      updateData.name = name;
-    if (locationId !== undefined)
-      updateData.locationId = locationId;
+    if (notes !== undefined) updateData.notes = notes;
+    if (name !== undefined) updateData.name = name;
+    if (locationId !== undefined) updateData.locationId = locationId;
 
     const [updatedSurgery] = await db
       .update(surgery)
@@ -1560,10 +1557,7 @@ export async function getTodaysSurgeriesForSwipe({
         notes: surgery.notes,
       })
       .from(surgery)
-      .leftJoin(
-        surgeryLocation,
-        eq(surgery.locationId, surgeryLocation.id),
-      )
+      .leftJoin(surgeryLocation, eq(surgery.locationId, surgeryLocation.id))
       .where(
         and(
           inArray(
@@ -1661,10 +1655,7 @@ export async function getMonthlySurgeries({
         notes: surgery.notes,
       })
       .from(surgery)
-      .leftJoin(
-        surgeryLocation,
-        eq(surgery.locationId, surgeryLocation.id),
-      )
+      .leftJoin(surgeryLocation, eq(surgery.locationId, surgeryLocation.id))
       .where(
         and(
           inArray(
@@ -1771,10 +1762,7 @@ export async function getWeeklySurgeries({
         notes: surgery.notes,
       })
       .from(surgery)
-      .leftJoin(
-        surgeryLocation,
-        eq(surgery.locationId, surgeryLocation.id),
-      )
+      .leftJoin(surgeryLocation, eq(surgery.locationId, surgeryLocation.id))
       .where(
         and(
           inArray(
@@ -1864,10 +1852,7 @@ export async function getSurgeryByAssessmentId({
         notes: surgery.notes,
       })
       .from(surgery)
-      .leftJoin(
-        surgeryLocation,
-        eq(surgery.locationId, surgeryLocation.id),
-      )
+      .leftJoin(surgeryLocation, eq(surgery.locationId, surgeryLocation.id))
       .where(eq(surgery.assessmentId, assessmentId))
       .limit(1);
 
@@ -3058,9 +3043,7 @@ export async function updateClinicLocation(
 }
 
 export async function deleteClinicLocation(id: string) {
-  await db
-    .delete(surgeryLocation)
-    .where(eq(surgeryLocation.id, id));
+  await db.delete(surgeryLocation).where(eq(surgeryLocation.id, id));
 }
 
 export type { User };

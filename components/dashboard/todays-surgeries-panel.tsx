@@ -11,7 +11,7 @@ interface Surgery {
 
   // Display fields for surgery card
   patientAge: number;
-  riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido';
+  riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Pendente';
   surgeryDate: string;
   surgeryName?: string;
   surgeryTime?: string;
@@ -135,7 +135,10 @@ export function TodaysSurgeriesPanel({
                       </Badge>
                       {surgery.surgeryDate && (
                         <span className="text-sm text-muted-foreground">
-                          {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', { timeStyle: 'short' })}
+                          {new Date(surgery.surgeryDate).toLocaleTimeString(
+                            'pt-BR',
+                            { timeStyle: 'short' },
+                          )}
                         </span>
                       )}
                     </div>

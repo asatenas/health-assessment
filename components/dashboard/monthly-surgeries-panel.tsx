@@ -73,11 +73,13 @@ export function MonthlySurgeriesPanel({
   const [surgeryModalOpen, setSurgeryModalOpen] = useState(false);
   const [assessmentModalOpen, setAssessmentModalOpen] = useState(false);
   const swrKey = `/api/clinic/monthly-surgeries?month=${currentMonth.getMonth() + 1}&year=${currentMonth.getFullYear()}`;
-  const { data: monthlySurgeries = surgeriesByDay, isLoading, mutate: mutateMonthly } = useSWR<Record<string, Surgery[]>>(
-    swrKey,
-    fetcher,
-    { fallbackData: surgeriesByDay },
-  );
+  const {
+    data: monthlySurgeries = surgeriesByDay,
+    isLoading,
+    mutate: mutateMonthly,
+  } = useSWR<Record<string, Surgery[]>>(swrKey, fetcher, {
+    fallbackData: surgeriesByDay,
+  });
 
   // Prevent body scroll when day modal is open
   useEffect(() => {
@@ -258,7 +260,7 @@ export function MonthlySurgeriesPanel({
       case 'alto':
         return 'Alto Risco';
       default:
-        return 'Desconhecido';
+        return 'Pendente';
     }
   };
 
@@ -441,7 +443,10 @@ export function MonthlySurgeriesPanel({
                           </Badge>
                           {surgery.surgeryDate && (
                             <span className="text-sm text-muted-foreground">
-                              {new Date(surgery.surgeryDate).toLocaleTimeString('pt-BR', { timeStyle: 'short' })}
+                              {new Date(surgery.surgeryDate).toLocaleTimeString(
+                                'pt-BR',
+                                { timeStyle: 'short' },
+                              )}
                             </span>
                           )}
                         </div>

@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { DndContext, DragOverlay, useDroppable, useDraggable } from '@dnd-kit/core';
+import {
+  DndContext,
+  DragOverlay,
+  useDroppable,
+  useDraggable,
+} from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +20,7 @@ interface Surgery {
 
   // Display fields for surgery card
   patientAge: number;
-  riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Desconhecido';
+  riskLevel: 'Baixo' | 'Moderado' | 'Alto' | 'Pendente';
   surgeryDate: string;
   surgeryName?: string;
   surgeryTime?: string;
@@ -113,7 +118,10 @@ interface SurgeryCardContentProps {
   getRiskColor: (risk: string) => string;
 }
 
-function SurgeryCardContent({ surgery, getRiskColor }: SurgeryCardContentProps) {
+function SurgeryCardContent({
+  surgery,
+  getRiskColor,
+}: SurgeryCardContentProps) {
   return (
     <div className="space-y-1">
       <Badge className={cn('text-xs', getRiskColor(surgery.riskLevel))}>
@@ -287,7 +295,9 @@ export function WeeklySurgeriesPanel({
                           surgery={surgery}
                           isPast={day.isPast}
                           getRiskColor={getRiskColor}
-                          onClick={() => handleSurgeryClick(surgery.assessmentId)}
+                          onClick={() =>
+                            handleSurgeryClick(surgery.assessmentId)
+                          }
                         />
                       ))}
                     </div>
