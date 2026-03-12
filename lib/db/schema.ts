@@ -270,7 +270,7 @@ export type Surgery = InferSelectModel<typeof surgery>;
 
 export const earlyAccessSignups = pgTable('EarlyAccessSignups', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
-  email: varchar('email', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
   variant: varchar('variant', { length: 10 }).notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
 });

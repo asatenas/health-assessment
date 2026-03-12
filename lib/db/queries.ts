@@ -706,10 +706,10 @@ export async function createEarlyAccessSignup({
   variant: string;
 }) {
   try {
-    return await db.insert(earlyAccessSignups).values({
-      email,
-      variant,
-    });
+    return await db
+      .insert(earlyAccessSignups)
+      .values({ email, variant })
+      .onConflictDoNothing();
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',

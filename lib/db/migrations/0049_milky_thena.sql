@@ -1,0 +1,1 @@
+ALTER TABLE "EarlyAccessSignups" ADD CONSTRAINT "EarlyAccessSignups_email_unique" UNIQUE("email");

@@ -1,5 +1,7 @@
 "use client";
 
+import { SignupForm } from '@/components/landing/signup-form';
+
 export function Hero() {
   return (
     <div className="flex flex-col">
@@ -36,39 +38,9 @@ export function Hero() {
 
       {/* Sharp CTA Form */}
       <div className="w-full relative">
-        <form
-          className="flex flex-col sm:flex-row items-stretch gap-0 w-full max-w-[480px]"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const input = e.currentTarget.elements.namedItem('email') as HTMLInputElement;
-            if (input.value) {
-              fetch('/api/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: input.value }),
-              }).then(() => {
-                input.value = '';
-                alert('Obrigado! Entraremos em contato em breve.');
-              });
-            }
-          }}
-        >
-          <input
-            type="email"
-            name="email"
-            id="signup"
-            placeholder="Endereço de e-mail institucional"
-            required
-            className="flex-1 bg-white border border-[#0A1628]/[0.12] px-5 py-4 text-sm font-['Figtree'] text-[#0A1628] placeholder:text-[#0A1628]/30 focus:outline-none focus:border-[#0A1628]/50 transition-colors rounded-none"
-          />
-          <button
-            type="submit"
-            className="bg-[#0A1628] text-white text-[11px] font-medium uppercase tracking-[0.1em] font-['JetBrains_Mono'] px-8 py-4 transition-colors hover:bg-[#0A1628]/80 rounded-none border border-[#0A1628]"
-          >
-            Acesso Antecipado
-          </button>
-        </form>
+        <SignupForm variant="clinical-white" />
       </div>
     </div>
   );
 }
+
