@@ -31,7 +31,7 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="text-[1.15rem] font-bold tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2"
+            className="text-[1.15rem] tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2"
           >
             <div className="size-2.5 rounded-sm bg-[#D4906A]" />
             Asatenas

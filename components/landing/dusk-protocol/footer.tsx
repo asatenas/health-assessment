@@ -3,7 +3,7 @@ export function Footer() {
     <footer className="w-full bg-[#181622] pt-12 pb-16 px-6 sm:px-12 md:px-16 relative z-20 border-t border-[#F0ECE4]/10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
         <div className="flex flex-col gap-6">
-          <span className="text-[1.15rem] font-bold tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2">
+          <span className="text-[1.15rem] tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2">
             <div className="size-2.5 rounded-sm bg-[#D4906A]" />
             Asatenas
           </span>
