@@ -27,7 +27,7 @@ export function GoldenHourVariant() {
           </div>
 
           {/* Right: Data Rail */}
-          <div className="w-full md:w-[380px] md:min-w-[380px] bg-[#eeece6] shrink-0 relative z-20 border-t border-[#1a1d24]/10 md:border-t-0 md:border-l md:border-l-[#1a1d24]/10 p-6 sm:p-8 pt-10 md:pt-12">
+          <div className="w-full md:w-[380px] md:min-w-[380px] bg-[#eeece6] shrink-0 relative z-20 border-t border-[#1a1d24]/10 md:border-t-0 md:border-l md:border-l-[#1a1d24]/10 px-6 py-16 sm:px-8 sm:py-20 md:p-8 md:pt-12">
             <DataRail />
           </div>
         </div>
