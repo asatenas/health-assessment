@@ -23,36 +23,34 @@ export function DataRail() {
       <div className="flex items-center gap-3 mb-6 px-2">
         <div className="size-1.5 rounded-full bg-[#1a1d24]/20" />
         <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-widest text-[#1a1d24]/40 font-semibold">
-          Telemetria do Sistema
+          Resultados
         </span>
       </div>
 
-      {/* Card 1: Alert */}
+      {/* Card 1: Efficiency */}
       <DiagnosticCard
-        title="Ociosidade de Sala"
-        status="alert"
-        value="12.4%"
-        subtitle="Média mensal de atrasos"
-        sparkline={sparklineData[0]}
-        isPulsing={activePulse === 0}
-      />
-
-      {/* Card 2: Warn */}
-      <DiagnosticCard
-        title="Risco HAS-2"
-        status="warn"
-        value="Elevado"
-        subtitle="3 pacientes hoje"
-        sparkline={sparklineData[1]}
-        isPulsing={activePulse === 1}
-      />
-
-      {/* Card 3: OK */}
-      <DiagnosticCard
-        title="Taxa de Triagem"
+        title="Eficiência de Salas"
         status="ok"
-        value="98.2%"
-        subtitle="Dentro da conformidade"
+        value="Otimizado"
+        subtitle="Diminuição da ociosidade"
+        sparkline={sparklineData[0]}
+      />
+
+      {/* Card 2: Clinical */}
+      <DiagnosticCard
+        title="Padrão Científico"
+        status="ok"
+        value="Validado"
+        subtitle="Protocolos clínicos seguidos"
+        sparkline={sparklineData[1]}
+      />
+
+      {/* Card 3: Risk */}
+      <DiagnosticCard
+        title="Risco de Adoção"
+        status="ok"
+        value="Zero"
+        subtitle="Piloto sem impacto inicial"
         sparkline={sparklineData[2]}
       />
     </div>
