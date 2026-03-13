@@ -45,7 +45,7 @@ export function Navbar() {
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250"
             >
-              Plataforma
+              Solução
             </button>
             <Link href="/login" target="_blank" rel="noopener noreferrer" className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
               Acessar Painel
