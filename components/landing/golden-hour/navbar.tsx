@@ -33,19 +33,24 @@ export function Navbar() {
             href="/"
             className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center gap-2"
           >
-            <div className="size-2.5 rounded-full bg-[#1a1d24]" />
             Asatenas
           </Link>
 
           {/* Nav Links */}
           <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-wide uppercase font-['Albert_Sans'] text-[#1a1d24]/60">
-            <Link href="#features" className="hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250">
+            <button
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="uppercase hover:text-[#1a1d24] transition-colors hover:-translate-y-px duration-250"
+            >
               Solução
-            </Link>
-            <Link href="#metrics" className="hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250">
+            </button>
+            <button
+              onClick={() => document.getElementById('metrics')?.scrollIntoView({ behavior: 'smooth' })}
+              className="uppercase hover:text-[#1a1d24] transition-colors hover:-translate-y-px duration-250"
+            >
               Impacto
-            </Link>
-            <Link href="/login" className="hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250">
+            </button>
+            <Link href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250">
               Acessar
             </Link>
           </nav>
