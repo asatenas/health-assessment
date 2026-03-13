@@ -2,6 +2,7 @@ import { Navbar } from './navbar';
 import { Hero } from './hero';
 import { Features } from './features';
 import { DataPanel } from './data-panel';
+import { Proposition } from './proposition';
 import { Footer } from './footer';
 
 export function ClinicalWhiteVariant() {
@@ -30,6 +31,13 @@ export function ClinicalWhiteVariant() {
         {/* Features / Audience Strip */}
         <div className="bg-[#F0F2F5] border-t border-[#0A1628]/[0.12] w-full pt-16 pb-24">
           <Features />
+        </div>
+
+        {/* Main Proposition */}
+        <div className="w-full bg-white border-t border-[#0A1628]/[0.12] py-24 px-6 sm:px-12 md:px-16">
+          <div className="max-w-[1400px] mx-auto w-full">
+            <Proposition />
+          </div>
         </div>
       </main>
 
