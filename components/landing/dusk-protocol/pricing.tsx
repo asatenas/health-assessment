@@ -107,7 +107,7 @@ export function Pricing() {
             </div>
 
             <p className="font-['DM_Sans'] text-[14px] text-[#6A6080] font-light leading-relaxed mt-4 mb-8 max-w-[380px]">
-              Para cirurgiãos com <span className="text-[#F0ECE4]">mais de 100 cirurgias por mês</span>. Precificação personalizada, SLA dedicado e implantação assistida.
+              Configurações customizadas para hospitais e grandes centros cirúrgicos com <span className="text-[#F0ECE4]">volume ilimitado</span> de procedimentos. Precificação personalizada, SLA dedicado e implantação assistida.
             </p>
 
             {submitted ? (
