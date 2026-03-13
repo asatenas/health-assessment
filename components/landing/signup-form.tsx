@@ -47,7 +47,7 @@ const styles: Record<
     },
   },
   'clinical-white': {
-    form: 'flex flex-col sm:flex-row items-stretch gap-0 w-full max-w-[480px]',
+    form: 'flex flex-col sm:flex-row items-stretch gap-4 sm:gap-0 w-full max-w-[480px]',
     inputWrapper: '',
     input:
       'flex-1 bg-white border border-[#0A1628]/[0.12] px-5 py-4 text-sm font-[\'Figtree\'] text-[#0A1628] placeholder:text-[#0A1628]/30 focus:outline-none focus:border-[#0A1628]/50 transition-colors rounded-none',
