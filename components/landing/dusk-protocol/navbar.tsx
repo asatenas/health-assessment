@@ -55,7 +55,7 @@ export function Navbar() {
               Preços
             </button>
             <Link href="/login" target="_blank" rel="noopener noreferrer" className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
-              Acessar Painel
+              Acessar Plataforma
             </Link>
           </nav>
 
@@ -67,7 +67,7 @@ export function Navbar() {
               rel="noopener noreferrer"
               className="md:hidden uppercase text-[11px] font-medium tracking-[0.1em] font-['Albert_Sans'] text-[#6A6080] hover:text-[#F0ECE4] transition-colors"
             >
-              Acessar Painel
+              Acessar Plataforma
             </Link>
           </div>
         </div>

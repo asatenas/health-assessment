@@ -1,6 +1,6 @@
 export function Features() {
   return (
-    <div id="features" className="w-full flex justify-between gap-10 flex-col sm:flex-row pb-12">
+    <div id="features" className="w-full flex justify-between gap-10 flex-col sm:flex-row pb-12 scroll-mt-28">
       <FeatureCard
         number="01"
         title="Avaliação Pré-Anestésica"
