@@ -5,24 +5,24 @@ export function DataCards() {
     <div className="flex flex-col gap-6 w-full">
       {/* Featured Card */}
       <DiagnosticCard
-        title="Impacto Financeiro"
-        value="R$ 2.4M"
-        subtitle="Economia média anual projetada"
-        isFeatured={true}
+        title="Mesma Rotina"
+        value="Sem Mudanças"
+        subtitle="Continue com o anestesista do hospital"
+        // isFeatured={true}
       />
 
       {/* Standard Card 1 */}
       <DiagnosticCard
-        title="Redução de Atrasos"
-        value="-64%"
-        subtitle="Cancelamentos de última hora"
+        title="Agenda Sob Controle"
+        value="Gestão Completa"
+        subtitle="Do seu calendário, sem surpresas"
       />
 
       {/* Standard Card 2 */}
       <DiagnosticCard
-        title="Avaliações"
-        value="18k+"
-        subtitle="Processadas pela plataforma"
+        title="Retome sua atenção"
+        value="Foco na Cirurgia"
+        subtitle="Delegue a anestesia para quem é especialista"
       />
     </div>
   );
