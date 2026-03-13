@@ -21,7 +21,6 @@ export function DataRail() {
   return (
     <div className="flex flex-col gap-4 w-full h-full">
       <div className="flex items-center gap-3 mb-6 px-2">
-        <div className="size-1.5 rounded-full bg-[#1a1d24]/20" />
         <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-widest text-[#1a1d24]/40 font-semibold">
           Resultados
         </span>
