@@ -9,7 +9,7 @@ export function DataPanel() {
           Monitoramento em Tempo Real
         </span>
         <div className="flex gap-2">
-           <div className="bg-[#0A1628] text-white px-2 py-0.5 text-[9px] font-['JetBrains_Mono'] uppercase tracking-wider">Ativo</div>
+           <div className="border border-[#0A1628]/30 text-[#0A1628]/50 px-2 py-0.5 text-[9px] font-['JetBrains_Mono'] uppercase tracking-wider">Ativo</div>
         </div>
       </div>
 
@@ -18,7 +18,7 @@ export function DataPanel() {
         <PanelRow
           label="ALERTA IMINENTE"
           value="RISCO HAS-2"
-          tagPrimary="Prioridade"
+          tagMuted="Prioridade"
         />
 
         <PanelRow
