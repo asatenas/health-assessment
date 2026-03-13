@@ -3,20 +3,20 @@ export function Features() {
     <div id="features" className="w-full flex justify-between gap-12 sm:gap-6 flex-wrap lg:flex-nowrap pb-20">
       <FeatureCard
         number="01"
-        title="Fluxo Completo"
-        description="Gerencie todo o processo cirúrgico, da admissão inicial até a alta médica."
+        title="Foco em Performance"
+        description="Nosso modelo de investimento prioriza o retorno clínico e financeiro à sua instituição."
       />
 
       <FeatureCard
         number="02"
-        title="Triagem Inteligente"
-        description="Inteligência artificial capaz de identificar automaticamente pacientes que exigem atenção especial."
+        title="Piloto Estratégico"
+        description="Comprovamos a eficácia e o valor do modelo no seu fluxo de trabalho real antes de escalar as operações."
       />
 
       <FeatureCard
         number="03"
-        title="Colaboração Clínica"
-        description="Conecte anestesistas, cirurgiões e enfermagem em uma base unificada."
+        title="Integração em 48h"
+        description="Conectamos nossa inteligência à sua equipe de forma orgânica e em tempo recorde."
       />
     </div>
   );
