@@ -45,7 +45,7 @@ export function Navbar() {
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               className="uppercase hover:text-[#1a1d24] transition-colors hover:-translate-y-px duration-250"
             >
-              Solução
+              Resultados
             </button>
             <button
               onClick={() => document.getElementById('metrics')?.scrollIntoView({ behavior: 'smooth' })}
