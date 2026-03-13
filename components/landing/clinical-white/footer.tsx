@@ -13,10 +13,10 @@ export function Footer() {
 
         <div className="flex flex-col items-start md:items-end gap-8">
           <div className="flex items-center gap-4 bg-white/5 px-6 py-3 border border-white/10 rounded-none">
-            {/* Status Indicator White Dot at 40% opacity (no green per spec) */}
+            {/* Status Indicator Green Dot */}
             <div className="relative flex items-center justify-center">
-              <div className="size-2 bg-white opacity-40 rounded-none" />
-              <div className="absolute inset-0 size-2 bg-white animate-ping opacity-20 rounded-none" />
+              <div className="size-2 bg-[#2EBA8A] rounded-none" />
+              <div className="absolute inset-0 size-2 bg-[#2EBA8A] animate-ping opacity-40 rounded-none" />
             </div>
             <span className="font-['JetBrains_Mono'] text-[10px] text-white/60 uppercase tracking-widest">
               Sistemas Operacionais
