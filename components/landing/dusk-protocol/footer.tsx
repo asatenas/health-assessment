@@ -7,16 +7,16 @@ export function Footer() {
             Asatenas
           </span>
           <p className="font-['DM_Sans'] text-sm text-[#6A6080] max-w-[320px] font-light leading-relaxed">
-            Plataforma premium para gestão e avaliação clínica pré-operatória.
+            Plataforma premium para gestão de cirurgias e avaliação clínica pré-operatória.
           </p>
         </div>
 
         <div className="flex flex-col items-start md:items-end gap-6">
           <div className="flex items-center gap-4 bg-[rgba(240,236,228,0.03)] px-5 py-2.5 rounded-full border border-[#F0ECE4]/10">
-            {/* Status Indicator White Dot at 40% opacity (no green per spec) */}
-            <div className="relative flex items-center justify-center">
-              <div className="size-2 rounded-full bg-white opacity-40" />
-              <div className="absolute inset-0 size-2 rounded-full bg-white animate-ping opacity-20" />
+            {/* Status Indicator */}
+            <div className="relative flex items-center justify-center pt-[1px]">
+              <div className="size-2 rounded-full bg-[#2EBA8A]" />
+              <div className="absolute inset-0 size-2 rounded-full bg-[#2EBA8A] animate-ping opacity-40" />
             </div>
             <span className="font-['JetBrains_Mono'] text-[10px] text-[#F0ECE4]/60 uppercase tracking-widest">
               Status do Sistema
