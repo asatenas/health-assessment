@@ -23,12 +23,13 @@ export function Navbar() {
       <div className="max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 flex items-center justify-between md:justify-start">
         {/* Left: Logo */}
         <div className="flex-1 shrink-0">
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="text-xl font-bold tracking-tight text-[#0A1628] font-['Libre_Baskerville'] uppercase inline-flex items-center gap-3"
           >
             Asatenas
-          </Link>
+          </button>
         </div>
 
         {/* Center: Desktop Nav Links (hidden on mobile) */}
