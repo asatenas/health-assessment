@@ -52,7 +52,7 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-[#F0ECE4]/10 pt-8">
           <div className="flex flex-col gap-1">
             <div className="font-['JetBrains_Mono'] text-[10px] text-[#6A6080] uppercase tracking-wider">
-              2025 Asatenas Health.
+              {new Date().getFullYear()} Asatenas Health.
             </div>
             <div className="font-['DM_Sans'] text-[11px] text-[#6A6080]/50">
               Asatenas Soluções em Software Médicos LTDA &middot; CNPJ

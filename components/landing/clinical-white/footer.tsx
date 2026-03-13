@@ -52,7 +52,7 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-white/10 pt-8">
           <div className="flex flex-col gap-1">
             <div className="font-['JetBrains_Mono'] text-[10px] text-white/50 uppercase tracking-widest flex items-center gap-6">
-              <span>2025 Asatenas Health.</span>
+              <span>{new Date().getFullYear()} Asatenas Health.</span>
               <span className="hidden sm:inline-block">
                 Todos os direitos reservados.
               </span>
