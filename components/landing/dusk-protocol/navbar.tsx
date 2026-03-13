@@ -22,42 +22,47 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-16 flex justify-between items-center group">
         <div
-          className={`flex items-center justify-between px-6 py-4 rounded-full transition-all duration-500 ease-out border w-full backdrop-blur-md ${
+          className={`flex items-center px-6 py-4 rounded-full transition-all duration-500 ease-out border w-full backdrop-blur-md ${
             scrolled
               ? 'bg-[#181622]/80 border-[#F0ECE4]/10 shadow-lg'
               : 'bg-[rgba(240,236,228,0.02)] border-[rgba(240,236,228,0.04)]'
           }`}
         >
-          {/* Logo */}
-          <Link
-            href="/"
-            className="text-[1.15rem] tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2"
-          >
-            Asatenas
-          </Link>
-
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-10 text-[11px] font-medium tracking-[0.1em] uppercase font-['Albert_Sans'] text-[#6A6080]">
-            <Link href="#features" className="hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
-              Plataforma
+          {/* Left: Logo */}
+          <div className="flex-1 shrink-0 flex items-center">
+            <Link
+              href="/"
+              className="text-[1.15rem] tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2"
+            >
+              Asatenas
             </Link>
-            <Link href="/login" className="hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
+          </div>
+
+          {/* Center: Desktop Nav Links (hidden on mobile) */}
+          <nav className="hidden md:flex flex-1 justify-center items-center gap-10 text-[11px] font-medium tracking-[0.1em] uppercase font-['Albert_Sans'] text-[#6A6080]">
+            <button
+              type="button"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250"
+            >
+              Plataforma
+            </button>
+            <Link href="/login" target="_blank" rel="noopener noreferrer" className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
               Acessar Painel
             </Link>
           </nav>
 
-          {/* CTA */}
-          <button
-            onClick={() => document.getElementById('signup')?.focus()}
-            className="bg-[linear-gradient(135deg,rgba(212,144,106,1)__0%,rgba(170,105,71,1)_100%)] text-[#181622] text-[11px] font-semibold uppercase tracking-wider font-['Albert_Sans'] px-6 py-2.5 rounded-[8px] transition-all hover:-translate-y-[2px]"
-            style={{
-              boxShadow: '0 4px 24px rgba(212,144,106,0.2)',
-              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-              transitionDuration: '0.25s'
-            }}
-          >
-            Acesso Antecipado
-          </button>
+          {/* Right: Mobile Login Link (Desktop Empty Spacer) */}
+          <div className="flex-1 flex justify-end">
+            <Link
+              href="/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="md:hidden uppercase text-[11px] font-medium tracking-[0.1em] font-['Albert_Sans'] text-[#6A6080] hover:text-[#F0ECE4] transition-colors"
+            >
+              Acessar Painel
+            </Link>
+          </div>
         </div>
       </div>
     </header>
