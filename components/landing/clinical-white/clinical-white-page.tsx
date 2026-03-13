@@ -3,6 +3,7 @@ import { Hero } from './hero';
 import { Features } from './features';
 import { DataPanel } from './data-panel';
 import { Proposition } from './proposition';
+import { Pricing } from './pricing';
 import { Footer } from './footer';
 
 export function ClinicalWhiteVariant() {
@@ -39,6 +40,9 @@ export function ClinicalWhiteVariant() {
             <Proposition />
           </div>
         </div>
+
+        {/* Pricing Section */}
+        <Pricing />
       </main>
 
       <Footer />

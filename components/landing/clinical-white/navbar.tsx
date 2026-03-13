@@ -41,6 +41,13 @@ export function Navbar() {
           >
             Solução
           </button>
+          <button
+            type="button"
+            onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            className="uppercase hover:text-[#0A1628] transition-colors"
+          >
+            Preços
+          </button>
           <Link href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A1628] transition-colors">
             Acesso Restrito
           </Link>
