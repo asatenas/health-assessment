@@ -19,17 +19,8 @@ export function Hero() {
         <span className="italic text-[#0A1628]/50 font-normal">com IA.</span>
       </h1>
 
-      {/* Stat Rule Strip */}
-      <div className="flex items-center w-full max-w-[540px] border-y border-[#0A1628]/[0.12] py-4 mb-10 divide-x divide-[#0A1628]/[0.12]">
-        <div className="flex-1 pr-6 flex items-baseline gap-2">
-          <span className="font-['Libre_Baskerville'] text-2xl text-[#0A1628]">60%</span>
-          <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-wider text-[#0A1628]/30">redução em perdas</span>
-        </div>
-        <div className="flex-1 px-6 flex items-baseline gap-2">
-          <span className="font-['Libre_Baskerville'] text-2xl text-[#0A1628]">18M</span>
-          <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-wider text-[#0A1628]/30">recuperados</span>
-        </div>
-      </div>
+      {/* Divider */}
+      <div className="w-full max-w-[540px] h-[1px] bg-[#0A1628]/[0.12] mb-10" />
 
       {/* Body text */}
       <p className="font-['Figtree'] text-[15px] leading-[1.8] text-[#0A1628]/50 mb-14 max-w-[480px]">
