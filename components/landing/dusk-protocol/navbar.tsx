@@ -47,6 +47,13 @@ export function Navbar() {
             >
               Solução
             </button>
+            <button
+              type="button"
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+              className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250"
+            >
+              Preços
+            </button>
             <Link href="/login" target="_blank" rel="noopener noreferrer" className="uppercase hover:text-[#F0ECE4] transition-colors translate-y-0 hover:-translate-y-px duration-250">
               Acessar Painel
             </Link>

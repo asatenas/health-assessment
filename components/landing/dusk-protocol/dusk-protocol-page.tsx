@@ -2,6 +2,7 @@ import { Navbar } from './navbar';
 import { Hero } from './hero';
 import { Features } from './features';
 import { DataCards } from './cards';
+import { Pricing } from './pricing';
 import { Footer } from './footer';
 
 export function DuskProtocolVariant() {
@@ -39,6 +40,8 @@ export function DuskProtocolVariant() {
 
         </div>
       </main>
+
+      <Pricing />
 
       <Footer />
     </div>
