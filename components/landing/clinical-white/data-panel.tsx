@@ -16,21 +16,21 @@ export function DataPanel() {
       {/* Rows */}
       <div className="flex flex-col">
         <PanelRow
-          label="ALERTA IMINENTE"
-          value="RISCO HAS-2"
-          tagMuted="Prioridade"
-        />
-
-        <PanelRow
-          label="AVALIAÇÕES PENDENTES"
-          value="14 PACIENTES"
+          label="Avaliações Pendentes"
+          value="14 pacientes"
           tagMuted="Aguardando"
         />
 
         <PanelRow
-          label="TAXA DE OCUPAÇÃO"
-          value="92.4%"
-          tagMuted="Estável"
+          label="Alerta de Risco Cardíaco Elevado"
+          value="4 pacientes"
+          tagMuted="Visualizar"
+        />
+
+        <PanelRow
+          label="Alerta de medicações em uso"
+          value="Semaglutida detectada"
+          tagMuted="Revisar"
           isLast
         />
       </div>
