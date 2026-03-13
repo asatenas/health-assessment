@@ -20,32 +20,42 @@ export function Navbar() {
         scrolled ? 'border-b border-[#0A1628]/[0.12] py-4' : 'py-8'
       }`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 flex justify-between items-center">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-xl font-bold tracking-tight text-[#0A1628] font-['Libre_Baskerville'] uppercase flex items-center gap-3"
-        >
-          Asatenas
-        </Link>
-
-        {/* Nav Links */}
-        <nav className="hidden md:flex items-center gap-12 text-[11px] font-medium tracking-[0.2em] uppercase font-['JetBrains_Mono'] text-[#0A1628]/50">
-          <Link href="#features" className="hover:text-[#0A1628] transition-colors">
-            Solução
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 flex items-center justify-between md:justify-start">
+        {/* Left: Logo */}
+        <div className="flex-1 shrink-0">
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-tight text-[#0A1628] font-['Libre_Baskerville'] uppercase inline-flex items-center gap-3"
+          >
+            Asatenas
           </Link>
-          <Link href="/login" className="hover:text-[#0A1628] transition-colors">
+        </div>
+
+        {/* Center: Desktop Nav Links (hidden on mobile) */}
+        <nav className="hidden md:flex flex-1 justify-center items-center gap-12 text-[11px] font-medium tracking-[0.2em] uppercase font-['JetBrains_Mono'] text-[#0A1628]/50">
+          <button
+            type="button"
+            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            className="uppercase hover:text-[#0A1628] transition-colors"
+          >
+            Solução
+          </button>
+          <Link href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A1628] transition-colors">
             Acesso Restrito
           </Link>
         </nav>
 
-        {/* CTA (Sharp NO radius) */}
-        <button
-          onClick={() => document.getElementById('signup')?.focus()}
-          className="bg-[#0A1628] hover:bg-[#0A1628]/80 text-white text-[11px] font-medium uppercase tracking-[0.15em] font-['JetBrains_Mono'] px-6 py-3 transition-colors rounded-none"
-        >
-          Acesso Antecipado
-        </button>
+        {/* Right: Mobile Login Link (Desktop Empty Spacer) */}
+        <div className="flex-1 flex justify-end">
+          <Link
+            href="/login"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="md:hidden text-[11px] font-medium tracking-[0.2em] uppercase font-['JetBrains_Mono'] text-[#0A1628]/50 hover:text-[#0A1628] transition-colors"
+          >
+            Acesso Restrito
+          </Link>
+        </div>
       </div>
     </header>
   );
