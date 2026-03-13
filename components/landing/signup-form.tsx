@@ -100,10 +100,10 @@ export function SignupForm({ variant }: SignupFormProps) {
             name="email"
             placeholder={
               variant === 'clinical-white'
-                ? 'Endereço de e-mail institucional'
+                ? 'Seu e-mail profissional'
                 : variant === 'dusk-protocol'
                   ? 'E-mail profissional'
-                  : 'Seu e-mail profissional'
+                  : 'E-mail institucional'
             }
             required
             className={s.input}
@@ -113,7 +113,7 @@ export function SignupForm({ variant }: SignupFormProps) {
         <input
           type="email"
           name="email"
-          placeholder="Endereço de e-mail institucional"
+          placeholder="Seu e-mail profissional"
           required
           className={s.input}
         />
