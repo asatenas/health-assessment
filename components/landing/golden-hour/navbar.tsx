@@ -20,7 +20,7 @@ export function Navbar() {
         scrolled ? 'py-4' : 'py-8 md:py-10'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center group">
+      <div className="max-w-7xl mx-auto px-6 flex justify-center items-center group">
         <div
           className={`flex items-center justify-start gap-10 px-6 py-3 rounded-full transition-colors duration-500 ease-out border w-auto ${
             scrolled

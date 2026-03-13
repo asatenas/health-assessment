@@ -12,7 +12,7 @@ export function GoldenHourVariant() {
 
       <main className="relative z-10 w-full">
         {/* Hero — occupies only the left content area, full width on mobile */}
-        <div className="pt-24 pb-24 px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl">
+        <div className="pt-32 lg:pt-40 pb-24 px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl mx-auto">
           <Hero />
         </div>
 
