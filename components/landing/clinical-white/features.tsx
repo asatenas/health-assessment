@@ -2,8 +2,9 @@ export function Features() {
   return (
     <div id="features" className="w-full bg-white max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 pt-12 pb-8">
 
-      <div className="font-['JetBrains_Mono'] text-[10px] uppercase text-[#0A1628]/30 tracking-[0.2em] mb-12 border-l w-0 pl-[24px] border-[#0A1628]/30 ml-[-24px] h-[1px]">
-        <span className="-mt-3 block">01 — Arquitetura</span>
+      <div className="flex items-center gap-4 mb-12 md:pl-16">
+        <div className="w-8 h-[1px] bg-[#0A1628]/30" />
+        <span className="font-['JetBrains_Mono'] text-[10px] uppercase text-[#0A1628]/30 tracking-[0.2em]">01 — Arquitetura</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#0A1628]/[0.12] -ml-6 md:ml-0 md:-mx-16">
