@@ -7,7 +7,7 @@ export function Footer() {
             Asatenas
           </span>
           <p className="font-['Figtree'] text-[15px] text-white/50 leading-relaxed max-w-[320px]">
-            Auditoria, avaliação e autorização cirúrgica. Sem intervenção humana manual.
+            Triagem inteligente e segurança pré-anestésica. Protocolos clínicos processados em tempo real.
           </p>
         </div>
 
