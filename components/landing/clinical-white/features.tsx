@@ -1,6 +1,6 @@
 export function Features() {
   return (
-    <div id="features" className="w-full bg-white max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 pt-12 pb-8">
+    <div id="features" className="w-full bg-white max-w-[1400px] mx-auto px-6 sm:px-12 md:px-16 pt-12 pb-8 scroll-mt-32">
 
       <div className="flex items-center gap-4 mb-12 md:pl-16">
         <div className="w-8 h-[1px] bg-[#0A1628]/30" />
