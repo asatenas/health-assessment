@@ -30,12 +30,13 @@ export function Navbar() {
         >
           {/* Left: Logo */}
           <div className="flex-1 shrink-0 flex items-center">
-            <Link
-              href="/"
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="text-[1.15rem] tracking-tight text-[#F0ECE4] font-['Spectral'] font-light uppercase flex items-center gap-2"
             >
               Asatenas
-            </Link>
+            </button>
           </div>
 
           {/* Center: Desktop Nav Links (hidden on mobile) */}
