@@ -6,8 +6,8 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
-import { Analytics } from '@vercel/analytics/next';
 import { ImpersonationBannerWrapper } from '@/components/admin/impersonation-banner-wrapper';
+import { ConditionalAnalytics } from '@/components/landing/conditional-analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
@@ -85,7 +85,7 @@ export default async function RootLayout({
             <ImpersonationBannerWrapper />
             {children}
           </SessionProvider>
-          <Analytics />
+          <ConditionalAnalytics />
         </ThemeProvider>
       </body>
     </html>
