@@ -10,27 +10,26 @@ export function GoldenHourVariant() {
     <div className="min-h-screen bg-[#f5f4f0] text-[#1a1d24] font-sans overflow-x-hidden selection:bg-[#b87333]/20">
       <Navbar />
 
-      <main className="relative z-10 w-full flex flex-col md:flex-row min-h-[100dvh]">
-        {/* Left Content Column */}
-        <div className="flex-1 flex flex-col pt-32 pb-16 px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl relative z-10">
+      <main className="relative z-10 w-full">
+        {/* Hero — occupies only the left content area, full width on mobile */}
+        <div className="pt-24 pb-24 px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl">
           <Hero />
-
-          <div className="mt-32 w-full">
-            <Features />
-          </div>
-
-          {/* Metrics bar locked to bottom of left column content */}
-          <div className="mt-auto pt-24 w-full">
-            <MetricsBar />
-          </div>
         </div>
 
-        {/* Vertical divider */}
-        <div className="hidden md:block w-[1px] bg-[#1a1d24]/10 h-full fixed top-0 right-[380px] z-0" />
+        {/* Features row + Data Rail — side by side on desktop */}
+        <div className="flex flex-col md:flex-row min-h-[60vh]">
+          {/* Left: Features + MetricsBar */}
+          <div id="features" className="flex-1 flex flex-col px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl pb-24 pt-24">
+            <Features />
+            <div id="metrics" className="mt-auto pt-24 w-full">
+              <MetricsBar />
+            </div>
+          </div>
 
-        {/* Right Data Rail (Sidebar layout signature) */}
-        <div className="w-full md:w-[380px] md:min-w-[380px] bg-[#eeece6] flex-shrink-0 relative z-20 md:border-l-0 border-t border-[#1a1d24]/10 md:border-t-0 p-6 sm:p-8 pt-12 md:pt-32">
-          <DataRail />
+          {/* Right: Data Rail */}
+          <div className="w-full md:w-[380px] md:min-w-[380px] bg-[#eeece6] shrink-0 relative z-20 border-t border-[#1a1d24]/10 md:border-t-0 md:border-l md:border-l-[#1a1d24]/10 p-6 sm:p-8 pt-10 md:pt-12">
+            <DataRail />
+          </div>
         </div>
       </main>
 

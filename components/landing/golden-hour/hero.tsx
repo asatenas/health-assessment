@@ -15,13 +15,14 @@ export function Hero() {
 
       {/* Four-line Fraunces headline */}
       <h1 className="font-['Fraunces'] text-5xl sm:text-6xl lg:text-[76px] leading-[1.05] tracking-[-0.02em] text-[#1a1d24] mb-8">
-        <span className="block opacity-90">Recupere</span>
-        <span className="block opacity-90">milhões.</span>
-        <span className="block text-[#b87333] font-light italic mt-1">
-          Reduza
-        </span>
+        <span className="block opacity-90">Reduza</span>
+        <span className="block opacity-90">Cancelamentos</span>
         <span className="block opacity-45 font-light italic">
-          cancelamentos.
+          Recupere
+        </span>
+        <span className="block text-[#b87333] font-light italic mt-1">
+          R$ 1.000.000s
+          {/* Milhões */}
         </span>
       </h1>
 
@@ -35,7 +36,7 @@ export function Hero() {
       <div className="w-full relative mt-4">
         <SignupForm variant="golden-hour" />
         <p className="font-['JetBrains_Mono'] text-[10px] uppercase text-[#1a1d24]/30 mt-4 tracking-wider">
-          Apenas 50 vagas no grupo beta
+          Vagas limitadas
         </p>
       </div>
     </div>
