@@ -33,7 +33,7 @@ export function DuskProtocolVariant() {
           </div>
 
           {/* Right Column: Data Cards */}
-          <div className="w-full lg:w-[480px] xl:w-[520px] flex-shrink-0 pt-8 lg:pt-16">
+          <div className="w-full lg:w-[480px] xl:w-[520px] flex-shrink-0 pt-8 lg:pt-16 lg:pl-12">
             <DataCards />
           </div>
 
