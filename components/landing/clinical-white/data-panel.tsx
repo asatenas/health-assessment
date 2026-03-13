@@ -15,22 +15,22 @@ export function DataPanel() {
 
       {/* Rows */}
       <div className="flex flex-col">
-        <PanelRow 
-          label="ALERTA IMINENTE" 
-          value="RISCO HAS-2" 
-          tagPrimary="Prioridade" 
+        <PanelRow
+          label="ALERTA IMINENTE"
+          value="RISCO HAS-2"
+          tagPrimary="Prioridade"
         />
-        
-        <PanelRow 
-          label="AVALIAÇÕES PENDENTES" 
-          value="14 PACIENTES" 
-          tagMuted="Aguardando" 
+
+        <PanelRow
+          label="AVALIAÇÕES PENDENTES"
+          value="14 PACIENTES"
+          tagMuted="Aguardando"
         />
-        
-        <PanelRow 
-          label="TAXA DE OCUPAÇÃO" 
-          value="92.4%" 
-          tagMuted="Estável" 
+
+        <PanelRow
+          label="TAXA DE OCUPAÇÃO"
+          value="92.4%"
+          tagMuted="Estável"
           isLast
         />
       </div>
@@ -61,13 +61,13 @@ function PanelRow({
           {value}
         </span>
       </div>
-      
+
       {tagPrimary && (
         <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-wider px-2 py-1 bg-[#0A1628] text-white rounded-none">
           {tagPrimary}
         </span>
       )}
-      
+
       {tagMuted && (
         <span className="font-['JetBrains_Mono'] text-[9px] uppercase tracking-wider px-2 py-1 border border-[#0A1628]/30 text-[#0A1628]/50 rounded-none">
           {tagMuted}

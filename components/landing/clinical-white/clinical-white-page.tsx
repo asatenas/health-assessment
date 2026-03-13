@@ -13,11 +13,11 @@ export function ClinicalWhiteVariant() {
       <main className="relative z-10 w-full flex flex-col min-h-[100dvh]">
         {/* Hero Section */}
         <div className="max-w-[1400px] mx-auto w-full pt-32 pb-16 px-6 sm:px-12 md:px-16 flex flex-col lg:flex-row items-stretch">
-          
+
           {/* Left Column: Hero Copy */}
           <div className="flex-1 max-w-[700px] w-full pt-8 lg:pt-16 lg:pr-16 relative">
             <Hero />
-            
+
             {/* 1px Vertical Rule dividing hero and panel */}
             <div className="hidden lg:block absolute top-[10%] bottom-0 right-0 w-[1px] bg-[#0A1628]/[0.12]" />
           </div>
@@ -48,7 +48,7 @@ export function ClinicalWhiteVariant() {
                 Dados consolidados dos maiores hospitais da América Latina, processados com inteligência para reduzir o risco de sala ociosa.
               </p>
             </div>
-            
+
             <div className="w-full lg:w-[600px] flex-shrink-0">
               <NumberGrid />
             </div>

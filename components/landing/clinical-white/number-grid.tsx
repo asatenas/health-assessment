@@ -1,7 +1,7 @@
 export function NumberGrid() {
   return (
     <div className="grid grid-cols-2 gap-[1px] bg-[#0A1628]/[0.12] border border-[#0A1628]/[0.12]">
-      
+
       {/* Cell 1 */}
       <div className="bg-[#F0F2F5] hover:bg-white transition-colors p-8 flex flex-col justify-center items-center text-centeraspect-square md:aspect-auto md:h-64">
         <div className="font-['Libre_Baskerville'] text-4xl sm:text-5xl text-[#0A1628] mb-3">
