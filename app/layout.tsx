@@ -6,8 +6,8 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
-import { Analytics } from '@vercel/analytics/next';
 import { ImpersonationBannerWrapper } from '@/components/admin/impersonation-banner-wrapper';
+import { ConditionalAnalytics } from '@/components/landing/conditional-analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
@@ -58,7 +58,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       // `next-themes` injects an extra classname to the body element to avoid
       // visual flicker before hydration. Hence the `suppressHydrationWarning`
       // prop is necessary to avoid the React hydration mismatch warning.
@@ -85,7 +85,7 @@ export default async function RootLayout({
             <ImpersonationBannerWrapper />
             {children}
           </SessionProvider>
-          <Analytics />
+          <ConditionalAnalytics />
         </ThemeProvider>
       </body>
     </html>

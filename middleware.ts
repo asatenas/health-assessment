@@ -17,6 +17,42 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle root landing page variant assignment
+  if (pathname === '/') {
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+      secureCookie: !isDevelopmentEnvironment,
+    });
+
+    if (token) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    if (request.cookies.has('landing-variant')) {
+      return NextResponse.next();
+    }
+
+    // Assign a variant cookie if it doesn't exist
+    const nextResponse = NextResponse.next();
+    const random = Math.random();
+    let variant = 'A';
+
+    if (random > 0.66) {
+      variant = 'E';
+    } else if (random > 0.33) {
+      variant = 'D';
+    }
+
+    nextResponse.cookies.set('landing-variant', variant, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+
+    return nextResponse;
+  }
+
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
