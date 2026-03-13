@@ -32,12 +32,13 @@ export function Navbar() {
           <div className="flex-1 md:hidden" />
 
           {/* Logo */}
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center justify-center md:justify-start gap-2 shrink-0 md:flex-none flex-1"
           >
             Asatenas
-          </Link>
+          </button>
 
           {/* Nav Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-wide uppercase font-['Albert_Sans'] text-[#1a1d24]/60">
