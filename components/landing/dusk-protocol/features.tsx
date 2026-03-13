@@ -3,20 +3,20 @@ export function Features() {
     <div id="features" className="w-full flex justify-between gap-10 flex-col sm:flex-row pb-12">
       <FeatureCard
         number="01"
-        title="Fluxo Unificado"
-        description="Gerencie todo o processo da admissão à alta."
+        title="Avaliação Pré-Anestésica"
+        description="Nossa equipe conduz a avaliação diretamente com o paciente antes da cirurgia."
       />
 
       <FeatureCard
         number="02"
-        title="Triagem com IA"
-        description="Identifique pacientes que exigem atenção especial."
+        title="Zero Variabilidade"
+        description="Garantimos que seu paciente chegue pronto e adequado no dia da cirurgia."
       />
 
       <FeatureCard
         number="03"
-        title="Time Integrado"
-        description="Sincronize cirurgiões e anestesistas em tempo real."
+        title="Faturamento Sem Surpresas"
+        description="Cirurgias concluídas com previsibilidade clínica e financeira do início ao fim."
       />
     </div>
   );
