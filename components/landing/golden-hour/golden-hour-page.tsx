@@ -17,7 +17,7 @@ export function GoldenHourVariant() {
         </div>
 
         {/* Features row + Data Rail — side by side on desktop */}
-        <div className="flex flex-col md:flex-row min-h-[60vh]">
+        <div className="flex flex-col md:flex-row min-h-[60vh] max-w-[1404px] mx-auto w-full">
           {/* Left: Features + MetricsBar */}
           <div id="features" className="flex-1 flex flex-col px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl pb-24 pt-24">
             <Features />
