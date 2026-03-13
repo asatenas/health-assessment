@@ -4,7 +4,6 @@ export function Footer() {
       <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-16">
         <div className="flex flex-col gap-6 max-w-[400px]">
           <span className="text-xl font-bold tracking-tight text-white font-['Libre_Baskerville'] uppercase flex items-center gap-3">
-            <div className="size-3 bg-white" />
             Asatenas
           </span>
           <p className="font-['Figtree'] text-[15px] text-white/50 leading-relaxed max-w-[320px]">
@@ -25,7 +24,7 @@ export function Footer() {
           </div>
 
           <div className="font-['JetBrains_Mono'] text-[10px] text-white/50 uppercase tracking-widest flex items-center gap-6">
-            <span>© {new Date().getFullYear()} Asatenas Health.</span>
+            <span>2025 Asatenas Health.</span>
             <span className="hidden sm:inline-block">Todos os direitos reservados.</span>
           </div>
         </div>

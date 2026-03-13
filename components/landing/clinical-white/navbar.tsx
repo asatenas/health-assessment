@@ -26,7 +26,6 @@ export function Navbar() {
           href="/"
           className="text-xl font-bold tracking-tight text-[#0A1628] font-['Libre_Baskerville'] uppercase flex items-center gap-3"
         >
-          <div className="size-3 bg-[#0A1628]" /> {/* Sharp square, NO radius */}
           Asatenas
         </Link>
 
