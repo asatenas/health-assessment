@@ -22,21 +22,24 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-center items-center group">
         <div
-          className={`flex items-center justify-start gap-10 px-6 py-3 rounded-full transition-colors duration-500 ease-out border w-auto ${
+          className={`flex items-center px-6 py-3 rounded-full transition-colors duration-500 ease-out border w-full md:w-auto md:justify-start md:gap-10 ${
             scrolled
               ? 'bg-[#f5f4f0]/80 backdrop-blur-xl border-[#1a1d24]/10 shadow-sm'
               : 'bg-transparent border-transparent'
           }`}
         >
+          {/* Mobile Layout: 3 equal zones (Left empty, Center logo, Right link) */}
+          <div className="flex-1 md:hidden" />
+
           {/* Logo */}
           <Link
             href="/"
-            className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center gap-2 shrink-0"
+            className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center justify-center md:justify-start gap-2 shrink-0 md:flex-none flex-1"
           >
             Asatenas
           </Link>
 
-          {/* Nav Links */}
+          {/* Nav Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-wide uppercase font-['Albert_Sans'] text-[#1a1d24]/60">
             <button
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
@@ -50,10 +53,19 @@ export function Navbar() {
             >
               Impacto
             </button>
-            <Link href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250">
+          </nav>
+
+          {/* Login Link (Always Visible) */}
+          <div className="flex-1 flex justify-end md:flex-none md:ml-0">
+            <Link
+              href="/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[13px] font-medium tracking-wide uppercase font-['Albert_Sans'] text-[#1a1d24]/60 hover:text-[#1a1d24] transition-colors translate-y-0 hover:-translate-y-px duration-250"
+            >
               Acessar
             </Link>
-          </nav>
+          </div>
         </div>
       </div>
     </header>
