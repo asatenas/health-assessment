@@ -26,13 +26,12 @@ export function Footer() {
             >
               Sobre nós
             </button>
-            <button
-              type="button"
-              onClick={(e) => e.preventDefault()}
-              className="font-['Figtree'] text-sm text-white/50 hover:text-white transition-colors text-left"
+            <a
+              href="mailto:suporte@asatenas.com.br"
+              className="font-['Figtree'] text-sm text-white/50 hover:text-white transition-colors"
             >
               Fale Conosco
-            </button>
+            </a>
             <button
               type="button"
               onClick={(e) => e.preventDefault()}
