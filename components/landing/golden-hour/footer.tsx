@@ -4,7 +4,6 @@ export function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
         <div className="flex flex-col gap-6">
           <span className="text-xl font-bold tracking-tight text-[#f5f4f0] font-['Fraunces'] uppercase flex items-center gap-2">
-            <div className="size-2.5 rounded-full bg-[#b87333]" />
             Asatenas
           </span>
           <p className="font-['DM_Sans'] text-sm text-[#f5f4f0]/40 max-w-[300px] font-light">
@@ -25,7 +24,7 @@ export function Footer() {
           </div>
 
           <div className="font-['JetBrains_Mono'] text-[10px] text-[#f5f4f0]/30 uppercase tracking-wider">
-            © {new Date().getFullYear()} Asatenas Health.
+            2025 Asatenas Health.
           </div>
         </div>
       </div>
