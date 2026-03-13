@@ -345,9 +345,12 @@ export function MonthlySurgeriesPanel({
               {/* Calendar days */}
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((day, index) => (
+                  // biome-ignore lint/nursery/noStaticElementInteractions: role is set conditionally when surgeryCount > 0
                   <div
                     // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     key={index}
+                    role={day.surgeryCount > 0 ? 'button' : undefined}
+                    tabIndex={day.surgeryCount > 0 ? 0 : undefined}
                     className={cn(
                       'border p-2 min-h-[80px] transition-all duration-200 rounded-md',
                       !day.isCurrentMonth &&
@@ -357,6 +360,10 @@ export function MonthlySurgeriesPanel({
                         'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800',
                     )}
                     onClick={() => handleDayClick(day)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ')
+                        handleDayClick(day);
+                    }}
                   >
                     <div className="text-sm font-medium mb-1">{day.date}</div>
                     {day.surgeryCount > 0 && (

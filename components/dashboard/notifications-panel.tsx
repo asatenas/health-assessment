@@ -156,7 +156,9 @@ export function NotificationsPanel({
               onClick={() => setShowDismissed((v) => !v)}
               className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
             >
-              {showDismissed ? 'Ocultar dispensados' : `+${dismissed.length} dispensado${dismissed.length !== 1 ? 's' : ''}`}
+              {showDismissed
+                ? 'Ocultar dispensados'
+                : `+${dismissed.length} dispensado${dismissed.length !== 1 ? 's' : ''}`}
             </button>
           )}
           {visible.length > 0 && (
@@ -191,6 +193,7 @@ export function NotificationsPanel({
                 const isClickable = !!onNotificationClick && !isDismissed;
 
                 return (
+                  // biome-ignore lint/nursery/noStaticElementInteractions: role is set conditionally when isClickable
                   <div
                     key={notification.id}
                     role={isClickable ? 'button' : undefined}

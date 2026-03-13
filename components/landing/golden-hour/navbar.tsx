@@ -43,13 +43,23 @@ export function Navbar() {
           {/* Nav Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-wide uppercase font-['Albert_Sans'] text-[#1a1d24]/60">
             <button
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById('features')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
               className="uppercase hover:text-[#1a1d24] transition-colors hover:-translate-y-px duration-250"
             >
               Resultados
             </button>
             <button
-              onClick={() => document.getElementById('metrics')?.scrollIntoView({ behavior: 'smooth' })}
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById('metrics')
+                  ?.scrollIntoView({ behavior: 'smooth' })
+              }
               className="uppercase hover:text-[#1a1d24] transition-colors hover:-translate-y-px duration-250"
             >
               Impacto

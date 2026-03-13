@@ -1120,6 +1120,7 @@ export async function getDashboardMetrics({
     // Cancellation and reschedule breakdown by reason — filtered by surgery.date
     const surgeryStatusConditions: SQL<any>[] = [
       eq(chat.clinicId, clinicId),
+      // biome-ignore lint/style/noNonNullAssertion: or() with non-null args always returns SQL
       or(eq(surgery.cancelled, true), eq(surgery.rescheduled, true))!,
       isNotNull(surgery.statusReason),
     ];
