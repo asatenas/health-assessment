@@ -28,31 +28,31 @@ export function DataRail() {
       </div>
 
       {/* Card 1: Alert */}
-      <DiagnosticCard 
-        title="Ociosidade de Sala" 
-        status="alert" 
-        value="12.4%" 
-        subtitle="Média mensal de atrasos" 
+      <DiagnosticCard
+        title="Ociosidade de Sala"
+        status="alert"
+        value="12.4%"
+        subtitle="Média mensal de atrasos"
         sparkline={sparklineData[0]}
         isPulsing={activePulse === 0}
       />
 
       {/* Card 2: Warn */}
-      <DiagnosticCard 
-        title="Risco HAS-2" 
-        status="warn" 
-        value="Elevado" 
-        subtitle="3 pacientes hoje" 
+      <DiagnosticCard
+        title="Risco HAS-2"
+        status="warn"
+        value="Elevado"
+        subtitle="3 pacientes hoje"
         sparkline={sparklineData[1]}
         isPulsing={activePulse === 1}
       />
 
       {/* Card 3: OK */}
-      <DiagnosticCard 
-        title="Taxa de Triagem" 
-        status="ok" 
-        value="98.2%" 
-        subtitle="Dentro da conformidade" 
+      <DiagnosticCard
+        title="Taxa de Triagem"
+        status="ok"
+        value="98.2%"
+        subtitle="Dentro da conformidade"
         sparkline={sparklineData[2]}
       />
     </div>
@@ -82,7 +82,7 @@ function DiagnosticCard({
 
   return (
     <div className="group flex justify-between bg-[#f5f4f0]/60 p-5 border border-[#1a1d24]/[0.06] rounded-[6px] hover:border-[#b87333]/30 transition-all duration-300 transform hover:translate-x-1 cursor-default relative overflow-hidden">
-      
+
       {/* Content */}
       <div className="flex flex-col z-10">
         <div className="flex items-center gap-2 mb-3">
@@ -96,11 +96,11 @@ function DiagnosticCard({
             {title}
           </span>
         </div>
-        
+
         <div className="font-['Fraunces'] text-[28px] text-[#1a1d24] leading-none mb-2 tracking-tight">
           {value}
         </div>
-        
+
         <div className="font-['DM_Sans'] text-xs text-[#1a1d24]/45 font-light relative">
           {subtitle}
         </div>
@@ -109,13 +109,13 @@ function DiagnosticCard({
       {/* Sparkline Visual */}
       <div className="flex items-end gap-1 h-12 self-end mb-1 opacity-20 group-hover:opacity-40 transition-opacity">
         {sparkline.map((h, i) => (
-          <div 
-            key={i} 
-            className="w-1.5 bg-[#1a1d24] rounded-sm transition-all duration-700 ease-out" 
-            style={{ 
+          <div
+            key={i}
+            className="w-1.5 bg-[#1a1d24] rounded-sm transition-all duration-700 ease-out"
+            style={{
               height: `${h}%`,
               transitionDelay: `${i * 50}ms`
-            }} 
+            }}
           />
         ))}
       </div>

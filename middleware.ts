@@ -29,22 +29,27 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    const res = NextResponse.next();
-    // Assign a variant cookie if it doesn't exist
-    if (!request.cookies.has('landing-variant')) {
-      const random = Math.random();
-      let variant = 'A';
-      if (random > 0.66) {
-        variant = 'E';
-      } else if (random > 0.33) {
-        variant = 'D';
-      }
-      res.cookies.set('landing-variant', variant, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365, // 1 year
-      });
+    if (request.cookies.has('landing-variant')) {
+      return NextResponse.next();
     }
-    return res;
+
+    // Assign a variant cookie if it doesn't exist
+    const nextResponse = NextResponse.next();
+    const random = Math.random();
+    let variant = 'A';
+
+    if (random > 0.66) {
+      variant = 'E';
+    } else if (random > 0.33) {
+      variant = 'D';
+    }
+
+    nextResponse.cookies.set('landing-variant', variant, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+
+    return nextResponse;
   }
 
 

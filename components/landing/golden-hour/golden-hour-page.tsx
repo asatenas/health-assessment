@@ -14,7 +14,7 @@ export function GoldenHourVariant() {
         {/* Left Content Column */}
         <div className="flex-1 flex flex-col pt-32 pb-16 px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 max-w-5xl relative z-10">
           <Hero />
-          
+
           <div className="mt-32 w-full">
             <Features />
           </div>

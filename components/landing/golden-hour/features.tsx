@@ -1,19 +1,19 @@
 export function Features() {
   return (
     <div id="features" className="w-full flex justify-between gap-12 sm:gap-6 flex-wrap lg:flex-nowrap pb-20">
-      <FeatureCard 
+      <FeatureCard
         number="01"
         title="Fluxo Completo"
         description="Gerencie todo o processo cirúrgico, da admissão inicial até a alta médica."
       />
-      
-      <FeatureCard 
+
+      <FeatureCard
         number="02"
         title="Triagem Inteligente"
         description="Inteligência artificial capaz de identificar automaticamente pacientes que exigem atenção especial."
       />
-      
-      <FeatureCard 
+
+      <FeatureCard
         number="03"
         title="Colaboração Clínica"
         description="Conecte anestesistas, cirurgiões e enfermagem em uma base unificada."

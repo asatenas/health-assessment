@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Asatenas - Redução de cancelamentos cirúrgicos',
+  title: 'Asatenas',
   description:
     'Gerencie todo o fluxo cirúrgico e recupere milhões de reais perdidos em cancelamentos através de inteligência artificial.',
 };
@@ -23,4 +23,3 @@ export default function LandingLayout({
     </>
   );
 }
-

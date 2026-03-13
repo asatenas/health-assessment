@@ -9,16 +9,16 @@ export default async function LandingPage() {
   const variantCookie = cookieStore.get('landing-variant')?.value;
 
   // Fallback to variant A if cookie is missing/invalid
-  const variant = ['A', 'D', 'E'].includes(variantCookie || '') 
-    ? variantCookie 
+  const variant = ['A', 'D', 'E'].includes(variantCookie || '')
+    ? variantCookie
     : 'A';
 
   return (
     <>
       <AnalyticsTracker variant={variant!} />
-      
+
       {/* Global CSS noise overlay required by gemini.md */}
-      <div 
+      <div
         className="pointer-events-none fixed inset-0 z-[1000]"
         style={{
           opacity: variant === 'A' ? 0.02 : variant === 'D' ? 0.03 : 0.016,
