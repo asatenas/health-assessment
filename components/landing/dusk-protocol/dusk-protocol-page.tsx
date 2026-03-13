@@ -22,19 +22,24 @@ export function DuskProtocolVariant() {
 
       <Navbar />
 
-      <main className="relative z-10 w-full flex flex-col min-h-[100dvh]">
-        <div className="max-w-7xl mx-auto w-full pt-32 pb-24 px-6 sm:px-12 md:px-16 flex flex-col lg:flex-row gap-16 lg:gap-8 items-start relative z-10">
+      <main className="relative z-10 w-full flex flex-col lg:min-h-screen">
+        <div className="max-w-7xl mx-auto w-full px-6 sm:px-12 md:px-16 flex flex-col lg:flex-row gap-16 lg:gap-8 items-center lg:items-stretch relative z-10 lg:flex-1">
 
           {/* Left Column: Hero Copy + Features */}
-          <div className="flex-1 flex flex-col max-w-[600px] xl:max-w-[700px] w-full pt-8 lg:pt-16">
-            <Hero />
-            <div className="mt-20">
+          <div className="flex-1 flex flex-col max-w-[600px] xl:max-w-[700px] w-full lg:flex-shrink-0">
+            {/* Hero Section - Full View on Mobile */}
+            <div className="flex flex-col justify-center min-h-[100dvh] lg:min-h-0 pt-32 pb-16 lg:pt-24 lg:pb-0">
+              <Hero />
+            </div>
+
+            {/* Features Section */}
+            <div className="flex flex-col justify-center mt-12 lg:mt-20 pb-12 lg:pb-24 border-t border-[#F0ECE4]/5 lg:border-none pt-12 lg:pt-0">
               <Features />
             </div>
           </div>
 
           {/* Right Column: Data Cards */}
-          <div className="w-full lg:w-[480px] xl:w-[520px] flex-shrink-0 pt-8 lg:pt-16 lg:pl-12">
+          <div className="w-full lg:w-[480px] xl:w-[520px] flex-shrink-0 flex flex-col justify-center pt-8 pb-20 lg:py-24 lg:pl-12">
             <DataCards />
           </div>
 
