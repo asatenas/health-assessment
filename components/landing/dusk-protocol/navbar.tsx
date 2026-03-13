@@ -51,10 +51,10 @@ export function Navbar() {
           <button
             onClick={() => document.getElementById('signup')?.focus()}
             className="bg-[linear-gradient(135deg,rgba(212,144,106,1)__0%,rgba(170,105,71,1)_100%)] text-[#181622] text-[11px] font-semibold uppercase tracking-wider font-['Albert_Sans'] px-6 py-2.5 rounded-[8px] transition-all hover:-translate-y-[2px]"
-            style={{ 
+            style={{
               boxShadow: '0 4px 24px rgba(212,144,106,0.2)',
-              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', 
-              transitionDuration: '0.25s' 
+              transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              transitionDuration: '0.25s'
             }}
           >
             Acesso Antecipado

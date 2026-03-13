@@ -1,19 +1,19 @@
 export function Features() {
   return (
     <div id="features" className="w-full flex justify-between gap-10 flex-col sm:flex-row pb-12">
-      <FeatureCard 
+      <FeatureCard
         number="01"
         title="Fluxo Unificado"
         description="Gerencie todo o processo da admissão à alta."
       />
-      
-      <FeatureCard 
+
+      <FeatureCard
         number="02"
         title="Triagem com IA"
         description="Identifique pacientes que exigem atenção especial."
       />
-      
-      <FeatureCard 
+
+      <FeatureCard
         number="03"
         title="Time Integrado"
         description="Sincronize cirurgiões e anestesistas em tempo real."
