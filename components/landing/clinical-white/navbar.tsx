@@ -49,7 +49,7 @@ export function Navbar() {
             Preços
           </button>
           <Link href="/login" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A1628] transition-colors">
-            Acesso Restrito
+            Acessar Plataforma
           </Link>
         </nav>
 
@@ -61,7 +61,7 @@ export function Navbar() {
             rel="noopener noreferrer"
             className="md:hidden text-[11px] font-medium tracking-[0.2em] uppercase font-['JetBrains_Mono'] text-[#0A1628]/50 hover:text-[#0A1628] transition-colors"
           >
-            Acesso Restrito
+            Acessar Plataforma
           </Link>
         </div>
       </div>
