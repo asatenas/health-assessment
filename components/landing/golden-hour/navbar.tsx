@@ -22,7 +22,7 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center group">
         <div
-          className={`flex items-center justify-between px-6 py-3 rounded-full transition-all duration-500 ease-out border w-full max-w-[800px] mx-auto ${
+          className={`flex items-center justify-start gap-10 px-6 py-3 rounded-full transition-colors duration-500 ease-out border w-auto ${
             scrolled
               ? 'bg-[#f5f4f0]/80 backdrop-blur-xl border-[#1a1d24]/10 shadow-sm'
               : 'bg-transparent border-transparent'
@@ -31,7 +31,7 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center gap-2"
+            className="text-[1.15rem] font-bold tracking-tight text-[#1a1d24] font-['Fraunces'] uppercase flex items-center gap-2 shrink-0"
           >
             Asatenas
           </Link>
@@ -54,15 +54,6 @@ export function Navbar() {
               Acessar
             </Link>
           </nav>
-
-          {/* CTA */}
-          <button
-            onClick={() => document.getElementById('signup')?.focus()}
-            className="bg-[#1a1d24] text-[#f5f4f0] text-xs font-semibold uppercase tracking-wider font-['Albert_Sans'] px-5 py-2.5 rounded-[6px] transition-all hover:scale-[1.03] hover:-translate-y-px active:scale-[0.98]"
-            style={{ transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', transitionDuration: '0.25s' }}
-          >
-            Acesso Antecipado
-          </button>
         </div>
       </div>
     </header>
