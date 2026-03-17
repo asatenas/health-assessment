@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
   title: 'Asatenas',
   description:
-    'Avaliação pré-operatória inteligente para gestão do centro cirúrgico. Reduza riscos antecipadamente e recupere R$ 1.000.000s.',
+    'Avaliação pré-anestésica com IA para gestão do centro cirúrgico. Reduza riscos antecipadamente e recupere R$ 1.000.000s.',
   robots: {
     index: false,
     follow: false,
