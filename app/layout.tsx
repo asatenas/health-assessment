@@ -12,7 +12,12 @@ import { ConditionalAnalytics } from '@/components/landing/conditional-analytics
 export const metadata: Metadata = {
   metadataBase: new URL('https://asatenas.com.br'),
   title: 'Asatenas',
-  description: 'Asatenas',
+  description:
+    'Avaliação pré-operatória inteligente para gestão do centro cirúrgico. Reduza riscos antecipadamente e recupere R$ 1.000.000s.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const viewport = {
