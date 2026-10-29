@@ -33,7 +33,7 @@ export const myProvider = isTestEnvironment
         //   }),
         // }),
         'chat-model': wrapLanguageModel({
-          model: gateway.languageModel('google/gemini-3-pro-preview'),
+          model: gateway.languageModel('google/gemini-3.1-pro-preview'),
           middleware: defaultSettingsMiddleware({
             settings: {
               providerOptions: {
