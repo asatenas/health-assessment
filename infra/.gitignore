@@ -1,2 +1,5 @@
 node_modules/
 cdk.out/
+# CDK lookup cache. Its keys contain the AWS account ID, and this repo is
+# public, so it is not committed; CDK redoes the lookups on each synth.
+cdk.context.json
