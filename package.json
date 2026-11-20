@@ -16,8 +16,9 @@
     "db:pull": "NODE_ENV=development drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "test": "export PLAYWRIGHT=True && pnpm exec playwright test",
-    "test:unit": "vitest run"
+    "test": "export PLAYWRIGHT=True && pnpm exec playwright test --project=e2e --project=routes",
+    "test:unit": "vitest run",
+    "test:smoke": "playwright test --project=smoke"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.10",

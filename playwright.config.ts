@@ -17,7 +17,17 @@ const PORT = process.env.PORT || 3000;
  * Set webServer.url and use.baseURL with the location
  * of the WebServer respecting the correct set port
  */
-const baseURL = `http://localhost:${PORT}`;
+const localURL = `http://localhost:${PORT}`;
+
+/**
+ * Smoke tests can target a deployed URL instead of the local dev server.
+ * When SMOKE_BASE_URL is set, the local webServer is not started.
+ */
+const smokeBaseURL = process.env.SMOKE_BASE_URL;
+const baseURL = smokeBaseURL || localURL;
+
+/* Optional: Vercel "Protection Bypass for Automation" secret for previews */
+const smokeBypassSecret = process.env.SMOKE_VERCEL_BYPASS_SECRET;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -65,6 +75,19 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
       },
     },
+    {
+      name: 'smoke',
+      testMatch: /smoke\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(smokeBypassSecret && {
+          extraHTTPHeaders: {
+            'x-vercel-protection-bypass': smokeBypassSecret,
+            'x-vercel-set-bypass-cookie': 'true',
+          },
+        }),
+      },
+    },
 
     // {
     //   name: 'firefox',
@@ -97,11 +120,13 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm dev',
-    url: `${baseURL}/ping`,
-    timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
+  /* Run your local dev server before starting the tests, unless targeting a deployed URL */
+  webServer: smokeBaseURL
+    ? undefined
+    : {
+        command: 'pnpm dev',
+        url: `${localURL}/ping`,
+        timeout: 120 * 1000,
+        reuseExistingServer: !process.env.CI,
+      },
 });
