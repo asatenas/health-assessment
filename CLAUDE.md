@@ -190,6 +190,8 @@ Decided target (diagram: https://lucid.app/lucidchart/86936212-cf1f-4ba4-ada7-84
 
 When adding new infrastructure or integrations, prefer approaches that will carry over to AWS rather than deepening Vercel/Neon/Redis-specific coupling.
 
+**AWS tools (aws-mcp):** use the AWS MCP tools for AWS work. If they are missing from the session, fail to connect, or return credential/expired-token errors, the user's AWS login has most likely expired: ask the user to log in again (AWS CLI profile `asatenas`) instead of working around it or answering from memory. Logging in alone does not bring the tools back to a running session: the user must also reload the MCP server (`/mcp` → reconnect `aws-mcp`, or restart the session).
+
 <!-- BEGIN AWS Agent Toolkit rules -->
 # AWS Guidance for the new AWS experience
 
