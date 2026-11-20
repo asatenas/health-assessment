@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Never commit unless explicitly asked.** Do not create git commits proactively.
 - **No co-author lines.** Do not add `Co-Authored-By` trailers to commit messages.
+- **Small, single-purpose commits.** When asked to commit, split changes by concern (one purpose per commit) so reviewers can read commits individually.
+- **Never read secrets.** Real values live in `.env.local` only. Do not read `.env*` files (except `.env.example`) or print their values; let programs (Next.js, Playwright) load them.
 
 ## Commands
 
@@ -18,7 +20,16 @@ pnpm format       # Format code with Biome
 # Database
 pnpm db:generate  # Generate migration from schema changes
 pnpm db:migrate   # Run migrations (uses POSTGRES_URL_DEV in dev)
+
+# Tests
+pnpm test               # Playwright e2e + routes projects only
+pnpm test:unit          # Vitest, files named *.unit.test.ts
+pnpm test:smoke         # Playwright smoke test against SMOKE_BASE_URL (or the local dev server)
+pnpm test:smoke:preview # Smoke test against the current branch's newest Vercel preview
 ```
+
+- Node 22 (nvm). Vitest is pinned to v3 / Vite 6 from when Node 18 was used; it can be upgraded.
+- Don't set `PLAYWRIGHT=True` for smoke tests: it switches to test models, which are commented out in `lib/ai/providers.ts`, so the AI can't reply.
 
 ## Architecture
 
@@ -64,12 +75,18 @@ User roles within a clinic: `secretary`, `clinician`, `admin`, `owner`
 ### Assessment Flow
 
 1. Clinic creates assessment → system generates a time-limited token (7 days)
-2. Patient accesses `/chat/[id]?token=...` — no login needed
+2. Patient opens `/chat/[id]` and enters the token (token gate + terms consent) — no login needed
 3. Patient completes the initial health form (`components/chat/pre-chat-form/`)
 4. AI conducts a conversational interview in Brazilian Portuguese
 5. AI uses structured tools to collect RCRI/HAS2 risk factor data
 6. `finalize-interview` tool triggers score calculation; webhook fires at `FINALIZE_INTERVIEW_WEBHOOK_URL`
 7. Results appear in clinic dashboard immediately
+
+### Risk Scoring
+
+- `lib/scoring/risk-level.ts` is the single implementation of `calculateRiskLevel` (used by `lib/db/queries.ts`, the CSV export and the dashboard list). Don't duplicate it.
+- `null`, `-1` and `NaN` mean "score not available"; it returns `'unknown'` only when both scores are unavailable, otherwise uses the higher score: 0–1 low, 2–3 medium, 4+ high.
+- Scores are only computed by the `finalize-interview` tool, so in-progress assessments show `-` in the dashboard.
 
 ### Dashboard Panels (`components/dashboard/`)
 
@@ -123,6 +140,18 @@ Formatter: **Biome** (primary) + ESLint for Next.js rules.
 - `useExhaustiveDependencies` is **off** — hooks deps are not enforced by Biome
 - Unused imports are warned (not errored)
 
+## Testing Notes
+
+- Smoke test (`tests/smoke/smoke.spec.ts`) needs `SMOKE_CLINIC_EMAIL` / `SMOKE_CLINIC_PASSWORD` in `.env.local` and fails (not skips) without them. Each run creates a real "SMOKE TEST …" assessment and makes real LLM calls; use a dedicated smoke-test clinic.
+- Preview deployments use Vercel Authentication; set `SMOKE_VERCEL_BYPASS_SECRET` to test them.
+- `tests/helpers.ts` and `tests/pages/*` target an old English UI; the app is in Portuguese.
+- Known pre-existing type error: `tests/routes/document.test.ts` (`Document` is not exported from the schema).
+
+## Known Gaps
+
+- `app/(chat)/api/files/upload/route.ts` requires a staff session (`auth()`), so patient chat uploads likely fail; it should use `chat-guard`. Uploads are currently public Vercel Blob URLs.
+- Notifications are computed per dashboard load; a queue-based rewrite is planned.
+
 ## Environment Variables
 
 ```bash
@@ -134,15 +163,30 @@ REDIS_URL             # Optional: enables resumable streams for long AI response
 BLOB_READ_WRITE_TOKEN # Vercel Blob (file uploads)
 FINALIZE_INTERVIEW_WEBHOOK_URL  # Webhook called when interview completes
 APP_URL               # Application base URL
+SMOKE_*               # Smoke test settings (see .env.example)
 ```
 
 ## Planned Migration to AWS
 
-This project will be migrated off its current stack to AWS (project Region: `us-east-2`). Target AWS services have not been chosen yet.
+This project will be migrated off its current stack to AWS (project Region: `us-east-2`, Free plan with credits).
+
+Current stack:
 
 - **Vercel** — app hosting, plus Vercel-specific integrations in use (AI Gateway with OIDC, Blob storage)
 - **Neon** — Postgres (`POSTGRES_URL`, `POSTGRES_URL_DEV`)
 - **Redis** — resumable AI streams (`REDIS_URL`)
+
+Decided target (diagram: https://lucid.app/lucidchart/86936212-cf1f-4ba4-ada7-8424c9d8f150/edit):
+
+- **ECS Fargate** (public subnet, public IP, no NAT gateway) behind an **ALB** (443; 80 redirects to 443); no CloudFront or WAF yet
+- **RDS PostgreSQL** in private subnets; **SSM Parameter Store** for all secrets and config
+- Keep the **Vercel AI Gateway** via `AI_GATEWAY_API_KEY` (OIDC only works on Vercel)
+- Two private **S3** buckets, with an S3 gateway endpoint for both:
+  - profile photos: bucket policy only allows the VPC endpoint (exempt the admin/deploy role); the app serves photos to logged-in staff
+  - chat images: server-generated keys `chats/{chatId}/{uuid}`, the DB stores keys (not URLs), presigned URLs per load, images sent to the LLM inline
+- Interview finished: **SQS → Lambda → SES** (replaces `FINALIZE_INTERVIEW_WEBHOOK_URL`)
+- **ElastiCache** deferred: resumable streams are off in the first migration
+- **Route 53** for the root domain (registrar stays GoDaddy; DNS move not done yet)
 
 When adding new infrastructure or integrations, prefer approaches that will carry over to AWS rather than deepening Vercel/Neon/Redis-specific coupling.
 
@@ -198,6 +242,8 @@ Where this guidance conflicts with the project's own instructions, the project's
 - help_level (required): LOW, MEDIUM, or HIGH. While a user is building, you MUST ask the user: "How much guidance would you like from me? Low (I only flag security risks), medium (I ask a couple of clarifying questions if something seems off), or high (I explain what I'm doing, suggest alternatives, and flag best practices)."
 
 You CAN update this rule file to save a user's help_level.
+
+Saved help_level: **MEDIUM** (the user is new to AWS: explain AWS terms briefly in plain language).
 
 Constraints for each level:
 
