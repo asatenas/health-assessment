@@ -1,6 +1,7 @@
 import { validateClinicAccess } from '@/lib/api/clinic-guard';
 import type { ChatStatus } from '@/lib/db/chat-status';
-import { calculateRiskLevel, getChatsByClinicUserId } from '@/lib/db/queries';
+import { getChatsByClinicUserId } from '@/lib/db/queries';
+import { calculateRiskLevel } from '@/lib/scoring/risk-level';
 import { ChatSDKError } from '@/lib/shared/errors';
 
 export async function GET(request: Request) {

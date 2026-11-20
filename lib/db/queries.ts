@@ -38,6 +38,7 @@ import {
   type ClinicInvitation,
   earlyAccessSignups,
 } from './schema';
+import { calculateRiskLevel, type RiskLevel } from '@/lib/scoring/risk-level';
 import { generateUUID } from '../shared/utils';
 import { generateHashedPassword } from './utils';
 import { ChatSDKError } from '../shared/errors';
@@ -949,32 +950,8 @@ export async function getChatsByClinicUserId({
   }
 }
 
-/**
- * Calculate risk level from RCRI and HAS2 scores
- */
-export function calculateRiskLevel(
-  rcri: number | null,
-  has2: number | null,
-): 'low' | 'medium' | 'high' | 'unknown' {
-  // If both are null or -1, return unknown
-  const validRcri = rcri != null && rcri !== -1 ? rcri : null;
-  const validHas2 = has2 != null && has2 !== -1 ? has2 : null;
-
-  if (validRcri === null && validHas2 === null) return 'unknown';
-
-  // Use whichever score is available, or the max if both are available
-  const maxScore = Math.max(
-    validRcri ?? Number.NEGATIVE_INFINITY,
-    validHas2 ?? Number.NEGATIVE_INFINITY,
-  );
-
-  if (maxScore <= 1) return 'low';
-  if (maxScore <= 3) return 'medium';
-  return 'high';
-}
-
 function mapRiskLevelToPortuguese(
-  riskLevel: 'low' | 'medium' | 'high' | 'unknown',
+  riskLevel: RiskLevel,
 ): 'baixo' | 'moderado' | 'alto' | 'unknown' {
   const map = {
     low: 'baixo' as const,

@@ -16,7 +16,6 @@ import { useChats } from '@/hooks/swr';
 
 // Re-export types and utils for backward compatibility
 export type { Chat };
-export { calculateRiskLevel } from './chat-list-view/utils';
 
 const LIMIT = 20;
 

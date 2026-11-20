@@ -1,20 +1,5 @@
+import { calculateRiskLevel } from '@/lib/scoring/risk-level';
 import type { Chat } from './types';
-
-/**
- * Same as queries.db. Should create an API?
- */
-export function calculateRiskLevel(
-  rcri: number | null,
-  has2: number | null,
-): 'low' | 'medium' | 'high' | 'unknown' {
-  if (rcri == null || has2 == null) return 'unknown';
-  if (rcri === -1 || has2 === -1) return 'unknown';
-
-  const maxScore = Math.max(rcri, has2);
-  if (maxScore <= 1) return 'low';
-  if (maxScore <= 3) return 'medium';
-  return 'high';
-}
 
 export const getRiskLevel = (chat: Chat): { level: string; color: string } => {
   const riskLevel = calculateRiskLevel(chat.score_rcri, chat.score_aub_has2);

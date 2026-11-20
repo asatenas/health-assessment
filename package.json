@@ -16,7 +16,8 @@
     "db:pull": "NODE_ENV=development drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
+    "test": "export PLAYWRIGHT=True && pnpm exec playwright test",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.10",
@@ -125,7 +126,9 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite": "^6",
+    "vitest": "^3.2"
   },
   "packageManager": "pnpm@9.12.3"
 }
