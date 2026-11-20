@@ -18,7 +18,8 @@
     "db:up": "drizzle-kit up",
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test --project=e2e --project=routes",
     "test:unit": "vitest run",
-    "test:smoke": "playwright test --project=smoke"
+    "test:smoke": "playwright test --project=smoke",
+    "test:smoke:preview": "node scripts/smoke-preview.mjs"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.10",
