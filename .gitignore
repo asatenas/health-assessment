@@ -45,3 +45,6 @@ yarn-error.log*
 /playwright/*
 
 demo_seed.sql
+.env*
+!.env.example
+!.env.*.example
