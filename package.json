@@ -22,7 +22,7 @@
     "test:smoke:preview": "node scripts/smoke-preview.mjs",
     "cdk:bootstrap": "pnpm --dir infra exec cdk bootstrap --profile asatenas",
     "cdk:synth": "pnpm --dir infra exec cdk synth --profile asatenas",
-    "cdk:diff": "pnpm --dir infra exec cdk diff --all --profile asatenas",
+    "cdk:diff": "pnpm --dir infra exec cdk diff --profile asatenas",
     "cdk:deploy": "pnpm --dir infra exec cdk deploy --all --profile asatenas"
   },
   "dependencies": {
