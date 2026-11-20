@@ -9,7 +9,9 @@
       "node_modules",
       ".next",
       "public",
-      ".vercel"
+      ".vercel",
+      "infra/cdk.out",
+      "infra/node_modules"
     ]
   },
   "vcs": {
